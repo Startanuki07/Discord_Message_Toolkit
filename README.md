@@ -1,4 +1,7 @@
-Adds a hover/click toolbar to Discord messages, with the main focus on **copying messages with custom prefix symbols**.  
+---
+
+Adds a hover/click toolbar to Discord messages, with the main focus on **copying messages with custom prefix symbols**.
+Main function entry points (previously missing): **⠿ Wormhole button / bugwormhole icon / mouse icon / file icon** located next to each Discord message.
 Bonus perks include: converting social media URLs to embeddable formats (vxtwitter, fixthreads, etc.), downloading images, and forwarding messages via an enhanced panel with fuzzy search and pinned channel shortcuts.
 
 ---
@@ -17,7 +20,7 @@ Bonus perks include: converting social media URLs to embeddable formats (vxtwitt
 
 7. For more details on other features, please refer to the in-script documentation.
 
----
+```
 
 - This userscript is primarily maintained on Greasy Fork.  
 - Bugs may occur, as it is AI-generated; fixes might not be immediate.  
