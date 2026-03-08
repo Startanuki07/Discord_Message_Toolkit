@@ -22,4 +22,4 @@ Bonus perks include: converting social media URLs to embeddable formats (vxtwitt
 - This userscript is primarily maintained on Greasy Fork.  
 - Bugs may occur, as it is AI-generated; fixes might not be immediate.  
 - Feedback may be reviewed via translation tools if necessary.  
-- If you’re interested, you can also check the GitHub repository and optionally give it a ⭐: [https://github.com/Startanuki07/](https://github.com/Startanuki07/)
+- If you’re interested, you can also check the GitHub repository and optionally give it a ⭐: [Star_tanuki07](https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1)
