@@ -1,22 +1,21 @@
 # ✨ Discord Message Toolkit & Forward Manager
 
-**為 Discord 注入強大的懸停工具列、社群網址轉換、媒體下載、進階轉發與蟲洞捷徑的全方位增強腳本。**
+**An all-in-one enhancement script injecting a powerful hover toolbar, social media URL conversion, media extraction, advanced forwarding, and wormhole shortcuts into Discord.**
 
 ---
 
 > 💡 **Overview**
-> 本腳本旨在極大化 Discord 的操作效率與分享體驗。透過無縫整合的 UI，提供單鍵複製特定格式、修復社群媒體嵌入預覽（Twitter/X、Instagram、Pixiv 等）、一鍵打包下載媒體檔案，以及引入「蟲洞」跨頻道快速發送與進階轉發面板等次要強大輔助功能。
+> This script is designed to maximize operational efficiency and the sharing experience on Discord. Through seamlessly integrated UI components, it provides one-click copying of specific formats, fixes social media embed previews (Twitter/X, Instagram, Pixiv, etc.), enables batch media downloading, and introduces "Wormholes" for cross-channel quick sending alongside an advanced forwarding panel.
 
-## 🎛 UI 進入點 (UI Entry Points)
+## 🎛 UI Entry Points
 
-安裝腳本後，您可以在 Discord 的不同介面角落找到專屬的整合按鈕。
+Upon installing the script, you can find dedicated integration buttons located in various corners of the Discord interface.
 
-| 圖示 | 功能名稱 | 描述說明 |
+| Icon | Feature Name | Description |
 | --- | --- | --- |
-| **⠿** | **訊息懸停工具列** | 滑鼠懸停於任意訊息右上角出現，提供複製、轉換、下載等核心操作。 |
-| **📋** | **進階轉發面板** | 點擊 Discord 原生「轉發」按鈕後，於彈出視窗上方新增釘選頻道與模糊搜尋列。 |
-| **😀** | **表情與 GIF 管理器** | 位於原生 Emoji/GIF 選擇器內，提供準心選取（Target Mode）與收藏庫功能。 |
-| **🌀** | **蟲洞 (Wormhole)** | 預設停靠於頂部導航欄或輸入框上方，提供跨頻道快速跳轉與直接發送訊息捷徑。 |
+| **⠿** | **Hover Toolbar** | Appears in the top-right corner of any message upon hover, offering core actions like copy, convert, and extract. |
+| **📋** | **Advanced Forwarding Panel** | Appears above the native Discord "Forward" popup, adding pinned channels and a fuzzy search bar. |
+| **🌀** | **Wormhole** | Docked by default at the top navigation bar or above the chat input, providing quick cross-channel jumps and direct message sending. |
 
 *These icons act as the primary entry points for the script's features.*
 
@@ -24,71 +23,71 @@
 
 ## 🚀 Core Features
 
-### 🛠️ 訊息複製與提取 (Message Utility)
+### 🛠️ Message Utility & Extraction
 
-提供多種實用的複製格式，精準提取訊息中的關鍵內容。
+Offers multiple practical copy formats to precisely extract key content from messages.
 
-* **純文字與媒體網址**：一鍵提取純文字或隱藏於訊息中的圖片/影片直連。
-* **乾淨連結 (Clean Link)**：自動去除網址中多餘的追蹤參數。
-* **隱藏與 Markdown 格式**：支援快速將內容包裹為暴雷隱藏或 Markdown 格式。
+* **Plain Text & Media URLs**: One-click extraction of pure text or direct links to hidden images/videos.
+* **Clean Link**: Automatically strips redundant tracking parameters from URLs.
+* **Spoiler & Markdown Formatting**: Quickly wrap content in spoiler tags or specific Markdown structures.
 
 ```css
-/* * 示意用結構程式碼：格式化輸出結構
+/* * Structural Mockup: Formatted Output
  *
- * [Markdown 輸出格式]
+ * [Markdown Output Format]
  * [{text}]({url})
  *
- * [Spoiler 隱藏輸出格式]
+ * [Spoiler Hidden Format]
  * || {text} ||
  */
 
 ```
 
-### 🔁 社群網址自動轉換 (URL Conversion)
+### 🔁 Social Media URL Conversion
 
-修復 Discord 對部分社群平台無法正確展開預覽的問題。
+Fixes Discord's inability to properly expand previews for certain social media platforms.
 
-* **Twitter / X**：支援轉換為 `vxtwitter`, `fixupx` 等格式。
-* **Instagram & Bilibili**：轉換為 `kkinstagram`, `FX Bilibili` 以顯示完整媒體預覽。
-* **Pixiv**：轉換至 `phixiv` 讓插圖直接於對話中可見。
-* **一鍵批次轉換**：偵測訊息內所有同類網址並一次替換。
+* **Twitter / X**: Converts to `vxtwitter`, `fixupx`, etc.
+* **Instagram & Bilibili**: Converts to `ddinstagram` / `kkinstagram` or `FX Bilibili` to display full media previews.
+* **Pixiv**: Converts to `phixiv` to make illustrations directly visible in the chat.
+* **Batch Conversion**: Detects all similar URLs within a message and replaces them simultaneously.
 
-### ⬇️ 媒體下載器 (Media Downloader)
+### ⬇️ Media Downloader & Extractor
 
-* **單鍵下載**：快速下載該則訊息內附帶的所有圖片與影片。
-* **ZIP 批次打包**：將多個媒體檔案自動打包為一個 `.zip` 檔案進行下載，省去逐一右鍵存檔的麻煩。
+Efficiently manage and save media attachments.
 
-### 📋 進階轉發管理 (Forwarding Manager)
+* **One-Click Download (Left-Click)**: Instantly download all images and videos attached to a specific message.
+* **Quick URL Extraction (Right-Click)**: Swiftly copy the direct source URLs of the media files directly to your clipboard without triggering a download.
+* **Batch ZIP Archive**: Automatically bundle multiple media attachments into a single `.zip` file for efficient saving, eliminating the manual effort of saving items individually.
 
-強化 Discord 原生的轉發視窗，提升多頻道管理效率。
+### 📋 Advanced Forwarding Manager
 
-* **頻道與用戶釘選 (★/👤)**：將常用轉發目標加入最愛，置頂顯示。
-* **兩段式精準搜尋**：修復 Discord 轉發面板的搜尋 Bug，確保轉發目標無誤。
-* **模糊搜尋 (⏎)**：支援輸入前綴快速匹配變動頻繁的頻道名稱。
+Enhances Discord's native forwarding window to improve multi-channel management efficiency.
 
-### 🌀 蟲洞捷徑與 API 發送 (Wormhole)
+* **Channel & User Pinning (★/👤)**: Add frequently used forwarding targets to favorites for top-level display.
+* **Fuzzy Search (⏎)**: Supports prefix input to quickly match frequently changing channel names to ensure accurate forwarding.
 
-打破頻道間的切換壁壘，建立專屬的傳送門。
+### 🌀 Wormhole Shortcuts
 
-* **單擊跳轉**：將常用的頻道 URL 建立為蟲洞，點擊立即飛躍。
-* **跨頻道發送 (Shift+Click)**：免切換頻道，直接於當前畫面呼出輸入框傳送訊息至目標頻道。
-* **API 隱匿模式 (彩蛋/實驗性)**：透過 Discord REST API 直接在背景發送訊息，無需跳頁且支援圖片剪貼簿。
+Breaks down the switching barriers between channels by establishing dedicated portals.
+
+* **Single-Click Jump**: Save frequently used channel URLs as Wormholes for instant teleportation.
+* **Cross-Channel Sending (Shift+Click)**: Send messages to a target channel directly from your current view via a popup input box, without switching channels.
 
 ---
 
-## ⚠️ 實驗性功能與注意事項
+## ⚠️ Experimental Features & Notes
 
-* **API 發送模式風險**：蟲洞的「方案 B (API 模式)」會於背景攔截並使用使用者的 User Token 來呼叫 Discord API。此舉嚴格來說違反 Discord 服務條款 (ToS)，請自行評估風險。腳本已確保 Token 僅存於記憶體，重整即毀，絕不寫入磁碟或外傳。
-* **網址轉換安全性**：`vxtwitter`, `kkinstagram` 等服務皆依賴第三方開源 API 提供媒體預覽，若您對第三方服務有疑慮，請避免點擊轉換選項。
-* **DOM 依賴性**：本腳本高度依賴 Discord 當前的網頁 DOM 結構，若 Discord 官方進行大規模 UI 更新，部分功能（如懸停工具列或選單插入）可能暫時失效。
+* **URL Conversion Reliance**: Services like `vxtwitter` and `kkinstagram` rely on third-party open-source APIs to provide media previews. If you have concerns regarding third-party endpoints, please avoid triggering the conversion options.
+* **DOM Dependency**: This script highly depends on Discord's current web DOM structure. Major official UI updates may cause temporary breakage of specific features (e.g., hover toolbars or menu insertions).
 
 ---
 
 ## ⚙️ Additional Features
 
-* **自定義字串面板 (Custom Strings)**：允許使用者儲存常用的問候語、指令或文字模板，支援單擊複製或長按直接注入輸入框。
-* **Observer 健康檢查**：內建 MutationObserver 狀態監控模組，可透過 Tampermonkey 選單隨時檢查監聽器是否正常運作，確保系統效能穩定。
-* **設定匯出/匯入**：提供 JSON 格式的全域設定備份功能，方便在不同瀏覽器或裝置間無縫同步您的自訂蟲洞、收藏庫與介面配置。
+* **Custom Strings Panel**: Allows users to save frequently used greetings, commands, or text templates, supporting one-click copy or long-press injection into the chat input.
+* **Observer Health Check**: Built-in MutationObserver status monitoring module. You can check the listener status anytime via the Tampermonkey menu to ensure system stability.
+* **Settings Export/Import**: Provides full global settings backup in JSON format, facilitating seamless synchronization of your custom Wormholes and UI configurations across different browsers or devices.
 
 ---
 
