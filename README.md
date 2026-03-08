@@ -1,4 +1,4 @@
----
+
 
 Adds a hover/click toolbar to Discord messages, with the main focus on **copying messages with custom prefix symbols**.
 Main function entry points (previously missing): **⠿ Wormhole button / bugwormhole icon / mouse icon / file icon** located next to each Discord message.
