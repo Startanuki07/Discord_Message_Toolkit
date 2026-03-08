@@ -1,99 +1,110 @@
 
-# Discord_Message_Toolkit
 
-Adds a **hover/click toolbar** to messages in Discord, designed primarily for **copying messages with customizable prefix symbols**.
+# Discord Message Toolkit
 
-It also provides several productivity features such as social media embed conversion, quick media downloading, and enhanced message forwarding.
+A productivity **toolbar extension for Discord messages**.
 
----
+Adds a **hover / click toolbar** next to each message, primarily designed for **copying messages with customizable prefix symbols**.
 
-## Main Toolbar Entry Points
-
-The toolbar appears next to each message and includes several quick-access icons:
-
-* **⠿ Wormhole button**
-* **Bug / Wormhole icon**
-* **Mouse icon**
-* **File icon**
-
-These icons act as the primary entry points for the script’s features.
+It also includes several utility features such as **social media embed conversion, media downloading, and enhanced message forwarding**.
 
 ---
 
-## Core Features
+## 🎛 Toolbar Entry Points
 
-### 1. Wormhole System
+The toolbar appears beside each Discord message and provides several quick-access icons:
 
-The **Wormhole** allows messages to be sent across servers or channels using a special routing system.
+- **⠿ Wormhole button**
+- **🐞 Wormhole tools icon**
+- **🖱 Mouse interaction icon**
+- **📄 File utilities icon**
 
-* **Long-press the function key** to open the Wormhole menu.
-* Create a **Discord server wormhole** connection.
-* Toggle **focused icon display mode** for a cleaner UI.
-* Long-pressing the wormhole icon switches the sending method:
-
-  * **Standard mode**
-  * **API token mode**
-
-Once a wormhole is established, long-pressing the icon enables sending messages and performing additional operations.
+These icons act as the **primary entry points** for the script's features.
 
 ---
 
-### 2. Right-Click Unlock
+## ✨ Core Features
 
-Restores the **native browser context menu** so that normal right-click functions remain available.
+### 🌀 Wormhole System
+
+The **Wormhole** feature enables cross-channel or cross-server message routing.
+
+**Capabilities**
+
+- Long-press the **function key** to open the Wormhole menu
+- Create a **Discord server wormhole connection**
+- Toggle **focused icon display mode** for a cleaner interface
+- Switch message sending method by long-pressing the wormhole icon
+
+**Available sending modes**
+
+- **Standard mode**
+- **API Token mode**
+
+Once a wormhole connection is established, long-pressing the icon allows sending messages and performing additional operations.
 
 ---
 
-### 3. Encrypted Upload Filenames
+### 🖱 Right-Click Unlock
 
-When uploading files, the script **obfuscates the original filename** to improve privacy.
+Restores the **native browser context menu** inside Discord, allowing normal right-click behavior.
 
 ---
 
-### 4. One-Click Media Download
+### 📄 Encrypted Upload Filenames
+
+When uploading files, the script **automatically obfuscates the original filename** to improve privacy.
+
+---
+
+### 📥 One-Click Media Download
 
 Messages containing images can be **downloaded with a single click**.
 
-Additional behavior:
+Additional options:
 
-* **Right-click the download button** to copy the media URL to the clipboard.
-* Some sites may not support downloading or URL extraction.
-
----
-
-### 5. Enhanced Message Forwarding
-
-Forward messages using an improved panel with usability enhancements:
-
-* **Star frequently used servers**
-* **Pinned channel shortcuts**
-* **Fuzzy search for faster selection**
-
-Note: This feature is **experimental** and may not always provide optimal efficiency.
+- **Right-click the download button** to copy the media URL to the clipboard
+- Some sites may not support downloading or URL extraction
 
 ---
 
-### 6. Editable Discord Link Output
+### 📤 Enhanced Message Forwarding
 
-When the script generates a link in the format:
+Forward messages through an improved forwarding panel.
+
+Features include:
+
+- **Star frequently used servers**
+- **Pinned channel shortcuts**
+- **Fuzzy search for faster navigation**
+
+⚠️ This feature is currently **experimental** and may not always provide optimal efficiency.
+
+---
+
+### ✏️ Editable Discord Link Output
+
+When the script generates links in the format:
 
 ```
+
 [text](URL)
+
 ```
 
-You can modify it using the **✏️ edit icon**.
+You can edit them directly using the **✏️ edit icon**.
 
 ---
 
-### 7. Additional Features
+### ⚙️ Additional Features
 
 More advanced functionality and configuration options are documented **inside the script source code**.
 
 ---
 
-If you find this script useful, consider checking the GitHub repository and giving it a ⭐:
+## ⭐ Support the Project
 
-[https://github.com/Startanuki07](https://github.com/Startanuki07)
+If you find this script useful, consider visiting the GitHub repository and giving it a ⭐
 
-```
+https://github.com/Startanuki07
 
