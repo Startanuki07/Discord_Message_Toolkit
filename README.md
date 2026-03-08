@@ -1,28 +1,99 @@
 
+# Discord_Message_Toolkit
 
-Adds a hover/click toolbar to Discord messages, with the main focus on **copying messages with custom prefix symbols**.
-Main function entry points (previously missing): **⠿ Wormhole button / bugwormhole icon / mouse icon / file icon** located next to each Discord message.
-Bonus perks include: converting social media URLs to embeddable formats (vxtwitter, fixthreads, etc.), downloading images, and forwarding messages via an enhanced panel with fuzzy search and pinned channel shortcuts.
+Adds a **hover/click toolbar** to messages in Discord, designed primarily for **copying messages with customizable prefix symbols**.
+
+It also provides several productivity features such as social media embed conversion, quick media downloading, and enhanced message forwarding.
 
 ---
 
-1. Wormhole feature: long-press the function key to open a menu. You can create a Discord server wormhole and toggle a focused icon display mode. Long-pressing the wormhole feature switches the message sending method (standard mode / API token mode). Once a wormhole is established, long-pressing it allows sending messages and performing operations.
+## Main Toolbar Entry Points
 
-2. Right-click unlock: allows normal browser context menu usage.
+The toolbar appears next to each message and includes several quick-access icons:
 
-3. Encrypted filenames on file upload: original file names are obfuscated for privacy.
+* **⠿ Wormhole button**
+* **Bug / Wormhole icon**
+* **Mouse icon**
+* **File icon**
 
-4. Download feature: messages containing images can be downloaded with one click (may fail on some sites). Right-clicking the download option allows copying the media URL to the clipboard (some sites may not support this).
+These icons act as the primary entry points for the script’s features.
 
-5. Enhanced message forwarding: frequently used servers can be starred for easier recognition. This is experimental and may not always meet efficiency expectations.
+---
 
-6. Discord output format [text](URL) is editable via the ✏️ icon.
+## Core Features
 
-7. For more details on other features, please refer to the in-script documentation.
+### 1. Wormhole System
+
+The **Wormhole** allows messages to be sent across servers or channels using a special routing system.
+
+* **Long-press the function key** to open the Wormhole menu.
+* Create a **Discord server wormhole** connection.
+* Toggle **focused icon display mode** for a cleaner UI.
+* Long-pressing the wormhole icon switches the sending method:
+
+  * **Standard mode**
+  * **API token mode**
+
+Once a wormhole is established, long-pressing the icon enables sending messages and performing additional operations.
+
+---
+
+### 2. Right-Click Unlock
+
+Restores the **native browser context menu** so that normal right-click functions remain available.
+
+---
+
+### 3. Encrypted Upload Filenames
+
+When uploading files, the script **obfuscates the original filename** to improve privacy.
+
+---
+
+### 4. One-Click Media Download
+
+Messages containing images can be **downloaded with a single click**.
+
+Additional behavior:
+
+* **Right-click the download button** to copy the media URL to the clipboard.
+* Some sites may not support downloading or URL extraction.
+
+---
+
+### 5. Enhanced Message Forwarding
+
+Forward messages using an improved panel with usability enhancements:
+
+* **Star frequently used servers**
+* **Pinned channel shortcuts**
+* **Fuzzy search for faster selection**
+
+Note: This feature is **experimental** and may not always provide optimal efficiency.
+
+---
+
+### 6. Editable Discord Link Output
+
+When the script generates a link in the format:
+
+```
+[text](URL)
+```
+
+You can modify it using the **✏️ edit icon**.
+
+---
+
+### 7. Additional Features
+
+More advanced functionality and configuration options are documented **inside the script source code**.
+
+---
+
+If you find this script useful, consider checking the GitHub repository and giving it a ⭐:
+
+[https://github.com/Startanuki07](https://github.com/Startanuki07)
 
 ```
 
-- This userscript is primarily maintained on Greasy Fork.  
-- Bugs may occur, as it is AI-generated; fixes might not be immediate.  
-- Feedback may be reviewed via translation tools if necessary.  
-- If you’re interested, you can also check the GitHub repository and optionally give it a ⭐: [Star_tanuki07](https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1)
