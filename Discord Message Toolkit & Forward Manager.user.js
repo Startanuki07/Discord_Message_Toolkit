@@ -1,22 +1,30 @@
 // ==UserScript==
-// @name         Discord Message Toolkit & Forward Manager
-// @name:zh-TW   Discord 訊息工具箱 & 轉發管理器
-// @name:zh-CN   Discord 消息工具箱 & 转发管理器
-// @name:ja      Discord メッセージツールキット & 転送マネージャー
-// @name:ko      Discord 메시지 툴킷 & 전달 관리자
+// @name         Discord Message Toolkit
+// @name:zh-TW   Discord 訊息工具箱
+// @name:zh-CN   Discord 消息工具箱
+// @name:ja      Discord メッセージツールキット
+// @name:ko      Discord 메시지 툴킷
+// @name:es      Discord Message Toolkit
+// @name:pt-BR   Discord Message Toolkit
+// @name:fr      Discord Message Toolkit
+// @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
-// @namespace    https://github.com/Startanuki07
-// @version      1.0
+// @namespace    https://github.com/Startanuki07?tab=repositories
+// @version      1.4.4
 // @license      MIT
 // @author       Star_tanuki07
-// @description       Adds a hover/click toolbar to Discord messages: copy text with custom prefix symbols, convert social media URLs to embeddable formats (vxtwitter, fixthreads, etc.), download images, and forward messages via an enhanced panel with fuzzy search and pinned channel shortcuts.
-// @description:zh-TW 在 Discord 訊息上新增懸停工具列：複製附加前綴符號的文字、將社群媒體網址轉換為可嵌入格式（vxtwitter、fixthreads 等）、下載圖片，以及透過強化面板轉發訊息，支援模糊搜尋與釘選頻道快捷。
-// @description:zh-CN 在 Discord 消息上新增悬停工具栏：复制带自定义前缀符号的文字、将社交媒体网址转换为可嵌入格式（vxtwitter、fixthreads 等）、下载图片，并通过增强面板转发消息，支持模糊搜索与置顶频道快捷方式。
-// @description:ja    Discordのメッセージにホバー用ツールバーを追加：カスタム接頭辞付きテキストのコピー、SNS URLの埋め込み形式への変換（vxtwitter・fixthreads など）、画像ダウンロード、あいまい検索とピン留めチャンネル対応の強化転送パネルを搭載。
-// @description:ko    Discord 메시지에 호버 툴바 추가: 커스텀 접두사 포함 텍스트 복사, SNS URL 임베드 형식 변환(vxtwitter, fixthreads 등), 이미지 다운로드, 퍼지 검색과 고정 채널 단축키를 지원하는 강화 전달 패널 제공.
+// @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
+// @description:zh-TW 為每則訊息新增工具列，支援文字複製、媒體下載與社群連結轉換，並提供強化轉發面板、側欄頻道捷徑（蟲洞）與表情收藏管理器。
+// @description:zh-CN 为每条消息添加工具栏，支持文字复制、媒体下载与社交链接转换，并提供强化转发面板、侧栏频道快捷方式（虫洞）与表情收藏管理器。
+// @description:ja    メッセージごとにツールバーを追加。テキストコピー・メディアダウンロード・SNSリンク変換に対応し、強化された転送パネル・サイドバーチャンネルショートカット（ワームホール）・スタンプ管理機能も搭載。
+// @description:ko    메시지마다 툴바를 추가하여 텍스트 복사, 미디어 다운로드, SNS 링크 변환을 지원하며, 강화된 전달 패널, 사이드바 채널 단축키(웜홀), 이모지 컬렉션 관리 기능도 제공합니다。
+// @description:es    Añade una barra de herramientas por mensaje para copiar, descargar medios y convertir URLs, además de un panel de reenvío mejorado, atajos de canal en la barra lateral (Agujero de gusano) y un gestor de colecciones de expresiones.
+// @description:pt-BR Adiciona uma barra de ferramentas por mensagem para copiar, baixar mídias e converter URLs, além de um painel de encaminhamento aprimorado, atalhos de canal na barra lateral (Buraco de minhoca) e um gerenciador de coleções de expressões.
+// @description:fr    Ajoute une barre d'outils par message pour copier, télécharger des médias et convertir des URL, ainsi qu'un panneau de transfert amélioré, des raccourcis de salon dans la barre latérale (Trou de ver) et un gestionnaire de collections d'expressions.
+// @description:de    Fügt eine Symbolleiste pro Nachricht zum Kopieren, Herunterladen von Medien und Konvertieren von URLs hinzu, sowie ein verbessertes Weiterleitungspanel, Kanal-Shortcuts in der Seitenleiste (Wurmloch) und einen Ausdrucks-Sammlungsmanager.
+// @description:ru    Добавляет панель инструментов для каждого сообщения для копирования, загрузки медиа и конвертации URL, а также улучшенную панель переадресации, ярлыки каналов на боковой панели (Червоточина) и менеджер коллекций выражений.
 // @match       https://discord.com/*
 // @match       https://ptb.discord.com/*
-// @require     https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=discord.com
 // @grant       GM_setValue
 // @grant       GM_getValue
@@ -30,73 +38,12 @@
 // @connect     *
 // ==/UserScript==
 
-
-/*
- * ⚠️  Usage Notice / 使用提醒
- * ─────────────────────────────────────────────────
- * This script converts X / Twitter links into media-embeddable
- * third-party service URLs (for example formats similar to
- * https://fixupx.com/).
- *
- * It may also send messages using Discord prefix formatting,
- * such as:
- *
- * -# [text](https://x.com/i/status/123456)
- *
- * This behavior may change how the link preview, source,
- * and overall reading experience appear.
- * Before using, please make sure:
- * 1. Your channel or server allows this type of link conversion
- * 2. It does not disrupt other members’ reading, notifications,
- * or normal usage
- * 3. You understand that third-party services may alter previews
- *
- * Please use responsibly and respect community expectations.
- *
- * ─────────────────────────────────────────────────
- *
- * 本腳本會將 X / Twitter 連結轉換為可嵌入媒體的第三方服務連結
- * （例如類似 https://fixupx.com/ 的格式），
- * 並可選擇搭配 Discord 的訊息前綴語法發送，例如：
- *
- * -# [文字](https://x.com/i/status/123456)
- *
- * 此行為可能改變原始連結的顯示方式、預覽來源與閱讀體驗。
- * 使用前請確認：
- * 1. 所在頻道或伺服器允許此類連結轉換與媒體嵌入
- * 2. 不會干擾其他成員的閱讀、通知或使用習慣
- * 3. 已理解第三方服務可能帶來的顯示差異
- *
- * 請在尊重社群規範與其他使用者體驗的前提下使用。
- *
- * ─────────────────────────────────────────────────
- */
-
-
 (function () {
   "use strict";
 
   const DEBUG = false;
-  const searchTimers = new WeakMap();
-
-  function cleanupSearchTimers() {
-    DEBUG && console.log("[Search] beforeunload cleanup triggered");
-  }
-
-  window.addEventListener("beforeunload", cleanupSearchTimers);
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-
-  const DEFAULT_CONFIG = {
-    lang: null,
-    triggerMode: "hover",
-    symbols: ["𓈒𓂂𓏸"],
-    menuStyle: "general",
-    swapLogic: false,
-    appendSpace: false,
-    appendNewLine: false,
-    linkText: "⿻",
-  };
 
   const ConfigManager = {
     _cache: null,
@@ -108,7 +55,7 @@
       swapLogic: false,
       appendSpace: false,
       appendNewLine: false,
-      linkText: "⿻",
+      linkText: "text",
     },
 
     get config() {
@@ -184,7 +131,7 @@
       label: { "en-US": "Message Utility (⠿)", "zh-TW": "訊息工具 (⠿)", "zh-CN": "消息工具 (⠿)", "ja": "メッセージユーティリティ (⠿)", "ko": "메시지 유틸리티 (⠿)" } },
     { key: "modForwarding", storageKey: "mod_forwarding", icon: "📋", label: { "en-US": "Forwarding Manager",  "zh-TW": "轉發管理員",   "zh-CN": "转发管理员",   "ja": "転送マネージャー", "ko": "전달 관리자" } },
     { key: "modEmoji",      storageKey: "mod_emoji",      icon: "😀", label: { "en-US": "Emoji Search Helper", "zh-TW": "表情搜尋輔助", "zh-CN": "表情搜索助手", "ja": "絵文字検索", "ko": "이모지 검색" } },
-    { key: "modHeader",     storageKey: "mod_header",     icon: "📌", label: { "en-US": "Header Mods",         "zh-TW": "頁眉修改",     "zh-CN": "标题修改",     "ja": "ヘッダー改造", "ko": "헤더 수정" } },
+    { key: "modHeader",     storageKey: "mod_header",     icon: "📌", label: { "en-US": "Anti-Hijack & File Tools", "zh-TW": "右鍵解鎖",   "zh-CN": "右键解锁",   "ja": "右クリック解除", "ko": "우클릭 해제" } },
     { key: "modWormhole",   storageKey: "mod_wormhole",   icon: "🌀", label: { "en-US": "Wormhole",            "zh-TW": "蟲洞",         "zh-CN": "虫洞",         "ja": "ワームホール", "ko": "웜홀" } },
   ];
   function isModEnabled(storageKey) {
@@ -197,6 +144,11 @@
 
   function getConfig() {
     return ConfigManager.config;
+  }
+
+  const _escMap = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  function escHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => _escMap[c]);
   }
 
   class TranslationCacheManager {
@@ -245,7 +197,10 @@
     const cached = TranslationCache.get(cacheKey);
     if (cached !== null) return cached;
 
-    let text = TRANSLATIONS[lang]?.[key] || TRANSLATIONS["en"][key] || key;
+    let text = (lang === "custom"
+      ? (_customLangData?.[key] || TRANSLATIONS["en"][key])
+      : (TRANSLATIONS[lang]?.[key] || TRANSLATIONS["en"][key])
+    ) || key;
 
     for (const [k, v] of Object.entries(params)) {
       text = text.replace(new RegExp(`\\{${k}\\}`, "g"), v);
@@ -344,6 +299,7 @@
       download_start: "🚀 Downloading...",
       download_zip_start: "📦 Zipping {n} files...",
       download_fail: "❌ Download Failed",
+      download_cors_fail: "⚠️ CORS restricted — cannot download directly. Please copy the URL and open it manually to save.",
       original_url: "🔗 Original URL",
       convert_all: "⚡ Convert All ({n})",
       convert_imgur: "🖼️ Convert to i.imgur.com",
@@ -360,6 +316,7 @@
       to_vxreddit: "🛠️ to vxreddit",
       to_instagram: "📷 to instagram.com",
       to_kkinstagram: "🔁 to kkinstagram",
+      to_facebed: "🔁 to facebed.com",
       to_tiktok: "🎵 to tiktok.com",
       to_vxtiktok: "🔁 to vxtiktok",
       to_tnktok: "🛠️ to tnktok",
@@ -371,6 +328,7 @@
       to_vxb23: "🔗 to vxb23.tv",
       to_phixiv: "🔙 to phixiv.net",
       to_pixiv: "🎨 to pixiv.net",
+      yt_shorts_to_watch: "▶️ YouTube Shorts → Watch",
       restore_pixiv_img: "📖 Restore pixiv link",
       insert_symbol: "✳️ Insert → {s}",
       delete_symbol: "❌",
@@ -470,6 +428,7 @@
       wm_settings_position_navbar:    "Navigation Bar",
       wm_settings_position_titlebar:  "Channel Title Bar",
       wm_settings_position_input:     "Above Chat Input",
+      wm_settings_position_topleft:   "Top-Left Corner (Fixed)",
       wm_focus_on: "Disable Focus Mode",
       wm_focus_off: "Enable Focus Mode (Icons Only)",
       wm_focus_size: "Icon Size",
@@ -500,6 +459,9 @@
       wm_send_goto_channel: "Go to channel after send",
       wm_send_paste_hint: "📋 Ctrl+V to paste image",
       wm_send_token_warn: "⚠️ Token expired. Please re-open the API panel to detect again. Using Mode A this time.",
+      wm_send_channel_fail: "❌ Channel load failed",
+      wm_send_editor_missing: "❌ Editor not found",
+      wm_send_uploading: "📎 Uploading {n} image(s)...",
 
       wm_api_panel_title: "⚗️ Wormhole API Mode (Advanced)",
       wm_api_mode_label_a: "Mode A — Navigate (Default)",
@@ -510,7 +472,7 @@
       wm_api_token_status_ready: "Token: Ready (memory only)",
       wm_api_detect_btn: "Detect My Token",
       wm_api_detect_confirm: "【Token Interception Consent】\n\nBy clicking OK, you authorize this script to intercept your Discord Token for this session.\n\n🔒 Security Guarantees:\n• Stored in memory only — never written to disk or any storage\n• Automatically cleared when the page is closed or refreshed\n• Never transmitted to any external server — all requests go directly to discord.com\n• Used exclusively for POST /channels/{id}/messages on your behalf\n\n⚠️ Acknowledgement:\n• You understand this session token grants message-sending access\n• You accept full responsibility for all messages sent via this mode\n\nProceed only if you trust this script and understand the above.",
-      wm_api_detect_waiting: "Waiting for token… (use Discord normally to trigger)",
+      wm_api_detect_waiting: "⬆️ Switch to any channel once to capture Token",
       wm_api_enable_btn: "Enable API Mode",
       wm_api_disable_btn: "Disable API Mode (back to Mode A)",
       wm_api_enabled_toast: "✅ API Mode enabled",
@@ -544,12 +506,17 @@
       em_menu_sticker: "Stickers",
       em_menu_gif: "GIFs",
 
-      menu_observer_status: "🔍 Observer Status",
-      menu_observer_health: "🔧 Observer Health Check",
       menu_export: "📤 Export Settings (Backup)",
       menu_import: "⬇️ Import Settings (Restore)",
       menu_change_lang: "🌐 Change Language",
-      menu_download_stats: "📊 Download Stats",
+      custom_lang_desc: "Click 「📤 Export」 to get the English source JSON. After translating, click 「📥 Import」 to apply your language.\nNo matching language? Try: Deutsch (Benutzerdefinierte Übersetzung) · ภาษาไทย (ภาษาที่กำหนดเอง) · Türkçe (Özel Çeviri) · Polski (Niestandardowe tłumaczenie) · Italiano (Traduzione personalizzata)",
+      custom_lang_export: "📤 Export Text",
+      custom_lang_import: "📥 Import Text",
+      custom_lang_apply: "✅ Apply & Reload",
+      custom_lang_loaded: "✅ Loaded: {name}",
+      custom_lang_activate: "🌐 Apply \"{name}\"",
+      custom_lang_json_error: "⚠️ JSON Error: {msg}",
+      custom_lang_paste_hint: "Paste the translated JSON here …",
     },
 
     "zh-TW": {
@@ -634,6 +601,7 @@
       download_start: "🚀 開始下載...",
       download_zip_start: "📦 正在打包 {n} 個檔案...",
       download_fail: "❌ 下載失敗",
+      download_cors_fail: "⚠️ 此縮圖受 CORS 限制，無法直接下載。請複製網址後手動開啟儲存。",
       original_url: "🔗 原始網址",
       convert_all: "⚡ 全部轉為 ({n})",
       convert_imgur: "🖼️ 轉為 i.imgur.com",
@@ -650,6 +618,7 @@
       to_vxreddit: "🛠️ 轉為 vxreddit",
       to_instagram: "📷 轉為 instagram.com",
       to_kkinstagram: "🔁 轉為 kkinstagram",
+      to_facebed: "🔁 轉為 facebed.com",
       to_tiktok: "🎵 轉為 tiktok.com",
       to_vxtiktok: "🔁 轉為 vxtiktok",
       to_tnktok: "🛠️ 轉為 tnktok",
@@ -661,6 +630,7 @@
       to_vxb23: "🔗 轉為 vxb23.tv",
       to_phixiv: "🔙 轉為 phixiv.net",
       to_pixiv: "🎨 轉為 pixiv.net",
+      yt_shorts_to_watch: "▶️ YT Shorts → 一般連結",
       restore_pixiv_img: "📖 從圖片還原 pixiv/phixiv",
       insert_symbol: "✳️ 插入 → {s}",
       delete_symbol: "❌",
@@ -758,6 +728,7 @@
       wm_settings_position_navbar:    "導航欄",
       wm_settings_position_titlebar:  "頻道標題欄",
       wm_settings_position_input:     "訊息輸入框上緣",
+      wm_settings_position_topleft:   "左上角（固定懸浮）",
       wm_focus_on: "關閉聚焦模式",
       wm_focus_off: "開啟聚焦模式（僅顯示圖示）",
       wm_focus_size: "圖示大小",
@@ -788,6 +759,9 @@
       wm_send_goto_channel: "傳送後前往該頻道",
       wm_send_paste_hint: "📋 可 Ctrl+V 貼上圖片",
       wm_send_token_warn: "⚠️ Token 已失效，請重新開啟彩蛋面板偵測。本次使用方案 A。",
+      wm_send_channel_fail: "❌ 頻道載入失敗",
+      wm_send_editor_missing: "❌ 找不到輸入框",
+      wm_send_uploading: "📎 上傳 {n} 張圖片...",
 
       wm_api_panel_title: "⚗️ 蟲洞 API 模式（進階）",
       wm_api_mode_label_a: "方案 A — 跳頁模式（預設）",
@@ -798,7 +772,7 @@
       wm_api_token_status_ready: "Token：已就緒（僅存於記憶體）",
       wm_api_detect_btn: "偵測我的 Token",
       wm_api_detect_confirm: "【Token 攔截授權同意書】\n\n點擊「確認」即代表您同意本腳本在本次工作階段中攔截您的 Discord Token。\n\n🔒 安全保證：\n• 僅存於瀏覽器記憶體，絕不寫入任何儲存空間或磁碟\n• 頁面關閉或重新整理後自動清除，不留任何痕跡\n• 絕不傳送至任何外部伺服器，所有請求直接發往 discord.com\n• 僅用於代您執行 POST /channels/{id}/messages 操作\n\n⚠️ 使用者聲明：\n• 您了解此 Token 具備傳送訊息的能力\n• 透過本模式傳送的所有訊息，責任由您自行承擔\n\n請在確認信任本腳本且理解上述內容後再繼續。",
-      wm_api_detect_waiting: "等待 Token 中⋯（正常使用 Discord 即可觸發）",
+      wm_api_detect_waiting: "⬆️ 請切換到任意頻道一次，即可自動捕捉 Token",
       wm_api_enable_btn: "啟用 API 模式",
       wm_api_disable_btn: "停用 API 模式（返回方案 A）",
       wm_api_enabled_toast: "✅ API 模式已啟用",
@@ -824,12 +798,17 @@
       em_menu_sticker: "貼圖",
       em_menu_gif: "GIF",
 
-      menu_observer_status: "🔍 Observer 狀態",
-      menu_observer_health: "🔧 Observer 健康檢查",
       menu_export: "📤 匯出設定 (Backup)",
       menu_import: "⬇️ 匯入設定 (Restore)",
       menu_change_lang: "🌐 變更語言 (Language)",
-      menu_download_stats: "📊 下載統計",
+      custom_lang_desc: "點「📤 匯出文本」取得英文原文 JSON，翻譯後再點「📥 匯入文本」貼回即可套用。",
+      custom_lang_export: "📤 匯出文本",
+      custom_lang_import: "📥 匯入文本",
+      custom_lang_apply: "✅ 套用並重新整理",
+      custom_lang_loaded: "✅ 已載入：{name}",
+      custom_lang_activate: "🌐 套用「{name}」",
+      custom_lang_json_error: "⚠️ JSON 格式錯誤：{msg}",
+      custom_lang_paste_hint: "貼上翻譯後的 JSON 文本 …",
     },
 
     "zh-CN": {
@@ -844,7 +823,7 @@
       fm_no_users: "尚无收藏的用户",
       fm_add_user: "+ 新增用户",
       fm_fuzzy: "模糊搜索",
-      fm_remove_confirm: "移除“{target}”？",
+      fm_remove_confirm: "移除「{target}」？",
       fm_tooltip_channel: "频道: {c}\n服务器: {s}",
       fm_tooltip_user_add: "加入用户专区 (👤)",
       fm_tooltip_star_add: "加入频道收藏 (★)",
@@ -854,7 +833,7 @@
         "• 点击 <span class='help-key'>★</span> 或 <span class='help-key'>👤+</span> 加入收藏。<br>• <span class='help-key'>右键</span> 移除收藏。<br>• <span class='help-key'>Shift+右键</span> 可快速连续移除 (无需确认)。",
       fm_sec_search: "🔍 两段式搜索 (默认)",
       fm_sec_search_content:
-        "• 点击收藏按钮后，会自动执行“预热 -> 输入 -> 锁定”流程。<br>• 这是为了修复 Discord“直接填入搜索不到”的 Bug。<br>• 搜索时会进行 <span style='color:#2dc770'>精准比对</span>，确保不会转发错人。",
+        "• 点击收藏按钮后，会自动执行\"预热 -> 输入 -> 锁定\"流程。<br>• 这是为了修复 Discord\"直接填入搜索不到\"的 Bug。<br>• 搜索时会进行 <span style='color:#2dc770'>精准比对</span>，确保不会转发错人。",
       fm_sec_fuzzy: "⏎ 模糊搜索",
       fm_sec_fuzzy_content:
         "• 点击按钮右侧的 <span class='help-key'>⏎</span> 小箭头。<br>• 仅输入前两个字或第一个单词，适合名称有变动或符号的频道。",
@@ -898,7 +877,7 @@
       cancel_btn: "✕ 关闭",
       security_notice_title: "⚠️ 安全与免责声明",
       security_notice_content:
-        "本脚本提供的“网址转换”功能（如 vxtwitter, kkinstagram 等）皆依赖第三方开源服务。\n若您不信任这些第三方服务，请勿点击转换选项。\n请使用者自行具备辨识网址安全性的能力。",
+        "本脚本提供的\"网址转换\"功能（如 vxtwitter, kkinstagram 等）皆依赖第三方开源服务。\n若您不信任这些第三方服务，请勿点击转换选项。\n请使用者自行具备辨识网址安全性的能力。",
       manual_content:
         "【图标说明】\n• ◫/≡ : 切换菜单风格 (平面 / 群组)\n• ⇄ : 点击逻辑互换 (复制 / 填充)\n• ␣ : 尾部添加空格\n• ↵ : 尾部添加换行\n• ☆ : 自定义字符串面板\n• 🖱️ : 切换触发模式 (悬停 / 点击)\n• 🌐 : 切换语言\n\n【操作方式】\n• **单击**: 复制 (默认)\n• **长按 (0.5秒)**: 填充至输入框\n• **Shift+单击**: 同时复制并填充 (保持菜单开启)",
       manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ 快速开始</div><div class='mm-content'>将鼠标悬停在任意 Discord 消息上 → 右上角出现复制按钮。<br><b>单击</b>复制文字 · <b>长按 0.5秒</b>填充到输入框 · <b>Shift+单击</b>同时复制并填充（菜单保持开启）。<br>通过工具栏的 <span class='mm-key'>🖱️</span> 可切换为<span class='mm-key'>点击模式</span>，改为手动触发。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 复制菜单 — 文字与链接</div><div class='mm-content'>• <b>复制文字</b>：复制消息的完整文字内容。<br>• <b>复制媒体网址</b>：复制消息中图片或视频的直接链接。<br>• <b>复制第一个链接（已净化）</b>：提取并清除追踪参数的第一个 URL。<br>• <b>复制所有链接</b>：将消息中所有 URL 每行一个一次复制。<br>• <b>复制为 Markdown</b>：格式化为 <span class='mm-key'>[文字](URL)</span> 供 Markdown 使用。<br>• <b>插入 Markdown 链接</b>：直接将链接格式注入 Discord 的输入框。<br>• <b>隐藏格式</b>：自动包裹为 <span class='mm-key'>|| 剧透内容 ||</span> 格式。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ 下载</div><div class='mm-content'>• <b>下载图片/媒体</b>：下载该条消息中的所有图片或视频。<br>• <b>下载为 ZIP</b>：多个文件自动打包为单一 ZIP 压缩包。<br>• 下载失败时自动重试，并备援切换至备用链接。</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 网址转换</div><div class='mm-content'><b>Twitter / X</b>：在 twitter.com、x.com、vxtwitter、fixupx、fxtwitter、cunnyx 之间互转，修复 Discord 预览。<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com，让嵌入预览正常显示。<br><b>Bilibili</b>：转换为 FX Bilibili 或 VX Bilibili 获得更好的嵌入效果。<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net 互转，在 Discord 直接显示插图预览。<br><b>批量转换</b>：<span class='mm-key'>⚡ 全部转为 (N)</span> 一次处理消息中同类型的所有链接。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ 工具栏图标说明</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> 切换菜单风格：平面 / 群组</div><div><span class='mm-key'>⇄</span> 互换点击逻辑：复制 ↔ 填充</div><div><span class='mm-key'>␣</span> 填充时在尾部附加空格</div><div><span class='mm-key'>↵</span> 填充时在尾部附加换行</div><div><span class='mm-key'>☆</span> 自定义字符串面板（常用片段）</div><div><span class='mm-key'>🖱️</span> 切换触发方式：悬停 / 点击</div><div><span class='mm-key'>🌐</span> 切换界面语言</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ 自定义字符串面板</div><div class='mm-content'>• 储存常用的文字片段（问候语、模板、代码块等）。<br>• 单击复制 · 长按填充到输入框。<br>• <span class='mm-key'>Shift+单击</span> 可连续删除条目，无需逐一确认。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 虫洞 — 总览</div><div class='mm-content'>虫洞是存在 Discord 侧边栏的<b>一键频道快捷方式</b>。点击 <span class='mm-key'>＋</span> 并粘贴 Discord 频道网址即可创建。<br><b>单击</b> <span class='mm-key'>＋</span> → 创建新虫洞 · <b>长按 1 秒</b> → 打开设置菜单。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ 导航与管理</div><div class='mm-content'>• <b>单击</b>虫洞 → 立即跳转至该频道。<br>• <b>右键</b>虫洞 → 菜单：重命名 · 删除 · 设置图标 · 移至群组 · 切换 VIP。<br>• <b>VIP <span class='mm-key'>★</span></b>：设为 VIP 的虫洞自动置顶显示。<br>• <b>分组</b>：右键 → 移动到分组，整理进文件夹。<br>• <b>聚焦模式</b>：图标精简视图，虫洞面板右上角按钮切换。<br>• <b>历史记录</b>（紫色标签）：自动记录最近访问频道，点击即可返回。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ 发送消息</div><div class='mm-content'>• <b>右键</b>虫洞 → <b>在此频道发送消息</b> 打开输入框。<br>• <span class='mm-key'>Ctrl+V</span> 直接粘贴图片，图文合为一条消息一起发送。<br>• 底部选项（跨次保留）：自动关闭 · 前往频道 · 显示通知。<br>• 发送后弹出 3 秒可点击通知，点击即跳转到目标频道。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 设置菜单与 API 模式</div><div class='mm-content'>• <b>长按 <span class='mm-key'>＋</span> 1 秒</b>即可打开虫洞设置菜单。<br>• 菜单项目：<span class='mm-key'>➕ 创建新虫洞</span> · <span class='mm-key'>✉️ 发送方式与 API 模式</span> · <span class='mm-key'>⚙️ 更多设置</span>（可扩展）。<br>• 点击「<b>发送方式与 API 模式</b>」→ 打开 API 设置面板：<br>&nbsp;&nbsp;— <b>方案 A（跳页）</b>：自动切换频道，注入文字后返回，无需 Token。<br>&nbsp;&nbsp;— <b>方案 B（直接 API）</b>：REST API 直发，不切换页面，即时且隐蔽。<br>• Token 由后台静默拦截 Discord 自身请求取得——<b>绝不写入磁盘或外传。</b><br>• 页面刷新后：打开发送输入框时拦截器会自动重启。</div></div></div></div>`,
@@ -916,6 +895,7 @@
       download_start: "🚀 开始下载...",
       download_zip_start: "📦 正在打包 {n} 个文件...",
       download_fail: "❌ 下载失败",
+      download_cors_fail: "⚠️ 此缩略图受 CORS 限制，无法直接下载。请复制网址后手动打开保存。",
       original_url: "🔗 原始网址",
       convert_all: "⚡ 全部转为 ({n})",
       convert_imgur: "🖼️ 转为 i.imgur.com",
@@ -932,6 +912,7 @@
       to_vxreddit: "🛠️ 转为 vxreddit",
       to_instagram: "📷 转为 instagram.com",
       to_kkinstagram: "🔁 转为 kkinstagram",
+      to_facebed: "🔁 转为 facebed.com",
       to_tiktok: "🎵 转为 tiktok.com",
       to_vxtiktok: "🔁 转为 vxtiktok",
       to_tnktok: "🛠️ 转为 tnktok",
@@ -943,6 +924,7 @@
       to_vxb23: "🔗 转为 vxb23.tv",
       to_phixiv: "🔙 转为 phixiv.net",
       to_pixiv: "🎨 转为 pixiv.net",
+      yt_shorts_to_watch: "▶️ YT Shorts → 普通链接",
       restore_pixiv_img: "📖 从图片还原 pixiv/phixiv",
       insert_symbol: "✳️ 插入 → {s}",
       delete_symbol: "❌",
@@ -997,7 +979,7 @@
       em_btn_target_title: "准心模式：点击画面上的 GIF/表情 以直接收藏",
       em_btn_save_this: "将此项目加入收藏库",
       em_no_favs: "尚无收藏",
-      em_del_confirm: "删除“{k}”?",
+      em_del_confirm: "删除\"{k}\"?",
       em_note_prompt: "备注：",
       em_set_cover_success: "已设定封面图！",
 
@@ -1022,9 +1004,9 @@
 
       wm_group_prompt: "请输入新分组名称：",
       wm_edit_group: "编辑分组名称：",
-      wm_group_del_confirm: "解散分组“{n}”？(内含虫洞将会保留)",
+      wm_group_del_confirm: "解散分组\"{n}\"？(内含虫洞将会保留)",
       wm_group_select_prompt:
-        "请输入数字选择分组：\n\n0. [根目录/未分类]\n{list}\n\n留空并按下确认可创建“新分组”：",
+        "请输入数字选择分组：\n\n0. [根目录/未分类]\n{list}\n\n留空并按下确认可创建\"新分组\"：",
       wm_group_invalid: "无效的分组选择！",
       wm_move_prompt: "移动到哪个分组？(输入数字)\n\n{list}",
       wm_icon_picker_title: "选择 {name} 的图标",
@@ -1039,6 +1021,7 @@
       wm_settings_position_navbar:    "导航栏",
       wm_settings_position_titlebar:  "频道标题栏",
       wm_settings_position_input:     "消息输入框上方",
+      wm_settings_position_topleft:   "左上角（固定悬浮）",
       wm_focus_on: "关闭聚焦模式",
       wm_focus_off: "开启聚焦模式（仅显示图标）",
       wm_focus_size: "图标大小",
@@ -1069,6 +1052,9 @@
       wm_send_goto_channel: "发送后前往该频道",
       wm_send_paste_hint: "📋 可 Ctrl+V 粘贴图片",
       wm_send_token_warn: "⚠️ Token 已失效，请重新打开彩蛋面板检测。本次使用方案 A。",
+      wm_send_channel_fail: "❌ 频道加载失败",
+      wm_send_editor_missing: "❌ 找不到输入框",
+      wm_send_uploading: "📎 上传 {n} 张图片...",
 
       wm_api_panel_title: "⚗️ 虫洞 API 模式（进阶）",
       wm_api_mode_label_a: "方案 A — 跳页模式（默认）",
@@ -1079,7 +1065,7 @@
       wm_api_token_status_ready: "Token：已就绪（仅存于内存）",
       wm_api_detect_btn: "检测我的 Token",
       wm_api_detect_confirm: "【Token 拦截授权同意书】\n\n点击「确认」即代表您同意本脚本在本次会话中拦截您的 Discord Token。\n\n🔒 安全保证：\n• 仅存于浏览器内存，绝不写入任何存储空间或磁盘\n• 页面关闭或刷新后自动清除，不留任何痕迹\n• 绝不发送至任何外部服务器，所有请求直接发往 discord.com\n• 仅用于代您执行 POST /channels/{id}/messages 操作\n\n⚠️ 用户声明：\n• 您了解此 Token 具备发送消息的能力\n• 通过本模式发送的所有消息，责任由您自行承担\n\n请在确认信任本脚本且理解上述内容后再继续。",
-      wm_api_detect_waiting: "等待 Token 中⋯（正常使用 Discord 即可触发）",
+      wm_api_detect_waiting: "⬆️ 请切换到任意频道一次，即可自动捕捉 Token",
       wm_api_enable_btn: "启用 API 模式",
       wm_api_disable_btn: "停用 API 模式（返回方案 A）",
       wm_api_enabled_toast: "✅ API 模式已启用",
@@ -1105,12 +1091,17 @@
       em_menu_sticker: "贴纸",
       em_menu_gif: "GIF",
 
-      menu_observer_status: "🔍 Observer 状态",
-      menu_observer_health: "🔧 Observer 健康检查",
       menu_export: "📤 导出设置 (Backup)",
       menu_import: "⬇️ 导入设置 (Restore)",
       menu_change_lang: "🌐 切换语言 (Language)",
-      menu_download_stats: "📊 下载统计",
+      custom_lang_desc: "点「📤 导出文本」获取英文原文 JSON，翻译后再点「📥 导入文本」粘贴回来即可应用。",
+      custom_lang_export: "📤 导出文本",
+      custom_lang_import: "📥 导入文本",
+      custom_lang_apply: "✅ 应用并刷新",
+      custom_lang_loaded: "✅ 已载入：{name}",
+      custom_lang_activate: "🌐 应用「{name}」",
+      custom_lang_json_error: "⚠️ JSON 格式错误：{msg}",
+      custom_lang_paste_hint: "粘贴翻译后的 JSON 文本 …",
     },
 
     ja: {
@@ -1198,6 +1189,7 @@
       download_start: "🚀 ダウンロード中...",
       download_zip_start: "📦 {n} ファイルを圧縮中...",
       download_fail: "❌ ダウンロード失敗",
+      download_cors_fail: "⚠️ CORS制限により直接ダウンロードできません。URLをコピーしてブラウザで開いて保存してください。",
       original_url: "🔗 元のURL",
       convert_all: "⚡ すべて変換 ({n})",
       convert_imgur: "🖼️ i.imgur.com に変換",
@@ -1214,6 +1206,7 @@
       to_vxreddit: "🛠️ vxreddit へ",
       to_instagram: "📷 instagram.com へ",
       to_kkinstagram: "🔁 kkinstagram へ",
+      to_facebed: "🔁 facebed.com へ",
       to_tiktok: "🎵 tiktok.com へ",
       to_vxtiktok: "🔁 vxtiktok へ",
       to_tnktok: "🛠️ tnktok へ",
@@ -1225,6 +1218,7 @@
       to_vxb23: "🔗 vxb23.tv へ",
       to_phixiv: "🔙 phixiv.net へ",
       to_pixiv: "🎨 pixiv.net へ",
+      yt_shorts_to_watch: "▶️ YT Shorts → 通常リンク",
       restore_pixiv_img: "📖 画像からpixivを復元",
       insert_symbol: "✳️ 挿入 → {s}",
       delete_symbol: "❌",
@@ -1325,6 +1319,7 @@
       wm_settings_position_navbar:    "ナビバー",
       wm_settings_position_titlebar:  "チャンネルタイトルバー",
       wm_settings_position_input:     "チャット入力欄の上",
+      wm_settings_position_topleft:   "左上固定",
       wm_focus_on: "フォーカスモードを閉じる",
       wm_focus_off: "フォーカスモードを開く（アイコンのみ表示）",
       wm_focus_size: "アイコンサイズ",
@@ -1355,6 +1350,9 @@
       wm_send_goto_channel: "送信後にチャンネルへ移動",
       wm_send_paste_hint: "📋 Ctrl+V で画像を貼り付け",
       wm_send_token_warn: "⚠️ Token が無効です。もう一度 API パネルを開いて検出してください。今回はプラン A を使用します。",
+      wm_send_channel_fail: "❌ チャンネルの読み込みに失敗しました",
+      wm_send_editor_missing: "❌ 入力欄が見つかりません",
+      wm_send_uploading: "📎 {n} 枚の画像をアップロード中...",
 
       wm_api_panel_title: "⚗️ ワームホール API モード（上級）",
       wm_api_mode_label_a: "プラン A — ページ移動（デフォルト）",
@@ -1365,7 +1363,7 @@
       wm_api_token_status_ready: "Token：準備完了（メモリのみ）",
       wm_api_detect_btn: "Token を検出する",
       wm_api_detect_confirm: "【Token 傍受 — 同意確認】\n\n「OK」をクリックすることで、このスクリプトが今回のセッション中にあなたの Discord Token を傍受することに同意したとみなされます。\n\n🔒 安全性の保証：\n• ブラウザのメモリにのみ保存され、ディスクやストレージには一切書き込まれません\n• ページを閉じるか更新すると自動的に消去され、痕跡は残りません\n• いかなる外部サーバーにも送信されません。すべてのリクエストは直接 discord.com に送られます\n• あなたの代わりに POST /channels/{id}/messages を実行する目的にのみ使用されます\n\n⚠️ ユーザー確認事項：\n• この Token にはメッセージ送信の権限が含まれることを理解しています\n• このモードで送信したすべてのメッセージについて、責任は自身が負うものとします\n\nスクリプトを信頼し、上記の内容を理解した上で続行してください。",
-      wm_api_detect_waiting: "Token を待機中⋯（Discord を通常通り操作すると検出されます）",
+      wm_api_detect_waiting: "⬆️ 任意のチャンネルに一度切り替えると Token が取得されます",
       wm_api_enable_btn: "API モードを有効にする",
       wm_api_disable_btn: "API モードを無効にする（プラン A に戻る）",
       wm_api_enabled_toast: "✅ API モードが有効になりました",
@@ -1391,12 +1389,17 @@
       em_menu_sticker: "スタンプ",
       em_menu_gif: "GIF",
 
-      menu_observer_status: "🔍 Observer 状態",
-      menu_observer_health: "🔧 Observer ヘルスチェック",
       menu_export: "📤 設定をエクスポート (Backup)",
       menu_import: "⬇️ 設定をインポート (Restore)",
       menu_change_lang: "🌐 言語を変更 (Language)",
-      menu_download_stats: "📊 ダウンロード統計",
+      custom_lang_desc: "「📤 テキストをエクスポート」で英語の原文 JSON を取得し、翻訳後に「📥 テキストをインポート」で適用してください。",
+      custom_lang_export: "📤 テキストをエクスポート",
+      custom_lang_import: "📥 テキストをインポート",
+      custom_lang_apply: "✅ 適用してリロード",
+      custom_lang_loaded: "✅ 読み込み済み：{name}",
+      custom_lang_activate: "🌐「{name}」を適用",
+      custom_lang_json_error: "⚠️ JSON エラー：{msg}",
+      custom_lang_paste_hint: "翻訳済み JSON をここに貼り付け …",
     },
 
     ko: {
@@ -1484,6 +1487,7 @@
       download_start: "🚀 다운로드 중...",
       download_zip_start: "📦 {n}개의 파일 압축 중...",
       download_fail: "❌ 다운로드 실패",
+      download_cors_fail: "⚠️ CORS 제한으로 직접 다운로드할 수 없습니다. URL을 복사하여 브라우저에서 열어 저장해주세요.",
       original_url: "🔗 원본 URL",
       convert_all: "⚡ 모두 변환 ({n})",
       convert_imgur: "🖼️ i.imgur.com으로 변환",
@@ -1500,6 +1504,7 @@
       to_vxreddit: "🛠️ vxreddit으로",
       to_instagram: "📷 instagram.com으로",
       to_kkinstagram: "🔁 kkinstagram으로",
+      to_facebed: "🔁 facebed.com으로",
       to_tiktok: "🎵 tiktok.com으로",
       to_vxtiktok: "🔁 vxtiktok으로",
       to_tnktok: "🛠️ tnktok으로",
@@ -1511,6 +1516,7 @@
       to_vxb23: "🔗 vxb23.tv로",
       to_phixiv: "🔙 phixiv.net으로",
       to_pixiv: "🎨 pixiv.net으로",
+      yt_shorts_to_watch: "▶️ YT Shorts → 일반 링크",
       restore_pixiv_img: "📖 이미지에서 pixiv 복원",
       insert_symbol: "✳️ 삽입 → {s}",
       delete_symbol: "❌",
@@ -1609,6 +1615,7 @@
       wm_settings_position_navbar:    "내비게이션 바",
       wm_settings_position_titlebar:  "채널 타이틀바",
       wm_settings_position_input:     "채팅 입력창 위",
+      wm_settings_position_topleft:   "왼쪽 상단 고정",
       wm_focus_on: "포커스 모드 끄기",
       wm_focus_off: "포커스 모드 켜기 (아이콘만 표시)",
       wm_focus_size: "아이콘 크기",
@@ -1639,6 +1646,9 @@
       wm_send_goto_channel: "전송 후 해당 채널로 이동",
       wm_send_paste_hint: "📋 Ctrl+V 로 이미지 붙여넣기",
       wm_send_token_warn: "⚠️ Token이 만료되었습니다. API 패널을 다시 열어 감지해 주세요. 이번에는 플랜 A를 사용합니다.",
+      wm_send_channel_fail: "❌ 채널 로드 실패",
+      wm_send_editor_missing: "❌ 입력창을 찾을 수 없습니다",
+      wm_send_uploading: "📎 {n}개의 이미지 업로드 중...",
 
       wm_api_panel_title: "⚗️ 웜홀 API 모드 (고급)",
       wm_api_mode_label_a: "플랜 A — 페이지 이동 (기본)",
@@ -1649,7 +1659,7 @@
       wm_api_token_status_ready: "Token：준비됨 (메모리 전용)",
       wm_api_detect_btn: "내 Token 감지하기",
       wm_api_detect_confirm: "【Token 인터셉트 — 동의 확인】\n\n「확인」을 클릭하면 이 스크립트가 현재 세션 중 귀하의 Discord Token을 가로채는 것에 동의하는 것으로 간주됩니다.\n\n🔒 보안 보장：\n• 브라우저 메모리에만 저장되며, 디스크나 스토리지에는 절대 기록되지 않습니다\n• 페이지를 닫거나 새로고침하면 자동으로 삭제되어 흔적이 남지 않습니다\n• 어떤 외부 서버에도 전송되지 않으며, 모든 요청은 discord.com 으로 직접 전송됩니다\n• 귀하를 대신하여 POST /channels/{id}/messages 를 실행하는 용도로만 사용됩니다\n\n⚠️ 사용자 확인 사항：\n• 이 Token에 메시지 전송 권한이 포함되어 있음을 이해합니다\n• 이 모드를 통해 전송된 모든 메시지에 대한 책임은 본인이 집니다\n\n스크립트를 신뢰하고 위 내용을 이해한 후 계속하십시오。",
-      wm_api_detect_waiting: "Token 대기 중⋯ (Discord를 정상적으로 사용하면 감지됩니다)",
+      wm_api_detect_waiting: "⬆️ 아무 채널로 한 번 전환하면 Token이 자동으로 감지됩니다",
       wm_api_enable_btn: "API 모드 활성화",
       wm_api_disable_btn: "API 모드 비활성화 (플랜 A로 돌아가기)",
       wm_api_enabled_toast: "✅ API 모드가 활성화되었습니다",
@@ -1675,16 +1685,1153 @@
       em_menu_sticker: "스티커",
       em_menu_gif: "GIF",
 
-      menu_observer_status: "🔍 Observer 상태",
-      menu_observer_health: "🔧 Observer 상태 점검",
       menu_export: "📤 설정 내보내기 (Backup)",
       menu_import: "⬇️ 설정 가져오기 (Restore)",
       menu_change_lang: "🌐 언어 변경 (Language)",
-      menu_download_stats: "📊 다운로드 통계",
+      custom_lang_desc: "「📤 텍스트 내보내기」로 영어 원문 JSON을 받고, 번역 후 「📥 텍스트 가져오기」로 적용하세요.",
+      custom_lang_export: "📤 텍스트 내보내기",
+      custom_lang_import: "📥 텍스트 가져오기",
+      custom_lang_apply: "✅ 적용 및 새로고침",
+      custom_lang_loaded: "✅ 불러옴：{name}",
+      custom_lang_activate: "🌐 \"{name}\" 적용",
+      custom_lang_json_error: "⚠️ JSON 오류：{msg}",
+      custom_lang_paste_hint: "번역된 JSON을 여기에 붙여넣기 …",
     },
+    "es": {
+      name: "Español",
+      fm_pinned_channels: "★ Canales fijados",
+      fm_toggle_flat: "Cambiar a: Vista plana",
+      fm_toggle_drop: "Cambiar a: Desplegable",
+      fm_help: "Ayuda",
+      fm_prompt_channel: "Introduce la palabra clave del canal:",
+      fm_prompt_user: "Introduce el ID o palabra clave del usuario:",
+      fm_user_zone: "Zona de usuarios",
+      fm_no_users: "Sin usuarios fijados",
+      fm_add_user: "+ Añadir usuario",
+      fm_fuzzy: "Búsqueda aproximada",
+      fm_remove_confirm: "¿Eliminar {target}?",
+      fm_tooltip_channel: "Canal: {c}\nServidor: {s}",
+      fm_tooltip_user_add: "Añadir a Zona de usuarios (👤)",
+      fm_tooltip_star_add: "Añadir a Favoritos (★)",
+      fm_manual_title: "📚 Manual del Administrador de Reenvío",
+      fm_sec_star: "★ Favoritos y gestión",
+      fm_sec_star_content:
+        "• Haz clic en <span class='help-key'>★</span> o <span class='help-key'>👤+</span> para fijar.<br>• Clic derecho para eliminar.<br>• <span class='help-key'>Shift+Clic derecho</span> para eliminar rápido (sin confirmar).",
+      fm_sec_search: "🔍 Búsqueda en dos pasos (predeterminado)",
+      fm_sec_search_content:
+        "• Al hacer clic en un pin se ejecuta automáticamente 'Precalentamiento → Entrada → Bloqueo'.<br>• Corrige el error de Discord donde la entrada directa falla.<br>• Usa <span style='color:#2dc770'>Coincidencia exacta</span> para evitar reenvíos incorrectos.",
+      fm_sec_fuzzy: "⏎ Búsqueda aproximada",
+      fm_sec_fuzzy_content:
+        "• Haz clic en la flecha <span class='help-key'>⏎</span> dentro del botón.<br>• Introduce solo los 2 primeros caracteres o la primera palabra.",
+      fm_sec_user: "👤 Zona de usuarios",
+      fm_sec_user_content:
+        "• Haz clic en el botón <span class='help-key'>👤</span> para expandir la lista de usuarios.<br>• Admite adición manual de ID.",
+      fm_sec_misc_title: "⚙️ Consejos y visualización",
+      fm_sec_misc:
+        "• El botón superior izquierdo alterna el modo <b>Plano</b> o <b>Desplegable</b>.<br>• El <b>Historial</b> (etiquetas moradas) guarda automáticamente los canales visitados recientemente.",
+
+      fm_sec_wormhole: "🌀 Agujero de gusano — Básico",
+      fm_sec_wormhole_content:
+        "• Haz clic en <span class='help-key'>＋</span> y pega una URL de canal de Discord para crear un acceso directo.<br>"
+        + "• <b>Clic</b> en un agujero de gusano → salta instantáneamente a ese canal.<br>"
+        + "• <b>Clic derecho</b> → menú: renombrar, eliminar, icono, mover a grupo o alternar VIP.<br>"
+        + "• <b>VIP (★)</b>: los agujeros fijados flotan arriba automáticamente.<br>"
+        + "• <b>Grupos</b>: organiza agujeros en carpetas con nombre.<br>"
+        + "• <b>Modo enfoque</b>: vista compacta solo con iconos.",
+      fm_sec_wm_send: "✉️ Agujero de gusano — Enviar mensaje",
+      fm_sec_wm_send_content:
+        "• <b>Clic derecho</b> → <b>Enviar mensaje aquí</b> para abrir el panel.<br>"
+        + "• <b>Modo A (Navegar)</b>: cambia al canal destino, inyecta texto y regresa.<br>"
+        + "• <b>Shift+Clic</b> → abre el panel en el canal actual.<br>"
+        + "• Admite <b>pegar imágenes con Ctrl+V</b>.<br>"
+        + "• Opciones inferiores: <b>Cierre automático</b> / <b>Ir al canal</b> / <b>Mostrar notificación</b>.",
+      fm_sec_wm_api: "⚡ Agujero de gusano — Modo API (secreto)",
+      fm_sec_wm_api_content:
+        "• <b>Mantén presionado el botón ＋ 3 segundos</b> para desbloquear el Modo API.<br>"
+        + "• <b>Modo B (API directa)</b>: envía mensajes vía Discord REST API sin cambiar de página.<br>"
+        + "• El token se intercepta silenciosamente en memoria — <b>nunca se almacena ni transmite</b>.<br>"
+        + "• Se borra al cerrar la página.",
+      welcome_title: "Bienvenido a {script}",
+      select_lang_subtitle: "Por favor, selecciona el idioma de la interfaz",
+      help_btn: "📖 Manual",
+      cancel_btn: "✕ Cerrar",
+      security_notice_title: "⚠️ Aviso de seguridad",
+      security_notice_content:
+        "Las funciones de conversión de URL (como vxtwitter, kkinstagram) dependen de servicios de terceros.\nNo las uses si no confías en dichos servicios.\nLos usuarios deben ser capaces de identificar la seguridad de las URL.",
+      manual_content:
+        "【Guía de iconos】\n• ◫/≡ : Cambiar estilo de menú (Plano / Grupo)\n• ⇄ : Intercambiar lógica de clic (Copiar / Insertar)\n• ␣ : Añadir espacio al final\n• ↵ : Añadir nueva línea al final\n• ☆ : Panel de cadenas personalizadas\n• 🖱️ : Modo de activación (Hover / Clic)\n• 🌐 : Cambiar idioma\n\n【Acciones】\n• **Clic**: Copiar (predeterminado)\n• **Pulsación larga (0,5s)**: Insertar en el cuadro de texto\n• **Shift+Clic**: Copiar e insertar (mantiene el menú abierto)",
+      manual_content_sections: "<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Inicio rápido</div><div class='mm-content'>Pasa el cursor sobre cualquier mensaje de Discord → aparece un botón de copiar en la esquina superior derecha.<br><b>Clic</b> para copiar texto · <b>Pulsación larga 0,5s</b> para insertar · <b>Shift+Clic</b> para copiar e insertar.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Menú de copia</div><div class='mm-content'>• Copiar texto, URL de medios, primer enlace limpio, todos los enlaces, Markdown, texto oculto.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ Descargar</div><div class='mm-content'>• Descargar imágenes/medios individualmente o como ZIP.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 Conversión de URL</div><div class='mm-content'>Twitter/X, Instagram, Bilibili, Pixiv — conversión mutua para previsualizaciones en Discord.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Agujero de gusano</div><div class='mm-content'>Accesos directos de canal con un clic en la barra lateral de Discord.</div></div>",
+      reload_confirm: "¡Configuración guardada!\n¿Recargar la página ahora?",
+      copy_text: "📋 Copiar texto",
+      copy_media_url: "🖼️ Copiar URL de medios",
+      no_content: "⚠️ Sin contenido",
+      copy_first_link: "🔗 Copiar primer enlace (limpio)",
+      copy_markdown: "🧾 Copiar como Markdown",
+      copy_all_links: "📎 Copiar todos los enlaces",
+      insert_format_link: "📌 Insertar [{t}](URL)",
+      copy_hidden_format: "🙈 Texto oculto (|| ... ||)",
+      download_images: "⬇️ Descargar imágenes/medios",
+      download_zip: "📦 Descargar como ZIP",
+      download_start: "🚀 Descargando...",
+      download_zip_start: "📦 Comprimiendo {n} archivos...",
+      download_fail: "❌ Error al descargar",
+      download_cors_fail: "⚠️ CORS impide la descarga directa. Copia la URL y ábrela en el navegador.",
+      original_url: "🔗 URL original",
+      convert_all: "⚡ Convertir todo ({n})",
+      convert_imgur: "🖼️ Convertir a i.imgur.com",
+      to_twitter: "🐦 twitter.com",
+      to_x: "❌ x.com",
+      to_vxtwitter: "🔁 vxtwitter",
+      to_fixupx: "🛠️ fixupx",
+      to_fxtwitter: "🔧 fxtwitter",
+      to_cunnyx: "🍑 cunnyx",
+      to_fixvx: "🧩 fixvx",
+      to_reddit: "👽 reddit.com",
+      to_old_reddit: "📜 old.reddit",
+      to_rxddit: "🔁 rxddit",
+      to_vxreddit: "🛠️ vxreddit",
+      to_instagram: "📷 instagram.com",
+      to_kkinstagram: "🔁 kkinstagram",
+      to_facebed: "🔁 facebed.com",
+      to_tiktok: "🎵 tiktok.com",
+      to_vxtiktok: "🔁 vxtiktok",
+      to_tnktok: "🛠️ tnktok",
+      to_threads: "🧵 threads.com",
+      to_fixthreads: "🔁 fixthreads",
+      to_fx_bilibili: "📺 FX Bilibili",
+      to_vx_bilibili: "📼 VX Bilibili",
+      to_b23: "🔗 b23.tv",
+      to_vxb23: "🔗 vxb23.tv",
+      to_phixiv: "🔙 phixiv.net",
+      to_pixiv: "🎨 pixiv.net",
+      yt_shorts_to_watch: "▶️ YT Shorts → enlace normal",
+      restore_pixiv_img: "📖 Restaurar pixiv desde imagen",
+      insert_symbol: "✳️ Insertar → {s}",
+      delete_symbol: "❌",
+      delete_confirm: "Eliminado: {s}",
+      add_symbol: "➕ Añadir",
+      add_symbol_prompt: "Introduce el texto a añadir:",
+      add_success: "Añadido",
+      remove_symbol: "➖ Eliminar",
+      remove_symbol_prompt: "Introduce el texto a eliminar:",
+      remove_empty: "La lista está vacía",
+      mode_hover: "🔄 Hover",
+      mode_click: "🖱️ Clic",
+      mode_desc: "Modo: {mode} (clic para cambiar)",
+      mode_changed: "Modo cambiado: {mode}",
+      export_success: "✅ ¡Configuración exportada!\n\nCopiada al portapapeles.",
+      import_prompt: "⬇️ Pega el código de respaldo (JSON):",
+      import_success: "✅ ¡Importación exitosa!\nRecargando página.",
+      import_fail: "❌ Error de importación: JSON inválido.",
+      insert_success: "Insertado",
+      copy_success: "Copiado",
+      copy_fail: "Error al copiar",
+      input_not_found: "Cuadro de texto no encontrado",
+      edit_link_text: "Editar prefijo de enlace",
+      enter_link_text: "Introduce el prefijo del enlace (vacío para eliminar):",
+      tip_style: "Estilo de menú: Plano / Grupo",
+      tip_trigger: "Activación: Hover / Clic",
+      tip_logic: "Lógica de clic: Copiar / Insertar",
+      tip_space: "Añadir espacio",
+      tip_newline: "Añadir nueva línea",
+      tip_symbols: "Ver cadenas personalizadas",
+      tip_lang: "Cambiar idioma",
+      tip_manual: "Manual",
+      mod_msg_warn_title: "⚠️ ¿Deshabilitar Utilidad de Mensajes?",
+      mod_msg_warn_body: "⠿ La Utilidad de Mensajes es la función principal.\\nSi la deshabilitas, desaparecerá el botón ⠿ en todos los mensajes.",
+      mod_msg_warn_confirm: "Deshabilitar",
+      mod_msg_warn_cancel: "Cancelar",
+      mod_msg_enable_menu: "Habilitar ⠿ Utilidad de Mensajes",
+      grp_copy: "📝 Copiar >",
+      grp_convert: "🔄 Convertir >",
+      grp_download: "⬇️ Descargar >",
+      grp_system: "⚙️ Sistema y símbolos >",
+      view_main: "Menú principal",
+      view_symbols: "Cadenas personalizadas",
+
+      em_title: "😊 Gestión integrada de expresiones/GIF",
+      em_content:
+        "• <b>Barra</b>: [📁] Colección | [🎯] Modo mira | [★] Palabras clave.<br>• <b>Modo mira</b>: selecciona directamente GIFs o emojis de la pantalla.<br>• <b>Shift+Clic</b>: enviar consecutivamente sin cerrar el panel.",
+      em_picker_tip: "🔍 Haz clic en el GIF/emoji (clic en el fondo para cancelar)",
+      em_err_no_list: "No se encontró el contenedor de lista. ¡Abre primero la ventana de emoji o GIF!",
+      em_btn_add_title: "Guardar palabra clave de búsqueda",
+      em_btn_active_title: "Clic: rellenar palabra clave (alternar)",
+      em_btn_target_title: "Modo mira: clic en GIF/emoji para guardar",
+      em_btn_save_this: "Añadir este elemento a la colección",
+      em_no_favs: "Sin favoritos aún",
+      em_del_confirm: "¿Eliminar «{k}»?",
+      em_keyword_prompt: "Introduce una palabra clave:",
+      em_keyword_exists: "«{k}» ya existe",
+
+      wm_nav_fail: "Error de navegación. Comprueba la URL.",
+      wm_alert_invalid_url:
+        "¡URL inválida! Por favor copia una URL de canal de Discord (que contenga /channels/).",
+      wm_default_channel_name: "Canal",
+      wm_refresh_confirm:
+        "Agujero de gusano creado, pero la interfaz no puede actualizarse de inmediato.\n\n¿Recargar la página ahora?",
+      wm_root_group: "Sin categoría",
+
+      wm_menu_edit: "✎ Editar nombre",
+      wm_menu_del: "🗑️ Cerrar agujero",
+      wm_menu_vip_add: "★ Fijar como VIP",
+      wm_menu_vip_remove: "☆ Quitar VIP",
+      wm_menu_move: "📂 Mover al grupo",
+      wm_group_prompt: "Introduce el nombre del nuevo grupo:",
+      wm_edit_group: "Editar nombre del grupo:",
+      wm_group_del_confirm: "¿Disolver el grupo «{n}»? (los agujeros se conservarán)",
+      wm_group_select_prompt: "Introduce un número para seleccionar grupo:\n\n0. [Raíz/Sin categoría]\n{list}\n\nDeja vacío para crear «Nuevo grupo»:",
+      wm_group_invalid: "¡Selección de grupo inválida!",
+      wm_move_prompt: "¿A qué grupo mover? (introduce número)\n\n{list}",
+      wm_icon_picker_title: "Seleccionar icono para {name}",
+      wm_icon_set_success: "✅ Icono de {name} establecido",
+      wm_icon_empty: "Primero añade un Emoji en el módulo de colección",
+      wm_title: "Control de agujero de gusano\n• Clic: crear nuevo\n• Pulsación larga 1s: menú de ajustes",
+      wm_settings_menu_title: "🌀 Ajustes del agujero de gusano",
+      wm_settings_create: "Crear nuevo agujero de gusano",
+      wm_settings_send_mode: "Método de envío y Modo API",
+      wm_settings_more: "Más ajustes (próximamente)",
+      wm_settings_position: "Cambiar posición",
+      wm_settings_position_navbar: "Barra de navegación",
+      wm_settings_position_titlebar: "Barra de título del canal",
+      wm_settings_position_input: "Sobre el cuadro de chat",
+      wm_settings_position_topleft: "Esquina superior izquierda (fijo)",
+      wm_focus_on: "Desactivar modo enfoque",
+      wm_focus_off: "Activar modo enfoque (solo iconos)",
+      wm_focus_size: "Tamaño de icono",
+      wm_focus_size_s: "S  · Pequeño",
+      wm_focus_size_m: "M  · Mediano",
+      wm_focus_size_l: "L  · Grande",
+
+      wm_menu_send: "✉️ Enviar mensaje aquí",
+      wm_send_placeholder: "Escribe un mensaje para #{name}...",
+      wm_send_btn: "Enviar",
+      wm_send_cancel: "Cancelar",
+      wm_send_waiting: "Esperando al editor...",
+      wm_send_injecting: "Enviando...",
+      wm_send_success: "✅ ¡Enviado a #{name}!",
+      wm_send_toast_title: "✅ Enviado a #{name}",
+      wm_send_toast_hint: "Clic para ir al canal",
+      wm_send_waiting_token: "⏳ Esperando Token…",
+      wm_send_fail: "❌ Error — editor no listo.",
+      wm_send_empty: "El mensaje no puede estar vacío.",
+      wm_send_returning: "Volviendo...",
+      wm_send_hint: "Shift+Clic para enviar sin cambiar de canal",
+      wm_send_mode_api: "⚡ Modo API",
+      wm_send_mode_nav: "🔀 Modo navegación",
+      wm_send_mode_desc_api: "Envío directo, sin cambio de canal",
+      wm_send_mode_desc_nav: "Cambiar al canal destino y enviar",
+      wm_send_autoclose: "Cerrar automáticamente tras enviar",
+      wm_send_show_toast: "Mostrar notificación de envío",
+      wm_send_goto_channel: "Ir al canal tras enviar",
+      wm_send_paste_hint: "📋 Ctrl+V para pegar imagen",
+      wm_send_token_warn: "⚠️ Token expirado. Vuelve a abrir el panel API para detectarlo. Usando Modo A esta vez.",
+      wm_send_channel_fail: "❌ Error al cargar el canal",
+      wm_send_editor_missing: "❌ Editor no encontrado",
+      wm_send_uploading: "📎 Subiendo {n} imagen(es)...",
+
+      wm_api_panel_title: "⚗️ Modo API del agujero de gusano (avanzado)",
+      wm_api_mode_label_a: "Modo A — Navegar (predeterminado)",
+      wm_api_mode_label_b: "Modo B — API directa (sin cambio de página)",
+      wm_api_warning_title: "⚠️ Aviso de riesgo",
+      wm_api_warning_body: "Usar un Token de usuario para llamar a la API de Discord viola los Términos de Servicio. Tu cuenta podría ser suspendida. Úsalo bajo tu propia responsabilidad.",
+      wm_api_token_status_none: "Token: No detectado",
+      wm_api_token_status_ready: "Token: Listo (solo en memoria)",
+      wm_api_detect_btn: "Detectar mi Token",
+      wm_api_detect_confirm: "【Consentimiento de interceptación de Token】\n\nAl hacer clic en Aceptar, autorizas que este script intercepte tu Token de Discord para esta sesión.\n\n🔒 Garantías de seguridad:\n• Solo en memoria — nunca escrito en disco\n• Se borra al cerrar o recargar la página\n• Nunca transmitido a ningún servidor externo\n• Usado exclusivamente para enviar mensajes en tu nombre\n\n⚠️ Reconocimiento:\n• Entiendes que este token otorga acceso para enviar mensajes\n• Aceptas plena responsabilidad de todos los mensajes enviados\n\nProcede solo si confías en este script.",
+      wm_api_detect_waiting: "⬆️ Cambia a cualquier canal una vez para capturar el Token",
+      wm_api_enable_btn: "Activar Modo API",
+      wm_api_disable_btn: "Desactivar Modo API (volver al Modo A)",
+      wm_api_enabled_toast: "✅ Modo API activado",
+      wm_api_disabled_toast: "↩️ Vuelto al Modo Navegación",
+      wm_api_view_code: "Ver código del interceptor de Token",
+      wm_api_clear_token: "🗑 Borrar Token",
+      wm_api_reset_all: "🗑️ Restablecer todos los datos del agujero",
+      wm_api_plan_b_first: "Por favor selecciona primero el Plan B",
+      wm_api_send_fail: "❌ Error de API — revisa la consola",
+
+      em_col_title: "Mis colecciones",
+      em_col_add_success: '¡Guardado en "{g}"!',
+      em_col_tab_new: "Nueva pestaña",
+      em_col_tab_prompt: "Nombre de la nueva pestaña:",
+      em_col_empty_tab: "Esta pestaña está vacía.",
+      em_col_del_tab_confirm: '¿Eliminar la pestaña "{n}" y todos sus elementos?',
+      em_modal_choose_tab: "¿En qué colección guardar?",
+      em_modal_create_new: "+ Crear nueva...",
+      em_tip_pick: "Establecer imagen de portada",
+      em_tip_edit: "Editar nota",
+      em_tip_delete: "Eliminar",
+      em_menu_emoji: "Emojis",
+      em_menu_sticker: "Stickers",
+      em_menu_gif: "GIFs",
+
+      menu_export: "📤 Exportar configuración (Backup)",
+      menu_import: "⬇️ Importar configuración (Restaurar)",
+      menu_change_lang: "🌐 Cambiar idioma",
+      custom_lang_desc: "Haz clic en「📤 Exportar texto」para obtener el JSON en inglés. Tradúcelo y usa「📥 Importar texto」para aplicarlo.",
+      custom_lang_export: "📤 Exportar texto",
+      custom_lang_import: "📥 Importar texto",
+      custom_lang_apply: "✅ Aplicar y recargar",
+      custom_lang_loaded: "✅ Cargado: {name}",
+      custom_lang_activate: "🌐 Aplicar \"{name}\"",
+      custom_lang_json_error: "⚠️ Error JSON: {msg}",
+      custom_lang_paste_hint: "Pega el JSON traducido aquí …",
+    },
+
+    "pt-BR": {
+      name: "Português (Brasil)",
+      fm_pinned_channels: "★ Canais fixados",
+      fm_toggle_flat: "Alternar para: Vista plana",
+      fm_toggle_drop: "Alternar para: Menu suspenso",
+      fm_help: "Ajuda",
+      fm_prompt_channel: "Digite a palavra-chave do canal:",
+      fm_prompt_user: "Digite o ID ou palavra-chave do usuário:",
+      fm_user_zone: "Zona de usuários",
+      fm_no_users: "Sem usuários fixados",
+      fm_add_user: "+ Adicionar usuário",
+      fm_fuzzy: "Pesquisa aproximada",
+      fm_remove_confirm: "Remover {target}?",
+      fm_tooltip_channel: "Canal: {c}\nServidor: {s}",
+      fm_tooltip_user_add: "Adicionar à Zona de usuários (👤)",
+      fm_tooltip_star_add: "Adicionar aos Favoritos (★)",
+      fm_manual_title: "📚 Manual do Gerenciador de Encaminhamento",
+      fm_sec_star: "★ Favoritos e gerenciamento",
+      fm_sec_star_content:
+        "• Clique em <span class='help-key'>★</span> ou <span class='help-key'>👤+</span> para fixar.<br>• Clique com o botão direito para remover.<br>• <span class='help-key'>Shift+Botão direito</span> para remoção rápida (sem confirmação).",
+      fm_sec_search: "🔍 Pesquisa em dois passos (padrão)",
+      fm_sec_search_content:
+        "• Clicar em um pin executa automaticamente 'Aquecimento → Entrada → Bloqueio'.<br>• Corrige o bug do Discord onde a entrada direta falha.<br>• Usa <span style='color:#2dc770'>Correspondência exata</span> para evitar encaminhamentos errados.",
+      fm_sec_fuzzy: "⏎ Pesquisa aproximada",
+      fm_sec_fuzzy_content:
+        "• Clique na seta <span class='help-key'>⏎</span> dentro do botão.<br>• Insere apenas os 2 primeiros caracteres ou a primeira palavra.",
+      fm_sec_user: "👤 Zona de usuários",
+      fm_sec_user_content:
+        "• Clique no botão <span class='help-key'>👤</span> para expandir a lista de usuários.<br>• Suporta adição manual de ID.",
+      fm_sec_misc_title: "⚙️ Dicas e exibição",
+      fm_sec_misc:
+        "• O botão superior esquerdo alterna o modo <b>Plano</b> ou <b>Suspenso</b>.<br>• O <b>Histórico</b> (etiquetas roxas) salva automaticamente os canais visitados recentemente.",
+
+      fm_sec_wormhole: "🌀 Buraco de minhoca — Básico",
+      fm_sec_wormhole_content:
+        "• Clique em <span class='help-key'>＋</span> e cole uma URL de canal do Discord para criar um atalho.<br>"
+        + "• <b>Clique</b> em um buraco → pula instantaneamente para esse canal.<br>"
+        + "• <b>Botão direito</b> → menu: renomear, excluir, ícone, mover para grupo ou alternar VIP.<br>"
+        + "• <b>VIP (★)</b>: buracos fixados flutuam automaticamente para o topo.<br>"
+        + "• <b>Grupos</b>: organize buracos em pastas.<br>"
+        + "• <b>Modo foco</b>: visão compacta somente com ícones.",
+      fm_sec_wm_send: "✉️ Buraco de minhoca — Enviar mensagem",
+      fm_sec_wm_send_content:
+        "• <b>Botão direito</b> → <b>Enviar mensagem aqui</b> para abrir o painel.<br>"
+        + "• <b>Modo A (Navegar)</b>: muda para o canal destino, injeta texto e retorna.<br>"
+        + "• <b>Shift+Clique</b> → abre o painel no canal atual.<br>"
+        + "• Suporta <b>colar imagens com Ctrl+V</b>.<br>"
+        + "• Opções inferiores: <b>Fechar automaticamente</b> / <b>Ir ao canal</b> / <b>Mostrar notificação</b>.",
+      fm_sec_wm_api: "⚡ Buraco de minhoca — Modo API (secreto)",
+      fm_sec_wm_api_content:
+        "• <b>Mantenha pressionado o botão ＋ por 3 segundos</b> para desbloquear o Modo API.<br>"
+        + "• <b>Modo B (API direta)</b>: envia mensagens via Discord REST API sem trocar de página.<br>"
+        + "• O token é interceptado silenciosamente na memória — <b>nunca armazenado ou transmitido</b>.<br>"
+        + "• Apagado ao fechar a página.",
+      welcome_title: "Bem-vindo ao {script}",
+      select_lang_subtitle: "Por favor, selecione o idioma da interface",
+      help_btn: "📖 Manual",
+      cancel_btn: "✕ Fechar",
+      security_notice_title: "⚠️ Aviso de segurança",
+      security_notice_content:
+        "Os recursos de conversão de URL (como vxtwitter, kkinstagram) dependem de serviços de terceiros.\nNão os use se não confiar nesses serviços.\nOs usuários devem ser capazes de identificar a segurança das URL.",
+      manual_content:
+        "【Guia de ícones】\n• ◫/≡ : Alternar estilo de menu (Plano / Grupo)\n• ⇄ : Trocar lógica de clique (Copiar / Inserir)\n• ␣ : Adicionar espaço ao final\n• ↵ : Adicionar nova linha ao final\n• ☆ : Painel de strings personalizadas\n• 🖱️ : Modo de ativação (Hover / Clique)\n• 🌐 : Alterar idioma\n\n【Ações】\n• **Clique**: Copiar (padrão)\n• **Pressão longa (0,5s)**: Inserir na caixa de texto\n• **Shift+Clique**: Copiar e inserir (mantém o menu aberto)",
+      manual_content_sections: "<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Início rápido</div><div class='mm-content'>Passe o cursor sobre qualquer mensagem do Discord → aparece um botão de copiar no canto superior direito.<br><b>Clique</b> para copiar · <b>Pressão longa 0,5s</b> para inserir · <b>Shift+Clique</b> para copiar e inserir.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Menu de cópia</div><div class='mm-content'>• Copiar texto, URL de mídia, primeiro link limpo, todos os links, Markdown, texto oculto.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ Download</div><div class='mm-content'>• Baixar imagens/mídias individualmente ou como ZIP.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 Conversão de URL</div><div class='mm-content'>Twitter/X, Instagram, Bilibili, Pixiv — conversão mútua para prévias no Discord.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Buraco de minhoca</div><div class='mm-content'>Atalhos de canal com um clique na barra lateral do Discord.</div></div>",
+      reload_confirm: "Configurações salvas!\nRecarregar a página agora?",
+      copy_text: "📋 Copiar texto",
+      copy_media_url: "🖼️ Copiar URL de mídia",
+      no_content: "⚠️ Sem conteúdo",
+      copy_first_link: "🔗 Copiar primeiro link (limpo)",
+      copy_markdown: "🧾 Copiar como Markdown",
+      copy_all_links: "📎 Copiar todos os links",
+      insert_format_link: "📌 Inserir [{t}](URL)",
+      copy_hidden_format: "🙈 Texto oculto (|| ... ||)",
+      download_images: "⬇️ Baixar imagens/mídias",
+      download_zip: "📦 Baixar como ZIP",
+      download_start: "🚀 Baixando...",
+      download_zip_start: "📦 Compactando {n} arquivos...",
+      download_fail: "❌ Falha no download",
+      download_cors_fail: "⚠️ CORS impede o download direto. Copie a URL e abra no navegador.",
+      original_url: "🔗 URL original",
+      convert_all: "⚡ Converter tudo ({n})",
+      convert_imgur: "🖼️ Converter para i.imgur.com",
+      to_twitter: "🐦 twitter.com",
+      to_x: "❌ x.com",
+      to_vxtwitter: "🔁 vxtwitter",
+      to_fixupx: "🛠️ fixupx",
+      to_fxtwitter: "🔧 fxtwitter",
+      to_cunnyx: "🍑 cunnyx",
+      to_fixvx: "🧩 fixvx",
+      to_reddit: "👽 reddit.com",
+      to_old_reddit: "📜 old.reddit",
+      to_rxddit: "🔁 rxddit",
+      to_vxreddit: "🛠️ vxreddit",
+      to_instagram: "📷 instagram.com",
+      to_kkinstagram: "🔁 kkinstagram",
+      to_facebed: "🔁 facebed.com",
+      to_tiktok: "🎵 tiktok.com",
+      to_vxtiktok: "🔁 vxtiktok",
+      to_tnktok: "🛠️ tnktok",
+      to_threads: "🧵 threads.com",
+      to_fixthreads: "🔁 fixthreads",
+      to_fx_bilibili: "📺 FX Bilibili",
+      to_vx_bilibili: "📼 VX Bilibili",
+      to_b23: "🔗 b23.tv",
+      to_vxb23: "🔗 vxb23.tv",
+      to_phixiv: "🔙 phixiv.net",
+      to_pixiv: "🎨 pixiv.net",
+      yt_shorts_to_watch: "▶️ YT Shorts → link normal",
+      restore_pixiv_img: "📖 Restaurar pixiv a partir da imagem",
+      insert_symbol: "✳️ Inserir → {s}",
+      delete_symbol: "❌",
+      delete_confirm: "Excluído: {s}",
+      add_symbol: "➕ Adicionar",
+      add_symbol_prompt: "Digite o texto a adicionar:",
+      add_success: "Adicionado",
+      remove_symbol: "➖ Remover",
+      remove_symbol_prompt: "Digite o texto a remover:",
+      remove_empty: "A lista está vazia",
+      mode_hover: "🔄 Hover",
+      mode_click: "🖱️ Clique",
+      mode_desc: "Modo: {mode} (clique para alternar)",
+      mode_changed: "Modo alterado: {mode}",
+      export_success: "✅ Configurações exportadas!\n\nCopiadas para a área de transferência.",
+      import_prompt: "⬇️ Cole o código de backup (JSON):",
+      import_success: "✅ Importação bem-sucedida!\nRecarregando página.",
+      import_fail: "❌ Falha na importação: JSON inválido.",
+      insert_success: "Inserido",
+      copy_success: "Copiado",
+      copy_fail: "Falha ao copiar",
+      input_not_found: "Caixa de texto não encontrada",
+      edit_link_text: "Editar prefixo do link",
+      enter_link_text: "Digite o prefixo do link (vazio para remover):",
+      tip_style: "Estilo do menu: Plano / Grupo",
+      tip_trigger: "Ativação: Hover / Clique",
+      tip_logic: "Lógica de clique: Copiar / Inserir",
+      tip_space: "Adicionar espaço",
+      tip_newline: "Adicionar nova linha",
+      tip_symbols: "Ver strings personalizadas",
+      tip_lang: "Alterar idioma",
+      tip_manual: "Manual",
+      mod_msg_warn_title: "⚠️ Desativar Utilitário de Mensagens?",
+      mod_msg_warn_body: "⠿ O Utilitário de Mensagens é a função principal.\\nSe desativado, o botão ⠿ desaparecerá de todas as mensagens.",
+      mod_msg_warn_confirm: "Desativar",
+      mod_msg_warn_cancel: "Cancelar",
+      mod_msg_enable_menu: "Ativar ⠿ Utilitário de Mensagens",
+      grp_copy: "📝 Copiar >",
+      grp_convert: "🔄 Converter >",
+      grp_download: "⬇️ Baixar >",
+      grp_system: "⚙️ Sistema e símbolos >",
+      view_main: "Menu principal",
+      view_symbols: "Strings personalizadas",
+
+      em_title: "😊 Gerenciamento integrado de expressões/GIF",
+      em_content:
+        "• <b>Barra</b>: [📁] Coleção | [🎯] Modo mira | [★] Palavras-chave.<br>• <b>Modo mira</b>: selecione GIFs ou emojis diretamente da tela.<br>• <b>Shift+Clique</b>: enviar consecutivamente sem fechar o painel.",
+      em_picker_tip: "🔍 Clique no GIF/emoji (clique no fundo para cancelar)",
+      em_err_no_list: "Contêiner de lista não encontrado. Abra primeiro a janela de emoji ou GIF!",
+      em_btn_add_title: "Salvar palavra-chave de pesquisa",
+      em_btn_active_title: "Clique: preencher palavra-chave (alternar)",
+      em_btn_target_title: "Modo mira: clique no GIF/emoji para salvar",
+      em_btn_save_this: "Adicionar este item à coleção",
+      em_no_favs: "Sem favoritos ainda",
+      em_del_confirm: "Excluir «{k}»?",
+      em_keyword_prompt: "Digite uma palavra-chave:",
+      em_keyword_exists: "«{k}» já existe",
+
+      wm_nav_fail: "Falha na navegação. Verifique a URL.",
+      wm_alert_invalid_url:
+        "URL inválida! Por favor cole uma URL de canal do Discord (contendo /channels/).",
+      wm_default_channel_name: "Canal",
+      wm_refresh_confirm:
+        "Buraco de minhoca criado, mas a interface não pode ser atualizada imediatamente.\n\nRecarregar página agora?",
+      wm_root_group: "Sem categoria",
+
+      wm_menu_edit: "✎ Editar nome",
+      wm_menu_del: "🗑️ Fechar buraco",
+      wm_menu_vip_add: "★ Fixar como VIP",
+      wm_menu_vip_remove: "☆ Remover VIP",
+      wm_menu_move: "📂 Mover para grupo",
+      wm_group_prompt: "Digite o nome do novo grupo:",
+      wm_edit_group: "Editar nome do grupo:",
+      wm_group_del_confirm: "Dissolver o grupo «{n}»? (os buracos serão mantidos)",
+      wm_group_select_prompt: "Digite um número para selecionar o grupo:\n\n0. [Raiz/Sem categoria]\n{list}\n\nDeixe vazio para criar «Novo grupo»:",
+      wm_group_invalid: "Seleção de grupo inválida!",
+      wm_move_prompt: "Para qual grupo mover? (digite número)\n\n{list}",
+      wm_icon_picker_title: "Selecionar ícone para {name}",
+      wm_icon_set_success: "✅ Ícone de {name} definido",
+      wm_icon_empty: "Primeiro adicione um Emoji no módulo de coleção",
+      wm_title: "Controle do buraco de minhoca\n• Clique: criar novo\n• Pressão longa 1s: menu de configurações",
+      wm_settings_menu_title: "🌀 Configurações do buraco de minhoca",
+      wm_settings_create: "Criar novo buraco de minhoca",
+      wm_settings_send_mode: "Método de envio e Modo API",
+      wm_settings_more: "Mais configurações (em breve)",
+      wm_settings_position: "Alterar posição",
+      wm_settings_position_navbar: "Barra de navegação",
+      wm_settings_position_titlebar: "Barra de título do canal",
+      wm_settings_position_input: "Acima da caixa de chat",
+      wm_settings_position_topleft: "Canto superior esquerdo (fixo)",
+      wm_focus_on: "Desativar modo foco",
+      wm_focus_off: "Ativar modo foco (somente ícones)",
+      wm_focus_size: "Tamanho do ícone",
+      wm_focus_size_s: "P  · Pequeno",
+      wm_focus_size_m: "M  · Médio",
+      wm_focus_size_l: "G  · Grande",
+
+      wm_menu_send: "✉️ Enviar mensagem aqui",
+      wm_send_placeholder: "Digite uma mensagem para #{name}...",
+      wm_send_btn: "Enviar",
+      wm_send_cancel: "Cancelar",
+      wm_send_waiting: "Aguardando editor...",
+      wm_send_injecting: "Enviando...",
+      wm_send_success: "✅ Enviado para #{name}!",
+      wm_send_toast_title: "✅ Enviado para #{name}",
+      wm_send_toast_hint: "Clique para ir ao canal",
+      wm_send_waiting_token: "⏳ Aguardando Token…",
+      wm_send_fail: "❌ Falha — editor não pronto.",
+      wm_send_empty: "A mensagem não pode estar vazia.",
+      wm_send_returning: "Voltando...",
+      wm_send_hint: "Shift+Clique para enviar sem trocar de canal",
+      wm_send_mode_api: "⚡ Modo API",
+      wm_send_mode_nav: "🔀 Modo navegação",
+      wm_send_mode_desc_api: "Envio direto, sem troca de canal",
+      wm_send_mode_desc_nav: "Trocar para o canal destino e enviar",
+      wm_send_autoclose: "Fechar automaticamente após enviar",
+      wm_send_show_toast: "Mostrar notificação de envio",
+      wm_send_goto_channel: "Ir ao canal após enviar",
+      wm_send_paste_hint: "📋 Ctrl+V para colar imagem",
+      wm_send_token_warn: "⚠️ Token expirado. Reabra o painel API para detectar novamente. Usando Modo A desta vez.",
+      wm_send_channel_fail: "❌ Falha ao carregar o canal",
+      wm_send_editor_missing: "❌ Editor não encontrado",
+      wm_send_uploading: "📎 Enviando {n} imagem(ns)...",
+
+      wm_api_panel_title: "⚗️ Modo API do buraco de minhoca (avançado)",
+      wm_api_mode_label_a: "Modo A — Navegar (padrão)",
+      wm_api_mode_label_b: "Modo B — API direta (sem troca de página)",
+      wm_api_warning_title: "⚠️ Aviso de risco",
+      wm_api_warning_body: "Usar um Token de usuário para chamar a API do Discord viola os Termos de Serviço. Sua conta pode ser banida. Use por sua conta e risco.",
+      wm_api_token_status_none: "Token: Não detectado",
+      wm_api_token_status_ready: "Token: Pronto (somente na memória)",
+      wm_api_detect_btn: "Detectar meu Token",
+      wm_api_detect_confirm: "【Consentimento de interceptação de Token】\n\nAo clicar em OK, você autoriza que este script intercepte seu Token do Discord para esta sessão.\n\n🔒 Garantias de segurança:\n• Somente na memória — nunca gravado em disco\n• Apagado ao fechar ou recarregar a página\n• Nunca transmitido para qualquer servidor externo\n• Usado exclusivamente para enviar mensagens em seu nome\n\n⚠️ Reconhecimento:\n• Você entende que este token concede acesso para enviar mensagens\n• Você aceita total responsabilidade por todas as mensagens enviadas\n\nProssiga somente se confiar neste script.",
+      wm_api_detect_waiting: "⬆️ Mude para qualquer canal uma vez para capturar o Token",
+      wm_api_enable_btn: "Ativar Modo API",
+      wm_api_disable_btn: "Desativar Modo API (voltar ao Modo A)",
+      wm_api_enabled_toast: "✅ Modo API ativado",
+      wm_api_disabled_toast: "↩️ Retornado ao Modo Navegação",
+      wm_api_view_code: "Ver código do interceptor de Token",
+      wm_api_clear_token: "🗑 Limpar Token",
+      wm_api_reset_all: "🗑️ Redefinir todos os dados do buraco",
+      wm_api_plan_b_first: "Por favor selecione primeiro o Plano B",
+      wm_api_send_fail: "❌ Falha na API — verifique o console",
+
+      em_col_title: "Minhas coleções",
+      em_col_add_success: 'Salvo em "{g}"!',
+      em_col_tab_new: "Nova aba",
+      em_col_tab_prompt: "Nome da nova aba:",
+      em_col_empty_tab: "Esta aba está vazia.",
+      em_col_del_tab_confirm: 'Excluir a aba "{n}" e todos os itens?',
+      em_modal_choose_tab: "Salvar em qual coleção?",
+      em_modal_create_new: "+ Criar nova...",
+      em_tip_pick: "Definir imagem de capa",
+      em_tip_edit: "Editar nota",
+      em_tip_delete: "Excluir",
+      em_menu_emoji: "Emojis",
+      em_menu_sticker: "Stickers",
+      em_menu_gif: "GIFs",
+
+      menu_export: "📤 Exportar configurações (Backup)",
+      menu_import: "⬇️ Importar configurações (Restaurar)",
+      menu_change_lang: "🌐 Alterar idioma",
+      custom_lang_desc: "Clique em「📤 Exportar texto」para obter o JSON em inglês. Após traduzir, use「📥 Importar texto」para aplicar.",
+      custom_lang_export: "📤 Exportar texto",
+      custom_lang_import: "📥 Importar texto",
+      custom_lang_apply: "✅ Aplicar e recarregar",
+      custom_lang_loaded: "✅ Carregado: {name}",
+      custom_lang_activate: "🌐 Aplicar \"{name}\"",
+      custom_lang_json_error: "⚠️ Erro JSON: {msg}",
+      custom_lang_paste_hint: "Cole o JSON traduzido aqui …",
+    },
+
+    "fr": {
+      name: "Français",
+      fm_pinned_channels: "★ Salons épinglés",
+      fm_toggle_flat: "Passer à : Vue plate",
+      fm_toggle_drop: "Passer à : Menu déroulant",
+      fm_help: "Aide",
+      fm_prompt_channel: "Entrez le mot-clé du salon :",
+      fm_prompt_user: "Entrez l'ID ou le mot-clé de l'utilisateur :",
+      fm_user_zone: "Zone utilisateurs",
+      fm_no_users: "Aucun utilisateur épinglé",
+      fm_add_user: "+ Ajouter un utilisateur",
+      fm_fuzzy: "Recherche approximative",
+      fm_remove_confirm: "Supprimer {target} ?",
+      fm_tooltip_channel: "Salon : {c}\nServeur : {s}",
+      fm_tooltip_user_add: "Ajouter à la Zone utilisateurs (👤)",
+      fm_tooltip_star_add: "Ajouter aux Favoris (★)",
+      fm_manual_title: "📚 Manuel du Gestionnaire de Transfert",
+      fm_sec_star: "★ Favoris et gestion",
+      fm_sec_star_content:
+        "• Cliquez sur <span class='help-key'>★</span> ou <span class='help-key'>👤+</span> pour épingler.<br>• Clic droit pour supprimer.<br>• <span class='help-key'>Shift+Clic droit</span> pour suppression rapide (sans confirmation).",
+      fm_sec_search: "🔍 Recherche en deux étapes (défaut)",
+      fm_sec_search_content:
+        "• Cliquer sur un pin exécute automatiquement 'Préchauffage → Saisie → Verrouillage'.<br>• Corrige le bug de Discord où la saisie directe échoue.<br>• Utilise la <span style='color:#2dc770'>Correspondance exacte</span> pour éviter les transferts incorrects.",
+      fm_sec_fuzzy: "⏎ Recherche approximative",
+      fm_sec_fuzzy_content:
+        "• Cliquez sur la flèche <span class='help-key'>⏎</span> dans le bouton.<br>• Saisit uniquement les 2 premiers caractères ou le premier mot.",
+      fm_sec_user: "👤 Zone utilisateurs",
+      fm_sec_user_content:
+        "• Cliquez sur le bouton <span class='help-key'>👤</span> pour développer la liste.<br>• Prend en charge l'ajout manuel d'ID.",
+      fm_sec_misc_title: "⚙️ Conseils et affichage",
+      fm_sec_misc:
+        "• Le bouton en haut à gauche bascule entre le mode <b>Plat</b> et <b>Déroulant</b>.<br>• L'<b>Historique</b> (badges violets) sauvegarde automatiquement les salons récemment visités.",
+
+      fm_sec_wormhole: "🌀 Trou de ver — Bases",
+      fm_sec_wormhole_content:
+        "• Cliquez sur <span class='help-key'>＋</span> et collez une URL de salon Discord pour créer un raccourci.<br>"
+        + "• <b>Clic</b> sur un trou de ver → saut instantané vers ce salon.<br>"
+        + "• <b>Clic droit</b> → menu : renommer, supprimer, icône, déplacer vers un groupe ou basculer VIP.<br>"
+        + "• <b>VIP (★)</b> : les trous épinglés remontent automatiquement.<br>"
+        + "• <b>Groupes</b> : organisez les trous en dossiers.<br>"
+        + "• <b>Mode focus</b> : vue compacte icônes uniquement.",
+      fm_sec_wm_send: "✉️ Trou de ver — Envoyer un message",
+      fm_sec_wm_send_content:
+        "• <b>Clic droit</b> → <b>Envoyer un message ici</b> pour ouvrir le panneau.<br>"
+        + "• <b>Mode A (Navigation)</b> : change de salon, injecte le texte et revient.<br>"
+        + "• <b>Shift+Clic</b> → ouvre le panneau dans le salon actuel.<br>"
+        + "• Prend en charge le <b>collage d'images avec Ctrl+V</b>.<br>"
+        + "• Options du bas : <b>Fermeture auto</b> / <b>Aller au salon</b> / <b>Afficher la notification</b>.",
+      fm_sec_wm_api: "⚡ Trou de ver — Mode API (secret)",
+      fm_sec_wm_api_content:
+        "• <b>Maintenez le bouton ＋ appuyé 3 secondes</b> pour déverrouiller le Mode API.<br>"
+        + "• <b>Mode B (API directe)</b> : envoie des messages via l'API REST Discord sans changer de page.<br>"
+        + "• Le token est intercepté silencieusement en mémoire — <b>jamais stocké ni transmis</b>.<br>"
+        + "• Effacé à la fermeture de la page.",
+      welcome_title: "Bienvenue sur {script}",
+      select_lang_subtitle: "Veuillez sélectionner la langue de l'interface",
+      help_btn: "📖 Manuel",
+      cancel_btn: "✕ Fermer",
+      security_notice_title: "⚠️ Avertissement de sécurité",
+      security_notice_content:
+        "Les fonctions de conversion d'URL (vxtwitter, kkinstagram, etc.) dépendent de services tiers.\nNe les utilisez pas si vous ne faites pas confiance à ces services.\nLes utilisateurs doivent être capables d'identifier la sécurité des URL.",
+      manual_content:
+        "【Guide des icônes】\n• ◫/≡ : Changer le style de menu (Plat / Groupe)\n• ⇄ : Inverser la logique de clic (Copier / Insérer)\n• ␣ : Ajouter un espace à la fin\n• ↵ : Ajouter une nouvelle ligne à la fin\n• ☆ : Panneau de chaînes personnalisées\n• 🖱️ : Mode d'activation (Survol / Clic)\n• 🌐 : Changer de langue\n\n【Actions】\n• **Clic** : Copier (défaut)\n• **Appui long (0,5s)** : Insérer dans la zone de texte\n• **Shift+Clic** : Copier et insérer (menu conservé)",
+      manual_content_sections: "<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Démarrage rapide</div><div class='mm-content'>Survolez un message Discord → un bouton de copie apparaît en haut à droite.<br><b>Clic</b> pour copier · <b>Appui long 0,5s</b> pour insérer · <b>Shift+Clic</b> pour copier et insérer.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Menu de copie</div><div class='mm-content'>• Copier le texte, l'URL des médias, le premier lien propre, tous les liens, Markdown, texte masqué.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ Télécharger</div><div class='mm-content'>• Télécharger images/médias individuellement ou en ZIP.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 Conversion d'URL</div><div class='mm-content'>Twitter/X, Instagram, Bilibili, Pixiv — conversion mutuelle pour les aperçus Discord.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Trou de ver</div><div class='mm-content'>Raccourcis de salon en un clic dans la barre latérale Discord.</div></div>",
+      reload_confirm: "Paramètres sauvegardés !\nRecharger la page maintenant ?",
+      copy_text: "📋 Copier le texte",
+      copy_media_url: "🖼️ Copier l'URL des médias",
+      no_content: "⚠️ Aucun contenu",
+      copy_first_link: "🔗 Copier le premier lien (propre)",
+      copy_markdown: "🧾 Copier en Markdown",
+      copy_all_links: "📎 Copier tous les liens",
+      insert_format_link: "📌 Insérer [{t}](URL)",
+      copy_hidden_format: "🙈 Texte masqué (|| ... ||)",
+      download_images: "⬇️ Télécharger images/médias",
+      download_zip: "📦 Télécharger en ZIP",
+      download_start: "🚀 Téléchargement...",
+      download_zip_start: "📦 Compression de {n} fichier(s)...",
+      download_fail: "❌ Échec du téléchargement",
+      download_cors_fail: "⚠️ CORS empêche le téléchargement direct. Copiez l'URL et ouvrez-la dans le navigateur.",
+      original_url: "🔗 URL originale",
+      convert_all: "⚡ Tout convertir ({n})",
+      convert_imgur: "🖼️ Convertir en i.imgur.com",
+      to_twitter: "🐦 twitter.com",
+      to_x: "❌ x.com",
+      to_vxtwitter: "🔁 vxtwitter",
+      to_fixupx: "🛠️ fixupx",
+      to_fxtwitter: "🔧 fxtwitter",
+      to_cunnyx: "🍑 cunnyx",
+      to_fixvx: "🧩 fixvx",
+      to_reddit: "👽 reddit.com",
+      to_old_reddit: "📜 old.reddit",
+      to_rxddit: "🔁 rxddit",
+      to_vxreddit: "🛠️ vxreddit",
+      to_instagram: "📷 instagram.com",
+      to_kkinstagram: "🔁 kkinstagram",
+      to_facebed: "🔁 facebed.com",
+      to_tiktok: "🎵 tiktok.com",
+      to_vxtiktok: "🔁 vxtiktok",
+      to_tnktok: "🛠️ tnktok",
+      to_threads: "🧵 threads.com",
+      to_fixthreads: "🔁 fixthreads",
+      to_fx_bilibili: "📺 FX Bilibili",
+      to_vx_bilibili: "📼 VX Bilibili",
+      to_b23: "🔗 b23.tv",
+      to_vxb23: "🔗 vxb23.tv",
+      to_phixiv: "🔙 phixiv.net",
+      to_pixiv: "🎨 pixiv.net",
+      yt_shorts_to_watch: "▶️ YT Shorts → lien normal",
+      restore_pixiv_img: "📖 Restaurer pixiv depuis l'image",
+      insert_symbol: "✳️ Insérer → {s}",
+      delete_symbol: "❌",
+      delete_confirm: "Supprimé : {s}",
+      add_symbol: "➕ Ajouter",
+      add_symbol_prompt: "Entrez le texte à ajouter :",
+      add_success: "Ajouté",
+      remove_symbol: "➖ Supprimer",
+      remove_symbol_prompt: "Entrez le texte à supprimer :",
+      remove_empty: "La liste est vide",
+      mode_hover: "🔄 Survol",
+      mode_click: "🖱️ Clic",
+      mode_desc: "Mode : {mode} (clic pour changer)",
+      mode_changed: "Mode changé : {mode}",
+      export_success: "✅ Paramètres exportés !\n\nCopiés dans le presse-papiers.",
+      import_prompt: "⬇️ Collez le code de sauvegarde (JSON) :",
+      import_success: "✅ Importation réussie !\nRechargement de la page.",
+      import_fail: "❌ Échec de l'importation : JSON invalide.",
+      insert_success: "Inséré",
+      copy_success: "Copié",
+      copy_fail: "Échec de la copie",
+      input_not_found: "Zone de texte introuvable",
+      edit_link_text: "Modifier le préfixe du lien",
+      enter_link_text: "Entrez le préfixe du lien (vide pour supprimer) :",
+      tip_style: "Style de menu : Plat / Groupe",
+      tip_trigger: "Activation : Survol / Clic",
+      tip_logic: "Logique de clic : Copier / Insérer",
+      tip_space: "Ajouter un espace",
+      tip_newline: "Ajouter une nouvelle ligne",
+      tip_symbols: "Voir les chaînes personnalisées",
+      tip_lang: "Changer de langue",
+      tip_manual: "Manuel",
+      mod_msg_warn_title: "⚠️ Désactiver l'Utilitaire de Messages ?",
+      mod_msg_warn_body: "⠿ L'Utilitaire de Messages est la fonction principale.\\nSi désactivé, le bouton ⠿ disparaîtra de tous les messages.",
+      mod_msg_warn_confirm: "Désactiver",
+      mod_msg_warn_cancel: "Annuler",
+      mod_msg_enable_menu: "Activer ⠿ Utilitaire de Messages",
+      grp_copy: "📝 Copier >",
+      grp_convert: "🔄 Convertir >",
+      grp_download: "⬇️ Télécharger >",
+      grp_system: "⚙️ Système et symboles >",
+      view_main: "Menu principal",
+      view_symbols: "Chaînes personnalisées",
+
+      em_title: "😊 Gestion intégrée des expressions/GIF",
+      em_content:
+        "• <b>Barre</b> : [📁] Collection | [🎯] Mode viseur | [★] Mots-clés.<br>• <b>Mode viseur</b> : sélectionnez directement des GIFs ou emojis à l'écran.<br>• <b>Shift+Clic</b> : envoyer consécutivement sans fermer le panneau.",
+      em_picker_tip: "🔍 Cliquez sur le GIF/emoji (clic sur le fond pour annuler)",
+      em_err_no_list: "Conteneur de liste introuvable. Ouvrez d'abord la fenêtre emoji ou GIF !",
+      em_btn_add_title: "Sauvegarder le mot-clé de recherche",
+      em_btn_active_title: "Clic : remplir le mot-clé (basculer)",
+      em_btn_target_title: "Mode viseur : cliquez sur GIF/emoji pour sauvegarder",
+      em_btn_save_this: "Ajouter cet élément à la collection",
+      em_no_favs: "Aucun favori pour l'instant",
+      em_del_confirm: "Supprimer « {k} » ?",
+      em_keyword_prompt: "Entrez un mot-clé :",
+      em_keyword_exists: "« {k} » existe déjà",
+
+      wm_nav_fail: "Échec de la navigation. Vérifiez l'URL.",
+      wm_alert_invalid_url:
+        "URL invalide ! Veuillez coller une URL de salon Discord (contenant /channels/).",
+      wm_default_channel_name: "Salon",
+      wm_refresh_confirm:
+        "Trou de ver créé, mais l'interface ne peut pas se mettre à jour immédiatement.\n\nRecharger la page maintenant ?",
+      wm_root_group: "Non catégorisé",
+
+      wm_menu_edit: "✎ Modifier le nom",
+      wm_menu_del: "🗑️ Fermer le trou",
+      wm_menu_vip_add: "★ Épingler en VIP",
+      wm_menu_vip_remove: "☆ Retirer le VIP",
+      wm_menu_move: "📂 Déplacer vers le groupe",
+      wm_group_prompt: "Entrez le nom du nouveau groupe :",
+      wm_edit_group: "Modifier le nom du groupe :",
+      wm_group_del_confirm: "Dissoudre le groupe « {n} » ? (les trous seront conservés)",
+      wm_group_select_prompt: "Entrez un numéro pour sélectionner le groupe :\n\n0. [Racine/Non catégorisé]\n{list}\n\nLaissez vide pour créer « Nouveau groupe » :",
+      wm_group_invalid: "Sélection de groupe invalide !",
+      wm_move_prompt: "Déplacer vers quel groupe ? (entrez le numéro)\n\n{list}",
+      wm_icon_picker_title: "Sélectionner l'icône pour {name}",
+      wm_icon_set_success: "✅ Icône de {name} définie",
+      wm_icon_empty: "Ajoutez d'abord un Emoji dans le module de collection",
+      wm_title: "Contrôle du trou de ver\n• Clic : créer nouveau\n• Appui long 1s : menu des paramètres",
+      wm_settings_menu_title: "🌀 Paramètres du trou de ver",
+      wm_settings_create: "Créer un nouveau trou de ver",
+      wm_settings_send_mode: "Méthode d'envoi et Mode API",
+      wm_settings_more: "Plus de paramètres (à venir)",
+      wm_settings_position: "Changer la position",
+      wm_settings_position_navbar: "Barre de navigation",
+      wm_settings_position_titlebar: "Barre de titre du salon",
+      wm_settings_position_input: "Au-dessus de la saisie de chat",
+      wm_settings_position_topleft: "Coin supérieur gauche (fixe)",
+      wm_focus_on: "Désactiver le mode focus",
+      wm_focus_off: "Activer le mode focus (icônes uniquement)",
+      wm_focus_size: "Taille des icônes",
+      wm_focus_size_s: "S  · Petit",
+      wm_focus_size_m: "M  · Moyen",
+      wm_focus_size_l: "L  · Grand",
+
+      wm_menu_send: "✉️ Envoyer un message ici",
+      wm_send_placeholder: "Tapez un message pour #{name}...",
+      wm_send_btn: "Envoyer",
+      wm_send_cancel: "Annuler",
+      wm_send_waiting: "En attente de l'éditeur...",
+      wm_send_injecting: "Envoi en cours...",
+      wm_send_success: "✅ Envoyé à #{name} !",
+      wm_send_toast_title: "✅ Envoyé à #{name}",
+      wm_send_toast_hint: "Cliquez pour aller au salon",
+      wm_send_waiting_token: "⏳ En attente du Token…",
+      wm_send_fail: "❌ Échec — éditeur non prêt.",
+      wm_send_empty: "Le message ne peut pas être vide.",
+      wm_send_returning: "Retour en cours...",
+      wm_send_hint: "Shift+Clic pour envoyer sans changer de salon",
+      wm_send_mode_api: "⚡ Mode API",
+      wm_send_mode_nav: "🔀 Mode navigation",
+      wm_send_mode_desc_api: "Envoi direct, sans changement de salon",
+      wm_send_mode_desc_nav: "Changer de salon cible, puis envoyer",
+      wm_send_autoclose: "Fermer automatiquement après envoi",
+      wm_send_show_toast: "Afficher la notification d'envoi",
+      wm_send_goto_channel: "Aller au salon après envoi",
+      wm_send_paste_hint: "📋 Ctrl+V pour coller une image",
+      wm_send_token_warn: "⚠️ Token expiré. Rouvrez le panneau API pour le détecter à nouveau. Utilisation du Mode A cette fois.",
+      wm_send_channel_fail: "❌ Échec du chargement du salon",
+      wm_send_editor_missing: "❌ Éditeur introuvable",
+      wm_send_uploading: "📎 Envoi de {n} image(s)...",
+
+      wm_api_panel_title: "⚗️ Mode API du trou de ver (avancé)",
+      wm_api_mode_label_a: "Mode A — Navigation (défaut)",
+      wm_api_mode_label_b: "Mode B — API directe (sans changement de page)",
+      wm_api_warning_title: "⚠️ Avis de risque",
+      wm_api_warning_body: "Utiliser un Token utilisateur pour appeler l'API Discord viole les Conditions d'utilisation. Votre compte peut être banni. Utilisez à vos risques.",
+      wm_api_token_status_none: "Token : Non détecté",
+      wm_api_token_status_ready: "Token : Prêt (mémoire uniquement)",
+      wm_api_detect_btn: "Détecter mon Token",
+      wm_api_detect_confirm: "【Consentement d'interception du Token】\n\nEn cliquant sur OK, vous autorisez ce script à intercepter votre Token Discord pour cette session.\n\n🔒 Garanties de sécurité :\n• Mémoire uniquement — jamais écrit sur disque\n• Effacé à la fermeture ou au rechargement de la page\n• Jamais transmis à un serveur externe\n• Utilisé exclusivement pour envoyer des messages en votre nom\n\n⚠️ Reconnaissance :\n• Vous comprenez que ce token accorde l'accès à l'envoi de messages\n• Vous acceptez l'entière responsabilité de tous les messages envoyés\n\nProcédez uniquement si vous faites confiance à ce script.",
+      wm_api_detect_waiting: "⬆️ Changez de salon une fois pour capturer le Token",
+      wm_api_enable_btn: "Activer le Mode API",
+      wm_api_disable_btn: "Désactiver le Mode API (retour au Mode A)",
+      wm_api_enabled_toast: "✅ Mode API activé",
+      wm_api_disabled_toast: "↩️ Retour au Mode Navigation",
+      wm_api_view_code: "Voir le code de l'intercepteur de Token",
+      wm_api_clear_token: "🗑 Effacer le Token",
+      wm_api_reset_all: "🗑️ Réinitialiser toutes les données du trou",
+      wm_api_plan_b_first: "Veuillez d'abord sélectionner le Plan B",
+      wm_api_send_fail: "❌ Échec de l'API — vérifiez la console",
+
+      em_col_title: "Mes collections",
+      em_col_add_success: 'Enregistré dans « {g} » !',
+      em_col_tab_new: "Nouvel onglet",
+      em_col_tab_prompt: "Nom du nouvel onglet :",
+      em_col_empty_tab: "Cet onglet est vide.",
+      em_col_del_tab_confirm: 'Supprimer l\'onglet « {n} » et tous ses éléments ?',
+      em_modal_choose_tab: "Enregistrer dans quelle collection ?",
+      em_modal_create_new: "+ Créer une nouvelle...",
+      em_tip_pick: "Définir l'image de couverture",
+      em_tip_edit: "Modifier la note",
+      em_tip_delete: "Supprimer",
+      em_menu_emoji: "Emojis",
+      em_menu_sticker: "Autocollants",
+      em_menu_gif: "GIFs",
+
+      menu_export: "📤 Exporter les paramètres (Sauvegarde)",
+      menu_import: "⬇️ Importer les paramètres (Restaurer)",
+      menu_change_lang: "🌐 Changer de langue",
+      custom_lang_desc: "Cliquez sur「📤 Exporter le texte」pour obtenir le JSON source en anglais. Traduisez-le puis utilisez「📥 Importer le texte」pour l'appliquer.",
+      custom_lang_export: "📤 Exporter le texte",
+      custom_lang_import: "📥 Importer le texte",
+      custom_lang_apply: "✅ Appliquer et recharger",
+      custom_lang_loaded: "✅ Chargé : {name}",
+      custom_lang_activate: "🌐 Appliquer « {name} »",
+      custom_lang_json_error: "⚠️ Erreur JSON : {msg}",
+      custom_lang_paste_hint: "Collez le JSON traduit ici …",
+    },
+
+    "ru": {
+      name: "Русский",
+      fm_pinned_channels: "★ Закреплённые каналы",
+      fm_toggle_flat: "Переключить на: Плоский вид",
+      fm_toggle_drop: "Переключить на: Выпадающий список",
+      fm_help: "Справка",
+      fm_prompt_channel: "Введите ключевое слово канала:",
+      fm_prompt_user: "Введите ID или ключевое слово пользователя:",
+      fm_user_zone: "Зона пользователей",
+      fm_no_users: "Нет закреплённых пользователей",
+      fm_add_user: "+ Добавить пользователя",
+      fm_fuzzy: "Нечёткий поиск",
+      fm_remove_confirm: "Удалить {target}?",
+      fm_tooltip_channel: "Канал: {c}\nСервер: {s}",
+      fm_tooltip_user_add: "Добавить в зону пользователей (👤)",
+      fm_tooltip_star_add: "Добавить в избранное (★)",
+      fm_manual_title: "📚 Руководство менеджера переадресации",
+      fm_sec_star: "★ Избранное и управление",
+      fm_sec_star_content:
+        "• Нажмите <span class='help-key'>★</span> или <span class='help-key'>👤+</span> для закрепления.<br>• Правый клик для удаления.<br>• <span class='help-key'>Shift+Правый клик</span> для быстрого удаления (без подтверждения).",
+      fm_sec_search: "🔍 Двухэтапный поиск (по умолчанию)",
+      fm_sec_search_content:
+        "• Нажатие на закреплённый элемент автоматически выполняет «Разогрев → Ввод → Блокировка».<br>• Исправляет ошибку Discord, при которой прямой ввод не работает.<br>• Использует <span style='color:#2dc770'>Точное совпадение</span> для предотвращения ошибочных пересылок.",
+      fm_sec_fuzzy: "⏎ Нечёткий поиск",
+      fm_sec_fuzzy_content:
+        "• Нажмите стрелку <span class='help-key'>⏎</span> внутри кнопки.<br>• Вводит только первые 2 символа или первое слово.",
+      fm_sec_user: "👤 Зона пользователей",
+      fm_sec_user_content:
+        "• Нажмите кнопку <span class='help-key'>👤</span> для раскрытия списка пользователей.<br>• Поддерживает ручное добавление ID.",
+      fm_sec_misc_title: "⚙️ Советы и отображение",
+      fm_sec_misc:
+        "• Кнопка в верхнем левом углу переключает режим <b>Плоский</b> или <b>Выпадающий</b>.<br>• <b>История</b> (фиолетовые метки) автоматически сохраняет недавно посещённые каналы.",
+
+      fm_sec_wormhole: "🌀 Червоточина — Основы",
+      fm_sec_wormhole_content:
+        "• Нажмите <span class='help-key'>＋</span> и вставьте URL канала Discord для создания ярлыка.<br>"
+        + "• <b>Клик</b> на червоточину → мгновенный переход к этому каналу.<br>"
+        + "• <b>Правый клик</b> → меню: переименовать, удалить, значок, перенести в группу или переключить VIP.<br>"
+        + "• <b>VIP (★)</b>: закреплённые червоточины автоматически всплывают наверх.<br>"
+        + "• <b>Группы</b>: организуйте червоточины в именованные папки.<br>"
+        + "• <b>Режим фокуса</b>: компактный вид только со значками.",
+      fm_sec_wm_send: "✉️ Червоточина — Отправка сообщений",
+      fm_sec_wm_send_content:
+        "• <b>Правый клик</b> → <b>Отправить сообщение здесь</b> для открытия панели.<br>"
+        + "• <b>Режим A (Навигация)</b>: переходит на целевой канал, вставляет текст и возвращается.<br>"
+        + "• <b>Shift+Клик</b> → открывает панель в текущем канале.<br>"
+        + "• Поддерживает <b>вставку изображений через Ctrl+V</b>.<br>"
+        + "• Нижние опции: <b>Автозакрытие</b> / <b>Перейти на канал</b> / <b>Показать уведомление</b>.",
+      fm_sec_wm_api: "⚡ Червоточина — Режим API (секретный)",
+      fm_sec_wm_api_content:
+        "• <b>Удерживайте кнопку ＋ 3 секунды</b> для разблокировки режима API.<br>"
+        + "• <b>Режим B (Прямой API)</b>: отправляет сообщения через Discord REST API без смены страницы.<br>"
+        + "• Токен перехватывается тихо в памяти — <b>никогда не сохраняется и не передаётся</b>.<br>"
+        + "• Очищается при закрытии страницы.",
+      welcome_title: "Добро пожаловать в {script}",
+      select_lang_subtitle: "Пожалуйста, выберите язык интерфейса",
+      help_btn: "📖 Руководство",
+      cancel_btn: "✕ Закрыть",
+      security_notice_title: "⚠️ Уведомление безопасности",
+      security_notice_content:
+        "Функции конвертации URL (например, vxtwitter, kkinstagram) зависят от сторонних сервисов.\nНе используйте их, если не доверяете этим сервисам.\nПользователи должны уметь определять безопасность URL.",
+      manual_content:
+        "【Руководство по иконкам】\n• ◫/≡ : Сменить стиль меню (Плоский / Группа)\n• ⇄ : Поменять логику клика (Копировать / Вставить)\n• ␣ : Добавить пробел в конце\n• ↵ : Добавить новую строку в конце\n• ☆ : Панель пользовательских строк\n• 🖱️ : Режим активации (Hover / Клик)\n• 🌐 : Сменить язык\n\n【Действия】\n• **Клик**: Копировать (по умолчанию)\n• **Долгое нажатие (0,5с)**: Вставить в поле ввода\n• **Shift+Клик**: Копировать и вставить (меню остаётся открытым)",
+      manual_content_sections: "<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Быстрый старт</div><div class='mm-content'>Наведите курсор на любое сообщение Discord → в правом верхнем углу появится кнопка копирования.<br><b>Клик</b> для копирования · <b>Долгое нажатие 0,5с</b> для вставки · <b>Shift+Клик</b> для копирования и вставки.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Меню копирования</div><div class='mm-content'>• Копировать текст, URL медиа, первую чистую ссылку, все ссылки, Markdown, скрытый текст.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ Загрузка</div><div class='mm-content'>• Загружать изображения/медиа по отдельности или как ZIP.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 Конвертация URL</div><div class='mm-content'>Twitter/X, Instagram, Bilibili, Pixiv — взаимная конвертация для предпросмотра в Discord.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Червоточина</div><div class='mm-content'>Ярлыки каналов в один клик на боковой панели Discord.</div></div>",
+      reload_confirm: "Настройки сохранены!\nПерезагрузить страницу сейчас?",
+      copy_text: "📋 Копировать текст",
+      copy_media_url: "🖼️ Копировать URL медиа",
+      no_content: "⚠️ Нет содержимого",
+      copy_first_link: "🔗 Копировать первую ссылку (чистую)",
+      copy_markdown: "🧾 Копировать как Markdown",
+      copy_all_links: "📎 Копировать все ссылки",
+      insert_format_link: "📌 Вставить [{t}](URL)",
+      copy_hidden_format: "🙈 Скрытый текст (|| ... ||)",
+      download_images: "⬇️ Скачать изображения/медиа",
+      download_zip: "📦 Скачать как ZIP",
+      download_start: "🚀 Загрузка...",
+      download_zip_start: "📦 Сжатие {n} файл(ов)...",
+      download_fail: "❌ Ошибка загрузки",
+      download_cors_fail: "⚠️ CORS не позволяет прямую загрузку. Скопируйте URL и откройте в браузере.",
+      original_url: "🔗 Оригинальный URL",
+      convert_all: "⚡ Конвертировать всё ({n})",
+      convert_imgur: "🖼️ Конвертировать в i.imgur.com",
+      to_twitter: "🐦 twitter.com",
+      to_x: "❌ x.com",
+      to_vxtwitter: "🔁 vxtwitter",
+      to_fixupx: "🛠️ fixupx",
+      to_fxtwitter: "🔧 fxtwitter",
+      to_cunnyx: "🍑 cunnyx",
+      to_fixvx: "🧩 fixvx",
+      to_reddit: "👽 reddit.com",
+      to_old_reddit: "📜 old.reddit",
+      to_rxddit: "🔁 rxddit",
+      to_vxreddit: "🛠️ vxreddit",
+      to_instagram: "📷 instagram.com",
+      to_kkinstagram: "🔁 kkinstagram",
+      to_facebed: "🔁 facebed.com",
+      to_tiktok: "🎵 tiktok.com",
+      to_vxtiktok: "🔁 vxtiktok",
+      to_tnktok: "🛠️ tnktok",
+      to_threads: "🧵 threads.com",
+      to_fixthreads: "🔁 fixthreads",
+      to_fx_bilibili: "📺 FX Bilibili",
+      to_vx_bilibili: "📼 VX Bilibili",
+      to_b23: "🔗 b23.tv",
+      to_vxb23: "🔗 vxb23.tv",
+      to_phixiv: "🔙 phixiv.net",
+      to_pixiv: "🎨 pixiv.net",
+      yt_shorts_to_watch: "▶️ YT Shorts → обычная ссылка",
+      restore_pixiv_img: "📖 Восстановить pixiv из изображения",
+      insert_symbol: "✳️ Вставить → {s}",
+      delete_symbol: "❌",
+      delete_confirm: "Удалено: {s}",
+      add_symbol: "➕ Добавить",
+      add_symbol_prompt: "Введите текст для добавления:",
+      add_success: "Добавлено",
+      remove_symbol: "➖ Удалить",
+      remove_symbol_prompt: "Введите текст для удаления:",
+      remove_empty: "Список пуст",
+      mode_hover: "🔄 Hover",
+      mode_click: "🖱️ Клик",
+      mode_desc: "Режим: {mode} (клик для переключения)",
+      mode_changed: "Режим изменён: {mode}",
+      export_success: "✅ Настройки экспортированы!\n\nСкопированы в буфер обмена.",
+      import_prompt: "⬇️ Вставьте код резервной копии (JSON):",
+      import_success: "✅ Импорт успешен!\nСтраница перезагружается.",
+      import_fail: "❌ Ошибка импорта: неверный JSON.",
+      insert_success: "Вставлено",
+      copy_success: "Скопировано",
+      copy_fail: "Ошибка копирования",
+      input_not_found: "Поле ввода не найдено",
+      edit_link_text: "Изменить префикс ссылки",
+      enter_link_text: "Введите префикс ссылки (пустое для удаления):",
+      tip_style: "Стиль меню: Плоский / Группа",
+      tip_trigger: "Активация: Hover / Клик",
+      tip_logic: "Логика клика: Копировать / Вставить",
+      tip_space: "Добавить пробел",
+      tip_newline: "Добавить новую строку",
+      tip_symbols: "Просмотреть пользовательские строки",
+      tip_lang: "Сменить язык",
+      tip_manual: "Руководство",
+      mod_msg_warn_title: "⚠️ Отключить утилиту сообщений?",
+      mod_msg_warn_body: "⠿ Утилита сообщений является основной функцией.\\nПри отключении кнопка ⠿ исчезнет со всех сообщений.",
+      mod_msg_warn_confirm: "Отключить",
+      mod_msg_warn_cancel: "Отмена",
+      mod_msg_enable_menu: "Включить ⠿ утилиту сообщений",
+      grp_copy: "📝 Копировать >",
+      grp_convert: "🔄 Конвертировать >",
+      grp_download: "⬇️ Скачать >",
+      grp_system: "⚙️ Система и символы >",
+      view_main: "Главное меню",
+      view_symbols: "Пользовательские строки",
+
+      em_title: "😊 Интегрированное управление выражениями/GIF",
+      em_content:
+        "• <b>Панель</b>: [📁] Коллекция | [🎯] Режим прицела | [★] Ключевые слова.<br>• <b>Режим прицела</b>: выбирайте GIF или эмодзи прямо с экрана.<br>• <b>Shift+Клик</b>: отправлять последовательно без закрытия панели.",
+      em_picker_tip: "🔍 Нажмите на GIF/эмодзи (нажмите на фон для отмены)",
+      em_err_no_list: "Контейнер списка не найден. Сначала откройте окно эмодзи или GIF!",
+      em_btn_add_title: "Сохранить ключевое слово поиска",
+      em_btn_active_title: "Клик: заполнить ключевое слово (переключить)",
+      em_btn_target_title: "Режим прицела: нажмите GIF/эмодзи для сохранения",
+      em_btn_save_this: "Добавить этот элемент в коллекцию",
+      em_no_favs: "Пока нет избранного",
+      em_del_confirm: "Удалить «{k}»?",
+      em_keyword_prompt: "Введите ключевое слово:",
+      em_keyword_exists: "«{k}» уже существует",
+
+      wm_nav_fail: "Навигация не удалась. Проверьте URL.",
+      wm_alert_invalid_url:
+        "Недопустимый URL! Пожалуйста, вставьте URL канала Discord (содержащий /channels/).",
+      wm_default_channel_name: "Канал",
+      wm_refresh_confirm:
+        "Червоточина создана, но интерфейс не может обновиться немедленно.\n\nПерезагрузить страницу сейчас?",
+      wm_root_group: "Без категории",
+
+      wm_menu_edit: "✎ Изменить название",
+      wm_menu_del: "🗑️ Закрыть червоточину",
+      wm_menu_vip_add: "★ Закрепить как VIP",
+      wm_menu_vip_remove: "☆ Снять VIP",
+      wm_menu_move: "📂 Переместить в группу",
+      wm_group_prompt: "Введите название новой группы:",
+      wm_edit_group: "Изменить название группы:",
+      wm_group_del_confirm: "Расформировать группу «{n}»? (червоточины сохранятся)",
+      wm_group_select_prompt: "Введите номер для выбора группы:\n\n0. [Корень/Без категории]\n{list}\n\nОставьте пустым для создания «Новой группы»:",
+      wm_group_invalid: "Недопустимый выбор группы!",
+      wm_move_prompt: "В какую группу переместить? (введите номер)\n\n{list}",
+      wm_icon_picker_title: "Выбрать значок для {name}",
+      wm_icon_set_success: "✅ Значок {name} установлен",
+      wm_icon_empty: "Сначала добавьте эмодзи в модуле коллекции",
+      wm_title: "Управление червоточиной\n• Клик: создать новую\n• Долгое нажатие 1с: меню настроек",
+      wm_settings_menu_title: "🌀 Настройки червоточины",
+      wm_settings_create: "Создать новую червоточину",
+      wm_settings_send_mode: "Метод отправки и режим API",
+      wm_settings_more: "Дополнительные настройки (скоро)",
+      wm_settings_position: "Изменить позицию",
+      wm_settings_position_navbar: "Панель навигации",
+      wm_settings_position_titlebar: "Заголовок канала",
+      wm_settings_position_input: "Над полем чата",
+      wm_settings_position_topleft: "Верхний левый угол (фиксированный)",
+      wm_focus_on: "Отключить режим фокуса",
+      wm_focus_off: "Включить режим фокуса (только значки)",
+      wm_focus_size: "Размер значка",
+      wm_focus_size_s: "S  · Маленький",
+      wm_focus_size_m: "M  · Средний",
+      wm_focus_size_l: "L  · Большой",
+
+      wm_menu_send: "✉️ Отправить сообщение здесь",
+      wm_send_placeholder: "Введите сообщение для #{name}...",
+      wm_send_btn: "Отправить",
+      wm_send_cancel: "Отмена",
+      wm_send_waiting: "Ожидание редактора...",
+      wm_send_injecting: "Отправка...",
+      wm_send_success: "✅ Отправлено в #{name}!",
+      wm_send_toast_title: "✅ Отправлено в #{name}",
+      wm_send_toast_hint: "Нажмите для перехода на канал",
+      wm_send_waiting_token: "⏳ Ожидание токена…",
+      wm_send_fail: "❌ Ошибка — редактор не готов.",
+      wm_send_empty: "Сообщение не может быть пустым.",
+      wm_send_returning: "Возвращаемся...",
+      wm_send_hint: "Shift+Клик для отправки без смены канала",
+      wm_send_mode_api: "⚡ Режим API",
+      wm_send_mode_nav: "🔀 Режим навигации",
+      wm_send_mode_desc_api: "Прямая отправка, без смены канала",
+      wm_send_mode_desc_nav: "Переход на целевой канал, затем отправка",
+      wm_send_autoclose: "Автозакрытие после отправки",
+      wm_send_show_toast: "Показывать уведомление об отправке",
+      wm_send_goto_channel: "Перейти на канал после отправки",
+      wm_send_paste_hint: "📋 Ctrl+V для вставки изображения",
+      wm_send_token_warn: "⚠️ Токен истёк. Откройте панель API заново для повторного обнаружения. На этот раз используется режим A.",
+      wm_send_channel_fail: "❌ Ошибка загрузки канала",
+      wm_send_editor_missing: "❌ Редактор не найден",
+      wm_send_uploading: "📎 Загрузка {n} изображени(й)...",
+
+      wm_api_panel_title: "⚗️ Режим API червоточины (расширенный)",
+      wm_api_mode_label_a: "Режим A — Навигация (по умолчанию)",
+      wm_api_mode_label_b: "Режим B — Прямой API (без смены страницы)",
+      wm_api_warning_title: "⚠️ Предупреждение о рисках",
+      wm_api_warning_body: "Использование токена пользователя для вызова API Discord нарушает Условия использования. Ваш аккаунт может быть заблокирован. Используйте на свой страх и риск.",
+      wm_api_token_status_none: "Токен: Не обнаружен",
+      wm_api_token_status_ready: "Токен: Готов (только в памяти)",
+      wm_api_detect_btn: "Обнаружить мой токен",
+      wm_api_detect_confirm: "【Согласие на перехват токена】\n\nНажав ОК, вы разрешаете этому скрипту перехватить ваш токен Discord для данной сессии.\n\n🔒 Гарантии безопасности:\n• Только в памяти — никогда не записывается на диск\n• Автоматически удаляется при закрытии или перезагрузке страницы\n• Никогда не передаётся на внешние серверы\n• Используется исключительно для отправки сообщений от вашего имени\n\n⚠️ Подтверждение:\n• Вы понимаете, что токен предоставляет доступ к отправке сообщений\n• Вы принимаете полную ответственность за все отправленные сообщения\n\nПродолжайте только если доверяете этому скрипту.",
+      wm_api_detect_waiting: "⬆️ Переключитесь в любой канал один раз, чтобы захватить Token",
+      wm_api_enable_btn: "Включить режим API",
+      wm_api_disable_btn: "Отключить режим API (вернуться к режиму A)",
+      wm_api_enabled_toast: "✅ Режим API включён",
+      wm_api_disabled_toast: "↩️ Возврат к режиму навигации",
+      wm_api_view_code: "Просмотреть код перехватчика токена",
+      wm_api_clear_token: "🗑 Очистить токен",
+      wm_api_reset_all: "🗑️ Сбросить все данные червоточины",
+      wm_api_plan_b_first: "Сначала выберите план B",
+      wm_api_send_fail: "❌ Ошибка API — проверьте консоль",
+
+      em_col_title: "Мои коллекции",
+      em_col_add_success: 'Сохранено в «{g}»!',
+      em_col_tab_new: "Новая вкладка",
+      em_col_tab_prompt: "Название новой вкладки:",
+      em_col_empty_tab: "Эта вкладка пуста.",
+      em_col_del_tab_confirm: 'Удалить вкладку «{n}» со всеми элементами?',
+      em_modal_choose_tab: "В какую коллекцию сохранить?",
+      em_modal_create_new: "+ Создать новую...",
+      em_tip_pick: "Установить обложку",
+      em_tip_edit: "Редактировать заметку",
+      em_tip_delete: "Удалить",
+      em_menu_emoji: "Эмодзи",
+      em_menu_sticker: "Стикеры",
+      em_menu_gif: "GIF",
+
+      menu_export: "📤 Экспорт настроек (Резервная копия)",
+      menu_import: "⬇️ Импорт настроек (Восстановление)",
+      menu_change_lang: "🌐 Сменить язык",
+      custom_lang_desc: "Нажмите「📤 Экспорт текста」для получения исходного JSON на английском. Переведите и используйте「📥 Импорт текста」для применения.",
+      custom_lang_export: "📤 Экспорт текста",
+      custom_lang_import: "📥 Импорт текста",
+      custom_lang_apply: "✅ Применить и перезагрузить",
+      custom_lang_loaded: "✅ Загружено: {name}",
+      custom_lang_activate: "🌐 Применить «{name}»",
+      custom_lang_json_error: "⚠️ Ошибка JSON: {msg}",
+      custom_lang_paste_hint: "Вставьте переведённый JSON сюда …",
+    },
+
   };
 
-class ObserverManager {
+  let _customLangData = null;
+  (() => {
+    try {
+      const raw = localStorage.getItem("copyMenuLanguage_custom");
+      if (raw) _customLangData = JSON.parse(raw);
+    } catch (e) {
+      console.warn("[i18n] Failed to load custom language data:", e);
+    }
+  })();
+
+  TRANSLATIONS["custom"] = { name: "Custom" };
+
+  class ObserverManager {
     constructor() {
       this.observers = new Map();
       this.reconnectAttempts = new Map();
@@ -1692,7 +2839,7 @@ class ObserverManager {
       this.reconnectDelay = 2000;
     }
 
-register(
+    register(
       name,
       target,
       callback,
@@ -1730,7 +2877,7 @@ register(
       }
     }
 
-disconnect(name) {
+    disconnect(name) {
       if (this.observers.has(name)) {
         const { observer } = this.observers.get(name);
         observer.disconnect();
@@ -1739,12 +2886,12 @@ disconnect(name) {
       }
     }
 
-disconnectAll() {
+    disconnectAll() {
       this.observers.forEach((_, name) => this.disconnect(name));
       console.log(`[ObserverManager] All observers disconnected`);
     }
 
-_scheduleReconnect(name, target, callback, options) {
+    _scheduleReconnect(name, target, callback, options) {
       const attempts = this.reconnectAttempts.get(name) || 0;
 
       if (attempts >= this.maxReconnectAttempts) {
@@ -1768,7 +2915,7 @@ _scheduleReconnect(name, target, callback, options) {
       }, this.reconnectDelay);
     }
 
-getStatus() {
+    getStatus() {
       const status = {};
       this.observers.forEach((data, name) => {
         const uptime = Math.floor((Date.now() - data.startTime) / 1000);
@@ -1781,7 +2928,7 @@ getStatus() {
       return status;
     }
 
-healthCheck() {
+    healthCheck() {
       const issues = [];
 
       this.observers.forEach((data, name) => {
@@ -1804,23 +2951,6 @@ healthCheck() {
   GM_registerMenuCommand(t("mod_msg_enable_menu"), () => {
     localStorage.setItem("mod_message", "true");
     location.reload();
-  });
-
-  GM_registerMenuCommand(t("menu_observer_status"), () => {
-    const status = observerManager.getStatus();
-    const statusText = Object.entries(status)
-      .map(([name, info]) => `• ${name}: ${info.uptime} (${info.target})`)
-      .join("\n");
-    alert(`${t("menu_observer_status")}:\n\n${statusText || "無活動 Observer"}`);
-  });
-
-  GM_registerMenuCommand(t("menu_observer_health"), () => {
-    const issues = observerManager.healthCheck();
-    if (issues.length === 0) {
-      alert("✅ 所有 Observer 運作正常");
-    } else {
-      alert(`⚠️ 發現問題:\n\n${issues.join("\n")}`);
-    }
   });
 
   window.addEventListener("beforeunload", () => {
@@ -2260,22 +3390,6 @@ healthCheck() {
                         <div class="help-section">
                             <div class="help-title" style="color:#b5bac1;">⚙️ ${t("fm_sec_misc_title") || "Tips"}</div>
                             <div class="help-content">${t("fm_sec_misc")}</div>
-                        </div>
-                        <div class="help-section" style="background:rgba(255,255,255,0.03); padding:8px; border-radius:4px;">
-                            <div class="help-title" style="color:#2dc770;">${t("em_title")}</div>
-                            <div class="help-content" style="line-height:1.6;">${t("em_content")}</div>
-                        </div>
-                        <div class="help-section" style="background:rgba(88,101,242,0.06); padding:8px; border-radius:4px; border:1px solid rgba(88,101,242,.2);">
-                            <div class="help-title" style="color:#8891f7;">${t("fm_sec_wormhole")}</div>
-                            <div class="help-content" style="line-height:1.7;">${t("fm_sec_wormhole_content")}</div>
-                        </div>
-                        <div class="help-section" style="background:rgba(88,101,242,0.06); padding:8px; border-radius:4px; border:1px solid rgba(88,101,242,.2);">
-                            <div class="help-title" style="color:#8891f7;">${t("fm_sec_wm_send")}</div>
-                            <div class="help-content" style="line-height:1.7;">${t("fm_sec_wm_send_content")}</div>
-                        </div>
-                        <div class="help-section" style="background:rgba(35,165,90,0.06); padding:8px; border-radius:4px; border:1px solid rgba(35,165,90,.25);">
-                            <div class="help-title" style="color:#2dc770;">${t("fm_sec_wm_api")}</div>
-                            <div class="help-content" style="line-height:1.7;">${t("fm_sec_wm_api_content")}</div>
                         </div>
                     </div>
                 </div>
@@ -2886,79 +4000,252 @@ healthCheck() {
       const overlay = document.createElement("div");
       overlay.id = "msg-copy-lang-overlay";
       overlay.style.cssText = `
-                position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                background: rgba(0, 0, 0, 0.7); z-index: 2147483647;
-                display: flex; flex-direction: column; align-items: center; justify-content: center;
-                color: white; font-family: sans-serif; backdrop-filter: blur(5px);
-            `;
+        position:fixed; inset:0; z-index:2147483647;
+        background:rgba(0,0,0,0.55);
+        backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+        display:flex; align-items:center; justify-content:center;
+        font-family:sans-serif;
+        animation:lgFadeIn 0.2s ease;
+      `;
+
+      const animStyle = document.createElement("style");
+      animStyle.textContent = `
+        @keyframes lgFadeIn{from{opacity:0}to{opacity:1}}
+        @keyframes lgSlideUp{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+        #msg-copy-lang-overlay button.lang-btn {
+          padding:9px 18px; font-size:13.5px; cursor:pointer; font-weight:500;
+          background:rgba(255,255,255,0.07); color:#e3e5e8;
+          border:1px solid rgba(255,255,255,0.13); border-radius:10px;
+          transition:all 0.18s ease; backdrop-filter:blur(4px);
+          letter-spacing:0.01em;
+        }
+        #msg-copy-lang-overlay button.lang-btn:hover {
+          background:rgba(88,101,242,0.45); border-color:rgba(88,101,242,0.7);
+          color:#fff; transform:translateY(-2px);
+          box-shadow:0 4px 16px rgba(88,101,242,0.3);
+        }
+        #msg-copy-lang-overlay button.lang-btn:active {
+          transform:translateY(0); box-shadow:none;
+        }
+      `;
+      document.head.appendChild(animStyle);
 
       const container = document.createElement("div");
       container.style.cssText = `
-                background: #2f3136; padding: 30px; border-radius: 12px;
-                box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center;
-                max-width: 90%; width: 500px; position: relative;
-            `;
+        background:rgba(32,34,37,0.82);
+        backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+        border:1px solid rgba(255,255,255,0.10);
+        box-shadow:0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
+        border-radius:20px; padding:32px 28px 24px;
+        text-align:center; max-width:90%; width:520px;
+        position:relative; color:#fff;
+        animation:lgSlideUp 0.22s cubic-bezier(.19,1,.22,1);
+      `;
+
       const closeBtn = document.createElement("button");
       closeBtn.innerText = "✕";
-      closeBtn.style.cssText =
-        "position:absolute; top:10px; right:10px; background:none; border:none; color:#bbb; font-size:18px; cursor:pointer;";
-      closeBtn.onclick = () => overlay.remove();
+      closeBtn.style.cssText = `
+        position:absolute; top:14px; right:16px;
+        background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12);
+        border-radius:50%; width:28px; height:28px;
+        color:#aaa; font-size:14px; cursor:pointer; line-height:1;
+        transition:all 0.15s ease; display:flex; align-items:center; justify-content:center;
+      `;
+      closeBtn.onmouseenter = () => { closeBtn.style.background="rgba(237,66,69,0.3)"; closeBtn.style.color="#fff"; };
+      closeBtn.onmouseleave = () => { closeBtn.style.background="rgba(255,255,255,0.08)"; closeBtn.style.color="#aaa"; };
+      closeBtn.onclick = () => { overlay.remove(); animStyle.remove(); };
       container.appendChild(closeBtn);
+
       const welcome = document.createElement("h2");
       welcome.innerText = t("welcome_title", { script: SCRIPT_NAME });
-      welcome.style.cssText =
-        "margin-top: 0; margin-bottom: 10px; color: #fff;";
+      welcome.style.cssText = "margin:0 0 6px; font-size:20px; font-weight:700; color:#fff; letter-spacing:-0.01em;";
+
       const subtitle = document.createElement("p");
       subtitle.innerText = t("select_lang_subtitle");
-      subtitle.style.cssText =
-        "margin-bottom: 20px; color: #b9bbbe; font-size: 14px;";
+      subtitle.style.cssText = "margin:0 0 20px; color:rgba(255,255,255,0.45); font-size:13px;";
 
       const noticeBox = document.createElement("div");
       noticeBox.style.cssText = `
-                background: rgba(237, 66, 69, 0.1); border: 1px solid #ed4245;
-                border-radius: 8px; padding: 15px; margin-bottom: 25px; text-align: left;
-            `;
+        background:rgba(237,66,69,0.10);
+        border:1px solid rgba(237,66,69,0.30);
+        border-radius:12px; padding:14px 16px; margin-bottom:22px; text-align:left;
+      `;
       const noticeTitle = document.createElement("h3");
       noticeTitle.innerText = t("security_notice_title");
-      noticeTitle.style.cssText =
-        "color: #ed4245; margin: 0 0 8px 0; font-size: 16px; display: flex; align-items: center;";
+      noticeTitle.style.cssText = "color:#f87171; margin:0 0 7px; font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px;";
       const noticeContent = document.createElement("p");
       noticeContent.innerText = t("security_notice_content");
-      noticeContent.style.cssText =
-        "color: #dcddde; font-size: 13px; line-height: 1.5; margin: 0; white-space: pre-line;";
+      noticeContent.style.cssText = "color:rgba(255,255,255,0.7); font-size:12.5px; line-height:1.6; margin:0; white-space:pre-line;";
       noticeBox.appendChild(noticeTitle);
       noticeBox.appendChild(noticeContent);
 
       container.appendChild(welcome);
       container.appendChild(subtitle);
       container.appendChild(noticeBox);
+
       const btnContainer = document.createElement("div");
-      btnContainer.style.cssText =
-        "display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 15px;";
-      Object.keys(TRANSLATIONS).forEach((langCode) => {
+      btnContainer.style.cssText = "display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:12px;";
+
+      Object.keys(TRANSLATIONS).filter(lc => lc !== "custom").forEach((langCode) => {
         const btn = document.createElement("button");
+        btn.className = "lang-btn";
         btn.innerText = TRANSLATIONS[langCode].name;
-        btn.style.cssText = `
-                    padding: 10px 20px; font-size: 14px; cursor: pointer;
-                    background: #5865F2; color: white; border: none; border-radius: 5px;
-                    transition: transform 0.1s, background 0.2s;
-                `;
-        btn.onmouseover = () => (btn.style.backgroundColor = "#4752C4");
-        btn.onmouseout = () => (btn.style.backgroundColor = "#5865F2");
         btn.onclick = () => {
           config.lang = langCode;
           localStorage.setItem("copyMenuLanguage", langCode);
-          overlay.remove();
+          overlay.remove(); animStyle.remove();
           if (confirm(t("reload_confirm"))) location.reload();
         };
         btnContainer.appendChild(btn);
       });
+
+      const customLangBtn = document.createElement("button");
+      customLangBtn.className = "lang-btn";
+      customLangBtn.innerText = "🌐 " + (_customLangData?.name || "Custom");
+      btnContainer.appendChild(customLangBtn);
+
       container.appendChild(btnContainer);
+
+      const customPanel = document.createElement("div");
+      customPanel.style.cssText = `
+        display:none;
+        background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.10);
+        border-radius:12px; padding:16px; margin-bottom:10px; text-align:left;
+      `;
+
+      const customTitle = document.createElement("p");
+      customTitle.style.cssText = "margin:0 0 10px; color:rgba(255,255,255,0.75); font-size:13px; line-height:1.6;";
+      customTitle.innerHTML = `<b style="color:#5865F2">🌐 Custom</b><br>${t("custom_lang_desc")}`;
+      customPanel.appendChild(customTitle);
+
+      const customBtnRow = document.createElement("div");
+      customBtnRow.style.cssText = "display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;";
+
+      const exportBtn = document.createElement("button");
+      exportBtn.innerText = t("custom_lang_export");
+      exportBtn.style.cssText = `
+        padding:7px 16px; font-size:13px; cursor:pointer;
+        background:rgba(59,165,92,0.25); color:#3ba55c;
+        border:1px solid rgba(59,165,92,0.4); border-radius:8px; transition:all 0.15s;
+      `;
+      exportBtn.onmouseenter = () => { exportBtn.style.background="rgba(59,165,92,0.4)"; exportBtn.style.color="#fff"; };
+      exportBtn.onmouseleave = () => { exportBtn.style.background="rgba(59,165,92,0.25)"; exportBtn.style.color="#3ba55c"; };
+      exportBtn.onclick = () => {
+        const exportData = {
+          _note: "Translate the VALUES only. Do NOT change the KEYS. Keep {placeholders} like {n} {s} {t} untouched. Preserve HTML tags and class='...' attributes as-is. The 'name' field will be shown in the language selector.",
+          name: "My Custom Language",
+        };
+        const enTranslations = TRANSLATIONS["en"];
+        for (const key of Object.keys(enTranslations)) {
+          if (key !== "name") exportData[key] = enTranslations[key];
+        }
+        const jsonStr = JSON.stringify(exportData, null, 2);
+        const blob = new Blob([jsonStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = "discord-toolkit-custom-lang.json"; a.click();
+        URL.revokeObjectURL(url);
+      };
+      customBtnRow.appendChild(exportBtn);
+
+      const importBtn = document.createElement("button");
+      importBtn.innerText = t("custom_lang_import");
+      importBtn.style.cssText = `
+        padding:7px 16px; font-size:13px; cursor:pointer;
+        background:rgba(88,101,242,0.25); color:#7289da;
+        border:1px solid rgba(88,101,242,0.4); border-radius:8px; transition:all 0.15s;
+      `;
+      importBtn.onmouseenter = () => { importBtn.style.background="rgba(88,101,242,0.45)"; importBtn.style.color="#fff"; };
+      importBtn.onmouseleave = () => { importBtn.style.background="rgba(88,101,242,0.25)"; importBtn.style.color="#7289da"; };
+
+      const importArea = document.createElement("div");
+      importArea.style.cssText = "display:none; margin-top:10px;";
+
+      const importTextarea = document.createElement("textarea");
+      importTextarea.placeholder = t("custom_lang_paste_hint");
+      importTextarea.style.cssText = `
+        width:100%; min-height:120px;
+        background:rgba(0,0,0,0.3); color:#dcddde;
+        border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:8px;
+        font-size:12px; font-family:monospace; resize:vertical; box-sizing:border-box;
+      `;
+      const importError = document.createElement("p");
+      importError.style.cssText = "color:#ed4245; font-size:12px; margin:4px 0 0; display:none;";
+
+      const importConfirmBtn = document.createElement("button");
+      importConfirmBtn.innerText = t("custom_lang_apply");
+      importConfirmBtn.style.cssText = `
+        margin-top:8px; padding:7px 14px; font-size:13px; cursor:pointer;
+        background:rgba(88,101,242,0.4); color:#fff;
+        border:1px solid rgba(88,101,242,0.5); border-radius:8px; transition:all 0.15s;
+      `;
+      importConfirmBtn.onmouseenter = () => { importConfirmBtn.style.background="rgba(88,101,242,0.7)"; };
+      importConfirmBtn.onmouseleave = () => { importConfirmBtn.style.background="rgba(88,101,242,0.4)"; };
+      importConfirmBtn.onclick = () => {
+        try {
+          const parsed = JSON.parse(importTextarea.value.trim());
+          if (typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("must be a JSON object");
+          delete parsed["_note"];
+          localStorage.setItem("copyMenuLanguage_custom", JSON.stringify(parsed));
+          localStorage.setItem("copyMenuLanguage", "custom");
+          _customLangData = parsed;
+          overlay.remove(); animStyle.remove();
+          location.reload();
+        } catch (err) {
+          importError.textContent = t("custom_lang_json_error", { msg: err.message });
+          importError.style.display = "block";
+        }
+      };
+      importArea.appendChild(importTextarea);
+      importArea.appendChild(importError);
+      importArea.appendChild(importConfirmBtn);
+
+      importBtn.onclick = () => {
+        importArea.style.display = importArea.style.display === "none" ? "block" : "none";
+        importError.style.display = "none";
+      };
+      customBtnRow.appendChild(importBtn);
+
+      customPanel.appendChild(customBtnRow);
+      customPanel.appendChild(importArea);
+
+      if (_customLangData) {
+        const langName = _customLangData.name || "Custom";
+        const statusRow = document.createElement("p");
+        statusRow.style.cssText = "margin:10px 0 0; color:#3ba55c; font-size:12px;";
+        statusRow.innerHTML = t("custom_lang_loaded", { name: `<b>${escHtml(langName)}</b>` });
+
+        const activateBtn = document.createElement("button");
+        activateBtn.innerText = t("custom_lang_activate", { name: langName });
+        activateBtn.style.cssText = `
+          display:block; margin-top:6px; padding:7px 14px; font-size:12px; cursor:pointer;
+          background:rgba(88,101,242,0.35); color:#fff;
+          border:1px solid rgba(88,101,242,0.5); border-radius:8px; transition:all 0.15s;
+        `;
+        activateBtn.onmouseenter = () => { activateBtn.style.background="rgba(88,101,242,0.6)"; };
+        activateBtn.onmouseleave = () => { activateBtn.style.background="rgba(88,101,242,0.35)"; };
+        activateBtn.onclick = () => {
+          localStorage.setItem("copyMenuLanguage", "custom");
+          overlay.remove(); animStyle.remove();
+          location.reload();
+        };
+        customPanel.appendChild(statusRow);
+        customPanel.appendChild(activateBtn);
+      }
+
+      customLangBtn.onclick = () => {
+        const isOpen = customPanel.style.display !== "none";
+        customPanel.style.display = isOpen ? "none" : "block";
+      };
+
+      container.appendChild(customPanel);
 
       const helpBtn = document.createElement("button");
       helpBtn.innerText = t("help_btn");
       helpBtn.style.cssText =
-        "background:none; border:none; color:#3ba55c; cursor:pointer; font-size:13px; text-decoration:underline;";
+        "background:none; border:none; color:rgba(255,255,255,0.35); cursor:pointer; font-size:12px; text-decoration:underline; margin-top:4px;";
+      helpBtn.onmouseenter = () => { helpBtn.style.color="#3ba55c"; };
+      helpBtn.onmouseleave = () => { helpBtn.style.color="rgba(255,255,255,0.35)"; };
       helpBtn.onclick = () => {
         const existingManual = document.getElementById("msg-manual-overlay");
         if (existingManual) { existingManual.remove(); return; }
@@ -3008,7 +4295,6 @@ healthCheck() {
           #msg-manual-overlay .mm-tag.g{background:rgba(35,165,90,.25);color:#57f287}
           #msg-manual-overlay .mm-tag.y{background:rgba(240,178,50,.25);color:#f0b232}
         `;
-        document.head.appendChild(style);
 
         const sections = t("manual_content_sections");
 
@@ -3030,6 +4316,7 @@ healthCheck() {
       container.appendChild(helpBtn);
 
       overlay.appendChild(container);
+      overlay.addEventListener("click", (e) => { if (e.target === overlay) { overlay.remove(); animStyle.remove(); } });
       document.body.appendChild(overlay);
     }
 
@@ -3719,7 +5006,7 @@ healthCheck() {
       }
     }
 
-function generateSmartFilename(container, mediaUrl, index = 0) {
+    function generateSmartFilename(container, mediaUrl, index = 0) {
       try {
         DEBUG && console.log("[Filename] Generating filename for:", mediaUrl);
         DEBUG && console.log("[Filename] Container:", container);
@@ -4017,7 +5304,7 @@ function generateSmartFilename(container, mediaUrl, index = 0) {
           console.warn("[extractExternalMediaUrl] Parse failed:", e);
         }
 
-        return proxyImg.src.split("?")[0];
+        return proxyImg.src;
       }
 
       const videoSource = msg.querySelector('video source[src*="/external/"]');
@@ -4191,7 +5478,7 @@ function generateSmartFilename(container, mediaUrl, index = 0) {
         };
       }
 
-download(url, filename, fallbackUrl = null, retryCount = 0) {
+      download(url, filename, fallbackUrl = null, retryCount = 0) {
         const downloadKey = `${url}_${filename}`;
         if (this.activeDownloads.has(downloadKey)) {
           console.warn(`[Download] ⚠ Already downloading: ${filename}`);
@@ -4286,7 +5573,7 @@ download(url, filename, fallbackUrl = null, retryCount = 0) {
         });
       }
 
-_handleFailure(url, filename, fallbackUrl, retryCount, reason, resolve) {
+      _handleFailure(url, filename, fallbackUrl, retryCount, reason, resolve) {
         console.warn(`[Download] ❌ Failed (${reason}): ${filename}`);
 
         if (retryCount < this.maxRetries) {
@@ -4310,12 +5597,29 @@ _handleFailure(url, filename, fallbackUrl, retryCount, reason, resolve) {
         }
 
         this.stats.failed++;
-        showToast(`❌ ${t("download_fail")}: ${filename}`);
+
+        const corsRestrictedHosts = [
+          "encrypted-tbn0.gstatic.com",
+          "lh3.googleusercontent.com",
+          "lh4.googleusercontent.com",
+          "pbs.twimg.com",
+        ];
+        let isCorsRestricted = false;
+        try {
+          const hostname = new URL(url).hostname;
+          isCorsRestricted = corsRestrictedHosts.some((h) => hostname.endsWith(h));
+        } catch (_) {}
+
+        if (isCorsRestricted) {
+          showToast(t("download_cors_fail"));
+        } else {
+          showToast(`❌ ${t("download_fail")}: ${filename}`);
+        }
         resolve({ success: false, reason });
         this._processQueue();
       }
 
-_saveBlob(blob, filename) {
+      _saveBlob(blob, filename) {
         try {
           const url = URL.createObjectURL(blob);
           const link = document.createElement("a");
@@ -4336,7 +5640,7 @@ _saveBlob(blob, filename) {
         }
       }
 
-_processQueue() {
+      _processQueue() {
         if (this.queue.length === 0) {
           if (this.stats.total > 0) {
             console.log(
@@ -4360,7 +5664,7 @@ _processQueue() {
         }
       }
 
-batchDownload(urlList, baseFilename = "discord_img") {
+      batchDownload(urlList, baseFilename = "discord_img") {
         console.log(
           `[Download] 📦 Starting batch download: ${urlList.length} files`,
         );
@@ -4376,11 +5680,11 @@ batchDownload(urlList, baseFilename = "discord_img") {
         });
       }
 
-resetStats() {
+      resetStats() {
         this.stats = { success: 0, failed: 0, total: 0 };
       }
 
-getStatus() {
+      getStatus() {
         return {
           active: this.activeDownloads.size,
           queued: this.queue.length,
@@ -4394,18 +5698,6 @@ getStatus() {
     function downloadFile(url, filename, fallbackUrl = null) {
       return downloadManager.download(url, filename, fallbackUrl);
     }
-
-    GM_registerMenuCommand(t("menu_download_stats"), () => {
-      const status = downloadManager.getStatus();
-      alert(
-        `下載管理器狀態:\n` +
-          `• 進行中: ${status.active}\n` +
-          `• 等待中: ${status.queued}\n` +
-          `• 成功: ${status.stats.success}\n` +
-          `• 失敗: ${status.stats.failed}\n` +
-          `• 總計: ${status.stats.total}`,
-      );
-    });
 
     function getMessageText(msg) {
       try {
@@ -4436,6 +5728,27 @@ getStatus() {
             el.style.display = "inline";
           });
           mainText = clone.innerText.trim();
+        }
+
+        if (!mainText) {
+          const isForwarded = msg.querySelector('[class*="headerContainer__"]') !== null;
+          if (isForwarded) {
+            const allContentEls2 = Array.from(msg.querySelectorAll('[id^="message-content-"]'));
+            const forwardedTexts = allContentEls2.slice(1).map((el) => {
+              const clone = el.cloneNode(true);
+              clone.querySelectorAll(
+                'span[class*="edited"], span[class*="timestamp"], time, [class*="spoilerWarning"], button',
+              ).forEach((n) => n.remove());
+              clone.querySelectorAll("a[href]").forEach((a) => {
+                const href = a.getAttribute("href");
+                if (href && href.startsWith("http") && !clone.innerText.includes(href)) {
+                  a.insertAdjacentText("afterend", " " + href);
+                }
+              });
+              return clone.innerText.trim();
+            }).filter(Boolean);
+            mainText = forwardedTexts.join("\n");
+          }
         }
 
         if (replyBlock) {
@@ -4622,7 +5935,7 @@ getStatus() {
       panel.id = "mod-settings-panel";
       panel.style.cssText = `
         position: fixed;
-        background: #2f3136;
+        background: #2b2d31;
         border: 1px solid rgba(255,255,255,0.12);
         border-radius: 8px;
         padding: 12px 0 8px;
@@ -4801,11 +6114,11 @@ getStatus() {
 
       const box = document.createElement("div");
       box.style.cssText = `
-        background: #2f3136; border-radius: 10px;
+        background: #2b2d31;
         width: min(680px, 92vw); max-height: 80vh;
         display: flex; flex-direction: column;
         box-shadow: 0 16px 48px rgba(0,0,0,0.6);
-        color: #dcddde; font-size: 13px; overflow: hidden;
+        color: #dcddde;
       `;
 
       const head = document.createElement("div");
@@ -5146,7 +6459,7 @@ getStatus() {
               cancelCloseGlobalMenu();
               const newVal = prompt(
                 t("enter_link_text"),
-                config.linkText === "⿻" ? "" : config.linkText,
+                config.linkText,
               );
               if (newVal !== null) {
                 const finalVal = newVal.trim() === "" ? "" : newVal.trim();
@@ -5168,23 +6481,61 @@ getStatus() {
 
         const attachmentLinks = Array.from(
           container.querySelectorAll('a[class*="originalLink"]'),
-        );
+        ).filter(link => {
+          const href = link.href || "";
+          return (
+            href.includes("cdn.discordapp.com/attachments/") ||
+            href.includes("media.discordapp.net/attachments/") ||
+            isLikelyMediaFile(href)
+          );
+        });
 
         const allVideoElements = Array.from(
           container.querySelectorAll("video"),
         );
 
+        const markdownMediaLinks = (() => {
+          const allAnchors = Array.from(container.querySelectorAll('a[href]'));
+          const existingHrefs = new Set([
+            ...attachmentLinks.map(l => l.href),
+            ...allVideoElements.map(v => v.src || v.querySelector("source")?.src || ""),
+          ]);
+          return allAnchors.filter(a => {
+            const href = a.href;
+            if (!href || existingHrefs.has(href)) return false;
+            return isLikelyMediaFile(href);
+          });
+        })();
+
+        const resolveUrlForComparison = (url) => {
+          if (!url) return "";
+          try {
+            if (url.includes("/external/")) {
+              const match = url.match(/\/external\/[^/]+\/(https?)\/(.+)/);
+              if (match) {
+                const resolved = `${match[1]}://${match[2]}`;
+                return resolved.split("?")[0];
+              }
+            }
+            return new URL(url).pathname;
+          } catch {
+            return url.split("?")[0];
+          }
+        };
+        const markdownMediaHrefs = new Set(markdownMediaLinks.map(a => resolveUrlForComparison(a.href)));
         const embedVideos = allVideoElements.filter((video) => {
           const videoSrc = video.src || video.querySelector("source")?.src;
           if (!videoSrc) return false;
+          const videoKey = resolveUrlForComparison(videoSrc);
 
-          const isDuplicate = attachmentLinks.some(
-            (link) => link.href === videoSrc,
-          );
-          return !isDuplicate;
+          if (attachmentLinks.some((link) => resolveUrlForComparison(link.href) === videoKey)) return false;
+
+          if (markdownMediaHrefs.has(videoKey)) return false;
+
+          return true;
         });
 
-        const totalDownloadCount = attachmentLinks.length + embedVideos.length;
+        const totalDownloadCount = attachmentLinks.length + embedVideos.length + markdownMediaLinks.length;
 
         if (totalDownloadCount > 0) {
           const dlBtn = document.createElement("button");
@@ -5253,6 +6604,27 @@ getStatus() {
               );
             });
 
+            markdownMediaLinks.forEach((link, i) => {
+              const rawUrl = link.href;
+              const baseOffset = attachmentLinks.length + embedVideos.length;
+
+              setTimeout(
+                () => animateFlyToTopRight(link, e.clientX, e.clientY),
+                (baseOffset + i) * 75,
+              );
+
+              let filename = generateSmartFilename(container, rawUrl, baseOffset + i);
+              if (filename && !/\.(mp4|webm|mov|mkv|jpg|jpeg|png|gif|webp)$/i.test(filename)) {
+                const extMatch = rawUrl.match(/\.(mp4|webm|mov|mkv|jpg|jpeg|png|gif|webp)([?#]|$)/i);
+                filename = filename.replace(/\.\w+$/, "") + (extMatch ? "." + extMatch[1] : ".mp4");
+              }
+
+              setTimeout(
+                () => { if (rawUrl) downloadFile(rawUrl, filename); },
+                (baseOffset + i) * 200,
+              );
+            });
+
             closeGlobalMenu();
           };
 
@@ -5262,7 +6634,7 @@ getStatus() {
 
             const mediaUrls = [];
 
-const extractSourceUrl = (proxyUrl) => {
+            const extractSourceUrl = (proxyUrl) => {
               try {
                 const cleanUrl = proxyUrl.split("?")[0];
 
@@ -5342,6 +6714,11 @@ const extractSourceUrl = (proxyUrl) => {
               }
             });
 
+            markdownMediaLinks.forEach((link) => {
+              const href = link.href;
+              if (href) mediaUrls.push(href);
+            });
+
             if (mediaUrls.length > 0) {
               const urlText = mediaUrls.join("\n");
               if (typeof GM_setClipboard === "function") {
@@ -5381,10 +6758,10 @@ const extractSourceUrl = (proxyUrl) => {
           const displayPrefix = linkPrefix ? linkPrefix : "";
 
           const labelStyle =
-            linkPrefix && linkPrefix !== "⿻" ? `style="color:cyan"` : "";
+            linkPrefix && linkPrefix !== "" ? `style="color:cyan"` : "";
           const displayLabel = linkPrefix ? linkPrefix : " ";
           const bracketed = links
-            .map((url) => `-# [${linkPrefix}](${url})`)
+            .map((url) => `[${linkPrefix}](${url})`)
             .join(" || ");
 
           const label = t("insert_format_link", {
@@ -5405,7 +6782,7 @@ const extractSourceUrl = (proxyUrl) => {
             cancelCloseGlobalMenu();
             const newVal = prompt(
               t("enter_link_text"),
-              config.linkText === "⿻" ? "" : config.linkText,
+              config.linkText,
             );
             if (newVal !== null) {
               const finalVal = newVal.trim() === "" ? "" : newVal.trim();
@@ -5426,7 +6803,7 @@ const extractSourceUrl = (proxyUrl) => {
           if (match)
             addItem(
               "convert",
-              t("restore_phixiv"),
+              t("restore_pixiv_img"),
               `https://www.phixiv.net/artworks/${match[7]}`,
             );
         }
@@ -5494,6 +6871,14 @@ const extractSourceUrl = (proxyUrl) => {
               "fixthreads.seria.moe": "to_fixthreads",
             },
           },
+          {
+            type: "facebook",
+            domains: ["facebook.com", "facebed.com"],
+            labels: {
+              "facebook.com": "to_facebook",
+              "facebed.com": "to_facebed",
+            },
+          },
         ];
         const collectedLinks = {
           twitter: [],
@@ -5501,6 +6886,7 @@ const extractSourceUrl = (proxyUrl) => {
           instagram: [],
           tiktok: [],
           threads: [],
+          facebook: [],
           bilibili: [],
           pixiv: [],
         };
@@ -5574,6 +6960,8 @@ const extractSourceUrl = (proxyUrl) => {
               else if (group.type === "tiktok") primaryTarget = "vxtiktok.com";
               else if (group.type === "threads")
                 primaryTarget = "fixthreads.seria.moe";
+              else if (group.type === "facebook")
+                primaryTarget = "facebed.com";
 
               const allConverted = data
                 .map((d) => `https://${primaryTarget}${d.path}`)
@@ -5649,6 +7037,23 @@ const extractSourceUrl = (proxyUrl) => {
               );
           }
         }
+
+        links.forEach((url) => {
+          const shortsMatch = url.match(
+            /^https?:\/\/(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})([?&].*)?$/
+          );
+          if (shortsMatch) {
+            const videoId = shortsMatch[1];
+            const extraParams = shortsMatch[2]
+              ? shortsMatch[2].replace(/^[?&]/, "&")
+              : "";
+            addItem(
+              "convert",
+              t("yt_shorts_to_watch"),
+              `https://www.youtube.com/watch?v=${videoId}${extraParams}`,
+            );
+          }
+        });
 
         if (config.menuStyle === "group") {
           ["copy", "download", "convert", "system"].forEach((k) => {
@@ -5786,7 +7191,27 @@ const extractSourceUrl = (proxyUrl) => {
         dropdown.style.left = `${left}px`;
       };
 
-      const discordBtnContainer = msg.querySelector('[class*="buttonContainer"]');
+      const discordBtnContainer = (() => {
+        for (const child of msg.children) {
+          const childClass = typeof child.className === "string" ? child.className : (child.getAttribute?.("class") ?? "");
+          if (childClass.includes("buttonContainer")) {
+            return child;
+          }
+        }
+        for (const child of msg.children) {
+          for (const grandchild of child.children) {
+            const gcClass = typeof grandchild.className === "string" ? grandchild.className : (grandchild.getAttribute?.("class") ?? "");
+            if (gcClass.includes("buttonContainer")) {
+              if (!grandchild.closest('[class*="content__"]') &&
+                  !grandchild.closest('[class*="embedFull"]') &&
+                  !grandchild.closest('[class*="container_b7e1cb"]')) {
+                return grandchild;
+              }
+            }
+          }
+        }
+        return null;
+      })();
       if (discordBtnContainer) {
         discordBtnContainer.insertAdjacentElement("afterend", btn);
       } else {
@@ -6246,6 +7671,21 @@ const extractSourceUrl = (proxyUrl) => {
         saveCollections(type, cols);
         showEmojiToast(t("em_col_add_success", { g: colName }));
 
+        if (type === TYPES.GIF || type === TYPES.STICKER) {
+          const downloadUrl = (typeof item === "object")
+            ? (item.url || item.content || item.stableUrl)
+            : item;
+          if (downloadUrl && downloadUrl.startsWith("http")) {
+            fetchAndCacheMedia(downloadUrl).then(dataUrl => {
+              if (dataUrl) {
+                DEBUG && console.log("[GifCache] Pre-cached on save:", downloadUrl.slice(0, 60));
+              } else {
+                console.warn("[GifCache] Pre-cache failed (CDN may have expired already):", downloadUrl.slice(0, 80));
+              }
+            });
+          }
+        }
+
         const inputFolderBtn = document.querySelector(
           ".my-chat-input-folder-btn button",
         );
@@ -6261,6 +7701,141 @@ const extractSourceUrl = (proxyUrl) => {
           }, 800);
         }
       }
+    }
+
+    const GIF_CACHE_PREFIX = "gifcache_";
+    const GIF_CACHE_INDEX  = "gifcache_index";
+    const GIF_MAX_BYTES    = 400 * 1024;
+
+    let _idbPromise = null;
+    function openGifIDB() {
+      if (_idbPromise) return _idbPromise;
+      _idbPromise = new Promise((resolve, reject) => {
+        const req = indexedDB.open("DiscordGifCache", 1);
+        req.onupgradeneeded = (e) => {
+          e.target.result.createObjectStore("blobs", { keyPath: "id" });
+        };
+        req.onsuccess  = (e) => resolve(e.target.result);
+        req.onerror    = (e) => reject(e.target.error);
+      });
+      return _idbPromise;
+    }
+    async function idbPut(id, dataUrl) {
+      const db = await openGifIDB();
+      return new Promise((res, rej) => {
+        const tx  = db.transaction("blobs", "readwrite");
+        tx.objectStore("blobs").put({ id, dataUrl });
+        tx.oncomplete = () => res();
+        tx.onerror    = (e) => rej(e.target.error);
+      });
+    }
+    async function idbGet(id) {
+      const db = await openGifIDB();
+      return new Promise((res, rej) => {
+        const tx  = db.transaction("blobs", "readonly");
+        const req = tx.objectStore("blobs").get(id);
+        req.onsuccess = (e) => res(e.target.result?.dataUrl || null);
+        req.onerror   = (e) => rej(e.target.error);
+      });
+    }
+
+    function gifCacheKey(url) {
+      try { return new URL(url).pathname; } catch { return url; }
+    }
+
+    async function readGifCache(url) {
+      const k = gifCacheKey(url);
+      const gmKey = GIF_CACHE_PREFIX + k;
+      try {
+        const val = GM_getValue(gmKey, null);
+        if (val) return val;
+      } catch(_) {}
+      try {
+        const val = await idbGet(k);
+        if (val) return val;
+      } catch(_) {}
+      return null;
+    }
+
+    async function writeGifCache(url, dataUrl) {
+      const k = gifCacheKey(url);
+      const byteLen = Math.round(dataUrl.length * 0.75);
+      try {
+        if (byteLen <= GIF_MAX_BYTES) {
+          GM_setValue(GIF_CACHE_PREFIX + k, dataUrl);
+        } else {
+          await idbPut(k, dataUrl);
+        }
+        try {
+          const idx = JSON.parse(GM_getValue(GIF_CACHE_INDEX, "[]"));
+          if (!idx.includes(k)) { idx.push(k); GM_setValue(GIF_CACHE_INDEX, JSON.stringify(idx)); }
+        } catch(_) {}
+      } catch(e) {
+        console.warn("[GifCache] write failed:", e);
+      }
+    }
+
+    function fetchAndCacheMedia(url) {
+      return new Promise(async (resolve) => {
+        try {
+          const cached = await readGifCache(url);
+          if (cached) { resolve(cached); return; }
+        } catch(_) {}
+
+        GM_xmlhttpRequest({
+          method: "GET",
+          url: url,
+          responseType: "arraybuffer",
+          timeout: 15000,
+          onload(res) {
+            if (res.status !== 200) { resolve(null); return; }
+            try {
+              const bytes = new Uint8Array(res.response);
+              const mime  = res.responseHeaders.match(/content-type:\s*([^\r\n;]+)/i)?.[1]?.trim()
+                         || (url.includes(".gif") ? "image/gif" : "image/webp");
+              let binary = "";
+              for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+              const b64 = "data:" + mime + ";base64," + btoa(binary);
+              writeGifCache(url, b64).catch(() => {});
+              resolve(b64);
+            } catch(e) {
+              console.error("[GifCache] encode error:", e);
+              resolve(null);
+            }
+          },
+          onerror()  { resolve(null); },
+          ontimeout(){ resolve(null); },
+        });
+      });
+    }
+
+    async function attachGifFallback(imgEl, originalUrl, stableUrl) {
+      if (!originalUrl || !originalUrl.startsWith("http")) return;
+      const cacheTarget = (stableUrl && stableUrl.startsWith("http")) ? stableUrl : originalUrl;
+
+      let cachedDataUrl = null;
+      try { cachedDataUrl = await readGifCache(cacheTarget); } catch(_) {}
+
+      if (cachedDataUrl) {
+        imgEl.src = cachedDataUrl;
+        return;
+      }
+
+      imgEl.onerror = async function() {
+        this.onerror = null;
+        this.alt   = "🖼️";
+        this.title = cacheTarget;
+        this.style.cssText = [
+          "object-fit:contain",
+          "background:rgba(0,0,0,0.25)",
+          "border-radius:4px",
+          "font-size:24px",
+          "display:flex",
+          "align-items:center",
+          "justify-content:center",
+        ].join(";");
+        DEBUG && console.warn("[GifCache] CDN expired, no local cache:", cacheTarget.slice(0, 80));
+      };
     }
 
     function parseMediaUrl(url, type) {
@@ -6394,15 +7969,23 @@ const extractSourceUrl = (proxyUrl) => {
           el = document.createElement("img");
           el.src = displayUrl;
 
-          el.onerror = function () {
-            if (this.src !== actualContent && actualContent !== displayUrl) {
-              console.warn(
-                "[createMediaElement] Thumbnail failed, trying original URL:",
-                actualContent,
-              );
-              this.src = actualContent;
-            }
-          };
+          const _cacheTarget = actualContent || displayUrl;
+          const _stableUrl = (typeof content === "object" && content !== null)
+            ? (content.stableUrl || null)
+            : null;
+          if (_cacheTarget && _cacheTarget.startsWith("http")) {
+            attachGifFallback(el, _cacheTarget, _stableUrl);
+          } else {
+            el.onerror = function () {
+              if (this.src !== actualContent && actualContent !== displayUrl) {
+                console.warn(
+                  "[createMediaElement] Thumbnail failed, trying original URL:",
+                  actualContent,
+                );
+                this.src = actualContent;
+              }
+            };
+          }
         }
         el.className = "my-col-img";
       } else {
@@ -6771,10 +8354,8 @@ const extractSourceUrl = (proxyUrl) => {
       if (existing) existing.remove();
       const toast = document.createElement("div");
       toast.className = "my-emoji-toast";
-      toast.style.cssText = `position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-            background: #2b2d31; color: #f2f3f5; padding: 8px 16px; border-radius: 24px; font-weight: 500; font-size: 14px; box-shadow: 0 8px 16px rgba(0,0,0,0.3); z-index: 2147483649;
-            display: flex; align-items: center; gap: 8px; border: 1px solid #1e1f22; animation: fadeUp 2s forwards; pointer-events: none;`;
-      let content = `<span>${msg}</span>`;
+      toast.style.cssText = `position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2b2d31;color:#f2f3f5;padding:8px 14px;border-radius:8px;font-size:13px;z-index:2147483647;pointer-events:none;display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,0.08);box-shadow:0 4px 16px rgba(0,0,0,0.5);`;
+      let content = `<span>${escHtml(String(msg))}</span>`;
       if (iconUrl && iconUrl.startsWith("http"))
         content =
           `<img src="${iconUrl}" style="width:20px; height:20px; object-fit:contain; border-radius:3px;">` +
@@ -6834,9 +8415,9 @@ const extractSourceUrl = (proxyUrl) => {
           contentDiv.className = "my-emoji-content";
           const headerDiv = document.createElement("div");
           headerDiv.className = "my-emoji-header";
-          headerDiv.innerHTML = `<span class="my-emoji-key">${item.key}</span>`;
+          headerDiv.innerHTML = `<span class="my-emoji-key">${escHtml(item.key)}</span>`;
           if (item.note)
-            headerDiv.innerHTML += `<span class="my-emoji-note-badge">${item.note}</span>`;
+            headerDiv.innerHTML += `<span class="my-emoji-note-badge">${escHtml(item.note)}</span>`;
           contentDiv.appendChild(headerDiv);
           row.appendChild(contentDiv);
 
@@ -7101,7 +8682,10 @@ const extractSourceUrl = (proxyUrl) => {
               const isNative = getNativeMode();
               wrap.style.opacity = "0.5";
               try {
-                const result = await detectAnimatedUrl(url);
+                const rawUrl = typeof url === "object"
+                  ? (url.url || url.stableUrl || url.content)
+                  : url;
+                const result = await detectAnimatedUrl(rawUrl);
                 if (isNative) {
                   const nativeTag = getNativeEmojiTag(result.url, result.isGif);
                   finalUrl = nativeTag ? nativeTag : getSendableUrl(url, type);
@@ -7656,7 +9240,7 @@ const extractSourceUrl = (proxyUrl) => {
               left: 7px;  /* Changed from right to left */
               z-index: 1000;
               background: rgba(0, 0, 0, 0.7);
-              color: #fff;
+              color: #ffffff;
               width: 24px; height: 24px;
               border-radius: 4px;
               display: flex; align-items: center; justify-content: center;
@@ -7981,6 +9565,10 @@ const extractSourceUrl = (proxyUrl) => {
           { l: "🇺🇸", t: "Anti-Hijack: ON" },
           { l: "🇯🇵", t: "右クリック防止: ON" },
           { l: "🇰🇷", t: "우클릭 방지: ON" },
+          { l: "🇪🇸", t: "Anti-Hijack: ON" },
+          { l: "🇧🇷", t: "Anti-Sequestro: ATIVO" },
+          { l: "🇫🇷", t: "Anti-Détournement: ON" },
+          { l: "🇷🇺", t: "Защита ПКМ: ВКЛ" },
         ],
         off: [
           { l: "🇹🇼", t: "右鍵防劫持: 關閉" },
@@ -7988,8 +9576,22 @@ const extractSourceUrl = (proxyUrl) => {
           { l: "🇺🇸", t: "Anti-Hijack: OFF" },
           { l: "🇯🇵", t: "右クリック防止: OFF" },
           { l: "🇰🇷", t: "우클릭 방지: OFF" },
+          { l: "🇪🇸", t: "Anti-Hijack: OFF" },
+          { l: "🇧🇷", t: "Anti-Sequestro: INATIVO" },
+          { l: "🇫🇷", t: "Anti-Détournement: OFF" },
+          { l: "🇷🇺", t: "Защита ПКМ: ВЫКЛ" },
         ],
-        desc: "Long press 0.5s to save preset",
+        desc: {
+          "zh-TW": "長按 0.5 秒儲存為預設狀態",
+          "zh-CN": "长按 0.5 秒保存为默认状态",
+          "en":    "Long press 0.5s to save as default",
+          "ja":    "0.5秒長押しでデフォルトとして保存",
+          "ko":    "0.5초 길게 눌러 기본값으로 저장",
+          "es":    "Mantén 0.5s para guardar como predeterminado",
+          "pt-BR": "Pressione 0.5s para salvar como padrão",
+          "fr":    "Maintenir 0.5s pour enregistrer par défaut",
+          "ru":    "Удержание 0.5с для сохранения по умолчанию",
+        },
       },
       concealName: {
         on: [
@@ -7998,6 +9600,10 @@ const extractSourceUrl = (proxyUrl) => {
           { l: "🇺🇸", t: "Conceal Name: ON" },
           { l: "🇯🇵", t: "ファイル名隠蔽: ON" },
           { l: "🇰🇷", t: "파일명 숨기기: ON" },
+          { l: "🇪🇸", t: "Ocultar Nombre: ON" },
+          { l: "🇧🇷", t: "Ocultar Nome: ATIVO" },
+          { l: "🇫🇷", t: "Masquer le nom: ON" },
+          { l: "🇷🇺", t: "Скрыть имя файла: ВКЛ" },
         ],
         off: [
           { l: "🇹🇼", t: "檔名隱藏: 關閉 (原名)" },
@@ -8005,8 +9611,22 @@ const extractSourceUrl = (proxyUrl) => {
           { l: "🇺🇸", t: "Conceal Name: OFF" },
           { l: "🇯🇵", t: "ファイル名隠蔽: OFF" },
           { l: "🇰🇷", t: "파일명 숨기기: OFF" },
+          { l: "🇪🇸", t: "Ocultar Nombre: OFF" },
+          { l: "🇧🇷", t: "Ocultar Nome: INATIVO" },
+          { l: "🇫🇷", t: "Masquer le nom: OFF" },
+          { l: "🇷🇺", t: "Скрыть имя файла: ВЫКЛ" },
         ],
-        desc: "Long press 0.5s to save preset",
+        desc: {
+          "zh-TW": "長按 0.5 秒儲存為預設狀態",
+          "zh-CN": "长按 0.5 秒保存为默认状态",
+          "en":    "Long press 0.5s to save as default",
+          "ja":    "0.5秒長押しでデフォルトとして保存",
+          "ko":    "0.5초 길게 눌러 기본값으로 저장",
+          "es":    "Mantén 0.5s para guardar como predeterminado",
+          "pt-BR": "Pressione 0.5s para salvar como padrão",
+          "fr":    "Maintenir 0.5s pour enregistrer par défaut",
+          "ru":    "Удержание 0.5с для сохранения по умолчанию",
+        },
       },
     };
 
@@ -8033,10 +9653,8 @@ const extractSourceUrl = (proxyUrl) => {
 
     const concealHandler = (() => {
       const REPLACE_PREFIX = "_";
-      const _getFilename = Object.getOwnPropertyDescriptor(
-        File.prototype,
-        "name",
-      ).get;
+      const _origFileNameDesc = Object.getOwnPropertyDescriptor(File.prototype, "name");
+      const _getFilename = _origFileNameDesc.get;
       const randomString = (len = 6) =>
         Math.random()
           .toString(36)
@@ -8051,7 +9669,16 @@ const extractSourceUrl = (proxyUrl) => {
             randomString() + REPLACE_PREFIX + randomString() + "." + extension
           );
         },
+        configurable: true,
       });
+
+      return {
+        restore() {
+          try {
+            Object.defineProperty(File.prototype, "name", _origFileNameDesc);
+          } catch (_) {}
+        },
+      };
     })();
 
     function updateTooltipContent(type) {
@@ -8070,14 +9697,30 @@ const extractSourceUrl = (proxyUrl) => {
         )
         .join("");
 
-      const statusText = isDefaultOn ? "Default ON" : "Default OFF";
+      const _lang = getConfig().lang || "en";
+      const _statusLabels = {
+        "zh-TW": { on: "預設：開啟", off: "預設：關閉", mem: "💾 記憶狀態" },
+        "zh-CN": { on: "默认：开启", off: "默认：关闭", mem: "💾 记忆状态" },
+        "en":    { on: "Default: ON",  off: "Default: OFF",  mem: "💾 Memory" },
+        "ja":    { on: "デフォルト: ON", off: "デフォルト: OFF", mem: "💾 記憶" },
+        "ko":    { on: "기본값: ON", off: "기본값: OFF", mem: "💾 메모리" },
+        "es":    { on: "Predeterminado: ON", off: "Predeterminado: OFF", mem: "💾 Memoria" },
+        "pt-BR": { on: "Padrão: ATIVO", off: "Padrão: INATIVO", mem: "💾 Memória" },
+        "fr":    { on: "Par défaut: ON", off: "Par défaut: OFF", mem: "💾 Mémoire" },
+        "ru":    { on: "По умолч.: ВКЛ", off: "По умолч.: ВЫКЛ", mem: "💾 Память" },
+      };
+      const _sl = _statusLabels[_lang] || _statusLabels["en"];
+      const statusText = isDefaultOn ? _sl.on : _sl.off;
+      const _descText = (typeof config.desc === "object")
+        ? (config.desc[_lang] || config.desc["en"])
+        : config.desc;
 
       globalTooltip.innerHTML = `
             <div class="header-mod-list">${listHTML}</div>
             <div class="header-mod-divider"></div>
             <div class="header-mod-footer">
-                <div>💾 Memory status: <span class="header-mod-def-status" style="color:${isDefaultOn ? "#2dc770" : "#ed4245"}">${statusText}</span></div>
-                <div>🖱️ ${config.desc}</div>
+                <div>${_sl.mem}: <span class="header-mod-def-status" style="color:${isDefaultOn ? "#2dc770" : "#ed4245"}">${statusText}</span></div>
+                <div>🖱️ ${_descText}</div>
             </div>
         `;
     }
@@ -8201,6 +9844,8 @@ const extractSourceUrl = (proxyUrl) => {
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
+    window.addEventListener("beforeunload", () => concealHandler.restore(), { once: true });
+
     setTimeout(injectButtons, 2000);
   }
 
@@ -8248,6 +9893,8 @@ const extractSourceUrl = (proxyUrl) => {
           this._injectInputDock();
         } else if (pos === "navbar") {
           this._injectNavbarDock();
+        } else if (pos === "topleft") {
+          this._injectTopLeftDock();
         } else {
           this._injectTitlebarDock();
         }
@@ -8638,7 +10285,7 @@ const extractSourceUrl = (proxyUrl) => {
       container.appendChild(row1);
       container.appendChild(row2);
 
-      this.applyFocusMode(this.focusMode);
+      this.applyFocusMode(this.focusMode, container);
 
       this._scheduleBalanceRows(container);
 
@@ -8743,13 +10390,13 @@ const extractSourceUrl = (proxyUrl) => {
       });
     }
 
-_scheduleBalanceRows(container) {
+    _scheduleBalanceRows(container) {
       requestAnimationFrame(() => {
         this._balanceRows(container);
       });
     }
 
-_balanceRows(container) {
+    _balanceRows(container) {
       const ROW1_MAX = 11;
       if (!container || !document.body.contains(container)) return;
 
@@ -8776,20 +10423,12 @@ _balanceRows(container) {
 
       chip.innerHTML = `
             ${iconHtml}
-            <span class="vip-text">${wormhole.name}</span>
+            <span class="vip-text">${escHtml(wormhole.name)}</span>
         `;
       chip.dataset.wormholeUrl = wormhole.url;
 
       chip.draggable = true;
-
-      console.log(
-        "[VIP Chip] Created:",
-        wormhole.name,
-        "draggable:",
-        chip.draggable,
-        "id:",
-        wormhole.id,
-      );
+      DEBUG && console.log("[VIP Chip] Created:", wormhole.name, "draggable:", chip.draggable, "id:", wormhole.id);
 
       this.attachChipEvents(chip, wormhole, true);
       this.attachDragEvents(chip, wormhole, "vip");
@@ -8806,19 +10445,11 @@ _balanceRows(container) {
         ? `<img src="${wormhole.icon}" style="width:16px;height:16px;border-radius:50%;object-fit:cover;" class="my-wormhole-icon" draggable="false">`
         : `<span class="my-wormhole-icon">${this.ICONS.portal}</span>`;
 
-      chip.innerHTML = `${iconHtml}<span class="item-name">${wormhole.name}</span>`;
+      chip.innerHTML = `${iconHtml}<span class="item-name">${escHtml(wormhole.name)}</span>`;
       chip.dataset.wormholeUrl = wormhole.url;
 
       chip.draggable = true;
-
-      console.log(
-        "[Wormhole Chip] Created:",
-        wormhole.name,
-        "draggable:",
-        chip.draggable,
-        "id:",
-        wormhole.id,
-      );
+      DEBUG && console.log("[Wormhole Chip] Created:", wormhole.name, "draggable:", chip.draggable, "id:", wormhole.id);
 
       this.attachChipEvents(chip, wormhole, false);
       this.attachDragEvents(chip, wormhole, "normal");
@@ -8838,7 +10469,7 @@ _balanceRows(container) {
 
       chip.innerHTML = `
             <span class="group-icon" style="cursor:pointer;">${displayIcon}</span>
-            <span class="group-name">${group.name}</span>
+            <span class="group-name">${escHtml(group.name)}</span>
             <span class="group-count">(${group.wormholes.length})</span>
             <span class="group-chevron">${this.ICONS.chevronDown}</span>
         `;
@@ -8940,12 +10571,7 @@ _balanceRows(container) {
       let isDragging = false;
 
       chip.addEventListener("dragstart", (e) => {
-        console.log(
-          "[Drag] dragstart triggered for:",
-          wormhole.name,
-          "id:",
-          wormhole.id,
-        );
+        DEBUG && console.log("[Drag] dragstart triggered for:", wormhole.name, "id:", wormhole.id);
 
         dragStartX = e.clientX;
         dragStartY = e.clientY;
@@ -8961,7 +10587,7 @@ _balanceRows(container) {
           }),
         );
 
-        console.log("[Drag] Drag data set:", { wormholeId: wormhole.id, type });
+        DEBUG && console.log("[Drag] Drag data set:", { wormholeId: wormhole.id, type });
 
         const dragImage = chip.cloneNode(true);
         dragImage.style.opacity = "0.7";
@@ -8983,7 +10609,7 @@ _balanceRows(container) {
       });
 
       chip.addEventListener("dragend", (e) => {
-        console.log("[Drag] dragend triggered");
+        DEBUG && console.log("[Drag] dragend triggered");
         isDragging = false;
         chip.classList.remove("dragging");
 
@@ -9022,7 +10648,7 @@ _balanceRows(container) {
       });
 
       chip.addEventListener("drop", (e) => {
-        console.log("[Drag] drop event triggered on:", wormhole.name);
+        DEBUG && console.log("[Drag] drop event triggered on:", wormhole.name);
         e.preventDefault();
         e.stopPropagation();
         chip.classList.remove("drag-over");
@@ -9034,7 +10660,7 @@ _balanceRows(container) {
           const targetId = parseInt(wormhole.id);
           const targetType = type;
 
-          console.log("[Drag] Drop data:", {
+          DEBUG && console.log("[Drag] Drop data:", {
             draggedId,
             targetId,
             draggedType,
@@ -9047,11 +10673,11 @@ _balanceRows(container) {
           }
 
           if (draggedId === targetId) {
-            console.log("[Drag] Same wormhole, skipping swap");
+            DEBUG && console.log("[Drag] Same wormhole, skipping swap");
             return;
           }
 
-          console.log("[Drag] Swapping:", draggedId, "↔", targetId);
+          DEBUG && console.log("[Drag] Swapping:", draggedId, "↔", targetId);
           this.swapWormholes(draggedId, targetId, targetType);
         } catch (err) {
           console.error("[Drag] Failed to parse data:", err);
@@ -9064,14 +10690,7 @@ _balanceRows(container) {
       draggedId = parseInt(draggedId);
       targetId = parseInt(targetId);
 
-      console.log(
-        "[Swap] Start swapping:",
-        draggedId,
-        "↔",
-        targetId,
-        "in",
-        listType,
-      );
+      DEBUG && console.log("[Swap] Start swapping:", draggedId, "↔", targetId, "in", listType);
 
       if (listType === "vip") {
         const dIdx = data.vipWormholes.findIndex(
@@ -9117,7 +10736,7 @@ _balanceRows(container) {
         }
       }
 
-      console.log("[Swap] Saving data and refreshing display");
+      DEBUG && console.log("[Swap] Saving data and refreshing display");
       this.saveData(data);
       this.refreshDisplay();
     }
@@ -9145,7 +10764,7 @@ _balanceRows(container) {
 
           item.innerHTML = `
                     ${iconHtml}
-                    <span class="item-name">${wormhole.name}</span>
+                    <span class="item-name">${escHtml(wormhole.name)}</span>
                     <button class="item-pin-btn" data-pinned="${isPinned}" title="${isPinned ? this.t("wm_menu_vip_remove") : this.t("wm_menu_vip_add")}">
                         ${isPinned ? this.ICONS.star : this.ICONS.starOutline}
                     </button>
@@ -9372,11 +10991,14 @@ _balanceRows(container) {
       document.getElementById("wh-input-dock")?.remove();
       this._cleanupNavbarDock();
       document.getElementById("wh-titlebar-dock")?.remove();
+      this._cleanupTopLeftDock();
 
       if (pos === "input") {
         this._injectInputDock();
       } else if (pos === "titlebar") {
         this._injectTitlebarDock();
+      } else if (pos === "topleft") {
+        this._injectTopLeftDock();
       } else {
         this._injectNavbarDock();
       }
@@ -9424,6 +11046,25 @@ _balanceRows(container) {
       }
     }
 
+    _injectTopLeftDock() {
+      if (document.getElementById("wh-topleft-dock")) return;
+
+      const dock = document.createElement("div");
+      dock.id = "wh-topleft-dock";
+
+      const wrapper = document.createElement("div");
+      wrapper.className = "my-wormhole-container";
+      dock.appendChild(wrapper);
+
+      document.body.appendChild(dock);
+      this.renderWormholes(wrapper);
+    }
+
+    _cleanupTopLeftDock() {
+      const dock = document.getElementById("wh-topleft-dock");
+      if (dock) dock.remove();
+    }
+
     _injectTitlebarDock(retryCount = 0) {
       if (document.getElementById("wh-titlebar-dock")) return;
 
@@ -9460,9 +11101,7 @@ _balanceRows(container) {
       }
 
       if (!anchorEl) {
-        console.warn("[WH Dock] Could not find chat input area, falling back to titlebar");
-        this.setDockPosition("titlebar");
-        this._injectTitlebarDock();
+        console.warn("[WH Dock] Could not find chat input area, will retry on next DOM change");
         return;
       }
 
@@ -9521,6 +11160,7 @@ _balanceRows(container) {
         { pos: "navbar",   key: "wm_settings_position_navbar",   icon: "🧭" },
         { pos: "titlebar", key: "wm_settings_position_titlebar",  icon: "📌" },
         { pos: "input",    key: "wm_settings_position_input",     icon: "⌨️" },
+        { pos: "topleft",  key: "wm_settings_position_topleft",   icon: "📍" },
       ];
       positions.forEach(({ pos, key, icon }) => {
         const isActive = currentDock === pos;
@@ -9678,7 +11318,7 @@ unsafeWindow.fetch = function(...args) {
                 ${this.t("wm_api_clear_token")}
               </button>
             </div>
-            <div id="wh-api-detect-status">${hasToken ? "" : (panelApiMode ? this.t("wm_api_detect_waiting") : this.t("wm_api_plan_b_first"))}</div>
+            <div id="wh-api-detect-status">${hasToken ? "" : (panelApiMode ? `<span style="color:#f0b232;font-weight:500;">${this.t("wm_api_detect_waiting")}</span>` : this.t("wm_api_plan_b_first"))}</div>
           </div>
 
           <div id="wh-api-footer">
@@ -9767,7 +11407,7 @@ unsafeWindow.fetch = function(...args) {
           detectStatus.textContent = "請先選擇方案 B";
           applyBtn.disabled = false;
         } else if (!tok) {
-          detectStatus.textContent = this.t("wm_api_detect_waiting");
+          detectStatus.innerHTML = `<span style="color:#f0b232;font-weight:500;">${this.t("wm_api_detect_waiting")}</span>`;
         } else {
           detectStatus.textContent = "";
         }
@@ -9855,6 +11495,8 @@ unsafeWindow.fetch = function(...args) {
       };
 
       const origXhrSetHeader = uw.XMLHttpRequest.prototype.setRequestHeader;
+      const origFetch = uw.fetch;
+
       uw.XMLHttpRequest.prototype.setRequestHeader = function(name, value) {
         try {
           if (name.toLowerCase() === "authorization") {
@@ -9864,7 +11506,6 @@ unsafeWindow.fetch = function(...args) {
         return origXhrSetHeader.apply(this, arguments);
       };
 
-      const origFetch = uw.fetch;
       uw.fetch = function(...args) {
         try {
           const url = typeof args[0] === "string"
@@ -9940,7 +11581,7 @@ unsafeWindow.fetch = function(...args) {
           <div id="wh-send-header">
             <span id="wh-send-title">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5865f2" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;flex-shrink:0"><path d="M14.12 3.88a8 8 0 0 1-3.68 15.69"/><path d="M18.84 6a10 10 0 0 0-14.72 13.84"/><path d="M9.88 20.12a8 8 0 0 1 3.68-15.69"/><path d="M5.16 18a10 10 0 0 0 14.72-13.84"/></svg>
-              ${wormhole.name}
+              ${escHtml(wormhole.name)}
             </span>
             <button id="wh-send-close" aria-label="close">✕</button>
           </div>
@@ -10238,13 +11879,13 @@ unsafeWindow.fetch = function(...args) {
         setStatus(this.t("wm_send_waiting"));
         const ready = await this._waitForSlateEditor(8000);
         if (!ready) {
-          setStatus("❌ 頻道載入失敗", "err");
+          setStatus(this.t("wm_send_channel_fail"), "err");
           return false;
         }
       }
 
       const result = this._getSlateEditor();
-      if (!result) { setStatus("❌ 找不到輸入框", "err"); return false; }
+      if (!result) { setStatus(this.t("wm_send_editor_missing"), "err"); return false; }
       const { editor, slateEl } = result;
 
       editor.children = [{ type: "line", children: [{ text: "" }] }];
@@ -10260,7 +11901,7 @@ unsafeWindow.fetch = function(...args) {
         await this._tick(80);
       }
 
-      setStatus(`📎 上傳 ${files.length} 張圖片...`);
+      setStatus(this.t("wm_send_uploading", { n: files.length }));
 
       const dt = new DataTransfer();
       for (const file of files) dt.items.add(file);
@@ -10282,7 +11923,7 @@ unsafeWindow.fetch = function(...args) {
         bubbles: true, cancelable: true, composed: true,
         shiftKey: false, ctrlKey: false, metaKey: false, altKey: false,
       }));
-      console.log("[WH Send] Image + text dispatched via paste+Enter");
+      DEBUG && console.log("[WH Send] Image + text dispatched via paste+Enter");
 
       if (!alreadyHere) {
         await this._waitForEditorClear(2000);
@@ -10387,7 +12028,7 @@ unsafeWindow.fetch = function(...args) {
       }
 
       if (res.status === 200 || res.status === 201) {
-        console.log(`[WH API] Message sent ✅ → channel ${channelId}${hasFiles ? ` (+${files.length} file(s))` : ""}`);
+        DEBUG && console.log(`[WH API] Message sent ✅ → channel ${channelId}${hasFiles ? ` (+${files.length} file(s))` : ""}`);
         return true;
       }
 
@@ -10517,7 +12158,7 @@ unsafeWindow.fetch = function(...args) {
 
     _tick(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-_positionMenu(menu, triggerEl) {
+    _positionMenu(menu, triggerEl) {
       const gap = 8;
       menu.style.position = "fixed";
       menu.style.top  = "-9999px";
@@ -10969,26 +12610,39 @@ _positionMenu(menu, triggerEl) {
 
     }
 
-    applyFocusMode(enabled) {
-      const container = document.querySelector(".my-wormhole-container");
+    applyFocusMode(enabled, containerEl = null) {
+      const container = containerEl || document.querySelector(".my-wormhole-container");
+
+      const sz = this._focusSizePx(this.getFocusSize());
+      const vipSz      = Math.round(sz * 0.78);
+      const imgSz      = Math.round(sz * 0.82);
+      const vipImgSz   = Math.round(vipSz * 0.82);
+      const iconFs     = Math.round(sz * 0.62);
+      const overlap    = "-" + Math.round(sz * 0.22) + "px";
+      const vipOverlap = "-" + Math.round(vipSz * 0.2) + "px";
+
+      let sizeStyle = document.getElementById("wh-focus-size-override");
+      if (!sizeStyle) {
+        sizeStyle = document.createElement("style");
+        sizeStyle.id = "wh-focus-size-override";
+        document.head.appendChild(sizeStyle);
+      }
+      sizeStyle.textContent = `
+        :root {
+          --wh-focus-chip: ${sz}px;
+          --wh-focus-vip: ${vipSz}px;
+          --wh-focus-img: ${imgSz}px;
+          --wh-focus-vip-img: ${vipImgSz}px;
+          --wh-focus-icon-fs: ${iconFs}px;
+          --wh-focus-overlap: ${overlap};
+          --wh-focus-vip-overlap: ${vipOverlap};
+        }
+      `;
+
       if (!container) return;
 
       if (enabled) {
         container.classList.add("focus-mode");
-        const sz = this._focusSizePx(this.getFocusSize());
-        const vipSz    = Math.round(sz * 0.78);
-        const imgSz    = Math.round(sz * 0.82);
-        const vipImgSz = Math.round(vipSz * 0.82);
-        const iconFs   = Math.round(sz * 0.62);
-        const overlap  = "-" + Math.round(sz * 0.22) + "px";
-        const vipOverlap = "-" + Math.round(vipSz * 0.2) + "px";
-        document.documentElement.style.setProperty("--wh-focus-chip",    sz + "px");
-        document.documentElement.style.setProperty("--wh-focus-vip",     vipSz + "px");
-        document.documentElement.style.setProperty("--wh-focus-img",     imgSz + "px");
-        document.documentElement.style.setProperty("--wh-focus-vip-img", vipImgSz + "px");
-        document.documentElement.style.setProperty("--wh-focus-icon-fs", iconFs + "px");
-        document.documentElement.style.setProperty("--wh-focus-overlap",  overlap);
-        document.documentElement.style.setProperty("--wh-focus-vip-overlap", vipOverlap);
       } else {
         container.classList.remove("focus-mode");
       }
@@ -11006,7 +12660,7 @@ _positionMenu(menu, triggerEl) {
       const toast = document.createElement("div");
       toast.id = "wh-send-result-toast";
       toast.innerHTML = `
-        <div id="wh-srt-main">${this.t("wm_send_toast_title").replace("#{name}", wormhole.name)}</div>
+        <div id="wh-srt-main">${this.t("wm_send_toast_title").replace("#{name}", escHtml(wormhole.name))}</div>
         <div id="wh-srt-hint">${this.t("wm_send_toast_hint")}</div>
       `;
       toast.style.cssText = `
@@ -11154,7 +12808,7 @@ _positionMenu(menu, triggerEl) {
       return false;
     }
 
-_isValidChannelHeader(el) {
+    _isValidChannelHeader(el) {
       if (!el) return false;
 
       if (el.closest('nav[class*="guilds"]')) return false;
@@ -11173,7 +12827,7 @@ _isValidChannelHeader(el) {
       return false;
     }
 
-_removeStrayContainers() {
+    _removeStrayContainers() {
       const dockPos = this.getDockPosition();
       document.querySelectorAll(".my-wormhole-container").forEach((c) => {
         const parent = c.parentElement;
@@ -11188,6 +12842,12 @@ _removeStrayContainers() {
         if (dockPos === "navbar") {
           if (parent.id === "wh-navbar-dock") return;
           console.warn("[Wormhole] Removing stray container (navbar mode) from:", parent);
+          c.remove();
+          return;
+        }
+        if (dockPos === "topleft") {
+          if (parent.id === "wh-topleft-dock") return;
+          console.warn("[Wormhole] Removing stray container (topleft mode) from:", parent);
           c.remove();
           return;
         }
@@ -11217,6 +12877,11 @@ _removeStrayContainers() {
 
           if (pos === "navbar") {
             if (!document.getElementById("wh-navbar-dock")) this._injectNavbarDock();
+            return;
+          }
+
+          if (pos === "topleft") {
+            if (!document.getElementById("wh-topleft-dock")) this._injectTopLeftDock();
             return;
           }
 
@@ -11277,6 +12942,14 @@ _removeStrayContainers() {
             /* Titlebar dock: 頻道標題欄下方停靠列 */
             #wh-titlebar-dock { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px; padding: 2px 16px; background: transparent; border-bottom: 1px solid rgba(255,255,255,0.05); width: 100%; box-sizing: border-box; flex-shrink: 0; min-height: 36px; }
             #wh-titlebar-dock .my-wormhole-container { margin-left: 0; border-left: none; padding-left: 0; }
+            /* Top-left dock: 左上角固定水平停靠列 */
+            #wh-topleft-dock { position: fixed; top: 4px; left: 72px; display: flex; flex-direction: row; align-items: center; gap: 0; z-index: 2147483640; overflow: visible; pointer-events: auto; background: rgba(30,31,34,0.88); backdrop-filter: blur(8px); border: 1px solid rgba(88,101,242,0.25); border-radius: 20px; padding: 3px 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.5); }
+            #wh-topleft-dock .my-wormhole-container { margin-left: 0; border-left: none; padding-left: 0; overflow: visible; flex-direction: row; align-items: center; }
+            #wh-topleft-dock .wh-row-1 { flex-direction: row; align-items: center; gap: 0; flex-wrap: nowrap; }
+            #wh-topleft-dock .wh-row-2 { position: absolute; top: calc(100% + 6px); left: 0; opacity: 0; pointer-events: none; flex-direction: row; flex-wrap: wrap; gap: 4px; padding: 4px 8px; background: rgba(30,31,34,0.95); border: 1px solid rgba(88,101,242,0.25); border-radius: 10px; box-shadow: 0 4px 16px rgba(0,0,0,0.5); transition: opacity 0.2s ease; }
+            #wh-topleft-dock:hover .wh-row-2 { opacity: 1; pointer-events: auto; }
+            #wh-topleft-dock .my-wormhole-chip,
+            #wh-topleft-dock .my-wormhole-vip-chip { max-width: 120px; width: auto; box-sizing: border-box; margin-bottom: 0; }
             /* titlebar / input dock 聚焦模式：chip 固定小尺寸，不膨脹 */
             #wh-titlebar-dock .my-wormhole-container.focus-mode,
             #wh-input-dock .my-wormhole-container.focus-mode { padding-top: 0; }
@@ -11369,7 +13042,7 @@ _removeStrayContainers() {
             /* ── Tooltip 由 JS 負責（body 層級，不受 header overflow 限制）── */
 
             /* 聚焦模式樣式 */
-            .my-wormhole-container.focus-mode { position: relative; z-index: 10001; padding-top: 0; align-items: center; }
+            .my-wormhole-container.focus-mode { position: relative; padding-top: 0; align-items: center; }
             .my-wormhole-container.focus-mode .my-wormhole-vip-chip,
             .my-wormhole-container.focus-mode .my-wormhole-chip {
                 width: var(--wh-focus-chip, 32px);
@@ -11536,19 +13209,98 @@ _removeStrayContainers() {
     wormholeModule.initialize();
     window.wormholeModule = wormholeModule;
 
-    window.testWormhole = () => {
-      console.log("=== Wormhole Pro Debug ===");
-      const data = window.wormholeModule.getData();
-      console.log("Groups:", data.groups);
-      console.log("VIP Wormholes:", data.vipWormholes);
-      console.log("Total Wormholes:", window.wormholeModule.getAllWormholes().length);
-    };
+    if (DEBUG) {
+      window.testWormhole = () => {
+        console.log("=== Wormhole Pro Debug ===");
+        const data = window.wormholeModule.getData();
+        console.log("Groups:", data.groups);
+        console.log("VIP Wormholes:", data.vipWormholes);
+        console.log("Total Wormholes:", window.wormholeModule.getAllWormholes().length);
+      };
+    }
   }
 
   if (isModEnabled("mod_forwarding")) initForwardingManager();
   if (isModEnabled("mod_message"))    initMessageUtility();
   if (isModEnabled("mod_emoji"))      initEmojiSearchHelper();
   if (isModEnabled("mod_header"))     initHeaderMods();
+
+  if (!isModEnabled("mod_message")) {
+    const rescueBtn = document.createElement("div");
+    rescueBtn.id = "dmt-rescue-btn";
+    rescueBtn.title = t("mod_msg_enable_menu");
+    rescueBtn.textContent = "⚙️";
+    rescueBtn.style.cssText = [
+      "position:fixed",
+      "bottom:20px",
+      "right:20px",
+      "z-index:2147483646",
+      "width:36px",
+      "height:36px",
+      "border-radius:50%",
+      "background:#5865f2",
+      "color:#fff",
+      "font-size:18px",
+      "display:flex",
+      "align-items:center",
+      "justify-content:center",
+      "cursor:pointer",
+      "box-shadow:0 2px 10px rgba(0,0,0,0.5)",
+      "user-select:none",
+      "opacity:0.5",
+      "transition:opacity 0.2s",
+    ].join(";");
+    rescueBtn.onmouseenter = () => { rescueBtn.style.opacity = "1"; };
+    rescueBtn.onmouseleave = () => { rescueBtn.style.opacity = "0.5"; };
+    rescueBtn.onclick = () => {
+      const existing = document.getElementById("mod-settings-panel-rescue");
+      if (existing) { existing.remove(); return; }
+      const lang = getConfig().lang || navigator.language || "en-US";
+      const getLang = (labels) => labels[lang] || labels["zh-TW"] || labels["en-US"];
+      const overlay = document.createElement("div");
+      overlay.id = "mod-settings-panel-rescue";
+      overlay.style.cssText = "position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);";
+      const box = document.createElement("div");
+      box.style.cssText = "background:#2b2d31;border-radius:12px;padding:20px 24px;min-width:280px;max-width:360px;color:#dcddde;font-size:13px;box-shadow:0 12px 40px rgba(0,0,0,0.6);";
+      const title = document.createElement("div");
+      title.style.cssText = "font-size:15px;font-weight:700;color:#fff;margin-bottom:14px;";
+      title.textContent = "⚙️ Discord Message Toolkit";
+      box.appendChild(title);
+      MODULE_DEFS.forEach(mod => {
+        const row = document.createElement("div");
+        row.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.06);";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = `${mod.icon} ${getLang(mod.label)}`;
+        const enabled = isModEnabled(mod.storageKey);
+        const toggleEl = document.createElement("div");
+        toggleEl.style.cssText = `width:34px;height:18px;border-radius:9px;background:${enabled ? "#5865f2" : "#4f545c"};position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;`;
+        const thumb = document.createElement("div");
+        thumb.style.cssText = `width:14px;height:14px;border-radius:50%;background:#fff;position:absolute;top:2px;left:${enabled ? "18px" : "2px"};transition:left 0.2s;`;
+        toggleEl.appendChild(thumb);
+        toggleEl.onclick = () => {
+          const nowOn = isModEnabled(mod.storageKey);
+          const next = !nowOn;
+          setModEnabled(mod.storageKey, next);
+          toggleEl.style.background = next ? "#5865f2" : "#4f545c";
+          thumb.style.left = next ? "18px" : "2px";
+          setTimeout(() => location.reload(), 400);
+        };
+        row.appendChild(nameSpan);
+        row.appendChild(toggleEl);
+        box.appendChild(row);
+      });
+      const closeBtn = document.createElement("button");
+      closeBtn.textContent = "✕ " + ({"zh-TW":"關閉","zh-CN":"关闭","ja":"閉じる","ko":"닫기"}[lang] || "Close");
+      closeBtn.style.cssText = "margin-top:14px;width:100%;padding:7px;border:none;border-radius:6px;background:#4f545c;color:#fff;cursor:pointer;font-size:13px;";
+      closeBtn.onclick = () => overlay.remove();
+      box.appendChild(closeBtn);
+      overlay.appendChild(box);
+      overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+      document.body.appendChild(overlay);
+    };
+    document.addEventListener("DOMContentLoaded", () => document.body.appendChild(rescueBtn));
+    if (document.body) document.body.appendChild(rescueBtn);
+  }
 
   console.log("[Discord Utilities] Modules loaded:", MODULE_DEFS.map(m => `${m.icon}${isModEnabled(m.storageKey) ? "✓" : "✗"}`).join(" "));
 })();
