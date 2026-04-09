@@ -1,9 +1,4 @@
 
-
-[![Version](https://img.shields.io/badge/Version-1.4.4-blue.svg)]()
-[![License](https://img.shields.io/badge/License-MIT-green.svg)]()
-
-
 **A userscript that adds a message utility toolbar, an enhanced forwarding panel, cross-channel shortcuts, an expression collection manager, and a set of header utility controls to the Discord web client.**
 
 
