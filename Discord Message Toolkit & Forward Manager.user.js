@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      1.4.4
+// @version      1.6.2
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -28,6 +28,7 @@
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=discord.com
 // @grant       GM_setValue
 // @grant       GM_getValue
+// @grant       GM_deleteValue
 // @grant       GM_listValues
 // @grant       GM_registerMenuCommand
 // @grant       GM_addStyle
@@ -117,26 +118,96 @@
         appendNewLine: "copyAppendNewLine",
         linkText: "copyLinkText",
         modForwarding: "mod_forwarding",
-        modMessage:    "mod_message",
-        modEmoji:      "mod_emoji",
-        modHeader:     "mod_header",
-        modWormhole:   "mod_wormhole",
+        modMessage: "mod_message",
+        modEmoji: "mod_emoji",
+        modHeader: "mod_header",
+        modWormhole: "mod_wormhole",
       };
       return keyMap[prop] || prop;
     },
   };
 
   const MODULE_DEFS = [
-    { key: "modMessage",    storageKey: "mod_message",    icon: "⠿",  warn: true,
-      label: { "en-US": "Message Utility (⠿)", "zh-TW": "訊息工具 (⠿)", "zh-CN": "消息工具 (⠿)", "ja": "メッセージユーティリティ (⠿)", "ko": "메시지 유틸리티 (⠿)" } },
-    { key: "modForwarding", storageKey: "mod_forwarding", icon: "📋", label: { "en-US": "Forwarding Manager",  "zh-TW": "轉發管理員",   "zh-CN": "转发管理员",   "ja": "転送マネージャー", "ko": "전달 관리자" } },
-    { key: "modEmoji",      storageKey: "mod_emoji",      icon: "😀", label: { "en-US": "Emoji Search Helper", "zh-TW": "表情搜尋輔助", "zh-CN": "表情搜索助手", "ja": "絵文字検索", "ko": "이모지 검색" } },
-    { key: "modHeader",     storageKey: "mod_header",     icon: "📌", label: { "en-US": "Anti-Hijack & File Tools", "zh-TW": "右鍵解鎖",   "zh-CN": "右键解锁",   "ja": "右クリック解除", "ko": "우클릭 해제" } },
-    { key: "modWormhole",   storageKey: "mod_wormhole",   icon: "🌀", label: { "en-US": "Wormhole",            "zh-TW": "蟲洞",         "zh-CN": "虫洞",         "ja": "ワームホール", "ko": "웜홀" } },
+    {
+      key: "modMessage",
+      storageKey: "mod_message",
+      icon: "⠿",
+      warn: true,
+      label: {
+        "en-US": "Message Utility (⠿)",
+        "zh-TW": "訊息工具 (⠿)",
+        "zh-CN": "消息工具 (⠿)",
+        ja: "メッセージユーティリティ (⠿)",
+        ko: "메시지 유틸리티 (⠿)",
+      },
+    },
+    {
+      key: "modForwarding",
+      storageKey: "mod_forwarding",
+      icon: "📋",
+      label: {
+        "en-US": "Forwarding Manager",
+        "zh-TW": "轉發管理員",
+        "zh-CN": "转发管理员",
+        ja: "転送マネージャー",
+        ko: "전달 관리자",
+      },
+    },
+    {
+      key: "modEmoji",
+      storageKey: "mod_emoji",
+      icon: "😀",
+      label: {
+        "en-US": "Emoji Search Helper",
+        "zh-TW": "表情搜尋輔助",
+        "zh-CN": "表情搜索助手",
+        ja: "絵文字検索",
+        ko: "이모지 검색",
+      },
+    },
+    {
+      key: "modHeader",
+      storageKey: "mod_header",
+      icon: "📌",
+      label: {
+        "en-US": "Anti-Hijack & File Tools",
+        "zh-TW": "右鍵解鎖",
+        "zh-CN": "右键解锁",
+        ja: "右クリック解除",
+        ko: "우클릭 해제",
+      },
+    },
+    {
+      key: "modWormhole",
+      storageKey: "mod_wormhole",
+      icon: "🌀",
+      label: {
+        "en-US": "Wormhole",
+        "zh-TW": "蟲洞",
+        "zh-CN": "虫洞",
+        ja: "ワームホール",
+        ko: "웜홀",
+      },
+    },
+    {
+      key: "modWebhook",
+      storageKey: "mod_webhook",
+      icon: "🔗",
+      defaultEnabled: false,
+      label: {
+        "en-US": "Webhook Manager",
+        "zh-TW": "Webhook 管理",
+        "zh-CN": "Webhook 管理",
+        ja: "Webhook 管理",
+        ko: "Webhook 관리",
+      },
+    },
   ];
   function isModEnabled(storageKey) {
     const val = localStorage.getItem(storageKey);
-    return val === null ? true : val !== "false";
+    if (val !== null) return val !== "false";
+    const def = MODULE_DEFS.find((m) => m.storageKey === storageKey);
+    return def?.defaultEnabled === false ? false : true;
   }
   function setModEnabled(storageKey, enabled) {
     localStorage.setItem(storageKey, String(enabled));
@@ -146,7 +217,13 @@
     return ConfigManager.config;
   }
 
-  const _escMap = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+  const _escMap = {
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#39;",
+  };
   function escHtml(s) {
     return String(s).replace(/[&<>"']/g, (c) => _escMap[c]);
   }
@@ -197,10 +274,10 @@
     const cached = TranslationCache.get(cacheKey);
     if (cached !== null) return cached;
 
-    let text = (lang === "custom"
-      ? (_customLangData?.[key] || TRANSLATIONS["en"][key])
-      : (TRANSLATIONS[lang]?.[key] || TRANSLATIONS["en"][key])
-    ) || key;
+    let text =
+      (lang === "custom"
+        ? _customLangData?.[key] || TRANSLATIONS["en"][key]
+        : TRANSLATIONS[lang]?.[key] || TRANSLATIONS["en"][key]) || key;
 
     for (const [k, v] of Object.entries(params)) {
       text = text.replace(new RegExp(`\\{${k}\\}`, "g"), v);
@@ -208,11 +285,6 @@
 
     TranslationCache.set(cacheKey, text);
     return text;
-  }
-
-  function clearTranslationCache() {
-    TranslationCache.clear();
-    DEBUG && console.log("[Translation] Cache cleared");
   }
 
   const TRANSLATIONS = {
@@ -251,30 +323,30 @@
 
       fm_sec_wormhole: "🌀 Wormhole — Basics",
       fm_sec_wormhole_content:
-        "• Click <span class='help-key'>＋</span> (create button) and paste a Discord channel URL to create a Wormhole shortcut.<br>"
-        + "• <b>Click</b> a Wormhole → jump to that channel instantly.<br>"
-        + "• <b>Right-click</b> a Wormhole → context menu: rename, delete, set icon, move to group, or toggle VIP.<br>"
-        + "• <b>VIP (★)</b>: pinned Wormholes float to the top automatically.<br>"
-        + "• <b>Groups</b>: organize Wormholes into named folders via right-click → Move to Group.<br>"
-        + "• <b>Focus Mode</b>: icon-only compact view — toggle via the button at top-right of the Wormhole panel.",
+        "• Click <span class='help-key'>＋</span> (create button) and paste a Discord channel URL to create a Wormhole shortcut.<br>" +
+        "• <b>Click</b> a Wormhole → jump to that channel instantly.<br>" +
+        "• <b>Right-click</b> a Wormhole → context menu: rename, delete, set icon, move to group, or toggle VIP.<br>" +
+        "• <b>VIP (★)</b>: pinned Wormholes float to the top automatically.<br>" +
+        "• <b>Groups</b>: organize Wormholes into named folders via right-click → Move to Group.<br>" +
+        "• <b>Focus Mode</b>: icon-only compact view — toggle via the button at top-right of the Wormhole panel.",
 
       fm_sec_wm_send: "✉️ Wormhole — Send Message",
       fm_sec_wm_send_content:
-        "• <b>Right-click</b> a Wormhole → <b>Send Message Here</b> to open the message overlay.<br>"
-        + "• <b>Mode A (Navigate)</b>: switches to the target channel, injects text into Discord's editor, then returns — no API needed.<br>"
-        + "• <b>Shift+Click</b> a Wormhole → opens the overlay in the current channel (no navigation).<br>"
-        + "• Supports <b>Ctrl+V image paste</b> — images are attached and sent together with text.<br>"
-        + "• Bottom options: <b>Auto-close</b> / <b>Go to channel</b> (mutual exclusive) / <b>Show notification</b>.<br>"
-        + "• After sending, a clickable toast appears — click it to fly to the target channel.",
+        "• <b>Right-click</b> a Wormhole → <b>Send Message Here</b> to open the message overlay.<br>" +
+        "• <b>Mode A (Navigate)</b>: switches to the target channel, injects text into Discord's editor, then returns — no API needed.<br>" +
+        "• <b>Shift+Click</b> a Wormhole → opens the overlay in the current channel (no navigation).<br>" +
+        "• Supports <b>Ctrl+V image paste</b> — images are attached and sent together with text.<br>" +
+        "• Bottom options: <b>Auto-close</b> / <b>Go to channel</b> (mutual exclusive) / <b>Show notification</b>.<br>" +
+        "• After sending, a clickable toast appears — click it to fly to the target channel.",
 
       fm_sec_wm_api: "⚡ Wormhole — API Mode (Secret)",
       fm_sec_wm_api_content:
-        "• <b>Hold the Wormhole create button (＋) for 3 seconds</b> to unlock the API Mode panel.<br>"
-        + "• <b>Mode B (Direct API)</b>: sends messages via Discord REST API — no page switch, faster, invisible.<br>"
-        + "• Your Token is intercepted silently in the background (from Discord's own requests) — <b>never stored or transmitted</b>, memory only, cleared on page close.<br>"
-        + "• Token detection starts automatically when Mode B is enabled — just use Discord normally and it will be captured.<br>"
-        + "• Supports image upload via <b>multipart/form-data</b> in API mode.<br>"
-        + "• If Token is lost after page refresh, the interceptor restarts automatically when you open the overlay.",
+        "• <b>Hold the Wormhole create button (＋) for 3 seconds</b> to unlock the API Mode panel.<br>" +
+        "• <b>Mode B (Direct API)</b>: sends messages via Discord REST API — no page switch, faster, invisible.<br>" +
+        "• Your Token is intercepted silently in the background (from Discord's own requests) — <b>never stored or transmitted</b>, memory only, cleared on page close.<br>" +
+        "• Token detection starts automatically when Mode B is enabled — just use Discord normally and it will be captured.<br>" +
+        "• Supports image upload via <b>multipart/form-data</b> in API mode.<br>" +
+        "• If Token is lost after page refresh, the interceptor restarts automatically when you open the overlay.",
       welcome_title: "Welcome to {script}",
       select_lang_subtitle: "Please select your interface language",
       help_btn: "📖 Manual",
@@ -299,7 +371,8 @@
       download_start: "🚀 Downloading...",
       download_zip_start: "📦 Zipping {n} files...",
       download_fail: "❌ Download Failed",
-      download_cors_fail: "⚠️ CORS restricted — cannot download directly. Please copy the URL and open it manually to save.",
+      download_cors_fail:
+        "⚠️ CORS restricted — cannot download directly. Please copy the URL and open it manually to save.",
       original_url: "🔗 Original URL",
       convert_all: "⚡ Convert All ({n})",
       convert_imgur: "🖼️ Convert to i.imgur.com",
@@ -362,7 +435,8 @@
       tip_lang: "Language",
       tip_manual: "Manual",
       mod_msg_warn_title: "⚠️ Disable Message Utility?",
-      mod_msg_warn_body: "Message Utility (⠿) is the core of this script.\\nAfter disabling, all ⠿ buttons will disappear.\\n\\nTo re-enable: right-click the Tampermonkey icon → 'Enable ⠿ Message Utility'.",
+      mod_msg_warn_body:
+        "Message Utility (⠿) is the core of this script.\\nAfter disabling, all ⠿ buttons will disappear.\\n\\nTo re-enable: right-click the Tampermonkey icon → 'Enable ⠿ Message Utility'.",
       mod_msg_warn_confirm: "Disable anyway",
       mod_msg_warn_cancel: "Cancel",
       mod_msg_enable_menu: "Enable ⠿ Message Utility",
@@ -370,6 +444,7 @@
       grp_convert: "🔄 Convert >",
       grp_download: "⬇️ Download >",
       grp_system: "⚙️ System >",
+      grp_webhook: "🔗 Webhook >",
       view_main: "Main",
       view_symbols: "Symbols",
 
@@ -419,16 +494,17 @@
       wm_icon_picker_title: "Choose Icon for {name}",
       wm_icon_set_success: "✅ Icon set for {name}",
       wm_icon_empty: "Please add Emoji in the collection module first",
-      wm_title: "Wormhole Controls\n• Click: Create new wormhole\n• Long-press 1s: Open settings menu",
+      wm_title:
+        "Wormhole Controls\n• Click: Create new wormhole\n• Long-press 1s: Open settings menu",
       wm_settings_menu_title: "🌀 Wormhole Settings",
       wm_settings_create: "Create New Wormhole",
       wm_settings_send_mode: "Send Method & API Mode",
       wm_settings_more: "More Settings (Coming Soon)",
       wm_settings_position: "Switch Wormhole Position",
-      wm_settings_position_navbar:    "Navigation Bar",
-      wm_settings_position_titlebar:  "Channel Title Bar",
-      wm_settings_position_input:     "Above Chat Input",
-      wm_settings_position_topleft:   "Top-Left Corner (Fixed)",
+      wm_settings_position_navbar: "Navigation Bar",
+      wm_settings_position_titlebar: "Channel Title Bar",
+      wm_settings_position_input: "Above Chat Input",
+      wm_settings_position_topleft: "Top-Left Corner (Fixed)",
       wm_focus_on: "Disable Focus Mode",
       wm_focus_off: "Enable Focus Mode (Icons Only)",
       wm_focus_size: "Icon Size",
@@ -458,7 +534,8 @@
       wm_send_show_toast: "Show send notification",
       wm_send_goto_channel: "Go to channel after send",
       wm_send_paste_hint: "📋 Ctrl+V to paste image",
-      wm_send_token_warn: "⚠️ Token expired. Please re-open the API panel to detect again. Using Mode A this time.",
+      wm_send_token_warn:
+        "⚠️ Token expired. Please re-open the API panel to detect again. Using Mode A this time.",
       wm_send_channel_fail: "❌ Channel load failed",
       wm_send_editor_missing: "❌ Editor not found",
       wm_send_uploading: "📎 Uploading {n} image(s)...",
@@ -467,11 +544,13 @@
       wm_api_mode_label_a: "Mode A — Navigate (Default)",
       wm_api_mode_label_b: "Mode B — Direct API (No page switch)",
       wm_api_warning_title: "⚠️ Risk Notice",
-      wm_api_warning_body: "Using a User Token to call the Discord API violates Discord's Terms of Service. Your account may be banned. Use at your own risk.",
+      wm_api_warning_body:
+        "Using a User Token to call the Discord API violates Discord's Terms of Service. Your account may be banned. Use at your own risk.",
       wm_api_token_status_none: "Token: Not detected",
       wm_api_token_status_ready: "Token: Ready (memory only)",
       wm_api_detect_btn: "Detect My Token",
-      wm_api_detect_confirm: "【Token Interception Consent】\n\nBy clicking OK, you authorize this script to intercept your Discord Token for this session.\n\n🔒 Security Guarantees:\n• Stored in memory only — never written to disk or any storage\n• Automatically cleared when the page is closed or refreshed\n• Never transmitted to any external server — all requests go directly to discord.com\n• Used exclusively for POST /channels/{id}/messages on your behalf\n\n⚠️ Acknowledgement:\n• You understand this session token grants message-sending access\n• You accept full responsibility for all messages sent via this mode\n\nProceed only if you trust this script and understand the above.",
+      wm_api_detect_confirm:
+        "【Token Interception Consent】\n\nBy clicking OK, you authorize this script to intercept your Discord Token for this session.\n\n🔒 Security Guarantees:\n• Stored in memory only — never written to disk or any storage\n• Automatically cleared when the page is closed or refreshed\n• Never transmitted to any external server — all requests go directly to discord.com\n• Used exclusively for POST /channels/{id}/messages on your behalf\n\n⚠️ Acknowledgement:\n• You understand this session token grants message-sending access\n• You accept full responsibility for all messages sent via this mode\n\nProceed only if you trust this script and understand the above.",
       wm_api_detect_waiting: "⬆️ Switch to any channel once to capture Token",
       wm_api_enable_btn: "Enable API Mode",
       wm_api_disable_btn: "Disable API Mode (back to Mode A)",
@@ -509,14 +588,40 @@
       menu_export: "📤 Export Settings (Backup)",
       menu_import: "⬇️ Import Settings (Restore)",
       menu_change_lang: "🌐 Change Language",
-      custom_lang_desc: "Click 「📤 Export」 to get the English source JSON. After translating, click 「📥 Import」 to apply your language.\nNo matching language? Try: Deutsch (Benutzerdefinierte Übersetzung) · ภาษาไทย (ภาษาที่กำหนดเอง) · Türkçe (Özel Çeviri) · Polski (Niestandardowe tłumaczenie) · Italiano (Traduzione personalizzata)",
+      custom_lang_desc:
+        "Click 「📤 Export」 to get the English source JSON. After translating, click 「📥 Import」 to apply your language.\nNo matching language? Try: Deutsch (Benutzerdefinierte Übersetzung) · ภาษาไทย (ภาษาที่กำหนดเอง) · Türkçe (Özel Çeviri) · Polski (Niestandardowe tłumaczenie) · Italiano (Traduzione personalizzata)",
       custom_lang_export: "📤 Export Text",
       custom_lang_import: "📥 Import Text",
       custom_lang_apply: "✅ Apply & Reload",
       custom_lang_loaded: "✅ Loaded: {name}",
-      custom_lang_activate: "🌐 Apply \"{name}\"",
+      custom_lang_activate: '🌐 Apply "{name}"',
       custom_lang_json_error: "⚠️ JSON Error: {msg}",
       custom_lang_paste_hint: "Paste the translated JSON here …",
+      copy_media_prefixed: "✅ Copied {n} media link(s) with prefix",
+      copy_media_urls: "✅ Copied {n} media link(s)",
+      wormhole_reset_success: "✅ Data cleared, refreshing…",
+      wh_panel_title: "🔗 Webhook Manager",
+      wh_enable: "Enable Webhook",
+      wh_tip: "Webhook Manager",
+      wh_add_name_ph: "Label (e.g. Animals)",
+      wh_add_url_ph: "https://discord.com/api/webhooks/…",
+      wh_btn_add: "＋ Add",
+      wh_btn_test: "Test",
+      wh_btn_delete: "Delete",
+      wh_test_ok: "✅ Test sent!",
+      wh_test_fail: "❌ Test failed",
+      wh_send_content: "📨 Send message to Webhook ▶",
+      wh_send_urls: "🔗 Send URLs to Webhook ▶",
+      wh_no_webhooks: "No Webhooks yet. Add one below.",
+      wh_send_ok: "✅ Sent to [{name}]",
+      wh_send_fail: "❌ Send failed [{name}]",
+      wh_no_urls: "⚠️ No URLs found in this message",
+      wh_url_invalid: "⚠️ Invalid Webhook URL",
+      wh_btn_edit: "Edit",
+      wh_btn_save: "Save",
+      wh_btn_cancel: "Cancel",
+      wh_keep_source: "📎 Include source link",
+      wh_keep_source_tip: "When checked, the original message link is appended to the sent content.",
     },
 
     "zh-TW": {
@@ -554,30 +659,30 @@
 
       fm_sec_wormhole: "🌀 蟲洞 — 基本操作",
       fm_sec_wormhole_content:
-        "• 點擊 <span class='help-key'>＋</span> 建立按鈕，貼上 Discord 頻道網址即可建立蟲洞捷徑。<br>"
-        + "• <b>單擊</b>蟲洞 → 立即跳轉至該頻道。<br>"
-        + "• <b>右鍵</b>蟲洞 → 開啟選單：重新命名、刪除、設定圖示、移動到分組、切換 VIP。<br>"
-        + "• <b>VIP（★）</b>：設為 VIP 的蟲洞會自動置頂顯示。<br>"
-        + "• <b>分組</b>：透過右鍵 → 移動到分組，可將蟲洞整理進資料夾。<br>"
-        + "• <b>聚焦模式</b>：僅顯示圖示的精簡視圖，可透過蟲洞面板右上角按鈕切換。",
+        "• 點擊 <span class='help-key'>＋</span> 建立按鈕，貼上 Discord 頻道網址即可建立蟲洞捷徑。<br>" +
+        "• <b>單擊</b>蟲洞 → 立即跳轉至該頻道。<br>" +
+        "• <b>右鍵</b>蟲洞 → 開啟選單：重新命名、刪除、設定圖示、移動到分組、切換 VIP。<br>" +
+        "• <b>VIP（★）</b>：設為 VIP 的蟲洞會自動置頂顯示。<br>" +
+        "• <b>分組</b>：透過右鍵 → 移動到分組，可將蟲洞整理進資料夾。<br>" +
+        "• <b>聚焦模式</b>：僅顯示圖示的精簡視圖，可透過蟲洞面板右上角按鈕切換。",
 
       fm_sec_wm_send: "✉️ 蟲洞 — 傳送訊息",
       fm_sec_wm_send_content:
-        "• <b>右鍵</b>蟲洞 → <b>在此頻道傳送訊息</b>，開啟傳訊輸入欄。<br>"
-        + "• <b>方案 A（跳頁模式）</b>：自動切換至目標頻道，將文字注入 Discord 編輯器後返回，無需 API。<br>"
-        + "• <b>Shift + 點擊</b>蟲洞 → 在當前頻道開啟輸入欄（不跳頁）。<br>"
-        + "• 支援 <b>Ctrl+V 貼上圖片</b>，圖片與文字會合併成一則訊息一起送出。<br>"
-        + "• 底部選項：<b>傳送後自動關閉</b> / <b>傳送後前往該頻道</b>（兩者互斥）/ <b>顯示傳訊通知</b>。<br>"
-        + "• 傳送成功後會出現可點擊的通知，點擊後立即飛往目標頻道。",
+        "• <b>右鍵</b>蟲洞 → <b>在此頻道傳送訊息</b>，開啟傳訊輸入欄。<br>" +
+        "• <b>方案 A（跳頁模式）</b>：自動切換至目標頻道，將文字注入 Discord 編輯器後返回，無需 API。<br>" +
+        "• <b>Shift + 點擊</b>蟲洞 → 在當前頻道開啟輸入欄（不跳頁）。<br>" +
+        "• 支援 <b>Ctrl+V 貼上圖片</b>，圖片與文字會合併成一則訊息一起送出。<br>" +
+        "• 底部選項：<b>傳送後自動關閉</b> / <b>傳送後前往該頻道</b>（兩者互斥）/ <b>顯示傳訊通知</b>。<br>" +
+        "• 傳送成功後會出現可點擊的通知，點擊後立即飛往目標頻道。",
 
       fm_sec_wm_api: "⚡ 蟲洞 — API 模式（彩蛋）",
       fm_sec_wm_api_content:
-        "• <b>長按蟲洞建立按鈕（＋）3 秒</b>，即可解鎖 API 模式設定面板。<br>"
-        + "• <b>方案 B（直接 API）</b>：透過 Discord REST API 傳送訊息，無需切換頁面，速度更快、更隱匿。<br>"
-        + "• Token 由腳本在背景靜默攔截（來自 Discord 自身發出的請求），<b>絕不儲存或外傳</b>，僅存於記憶體，關閉頁面即消失。<br>"
-        + "• 啟用方案 B 後，Token 偵測會自動在背景運行，正常使用 Discord 即可自動捕獲，無需手動操作。<br>"
-        + "• API 模式支援圖片上傳（multipart/form-data），圖文可一次傳出。<br>"
-        + "• 頁面重新整理後若 Token 遺失，開啟傳訊視窗時攔截器會自動重啟。",
+        "• <b>長按蟲洞建立按鈕（＋）3 秒</b>，即可解鎖 API 模式設定面板。<br>" +
+        "• <b>方案 B（直接 API）</b>：透過 Discord REST API 傳送訊息，無需切換頁面，速度更快、更隱匿。<br>" +
+        "• Token 由腳本在背景靜默攔截（來自 Discord 自身發出的請求），<b>絕不儲存或外傳</b>，僅存於記憶體，關閉頁面即消失。<br>" +
+        "• 啟用方案 B 後，Token 偵測會自動在背景運行，正常使用 Discord 即可自動捕獲，無需手動操作。<br>" +
+        "• API 模式支援圖片上傳（multipart/form-data），圖文可一次傳出。<br>" +
+        "• 頁面重新整理後若 Token 遺失，開啟傳訊視窗時攔截器會自動重啟。",
       select_lang_subtitle: "請選擇您的介面語言 / Please Select Language",
       help_btn: "📖 使用說明",
       cancel_btn: "✕ 關閉",
@@ -601,7 +706,8 @@
       download_start: "🚀 開始下載...",
       download_zip_start: "📦 正在打包 {n} 個檔案...",
       download_fail: "❌ 下載失敗",
-      download_cors_fail: "⚠️ 此縮圖受 CORS 限制，無法直接下載。請複製網址後手動開啟儲存。",
+      download_cors_fail:
+        "⚠️ 此縮圖受 CORS 限制，無法直接下載。請複製網址後手動開啟儲存。",
       original_url: "🔗 原始網址",
       convert_all: "⚡ 全部轉為 ({n})",
       convert_imgur: "🖼️ 轉為 i.imgur.com",
@@ -664,7 +770,8 @@
       tip_lang: "切換語言",
       tip_manual: "使用說明",
       mod_msg_warn_title: "⚠️ 確定停用訊息工具？",
-      mod_msg_warn_body: "⠿ 訊息工具是本腳本的核心功能。\\n停用後，所有訊息的 ⠿ 按鈕將會消失。\\n\\n若要重新啟用：右鍵點擊 Tampermonkey 圖示 → 選擇「啟用 ⠿ 訊息工具」。",
+      mod_msg_warn_body:
+        "⠿ 訊息工具是本腳本的核心功能。\\n停用後，所有訊息的 ⠿ 按鈕將會消失。\\n\\n若要重新啟用：右鍵點擊 Tampermonkey 圖示 → 選擇「啟用 ⠿ 訊息工具」。",
       mod_msg_warn_confirm: "仍要停用",
       mod_msg_warn_cancel: "取消",
       mod_msg_enable_menu: "啟用 ⠿ 訊息工具",
@@ -672,6 +779,7 @@
       grp_convert: "🔄 轉換相關 >",
       grp_download: "⬇️ 下載相關 >",
       grp_system: "⚙️ 系統與符號 >",
+      grp_webhook: "🔗 Webhook >",
       view_main: "主選單",
       view_symbols: "自定義字串",
 
@@ -725,10 +833,10 @@
       wm_settings_send_mode: "傳訊方式與 API 模式",
       wm_settings_more: "更多設定（敬請期待）",
       wm_settings_position: "切換蟲洞顯示位置",
-      wm_settings_position_navbar:    "導航欄",
-      wm_settings_position_titlebar:  "頻道標題欄",
-      wm_settings_position_input:     "訊息輸入框上緣",
-      wm_settings_position_topleft:   "左上角（固定懸浮）",
+      wm_settings_position_navbar: "導航欄",
+      wm_settings_position_titlebar: "頻道標題欄",
+      wm_settings_position_input: "訊息輸入框上緣",
+      wm_settings_position_topleft: "左上角（固定懸浮）",
       wm_focus_on: "關閉聚焦模式",
       wm_focus_off: "開啟聚焦模式（僅顯示圖示）",
       wm_focus_size: "圖示大小",
@@ -758,7 +866,8 @@
       wm_send_show_toast: "顯示傳訊通知",
       wm_send_goto_channel: "傳送後前往該頻道",
       wm_send_paste_hint: "📋 可 Ctrl+V 貼上圖片",
-      wm_send_token_warn: "⚠️ Token 已失效，請重新開啟彩蛋面板偵測。本次使用方案 A。",
+      wm_send_token_warn:
+        "⚠️ Token 已失效，請重新開啟彩蛋面板偵測。本次使用方案 A。",
       wm_send_channel_fail: "❌ 頻道載入失敗",
       wm_send_editor_missing: "❌ 找不到輸入框",
       wm_send_uploading: "📎 上傳 {n} 張圖片...",
@@ -767,11 +876,13 @@
       wm_api_mode_label_a: "方案 A — 跳頁模式（預設）",
       wm_api_mode_label_b: "方案 B — 直接 API（不切換頁面）",
       wm_api_warning_title: "⚠️ 風險聲明",
-      wm_api_warning_body: "使用 User Token 呼叫 Discord API 違反 Discord 服務條款，帳號可能面臨封禁風險，請自行評估。",
+      wm_api_warning_body:
+        "使用 User Token 呼叫 Discord API 違反 Discord 服務條款，帳號可能面臨封禁風險，請自行評估。",
       wm_api_token_status_none: "Token：尚未偵測",
       wm_api_token_status_ready: "Token：已就緒（僅存於記憶體）",
       wm_api_detect_btn: "偵測我的 Token",
-      wm_api_detect_confirm: "【Token 攔截授權同意書】\n\n點擊「確認」即代表您同意本腳本在本次工作階段中攔截您的 Discord Token。\n\n🔒 安全保證：\n• 僅存於瀏覽器記憶體，絕不寫入任何儲存空間或磁碟\n• 頁面關閉或重新整理後自動清除，不留任何痕跡\n• 絕不傳送至任何外部伺服器，所有請求直接發往 discord.com\n• 僅用於代您執行 POST /channels/{id}/messages 操作\n\n⚠️ 使用者聲明：\n• 您了解此 Token 具備傳送訊息的能力\n• 透過本模式傳送的所有訊息，責任由您自行承擔\n\n請在確認信任本腳本且理解上述內容後再繼續。",
+      wm_api_detect_confirm:
+        "【Token 攔截授權同意書】\n\n點擊「確認」即代表您同意本腳本在本次工作階段中攔截您的 Discord Token。\n\n🔒 安全保證：\n• 僅存於瀏覽器記憶體，絕不寫入任何儲存空間或磁碟\n• 頁面關閉或重新整理後自動清除，不留任何痕跡\n• 絕不傳送至任何外部伺服器，所有請求直接發往 discord.com\n• 僅用於代您執行 POST /channels/{id}/messages 操作\n\n⚠️ 使用者聲明：\n• 您了解此 Token 具備傳送訊息的能力\n• 透過本模式傳送的所有訊息，責任由您自行承擔\n\n請在確認信任本腳本且理解上述內容後再繼續。",
       wm_api_detect_waiting: "⬆️ 請切換到任意頻道一次，即可自動捕捉 Token",
       wm_api_enable_btn: "啟用 API 模式",
       wm_api_disable_btn: "停用 API 模式（返回方案 A）",
@@ -784,11 +895,11 @@
       wm_api_send_fail: "❌ API 傳送失敗，請查看主控台",
 
       em_col_title: "我的收藏庫",
-      em_col_add_success: '已儲存到「{g}」！',
+      em_col_add_success: "已儲存到「{g}」！",
       em_col_tab_new: "新增分頁",
       em_col_tab_prompt: "新分頁名稱：",
       em_col_empty_tab: "此分頁尚無內容。",
-      em_col_del_tab_confirm: '刪除分頁「{n}」及其所有項目？',
+      em_col_del_tab_confirm: "刪除分頁「{n}」及其所有項目？",
       em_modal_choose_tab: "儲存到哪個收藏庫？",
       em_modal_create_new: "+ 建立新的...",
       em_tip_pick: "設定封面圖",
@@ -801,7 +912,8 @@
       menu_export: "📤 匯出設定 (Backup)",
       menu_import: "⬇️ 匯入設定 (Restore)",
       menu_change_lang: "🌐 變更語言 (Language)",
-      custom_lang_desc: "點「📤 匯出文本」取得英文原文 JSON，翻譯後再點「📥 匯入文本」貼回即可套用。",
+      custom_lang_desc:
+        "點「📤 匯出文本」取得英文原文 JSON，翻譯後再點「📥 匯入文本」貼回即可套用。",
       custom_lang_export: "📤 匯出文本",
       custom_lang_import: "📥 匯入文本",
       custom_lang_apply: "✅ 套用並重新整理",
@@ -809,9 +921,32 @@
       custom_lang_activate: "🌐 套用「{name}」",
       custom_lang_json_error: "⚠️ JSON 格式錯誤：{msg}",
       custom_lang_paste_hint: "貼上翻譯後的 JSON 文本 …",
-    },
-
-    "zh-CN": {
+      copy_media_prefixed: "✅ 已複製 {n} 個帶前綴媒體連結",
+      copy_media_urls: "✅ 已複製 {n} 個媒體連結",
+      wormhole_reset_success: "✅ 資料已清除，正在重新整理…",
+      wh_panel_title: "🔗 Webhook 管理",
+      wh_enable: "啟用 Webhook",
+      wh_tip: "Webhook 管理",
+      wh_add_name_ph: "標籤（例：動物）",
+      wh_add_url_ph: "https://discord.com/api/webhooks/…",
+      wh_btn_add: "＋ 新增",
+      wh_btn_test: "測試",
+      wh_btn_delete: "刪除",
+      wh_test_ok: "✅ 測試已送出！",
+      wh_test_fail: "❌ 測試失敗",
+      wh_send_content: "📨 傳送訊息至 Webhook ▶",
+      wh_send_urls: "🔗 傳送網址至 Webhook ▶",
+      wh_no_webhooks: "尚未新增任何 Webhook",
+      wh_send_ok: "✅ 已傳送至 [{name}]",
+      wh_send_fail: "❌ 傳送失敗 [{name}]",
+      wh_no_urls: "⚠️ 此訊息中無網址",
+      wh_url_invalid: "⚠️ Webhook 網址無效",
+      wh_btn_edit: "編輯",
+      wh_btn_save: "儲存",
+      wh_btn_cancel: "取消",
+      wh_keep_source: "📎 附上來源連結",
+      wh_keep_source_tip: "勾選後，傳送內容末尾會附上該訊息的原始連結。",
+    },    "zh-CN": {
       name: "简体中文",
       fm_pinned_channels: "★ 收藏频道",
       fm_toggle_flat: "切换至：平铺显示",
@@ -833,7 +968,7 @@
         "• 点击 <span class='help-key'>★</span> 或 <span class='help-key'>👤+</span> 加入收藏。<br>• <span class='help-key'>右键</span> 移除收藏。<br>• <span class='help-key'>Shift+右键</span> 可快速连续移除 (无需确认)。",
       fm_sec_search: "🔍 两段式搜索 (默认)",
       fm_sec_search_content:
-        "• 点击收藏按钮后，会自动执行\"预热 -> 输入 -> 锁定\"流程。<br>• 这是为了修复 Discord\"直接填入搜索不到\"的 Bug。<br>• 搜索时会进行 <span style='color:#2dc770'>精准比对</span>，确保不会转发错人。",
+        '• 点击收藏按钮后，会自动执行"预热 -> 输入 -> 锁定"流程。<br>• 这是为了修复 Discord"直接填入搜索不到"的 Bug。<br>• 搜索时会进行 <span style=\'color:#2dc770\'>精准比对</span>，确保不会转发错人。',
       fm_sec_fuzzy: "⏎ 模糊搜索",
       fm_sec_fuzzy_content:
         "• 点击按钮右侧的 <span class='help-key'>⏎</span> 小箭头。<br>• 仅输入前两个字或第一个单词，适合名称有变动或符号的频道。",
@@ -846,30 +981,30 @@
 
       fm_sec_wormhole: "🌀 虫洞 — 基本操作",
       fm_sec_wormhole_content:
-        "• 点击 <span class='help-key'>＋</span> 创建按钮，粘贴 Discord 频道网址即可创建虫洞快捷方式。<br>"
-        + "• <b>单击</b>虫洞 → 立即跳转至该频道。<br>"
-        + "• <b>右键</b>虫洞 → 打开菜单：重命名、删除、设置图标、移动到分组、切换 VIP。<br>"
-        + "• <b>VIP（★）</b>：设为 VIP 的虫洞会自动置顶显示。<br>"
-        + "• <b>分组</b>：通过右键 → 移动到分组，可将虫洞整理进文件夹。<br>"
-        + "• <b>聚焦模式</b>：仅显示图标的精简视图，可通过虫洞面板右上角按钮切换。",
+        "• 点击 <span class='help-key'>＋</span> 创建按钮，粘贴 Discord 频道网址即可创建虫洞快捷方式。<br>" +
+        "• <b>单击</b>虫洞 → 立即跳转至该频道。<br>" +
+        "• <b>右键</b>虫洞 → 打开菜单：重命名、删除、设置图标、移动到分组、切换 VIP。<br>" +
+        "• <b>VIP（★）</b>：设为 VIP 的虫洞会自动置顶显示。<br>" +
+        "• <b>分组</b>：通过右键 → 移动到分组，可将虫洞整理进文件夹。<br>" +
+        "• <b>聚焦模式</b>：仅显示图标的精简视图，可通过虫洞面板右上角按钮切换。",
 
       fm_sec_wm_send: "✉️ 虫洞 — 发送消息",
       fm_sec_wm_send_content:
-        "• <b>右键</b>虫洞 → <b>在此频道发送消息</b>，打开消息输入框。<br>"
-        + "• <b>方案 A（跳页模式）</b>：自动切换至目标频道，将文字注入 Discord 编辑器后返回，无需 API。<br>"
-        + "• <b>Shift + 点击</b>虫洞 → 在当前频道打开输入框（不跳页）。<br>"
-        + "• 支持 <b>Ctrl+V 粘贴图片</b>，图片与文字会合并成一条消息一起发送。<br>"
-        + "• 底部选项：<b>发送后自动关闭</b> / <b>发送后前往该频道</b>（二者互斥）/ <b>显示发送通知</b>。<br>"
-        + "• 发送成功后会出现可点击的通知，点击后立即跳转到目标频道。",
+        "• <b>右键</b>虫洞 → <b>在此频道发送消息</b>，打开消息输入框。<br>" +
+        "• <b>方案 A（跳页模式）</b>：自动切换至目标频道，将文字注入 Discord 编辑器后返回，无需 API。<br>" +
+        "• <b>Shift + 点击</b>虫洞 → 在当前频道打开输入框（不跳页）。<br>" +
+        "• 支持 <b>Ctrl+V 粘贴图片</b>，图片与文字会合并成一条消息一起发送。<br>" +
+        "• 底部选项：<b>发送后自动关闭</b> / <b>发送后前往该频道</b>（二者互斥）/ <b>显示发送通知</b>。<br>" +
+        "• 发送成功后会出现可点击的通知，点击后立即跳转到目标频道。",
 
       fm_sec_wm_api: "⚡ 虫洞 — API 模式（彩蛋）",
       fm_sec_wm_api_content:
-        "• <b>长按虫洞创建按钮（＋）3 秒</b>，即可解锁 API 模式设置面板。<br>"
-        + "• <b>方案 B（直接 API）</b>：通过 Discord REST API 发送消息，无需切换页面，速度更快、更隐蔽。<br>"
-        + "• Token 由脚本在后台静默拦截（来自 Discord 自身发出的请求），<b>绝不存储或外传</b>，仅存于内存，关闭页面即消失。<br>"
-        + "• 启用方案 B 后，Token 检测会自动在后台运行，正常使用 Discord 即可自动捕获，无需手动操作。<br>"
-        + "• API 模式支持图片上传（multipart/form-data），图文可一次发出。<br>"
-        + "• 页面刷新后若 Token 丢失，打开发送窗口时拦截器会自动重启。",
+        "• <b>长按虫洞创建按钮（＋）3 秒</b>，即可解锁 API 模式设置面板。<br>" +
+        "• <b>方案 B（直接 API）</b>：通过 Discord REST API 发送消息，无需切换页面，速度更快、更隐蔽。<br>" +
+        "• Token 由脚本在后台静默拦截（来自 Discord 自身发出的请求），<b>绝不存储或外传</b>，仅存于内存，关闭页面即消失。<br>" +
+        "• 启用方案 B 后，Token 检测会自动在后台运行，正常使用 Discord 即可自动捕获，无需手动操作。<br>" +
+        "• API 模式支持图片上传（multipart/form-data），图文可一次发出。<br>" +
+        "• 页面刷新后若 Token 丢失，打开发送窗口时拦截器会自动重启。",
 
       welcome_title: "欢迎使用 {script}",
       select_lang_subtitle: "请选择您的界面语言",
@@ -877,7 +1012,7 @@
       cancel_btn: "✕ 关闭",
       security_notice_title: "⚠️ 安全与免责声明",
       security_notice_content:
-        "本脚本提供的\"网址转换\"功能（如 vxtwitter, kkinstagram 等）皆依赖第三方开源服务。\n若您不信任这些第三方服务，请勿点击转换选项。\n请使用者自行具备辨识网址安全性的能力。",
+        '本脚本提供的"网址转换"功能（如 vxtwitter, kkinstagram 等）皆依赖第三方开源服务。\n若您不信任这些第三方服务，请勿点击转换选项。\n请使用者自行具备辨识网址安全性的能力。',
       manual_content:
         "【图标说明】\n• ◫/≡ : 切换菜单风格 (平面 / 群组)\n• ⇄ : 点击逻辑互换 (复制 / 填充)\n• ␣ : 尾部添加空格\n• ↵ : 尾部添加换行\n• ☆ : 自定义字符串面板\n• 🖱️ : 切换触发模式 (悬停 / 点击)\n• 🌐 : 切换语言\n\n【操作方式】\n• **单击**: 复制 (默认)\n• **长按 (0.5秒)**: 填充至输入框\n• **Shift+单击**: 同时复制并填充 (保持菜单开启)",
       manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ 快速开始</div><div class='mm-content'>将鼠标悬停在任意 Discord 消息上 → 右上角出现复制按钮。<br><b>单击</b>复制文字 · <b>长按 0.5秒</b>填充到输入框 · <b>Shift+单击</b>同时复制并填充（菜单保持开启）。<br>通过工具栏的 <span class='mm-key'>🖱️</span> 可切换为<span class='mm-key'>点击模式</span>，改为手动触发。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 复制菜单 — 文字与链接</div><div class='mm-content'>• <b>复制文字</b>：复制消息的完整文字内容。<br>• <b>复制媒体网址</b>：复制消息中图片或视频的直接链接。<br>• <b>复制第一个链接（已净化）</b>：提取并清除追踪参数的第一个 URL。<br>• <b>复制所有链接</b>：将消息中所有 URL 每行一个一次复制。<br>• <b>复制为 Markdown</b>：格式化为 <span class='mm-key'>[文字](URL)</span> 供 Markdown 使用。<br>• <b>插入 Markdown 链接</b>：直接将链接格式注入 Discord 的输入框。<br>• <b>隐藏格式</b>：自动包裹为 <span class='mm-key'>|| 剧透内容 ||</span> 格式。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ 下载</div><div class='mm-content'>• <b>下载图片/媒体</b>：下载该条消息中的所有图片或视频。<br>• <b>下载为 ZIP</b>：多个文件自动打包为单一 ZIP 压缩包。<br>• 下载失败时自动重试，并备援切换至备用链接。</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 网址转换</div><div class='mm-content'><b>Twitter / X</b>：在 twitter.com、x.com、vxtwitter、fixupx、fxtwitter、cunnyx 之间互转，修复 Discord 预览。<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com，让嵌入预览正常显示。<br><b>Bilibili</b>：转换为 FX Bilibili 或 VX Bilibili 获得更好的嵌入效果。<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net 互转，在 Discord 直接显示插图预览。<br><b>批量转换</b>：<span class='mm-key'>⚡ 全部转为 (N)</span> 一次处理消息中同类型的所有链接。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ 工具栏图标说明</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> 切换菜单风格：平面 / 群组</div><div><span class='mm-key'>⇄</span> 互换点击逻辑：复制 ↔ 填充</div><div><span class='mm-key'>␣</span> 填充时在尾部附加空格</div><div><span class='mm-key'>↵</span> 填充时在尾部附加换行</div><div><span class='mm-key'>☆</span> 自定义字符串面板（常用片段）</div><div><span class='mm-key'>🖱️</span> 切换触发方式：悬停 / 点击</div><div><span class='mm-key'>🌐</span> 切换界面语言</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ 自定义字符串面板</div><div class='mm-content'>• 储存常用的文字片段（问候语、模板、代码块等）。<br>• 单击复制 · 长按填充到输入框。<br>• <span class='mm-key'>Shift+单击</span> 可连续删除条目，无需逐一确认。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 虫洞 — 总览</div><div class='mm-content'>虫洞是存在 Discord 侧边栏的<b>一键频道快捷方式</b>。点击 <span class='mm-key'>＋</span> 并粘贴 Discord 频道网址即可创建。<br><b>单击</b> <span class='mm-key'>＋</span> → 创建新虫洞 · <b>长按 1 秒</b> → 打开设置菜单。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ 导航与管理</div><div class='mm-content'>• <b>单击</b>虫洞 → 立即跳转至该频道。<br>• <b>右键</b>虫洞 → 菜单：重命名 · 删除 · 设置图标 · 移至群组 · 切换 VIP。<br>• <b>VIP <span class='mm-key'>★</span></b>：设为 VIP 的虫洞自动置顶显示。<br>• <b>分组</b>：右键 → 移动到分组，整理进文件夹。<br>• <b>聚焦模式</b>：图标精简视图，虫洞面板右上角按钮切换。<br>• <b>历史记录</b>（紫色标签）：自动记录最近访问频道，点击即可返回。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ 发送消息</div><div class='mm-content'>• <b>右键</b>虫洞 → <b>在此频道发送消息</b> 打开输入框。<br>• <span class='mm-key'>Ctrl+V</span> 直接粘贴图片，图文合为一条消息一起发送。<br>• 底部选项（跨次保留）：自动关闭 · 前往频道 · 显示通知。<br>• 发送后弹出 3 秒可点击通知，点击即跳转到目标频道。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 设置菜单与 API 模式</div><div class='mm-content'>• <b>长按 <span class='mm-key'>＋</span> 1 秒</b>即可打开虫洞设置菜单。<br>• 菜单项目：<span class='mm-key'>➕ 创建新虫洞</span> · <span class='mm-key'>✉️ 发送方式与 API 模式</span> · <span class='mm-key'>⚙️ 更多设置</span>（可扩展）。<br>• 点击「<b>发送方式与 API 模式</b>」→ 打开 API 设置面板：<br>&nbsp;&nbsp;— <b>方案 A（跳页）</b>：自动切换频道，注入文字后返回，无需 Token。<br>&nbsp;&nbsp;— <b>方案 B（直接 API）</b>：REST API 直发，不切换页面，即时且隐蔽。<br>• Token 由后台静默拦截 Discord 自身请求取得——<b>绝不写入磁盘或外传。</b><br>• 页面刷新后：打开发送输入框时拦截器会自动重启。</div></div></div></div>`,
@@ -895,7 +1030,8 @@
       download_start: "🚀 开始下载...",
       download_zip_start: "📦 正在打包 {n} 个文件...",
       download_fail: "❌ 下载失败",
-      download_cors_fail: "⚠️ 此缩略图受 CORS 限制，无法直接下载。请复制网址后手动打开保存。",
+      download_cors_fail:
+        "⚠️ 此缩略图受 CORS 限制，无法直接下载。请复制网址后手动打开保存。",
       original_url: "🔗 原始网址",
       convert_all: "⚡ 全部转为 ({n})",
       convert_imgur: "🖼️ 转为 i.imgur.com",
@@ -958,7 +1094,8 @@
       tip_lang: "切换语言",
       tip_manual: "使用说明",
       mod_msg_warn_title: "⚠️ 确定停用消息工具？",
-      mod_msg_warn_body: "⠿ 消息工具是本脚本的核心功能。\\n停用后，所有消息的 ⠿ 按鈕将会消失。\\n\\n若要重新启用：右键点击 Tampermonkey 图标 → 选择「启用 ⠿ 消息工具」。",
+      mod_msg_warn_body:
+        "⠿ 消息工具是本脚本的核心功能。\\n停用后，所有消息的 ⠿ 按鈕将会消失。\\n\\n若要重新启用：右键点击 Tampermonkey 图标 → 选择「启用 ⠿ 消息工具」。",
       mod_msg_warn_confirm: "仍要停用",
       mod_msg_warn_cancel: "取消",
       mod_msg_enable_menu: "启用 ⠿ 消息工具",
@@ -966,6 +1103,7 @@
       grp_convert: "🔄 转换相关 >",
       grp_download: "⬇️ 下载相关 >",
       grp_system: "⚙️ 系统与符号 >",
+      grp_webhook: "🔗 Webhook >",
       view_main: "主菜单",
       view_symbols: "自定义字符串",
 
@@ -979,7 +1117,7 @@
       em_btn_target_title: "准心模式：点击画面上的 GIF/表情 以直接收藏",
       em_btn_save_this: "将此项目加入收藏库",
       em_no_favs: "尚无收藏",
-      em_del_confirm: "删除\"{k}\"?",
+      em_del_confirm: '删除"{k}"?',
       em_note_prompt: "备注：",
       em_set_cover_success: "已设定封面图！",
 
@@ -1004,9 +1142,9 @@
 
       wm_group_prompt: "请输入新分组名称：",
       wm_edit_group: "编辑分组名称：",
-      wm_group_del_confirm: "解散分组\"{n}\"？(内含虫洞将会保留)",
+      wm_group_del_confirm: '解散分组"{n}"？(内含虫洞将会保留)',
       wm_group_select_prompt:
-        "请输入数字选择分组：\n\n0. [根目录/未分类]\n{list}\n\n留空并按下确认可创建\"新分组\"：",
+        '请输入数字选择分组：\n\n0. [根目录/未分类]\n{list}\n\n留空并按下确认可创建"新分组"：',
       wm_group_invalid: "无效的分组选择！",
       wm_move_prompt: "移动到哪个分组？(输入数字)\n\n{list}",
       wm_icon_picker_title: "选择 {name} 的图标",
@@ -1018,10 +1156,10 @@
       wm_settings_send_mode: "发送方式与 API 模式",
       wm_settings_more: "更多设置（敬请期待）",
       wm_settings_position: "切换虫洞显示位置",
-      wm_settings_position_navbar:    "导航栏",
-      wm_settings_position_titlebar:  "频道标题栏",
-      wm_settings_position_input:     "消息输入框上方",
-      wm_settings_position_topleft:   "左上角（固定悬浮）",
+      wm_settings_position_navbar: "导航栏",
+      wm_settings_position_titlebar: "频道标题栏",
+      wm_settings_position_input: "消息输入框上方",
+      wm_settings_position_topleft: "左上角（固定悬浮）",
       wm_focus_on: "关闭聚焦模式",
       wm_focus_off: "开启聚焦模式（仅显示图标）",
       wm_focus_size: "图标大小",
@@ -1051,7 +1189,8 @@
       wm_send_show_toast: "显示发送通知",
       wm_send_goto_channel: "发送后前往该频道",
       wm_send_paste_hint: "📋 可 Ctrl+V 粘贴图片",
-      wm_send_token_warn: "⚠️ Token 已失效，请重新打开彩蛋面板检测。本次使用方案 A。",
+      wm_send_token_warn:
+        "⚠️ Token 已失效，请重新打开彩蛋面板检测。本次使用方案 A。",
       wm_send_channel_fail: "❌ 频道加载失败",
       wm_send_editor_missing: "❌ 找不到输入框",
       wm_send_uploading: "📎 上传 {n} 张图片...",
@@ -1060,11 +1199,13 @@
       wm_api_mode_label_a: "方案 A — 跳页模式（默认）",
       wm_api_mode_label_b: "方案 B — 直接 API（不切换页面）",
       wm_api_warning_title: "⚠️ 风险声明",
-      wm_api_warning_body: "使用 User Token 调用 Discord API 违反 Discord 服务条款，账号可能面临封禁风险，请自行评估。",
+      wm_api_warning_body:
+        "使用 User Token 调用 Discord API 违反 Discord 服务条款，账号可能面临封禁风险，请自行评估。",
       wm_api_token_status_none: "Token：尚未检测",
       wm_api_token_status_ready: "Token：已就绪（仅存于内存）",
       wm_api_detect_btn: "检测我的 Token",
-      wm_api_detect_confirm: "【Token 拦截授权同意书】\n\n点击「确认」即代表您同意本脚本在本次会话中拦截您的 Discord Token。\n\n🔒 安全保证：\n• 仅存于浏览器内存，绝不写入任何存储空间或磁盘\n• 页面关闭或刷新后自动清除，不留任何痕迹\n• 绝不发送至任何外部服务器，所有请求直接发往 discord.com\n• 仅用于代您执行 POST /channels/{id}/messages 操作\n\n⚠️ 用户声明：\n• 您了解此 Token 具备发送消息的能力\n• 通过本模式发送的所有消息，责任由您自行承担\n\n请在确认信任本脚本且理解上述内容后再继续。",
+      wm_api_detect_confirm:
+        "【Token 拦截授权同意书】\n\n点击「确认」即代表您同意本脚本在本次会话中拦截您的 Discord Token。\n\n🔒 安全保证：\n• 仅存于浏览器内存，绝不写入任何存储空间或磁盘\n• 页面关闭或刷新后自动清除，不留任何痕迹\n• 绝不发送至任何外部服务器，所有请求直接发往 discord.com\n• 仅用于代您执行 POST /channels/{id}/messages 操作\n\n⚠️ 用户声明：\n• 您了解此 Token 具备发送消息的能力\n• 通过本模式发送的所有消息，责任由您自行承担\n\n请在确认信任本脚本且理解上述内容后再继续。",
       wm_api_detect_waiting: "⬆️ 请切换到任意频道一次，即可自动捕捉 Token",
       wm_api_enable_btn: "启用 API 模式",
       wm_api_disable_btn: "停用 API 模式（返回方案 A）",
@@ -1094,7 +1235,8 @@
       menu_export: "📤 导出设置 (Backup)",
       menu_import: "⬇️ 导入设置 (Restore)",
       menu_change_lang: "🌐 切换语言 (Language)",
-      custom_lang_desc: "点「📤 导出文本」获取英文原文 JSON，翻译后再点「📥 导入文本」粘贴回来即可应用。",
+      custom_lang_desc:
+        "点「📤 导出文本」获取英文原文 JSON，翻译后再点「📥 导入文本」粘贴回来即可应用。",
       custom_lang_export: "📤 导出文本",
       custom_lang_import: "📥 导入文本",
       custom_lang_apply: "✅ 应用并刷新",
@@ -1102,6 +1244,31 @@
       custom_lang_activate: "🌐 应用「{name}」",
       custom_lang_json_error: "⚠️ JSON 格式错误：{msg}",
       custom_lang_paste_hint: "粘贴翻译后的 JSON 文本 …",
+      copy_media_prefixed: "✅ 已复制 {n} 个带前缀媒体链接",
+      copy_media_urls: "✅ 已复制 {n} 个媒体链接",
+      wormhole_reset_success: "✅ 数据已清除，正在刷新…",
+      wh_panel_title: "🔗 Webhook 管理",
+      wh_enable: "启用 Webhook",
+      wh_tip: "Webhook 管理",
+      wh_add_name_ph: "标签（例：动物）",
+      wh_add_url_ph: "https://discord.com/api/webhooks/…",
+      wh_btn_add: "＋ 添加",
+      wh_btn_test: "测试",
+      wh_btn_delete: "删除",
+      wh_test_ok: "✅ 测试已发送！",
+      wh_test_fail: "❌ 测试失败",
+      wh_send_content: "📨 发送消息至 Webhook ▶",
+      wh_send_urls: "🔗 发送链接至 Webhook ▶",
+      wh_no_webhooks: "尚未添加任何 Webhook",
+      wh_send_ok: "✅ 已发送至 [{name}]",
+      wh_send_fail: "❌ 发送失败 [{name}]",
+      wh_no_urls: "⚠️ 此消息中无链接",
+      wh_url_invalid: "⚠️ Webhook 链接无效",
+      wh_btn_edit: "编辑",
+      wh_btn_save: "保存",
+      wh_btn_cancel: "取消",
+      wh_keep_source: "📎 附上来源链接",
+      wh_keep_source_tip: "勾选后，发送内容末尾会附上该消息的原始链接。",
     },
 
     ja: {
@@ -1139,30 +1306,30 @@
 
       fm_sec_wormhole: "🌀 ワームホール — 基本操作",
       fm_sec_wormhole_content:
-        "• <span class='help-key'>＋</span> 作成ボタンをクリックして Discord チャンネルの URL を貼り付けると、ワームホールが作成されます。<br>"
-        + "• <b>クリック</b>するとそのチャンネルへ即座にジャンプします。<br>"
-        + "• <b>右クリック</b> → メニュー：名前変更・削除・アイコン設定・グループ移動・VIP 切替。<br>"
-        + "• <b>VIP（★）</b>：設定したワームホールは自動的に最上部に固定されます。<br>"
-        + "• <b>グループ</b>：右クリック → グループに移動 で、フォルダに整理できます。<br>"
-        + "• <b>フォーカスモード</b>：アイコンのみのコンパクト表示。パネル右上のボタンで切り替え。",
+        "• <span class='help-key'>＋</span> 作成ボタンをクリックして Discord チャンネルの URL を貼り付けると、ワームホールが作成されます。<br>" +
+        "• <b>クリック</b>するとそのチャンネルへ即座にジャンプします。<br>" +
+        "• <b>右クリック</b> → メニュー：名前変更・削除・アイコン設定・グループ移動・VIP 切替。<br>" +
+        "• <b>VIP（★）</b>：設定したワームホールは自動的に最上部に固定されます。<br>" +
+        "• <b>グループ</b>：右クリック → グループに移動 で、フォルダに整理できます。<br>" +
+        "• <b>フォーカスモード</b>：アイコンのみのコンパクト表示。パネル右上のボタンで切り替え。",
 
       fm_sec_wm_send: "✉️ ワームホール — メッセージ送信",
       fm_sec_wm_send_content:
-        "• <b>右クリック</b> → <b>このチャンネルにメッセージを送る</b> で送信オーバーレイを開きます。<br>"
-        + "• <b>プラン A（ページ移動）</b>：対象チャンネルへ自動移動し、Discordのエディタにテキストを注入して戻ります。API不要。<br>"
-        + "• <b>Shift + クリック</b>：現在のチャンネルでオーバーレイを開きます（移動なし）。<br>"
-        + "• <b>Ctrl+V 画像貼り付け</b>に対応。テキストと画像を1通にまとめて送信できます。<br>"
-        + "• 下部オプション：<b>送信後に閉じる</b> / <b>送信後チャンネルへ移動</b>（相互排他）/ <b>送信通知を表示</b>。<br>"
-        + "• 送信後にクリック可能なトーストが表示され、クリックで対象チャンネルへ即座に移動できます。",
+        "• <b>右クリック</b> → <b>このチャンネルにメッセージを送る</b> で送信オーバーレイを開きます。<br>" +
+        "• <b>プラン A（ページ移動）</b>：対象チャンネルへ自動移動し、Discordのエディタにテキストを注入して戻ります。API不要。<br>" +
+        "• <b>Shift + クリック</b>：現在のチャンネルでオーバーレイを開きます（移動なし）。<br>" +
+        "• <b>Ctrl+V 画像貼り付け</b>に対応。テキストと画像を1通にまとめて送信できます。<br>" +
+        "• 下部オプション：<b>送信後に閉じる</b> / <b>送信後チャンネルへ移動</b>（相互排他）/ <b>送信通知を表示</b>。<br>" +
+        "• 送信後にクリック可能なトーストが表示され、クリックで対象チャンネルへ即座に移動できます。",
 
       fm_sec_wm_api: "⚡ ワームホール — API モード（隠し機能）",
       fm_sec_wm_api_content:
-        "• <b>ワームホール作成ボタン（＋）を3秒長押し</b>して API モード設定パネルを解除します。<br>"
-        + "• <b>プラン B（直接 API）</b>：Discord REST API 経由でメッセージを送信。ページ切替なし、高速・ステルス動作。<br>"
-        + "• Token はスクリプトがバックグラウンドで静かに傍受します（Discord 自身のリクエストから）。<b>保存・外部送信は一切なし</b>、メモリのみ保持、ページを閉じると消去。<br>"
-        + "• プラン B を有効にすると Token 検出がバックグラウンドで自動起動。Discord を普通に使うだけで自動取得されます。<br>"
-        + "• API モードは画像アップロード（multipart/form-data）対応。テキストと画像を1回で送信。<br>"
-        + "• ページ更新後に Token が失われた場合、オーバーレイを開くと自動で再起動します。",
+        "• <b>ワームホール作成ボタン（＋）を3秒長押し</b>して API モード設定パネルを解除します。<br>" +
+        "• <b>プラン B（直接 API）</b>：Discord REST API 経由でメッセージを送信。ページ切替なし、高速・ステルス動作。<br>" +
+        "• Token はスクリプトがバックグラウンドで静かに傍受します（Discord 自身のリクエストから）。<b>保存・外部送信は一切なし</b>、メモリのみ保持、ページを閉じると消去。<br>" +
+        "• プラン B を有効にすると Token 検出がバックグラウンドで自動起動。Discord を普通に使うだけで自動取得されます。<br>" +
+        "• API モードは画像アップロード（multipart/form-data）対応。テキストと画像を1回で送信。<br>" +
+        "• ページ更新後に Token が失われた場合、オーバーレイを開くと自動で再起動します。",
 
       welcome_title: "{script} へようこそ",
       select_lang_subtitle: "インターフェース言語を選択してください",
@@ -1189,7 +1356,8 @@
       download_start: "🚀 ダウンロード中...",
       download_zip_start: "📦 {n} ファイルを圧縮中...",
       download_fail: "❌ ダウンロード失敗",
-      download_cors_fail: "⚠️ CORS制限により直接ダウンロードできません。URLをコピーしてブラウザで開いて保存してください。",
+      download_cors_fail:
+        "⚠️ CORS制限により直接ダウンロードできません。URLをコピーしてブラウザで開いて保存してください。",
       original_url: "🔗 元のURL",
       convert_all: "⚡ すべて変換 ({n})",
       convert_imgur: "🖼️ i.imgur.com に変換",
@@ -1253,7 +1421,8 @@
       tip_lang: "言語切替",
       tip_manual: "マニュアル",
       mod_msg_warn_title: "⚠️ メッセージユーティリティを無効にしますか？",
-      mod_msg_warn_body: "⠿ メッセージユーティリティはこのスクリプトの核心機能です。\\n無効にすると、すべてのメッセージの ⠿ ボタンが消えます。\\n\\n再有効化には：Tampermonkeyアイコンを右クリック → 「⠿ メッセージユーティリティを有効にする」を選択。",
+      mod_msg_warn_body:
+        "⠿ メッセージユーティリティはこのスクリプトの核心機能です。\\n無効にすると、すべてのメッセージの ⠿ ボタンが消えます。\\n\\n再有効化には：Tampermonkeyアイコンを右クリック → 「⠿ メッセージユーティリティを有効にする」を選択。",
       mod_msg_warn_confirm: "無効にする",
       mod_msg_warn_cancel: "キャンセル",
       mod_msg_enable_menu: "⠿ メッセージユーティリティを有効にする",
@@ -1261,6 +1430,7 @@
       grp_convert: "🔄 変換 >",
       grp_download: "⬇️ ダウンロード >",
       grp_system: "⚙️ システム >",
+      grp_webhook: "🔗 Webhook >",
       view_main: "メインメニュー",
       view_symbols: "カスタム文字列",
 
@@ -1310,16 +1480,17 @@
       wm_icon_set_success: "✅ {name} のアイコンを設定しました",
       wm_icon_empty:
         "先にコレクション画像モジュールで Emoji を追加してください",
-      wm_title: "ワームホール コントロール\n• クリック：新規作成\n• 1秒長押し：設定メニューを開く",
+      wm_title:
+        "ワームホール コントロール\n• クリック：新規作成\n• 1秒長押し：設定メニューを開く",
       wm_settings_menu_title: "🌀 ワームホール設定",
       wm_settings_create: "新しいワームホールを作成",
       wm_settings_send_mode: "送信方式・API モード",
       wm_settings_more: "その他の設定（近日公開）",
       wm_settings_position: "表示位置を切り替え",
-      wm_settings_position_navbar:    "ナビバー",
-      wm_settings_position_titlebar:  "チャンネルタイトルバー",
-      wm_settings_position_input:     "チャット入力欄の上",
-      wm_settings_position_topleft:   "左上固定",
+      wm_settings_position_navbar: "ナビバー",
+      wm_settings_position_titlebar: "チャンネルタイトルバー",
+      wm_settings_position_input: "チャット入力欄の上",
+      wm_settings_position_topleft: "左上固定",
       wm_focus_on: "フォーカスモードを閉じる",
       wm_focus_off: "フォーカスモードを開く（アイコンのみ表示）",
       wm_focus_size: "アイコンサイズ",
@@ -1349,7 +1520,8 @@
       wm_send_show_toast: "送信通知を表示する",
       wm_send_goto_channel: "送信後にチャンネルへ移動",
       wm_send_paste_hint: "📋 Ctrl+V で画像を貼り付け",
-      wm_send_token_warn: "⚠️ Token が無効です。もう一度 API パネルを開いて検出してください。今回はプラン A を使用します。",
+      wm_send_token_warn:
+        "⚠️ Token が無効です。もう一度 API パネルを開いて検出してください。今回はプラン A を使用します。",
       wm_send_channel_fail: "❌ チャンネルの読み込みに失敗しました",
       wm_send_editor_missing: "❌ 入力欄が見つかりません",
       wm_send_uploading: "📎 {n} 枚の画像をアップロード中...",
@@ -1358,12 +1530,15 @@
       wm_api_mode_label_a: "プラン A — ページ移動（デフォルト）",
       wm_api_mode_label_b: "プラン B — 直接 API（ページ切替なし）",
       wm_api_warning_title: "⚠️ リスク告知",
-      wm_api_warning_body: "User Token で Discord API を呼び出すことは Discord 利用規約に違反します。アカウントが停止される可能性があります。自己責任でご利用ください。",
+      wm_api_warning_body:
+        "User Token で Discord API を呼び出すことは Discord 利用規約に違反します。アカウントが停止される可能性があります。自己責任でご利用ください。",
       wm_api_token_status_none: "Token：未検出",
       wm_api_token_status_ready: "Token：準備完了（メモリのみ）",
       wm_api_detect_btn: "Token を検出する",
-      wm_api_detect_confirm: "【Token 傍受 — 同意確認】\n\n「OK」をクリックすることで、このスクリプトが今回のセッション中にあなたの Discord Token を傍受することに同意したとみなされます。\n\n🔒 安全性の保証：\n• ブラウザのメモリにのみ保存され、ディスクやストレージには一切書き込まれません\n• ページを閉じるか更新すると自動的に消去され、痕跡は残りません\n• いかなる外部サーバーにも送信されません。すべてのリクエストは直接 discord.com に送られます\n• あなたの代わりに POST /channels/{id}/messages を実行する目的にのみ使用されます\n\n⚠️ ユーザー確認事項：\n• この Token にはメッセージ送信の権限が含まれることを理解しています\n• このモードで送信したすべてのメッセージについて、責任は自身が負うものとします\n\nスクリプトを信頼し、上記の内容を理解した上で続行してください。",
-      wm_api_detect_waiting: "⬆️ 任意のチャンネルに一度切り替えると Token が取得されます",
+      wm_api_detect_confirm:
+        "【Token 傍受 — 同意確認】\n\n「OK」をクリックすることで、このスクリプトが今回のセッション中にあなたの Discord Token を傍受することに同意したとみなされます。\n\n🔒 安全性の保証：\n• ブラウザのメモリにのみ保存され、ディスクやストレージには一切書き込まれません\n• ページを閉じるか更新すると自動的に消去され、痕跡は残りません\n• いかなる外部サーバーにも送信されません。すべてのリクエストは直接 discord.com に送られます\n• あなたの代わりに POST /channels/{id}/messages を実行する目的にのみ使用されます\n\n⚠️ ユーザー確認事項：\n• この Token にはメッセージ送信の権限が含まれることを理解しています\n• このモードで送信したすべてのメッセージについて、責任は自身が負うものとします\n\nスクリプトを信頼し、上記の内容を理解した上で続行してください。",
+      wm_api_detect_waiting:
+        "⬆️ 任意のチャンネルに一度切り替えると Token が取得されます",
       wm_api_enable_btn: "API モードを有効にする",
       wm_api_disable_btn: "API モードを無効にする（プラン A に戻る）",
       wm_api_enabled_toast: "✅ API モードが有効になりました",
@@ -1375,11 +1550,11 @@
       wm_api_send_fail: "❌ API 送信失敗 — コンソールを確認してください",
 
       em_col_title: "マイコレクション",
-      em_col_add_success: '「{g}」に保存しました！',
+      em_col_add_success: "「{g}」に保存しました！",
       em_col_tab_new: "新しいタブ",
       em_col_tab_prompt: "新しいタブ名：",
       em_col_empty_tab: "このタブは空です。",
-      em_col_del_tab_confirm: 'タブ「{n}」とその全項目を削除しますか？',
+      em_col_del_tab_confirm: "タブ「{n}」とその全項目を削除しますか？",
       em_modal_choose_tab: "どのコレクションに保存しますか？",
       em_modal_create_new: "+ 新しく作成...",
       em_tip_pick: "カバー画像を設定",
@@ -1392,7 +1567,8 @@
       menu_export: "📤 設定をエクスポート (Backup)",
       menu_import: "⬇️ 設定をインポート (Restore)",
       menu_change_lang: "🌐 言語を変更 (Language)",
-      custom_lang_desc: "「📤 テキストをエクスポート」で英語の原文 JSON を取得し、翻訳後に「📥 テキストをインポート」で適用してください。",
+      custom_lang_desc:
+        "「📤 テキストをエクスポート」で英語の原文 JSON を取得し、翻訳後に「📥 テキストをインポート」で適用してください。",
       custom_lang_export: "📤 テキストをエクスポート",
       custom_lang_import: "📥 テキストをインポート",
       custom_lang_apply: "✅ 適用してリロード",
@@ -1400,6 +1576,31 @@
       custom_lang_activate: "🌐「{name}」を適用",
       custom_lang_json_error: "⚠️ JSON エラー：{msg}",
       custom_lang_paste_hint: "翻訳済み JSON をここに貼り付け …",
+      copy_media_prefixed: "✅ プレフィックス付きメディアリンクを {n} 件コピーしました",
+      copy_media_urls: "✅ メディアリンクを {n} 件コピーしました",
+      wormhole_reset_success: "✅ データを削除しました。再読み込み中…",
+      wh_panel_title: "🔗 Webhook 管理",
+      wh_enable: "Webhook を有効化",
+      wh_tip: "Webhook 管理",
+      wh_add_name_ph: "ラベル（例：動物）",
+      wh_add_url_ph: "https://discord.com/api/webhooks/…",
+      wh_btn_add: "＋ 追加",
+      wh_btn_test: "テスト",
+      wh_btn_delete: "削除",
+      wh_test_ok: "✅ テスト送信しました！",
+      wh_test_fail: "❌ テスト失敗",
+      wh_send_content: "📨 Webhook へメッセージ送信 ▶",
+      wh_send_urls: "🔗 Webhook へ URL 送信 ▶",
+      wh_no_webhooks: "Webhook がまだありません",
+      wh_send_ok: "✅ [{name}] へ送信しました",
+      wh_send_fail: "❌ 送信失敗 [{name}]",
+      wh_no_urls: "⚠️ このメッセージに URL がありません",
+      wh_url_invalid: "⚠️ Webhook URL が無効です",
+      wh_btn_edit: "編集",
+      wh_btn_save: "保存",
+      wh_btn_cancel: "キャンセル",
+      wh_keep_source: "📎 ソースリンクを含める",
+      wh_keep_source_tip: "チェックすると、送信内容の末尾に元のメッセージリンクを追加します。",
     },
 
     ko: {
@@ -1437,30 +1638,30 @@
 
       fm_sec_wormhole: "🌀 웜홀 — 기본 조작",
       fm_sec_wormhole_content:
-        "• <span class='help-key'>＋</span> 생성 버튼을 클릭하고 Discord 채널 URL을 붙여넣으면 웜홀이 생성됩니다.<br>"
-        + "• <b>클릭</b>하면 해당 채널로 즉시 이동합니다.<br>"
-        + "• <b>우클릭</b> → 메뉴: 이름 변경, 삭제, 아이콘 설정, 그룹 이동, VIP 전환.<br>"
-        + "• <b>VIP（★）</b>：VIP로 설정한 웜홀은 자동으로 맨 위에 고정됩니다.<br>"
-        + "• <b>그룹</b>：우클릭 → 그룹으로 이동 으로 웜홀을 폴더에 정리할 수 있습니다.<br>"
-        + "• <b>포커스 모드</b>：아이콘만 표시하는 간결한 뷰. 패널 우측 상단 버튼으로 전환.",
+        "• <span class='help-key'>＋</span> 생성 버튼을 클릭하고 Discord 채널 URL을 붙여넣으면 웜홀이 생성됩니다.<br>" +
+        "• <b>클릭</b>하면 해당 채널로 즉시 이동합니다.<br>" +
+        "• <b>우클릭</b> → 메뉴: 이름 변경, 삭제, 아이콘 설정, 그룹 이동, VIP 전환.<br>" +
+        "• <b>VIP（★）</b>：VIP로 설정한 웜홀은 자동으로 맨 위에 고정됩니다.<br>" +
+        "• <b>그룹</b>：우클릭 → 그룹으로 이동 으로 웜홀을 폴더에 정리할 수 있습니다.<br>" +
+        "• <b>포커스 모드</b>：아이콘만 표시하는 간결한 뷰. 패널 우측 상단 버튼으로 전환.",
 
       fm_sec_wm_send: "✉️ 웜홀 — 메시지 전송",
       fm_sec_wm_send_content:
-        "• <b>우클릭</b> → <b>이 채널에 메시지 보내기</b>로 메시지 입력창을 엽니다.<br>"
-        + "• <b>플랜 A（페이지 이동）</b>：대상 채널로 자동 이동 후 Discord 에디터에 텍스트를 주입하고 돌아옵니다. API 불필요.<br>"
-        + "• <b>Shift + 클릭</b>：현재 채널에서 입력창을 엽니다（이동 없음）.<br>"
-        + "• <b>Ctrl+V 이미지 붙여넣기</b> 지원. 이미지와 텍스트를 하나의 메시지로 함께 전송합니다.<br>"
-        + "• 하단 옵션：<b>전송 후 자동 닫기</b> / <b>전송 후 채널로 이동</b>（상호 배타）/ <b>전송 알림 표시</b>。<br>"
-        + "• 전송 후 클릭 가능한 알림이 나타나며, 클릭하면 대상 채널로 즉시 이동합니다.",
+        "• <b>우클릭</b> → <b>이 채널에 메시지 보내기</b>로 메시지 입력창을 엽니다.<br>" +
+        "• <b>플랜 A（페이지 이동）</b>：대상 채널로 자동 이동 후 Discord 에디터에 텍스트를 주입하고 돌아옵니다. API 불필요.<br>" +
+        "• <b>Shift + 클릭</b>：현재 채널에서 입력창을 엽니다（이동 없음）.<br>" +
+        "• <b>Ctrl+V 이미지 붙여넣기</b> 지원. 이미지와 텍스트를 하나의 메시지로 함께 전송합니다.<br>" +
+        "• 하단 옵션：<b>전송 후 자동 닫기</b> / <b>전송 후 채널로 이동</b>（상호 배타）/ <b>전송 알림 표시</b>。<br>" +
+        "• 전송 후 클릭 가능한 알림이 나타나며, 클릭하면 대상 채널로 즉시 이동합니다.",
 
       fm_sec_wm_api: "⚡ 웜홀 — API 모드（숨겨진 기능）",
       fm_sec_wm_api_content:
-        "• <b>웜홀 생성 버튼（＋）을 3초 길게 누르면</b> API 모드 설정 패널이 잠금 해제됩니다.<br>"
-        + "• <b>플랜 B（직접 API）</b>：Discord REST API를 통해 메시지를 전송. 페이지 전환 없이 빠르고 스텔스하게 동작.<br>"
-        + "• Token은 스크립트가 백그라운드에서 조용히 가로챕니다（Discord 자체 요청에서）. <b>저장·외부 전송 없음</b>，메모리에만 유지，페이지 닫으면 소거.<br>"
-        + "• 플랜 B 활성화 시 Token 감지가 자동으로 백그라운드에서 실행됩니다. Discord를 평소처럼 사용하면 자동으로 캡처됩니다.<br>"
-        + "• API 모드는 이미지 업로드（multipart/form-data）지원. 텍스트와 이미지를 한 번에 전송.<br>"
-        + "• 페이지 새로고침 후 Token이 사라진 경우, 전송 창을 열면 인터셉터가 자동으로 재시작됩니다.",
+        "• <b>웜홀 생성 버튼（＋）을 3초 길게 누르면</b> API 모드 설정 패널이 잠금 해제됩니다.<br>" +
+        "• <b>플랜 B（직접 API）</b>：Discord REST API를 통해 메시지를 전송. 페이지 전환 없이 빠르고 스텔스하게 동작.<br>" +
+        "• Token은 스크립트가 백그라운드에서 조용히 가로챕니다（Discord 자체 요청에서）. <b>저장·외부 전송 없음</b>，메모리에만 유지，페이지 닫으면 소거.<br>" +
+        "• 플랜 B 활성화 시 Token 감지가 자동으로 백그라운드에서 실행됩니다. Discord를 평소처럼 사용하면 자동으로 캡처됩니다.<br>" +
+        "• API 모드는 이미지 업로드（multipart/form-data）지원. 텍스트와 이미지를 한 번에 전송.<br>" +
+        "• 페이지 새로고침 후 Token이 사라진 경우, 전송 창을 열면 인터셉터가 자동으로 재시작됩니다.",
 
       welcome_title: "{script}에 오신 것을 환영합니다",
       select_lang_subtitle: "인터페이스 언어를 선택하십시오",
@@ -1487,7 +1688,8 @@
       download_start: "🚀 다운로드 중...",
       download_zip_start: "📦 {n}개의 파일 압축 중...",
       download_fail: "❌ 다운로드 실패",
-      download_cors_fail: "⚠️ CORS 제한으로 직접 다운로드할 수 없습니다. URL을 복사하여 브라우저에서 열어 저장해주세요.",
+      download_cors_fail:
+        "⚠️ CORS 제한으로 직접 다운로드할 수 없습니다. URL을 복사하여 브라우저에서 열어 저장해주세요.",
       original_url: "🔗 원본 URL",
       convert_all: "⚡ 모두 변환 ({n})",
       convert_imgur: "🖼️ i.imgur.com으로 변환",
@@ -1550,7 +1752,8 @@
       tip_lang: "언어 변경",
       tip_manual: "매뉴얼",
       mod_msg_warn_title: "⚠️ 메시지 유틸리티를 비활성화하시겠습니까?",
-      mod_msg_warn_body: "⠿ 메시지 유틸리티는 이 스크립트의 핵심 기능입니다.\\n비활성화하면 모든 메시지의 ⠿ 버튼이 사라집니다.\\n\\n다시 활성화하려면: Tampermonkey 아이콘 우클릭 → '⠿ 메시지 유틸리티 활성화' 선택.",
+      mod_msg_warn_body:
+        "⠿ 메시지 유틸리티는 이 스크립트의 핵심 기능입니다.\\n비활성화하면 모든 메시지의 ⠿ 버튼이 사라집니다.\\n\\n다시 활성화하려면: Tampermonkey 아이콘 우클릭 → '⠿ 메시지 유틸리티 활성화' 선택.",
       mod_msg_warn_confirm: "비활성화",
       mod_msg_warn_cancel: "취소",
       mod_msg_enable_menu: "⠿ 메시지 유틸리티 활성화",
@@ -1558,6 +1761,7 @@
       grp_convert: "🔄 변환 >",
       grp_download: "⬇️ 다운로드 >",
       grp_system: "⚙️ 시스템 >",
+      grp_webhook: "🔗 Webhook >",
       view_main: "메인",
       view_symbols: "기호",
 
@@ -1606,16 +1810,17 @@
       wm_icon_picker_title: "{name}의 아이콘 선택",
       wm_icon_set_success: "✅ {name}의 아이콘이 설정되었습니다",
       wm_icon_empty: "먼저 컬렉션 이미지 모듈에서 Emoji를 추가하세요",
-      wm_title: "웜홀 컨트롤\n• 클릭: 새 웜홀 생성\n• 1초 길게 누르기: 설정 메뉴 열기",
+      wm_title:
+        "웜홀 컨트롤\n• 클릭: 새 웜홀 생성\n• 1초 길게 누르기: 설정 메뉴 열기",
       wm_settings_menu_title: "🌀 웜홀 설정",
       wm_settings_create: "새 웜홀 생성",
       wm_settings_send_mode: "전송 방식 및 API 모드",
       wm_settings_more: "추가 설정 (출시 예정)",
       wm_settings_position: "웜홀 위치 전환",
-      wm_settings_position_navbar:    "내비게이션 바",
-      wm_settings_position_titlebar:  "채널 타이틀바",
-      wm_settings_position_input:     "채팅 입력창 위",
-      wm_settings_position_topleft:   "왼쪽 상단 고정",
+      wm_settings_position_navbar: "내비게이션 바",
+      wm_settings_position_titlebar: "채널 타이틀바",
+      wm_settings_position_input: "채팅 입력창 위",
+      wm_settings_position_topleft: "왼쪽 상단 고정",
       wm_focus_on: "포커스 모드 끄기",
       wm_focus_off: "포커스 모드 켜기 (아이콘만 표시)",
       wm_focus_size: "아이콘 크기",
@@ -1645,7 +1850,8 @@
       wm_send_show_toast: "전송 알림 표시",
       wm_send_goto_channel: "전송 후 해당 채널로 이동",
       wm_send_paste_hint: "📋 Ctrl+V 로 이미지 붙여넣기",
-      wm_send_token_warn: "⚠️ Token이 만료되었습니다. API 패널을 다시 열어 감지해 주세요. 이번에는 플랜 A를 사용합니다.",
+      wm_send_token_warn:
+        "⚠️ Token이 만료되었습니다. API 패널을 다시 열어 감지해 주세요. 이번에는 플랜 A를 사용합니다.",
       wm_send_channel_fail: "❌ 채널 로드 실패",
       wm_send_editor_missing: "❌ 입력창을 찾을 수 없습니다",
       wm_send_uploading: "📎 {n}개의 이미지 업로드 중...",
@@ -1654,12 +1860,15 @@
       wm_api_mode_label_a: "플랜 A — 페이지 이동 (기본)",
       wm_api_mode_label_b: "플랜 B — 직접 API (페이지 전환 없음)",
       wm_api_warning_title: "⚠️ 위험 고지",
-      wm_api_warning_body: "User Token으로 Discord API를 호출하는 것은 Discord 서비스 약관을 위반합니다. 계정이 정지될 수 있으며, 사용 시 모든 책임은 본인에게 있습니다.",
+      wm_api_warning_body:
+        "User Token으로 Discord API를 호출하는 것은 Discord 서비스 약관을 위반합니다. 계정이 정지될 수 있으며, 사용 시 모든 책임은 본인에게 있습니다.",
       wm_api_token_status_none: "Token：미감지",
       wm_api_token_status_ready: "Token：준비됨 (메모리 전용)",
       wm_api_detect_btn: "내 Token 감지하기",
-      wm_api_detect_confirm: "【Token 인터셉트 — 동의 확인】\n\n「확인」을 클릭하면 이 스크립트가 현재 세션 중 귀하의 Discord Token을 가로채는 것에 동의하는 것으로 간주됩니다.\n\n🔒 보안 보장：\n• 브라우저 메모리에만 저장되며, 디스크나 스토리지에는 절대 기록되지 않습니다\n• 페이지를 닫거나 새로고침하면 자동으로 삭제되어 흔적이 남지 않습니다\n• 어떤 외부 서버에도 전송되지 않으며, 모든 요청은 discord.com 으로 직접 전송됩니다\n• 귀하를 대신하여 POST /channels/{id}/messages 를 실행하는 용도로만 사용됩니다\n\n⚠️ 사용자 확인 사항：\n• 이 Token에 메시지 전송 권한이 포함되어 있음을 이해합니다\n• 이 모드를 통해 전송된 모든 메시지에 대한 책임은 본인이 집니다\n\n스크립트를 신뢰하고 위 내용을 이해한 후 계속하십시오。",
-      wm_api_detect_waiting: "⬆️ 아무 채널로 한 번 전환하면 Token이 자동으로 감지됩니다",
+      wm_api_detect_confirm:
+        "【Token 인터셉트 — 동의 확인】\n\n「확인」을 클릭하면 이 스크립트가 현재 세션 중 귀하의 Discord Token을 가로채는 것에 동의하는 것으로 간주됩니다.\n\n🔒 보안 보장：\n• 브라우저 메모리에만 저장되며, 디스크나 스토리지에는 절대 기록되지 않습니다\n• 페이지를 닫거나 새로고침하면 자동으로 삭제되어 흔적이 남지 않습니다\n• 어떤 외부 서버에도 전송되지 않으며, 모든 요청은 discord.com 으로 직접 전송됩니다\n• 귀하를 대신하여 POST /channels/{id}/messages 를 실행하는 용도로만 사용됩니다\n\n⚠️ 사용자 확인 사항：\n• 이 Token에 메시지 전송 권한이 포함되어 있음을 이해합니다\n• 이 모드를 통해 전송된 모든 메시지에 대한 책임은 본인이 집니다\n\n스크립트를 신뢰하고 위 내용을 이해한 후 계속하십시오。",
+      wm_api_detect_waiting:
+        "⬆️ 아무 채널로 한 번 전환하면 Token이 자동으로 감지됩니다",
       wm_api_enable_btn: "API 모드 활성화",
       wm_api_disable_btn: "API 모드 비활성화 (플랜 A로 돌아가기)",
       wm_api_enabled_toast: "✅ API 모드가 활성화되었습니다",
@@ -1688,16 +1897,42 @@
       menu_export: "📤 설정 내보내기 (Backup)",
       menu_import: "⬇️ 설정 가져오기 (Restore)",
       menu_change_lang: "🌐 언어 변경 (Language)",
-      custom_lang_desc: "「📤 텍스트 내보내기」로 영어 원문 JSON을 받고, 번역 후 「📥 텍스트 가져오기」로 적용하세요.",
+      custom_lang_desc:
+        "「📤 텍스트 내보내기」로 영어 원문 JSON을 받고, 번역 후 「📥 텍스트 가져오기」로 적용하세요.",
       custom_lang_export: "📤 텍스트 내보내기",
       custom_lang_import: "📥 텍스트 가져오기",
       custom_lang_apply: "✅ 적용 및 새로고침",
       custom_lang_loaded: "✅ 불러옴：{name}",
-      custom_lang_activate: "🌐 \"{name}\" 적용",
+      custom_lang_activate: '🌐 "{name}" 적용',
       custom_lang_json_error: "⚠️ JSON 오류：{msg}",
       custom_lang_paste_hint: "번역된 JSON을 여기에 붙여넣기 …",
+      copy_media_prefixed: "✅ 접두사가 포함된 미디어 링크 {n}개를 복사했습니다",
+      copy_media_urls: "✅ 미디어 링크 {n}개를 복사했습니다",
+      wormhole_reset_success: "✅ 데이터가 삭제되었습니다. 새로고침 중…",
+      wh_panel_title: "🔗 Webhook 관리",
+      wh_enable: "Webhook 활성화",
+      wh_tip: "Webhook 관리",
+      wh_add_name_ph: "레이블 (예: 동물)",
+      wh_add_url_ph: "https://discord.com/api/webhooks/…",
+      wh_btn_add: "＋ 추가",
+      wh_btn_test: "테스트",
+      wh_btn_delete: "삭제",
+      wh_test_ok: "✅ 테스트 전송 완료!",
+      wh_test_fail: "❌ 테스트 실패",
+      wh_send_content: "📨 Webhook으로 메시지 전송 ▶",
+      wh_send_urls: "🔗 Webhook으로 URL 전송 ▶",
+      wh_no_webhooks: "등록된 Webhook이 없습니다",
+      wh_send_ok: "✅ [{name}]으로 전송됨",
+      wh_send_fail: "❌ 전송 실패 [{name}]",
+      wh_no_urls: "⚠️ 이 메시지에 URL이 없습니다",
+      wh_url_invalid: "⚠️ Webhook URL이 유효하지 않습니다",
+      wh_btn_edit: "편집",
+      wh_btn_save: "저장",
+      wh_btn_cancel: "취소",
+      wh_keep_source: "📎 출처 링크 포함",
+      wh_keep_source_tip: "체크 시 전송 내용 끝에 원본 메시지 링크가 추가됩니다.",
     },
-    "es": {
+    es: {
       name: "Español",
       fm_pinned_channels: "★ Canales fijados",
       fm_toggle_flat: "Cambiar a: Vista plana",
@@ -1732,25 +1967,25 @@
 
       fm_sec_wormhole: "🌀 Agujero de gusano — Básico",
       fm_sec_wormhole_content:
-        "• Haz clic en <span class='help-key'>＋</span> y pega una URL de canal de Discord para crear un acceso directo.<br>"
-        + "• <b>Clic</b> en un agujero de gusano → salta instantáneamente a ese canal.<br>"
-        + "• <b>Clic derecho</b> → menú: renombrar, eliminar, icono, mover a grupo o alternar VIP.<br>"
-        + "• <b>VIP (★)</b>: los agujeros fijados flotan arriba automáticamente.<br>"
-        + "• <b>Grupos</b>: organiza agujeros en carpetas con nombre.<br>"
-        + "• <b>Modo enfoque</b>: vista compacta solo con iconos.",
+        "• Haz clic en <span class='help-key'>＋</span> y pega una URL de canal de Discord para crear un acceso directo.<br>" +
+        "• <b>Clic</b> en un agujero de gusano → salta instantáneamente a ese canal.<br>" +
+        "• <b>Clic derecho</b> → menú: renombrar, eliminar, icono, mover a grupo o alternar VIP.<br>" +
+        "• <b>VIP (★)</b>: los agujeros fijados flotan arriba automáticamente.<br>" +
+        "• <b>Grupos</b>: organiza agujeros en carpetas con nombre.<br>" +
+        "• <b>Modo enfoque</b>: vista compacta solo con iconos.",
       fm_sec_wm_send: "✉️ Agujero de gusano — Enviar mensaje",
       fm_sec_wm_send_content:
-        "• <b>Clic derecho</b> → <b>Enviar mensaje aquí</b> para abrir el panel.<br>"
-        + "• <b>Modo A (Navegar)</b>: cambia al canal destino, inyecta texto y regresa.<br>"
-        + "• <b>Shift+Clic</b> → abre el panel en el canal actual.<br>"
-        + "• Admite <b>pegar imágenes con Ctrl+V</b>.<br>"
-        + "• Opciones inferiores: <b>Cierre automático</b> / <b>Ir al canal</b> / <b>Mostrar notificación</b>.",
+        "• <b>Clic derecho</b> → <b>Enviar mensaje aquí</b> para abrir el panel.<br>" +
+        "• <b>Modo A (Navegar)</b>: cambia al canal destino, inyecta texto y regresa.<br>" +
+        "• <b>Shift+Clic</b> → abre el panel en el canal actual.<br>" +
+        "• Admite <b>pegar imágenes con Ctrl+V</b>.<br>" +
+        "• Opciones inferiores: <b>Cierre automático</b> / <b>Ir al canal</b> / <b>Mostrar notificación</b>.",
       fm_sec_wm_api: "⚡ Agujero de gusano — Modo API (secreto)",
       fm_sec_wm_api_content:
-        "• <b>Mantén presionado el botón ＋ 3 segundos</b> para desbloquear el Modo API.<br>"
-        + "• <b>Modo B (API directa)</b>: envía mensajes vía Discord REST API sin cambiar de página.<br>"
-        + "• El token se intercepta silenciosamente en memoria — <b>nunca se almacena ni transmite</b>.<br>"
-        + "• Se borra al cerrar la página.",
+        "• <b>Mantén presionado el botón ＋ 3 segundos</b> para desbloquear el Modo API.<br>" +
+        "• <b>Modo B (API directa)</b>: envía mensajes vía Discord REST API sin cambiar de página.<br>" +
+        "• El token se intercepta silenciosamente en memoria — <b>nunca se almacena ni transmite</b>.<br>" +
+        "• Se borra al cerrar la página.",
       welcome_title: "Bienvenido a {script}",
       select_lang_subtitle: "Por favor, selecciona el idioma de la interfaz",
       help_btn: "📖 Manual",
@@ -1760,7 +1995,8 @@
         "Las funciones de conversión de URL (como vxtwitter, kkinstagram) dependen de servicios de terceros.\nNo las uses si no confías en dichos servicios.\nLos usuarios deben ser capaces de identificar la seguridad de las URL.",
       manual_content:
         "【Guía de iconos】\n• ◫/≡ : Cambiar estilo de menú (Plano / Grupo)\n• ⇄ : Intercambiar lógica de clic (Copiar / Insertar)\n• ␣ : Añadir espacio al final\n• ↵ : Añadir nueva línea al final\n• ☆ : Panel de cadenas personalizadas\n• 🖱️ : Modo de activación (Hover / Clic)\n• 🌐 : Cambiar idioma\n\n【Acciones】\n• **Clic**: Copiar (predeterminado)\n• **Pulsación larga (0,5s)**: Insertar en el cuadro de texto\n• **Shift+Clic**: Copiar e insertar (mantiene el menú abierto)",
-      manual_content_sections: "<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Inicio rápido</div><div class='mm-content'>Pasa el cursor sobre cualquier mensaje de Discord → aparece un botón de copiar en la esquina superior derecha.<br><b>Clic</b> para copiar texto · <b>Pulsación larga 0,5s</b> para insertar · <b>Shift+Clic</b> para copiar e insertar.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Menú de copia</div><div class='mm-content'>• Copiar texto, URL de medios, primer enlace limpio, todos los enlaces, Markdown, texto oculto.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ Descargar</div><div class='mm-content'>• Descargar imágenes/medios individualmente o como ZIP.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 Conversión de URL</div><div class='mm-content'>Twitter/X, Instagram, Bilibili, Pixiv — conversión mutua para previsualizaciones en Discord.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Agujero de gusano</div><div class='mm-content'>Accesos directos de canal con un clic en la barra lateral de Discord.</div></div>",
+      manual_content_sections:
+        "<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Inicio rápido</div><div class='mm-content'>Pasa el cursor sobre cualquier mensaje de Discord → aparece un botón de copiar en la esquina superior derecha.<br><b>Clic</b> para copiar texto · <b>Pulsación larga 0,5s</b> para insertar · <b>Shift+Clic</b> para copiar e insertar.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Menú de copia</div><div class='mm-content'>• Copiar texto, URL de medios, primer enlace limpio, todos los enlaces, Markdown, texto oculto.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ Descargar</div><div class='mm-content'>• Descargar imágenes/medios individualmente o como ZIP.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 Conversión de URL</div><div class='mm-content'>Twitter/X, Instagram, Bilibili, Pixiv — conversión mutua para previsualizaciones en Discord.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Agujero de gusano</div><div class='mm-content'>Accesos directos de canal con un clic en la barra lateral de Discord.</div></div>",
       reload_confirm: "¡Configuración guardada!\n¿Recargar la página ahora?",
       copy_text: "📋 Copiar texto",
       copy_media_url: "🖼️ Copiar URL de medios",
@@ -1775,7 +2011,8 @@
       download_start: "🚀 Descargando...",
       download_zip_start: "📦 Comprimiendo {n} archivos...",
       download_fail: "❌ Error al descargar",
-      download_cors_fail: "⚠️ CORS impide la descarga directa. Copia la URL y ábrela en el navegador.",
+      download_cors_fail:
+        "⚠️ CORS impide la descarga directa. Copia la URL y ábrela en el navegador.",
       original_url: "🔗 URL original",
       convert_all: "⚡ Convertir todo ({n})",
       convert_imgur: "🖼️ Convertir a i.imgur.com",
@@ -1819,7 +2056,8 @@
       mode_click: "🖱️ Clic",
       mode_desc: "Modo: {mode} (clic para cambiar)",
       mode_changed: "Modo cambiado: {mode}",
-      export_success: "✅ ¡Configuración exportada!\n\nCopiada al portapapeles.",
+      export_success:
+        "✅ ¡Configuración exportada!\n\nCopiada al portapapeles.",
       import_prompt: "⬇️ Pega el código de respaldo (JSON):",
       import_success: "✅ ¡Importación exitosa!\nRecargando página.",
       import_fail: "❌ Error de importación: JSON inválido.",
@@ -1838,7 +2076,8 @@
       tip_lang: "Cambiar idioma",
       tip_manual: "Manual",
       mod_msg_warn_title: "⚠️ ¿Deshabilitar Utilidad de Mensajes?",
-      mod_msg_warn_body: "⠿ La Utilidad de Mensajes es la función principal.\\nSi la deshabilitas, desaparecerá el botón ⠿ en todos los mensajes.",
+      mod_msg_warn_body:
+        "⠿ La Utilidad de Mensajes es la función principal.\\nSi la deshabilitas, desaparecerá el botón ⠿ en todos los mensajes.",
       mod_msg_warn_confirm: "Deshabilitar",
       mod_msg_warn_cancel: "Cancelar",
       mod_msg_enable_menu: "Habilitar ⠿ Utilidad de Mensajes",
@@ -1846,14 +2085,17 @@
       grp_convert: "🔄 Convertir >",
       grp_download: "⬇️ Descargar >",
       grp_system: "⚙️ Sistema y símbolos >",
+      grp_webhook: "🔗 Webhook >",
       view_main: "Menú principal",
       view_symbols: "Cadenas personalizadas",
 
       em_title: "😊 Gestión integrada de expresiones/GIF",
       em_content:
         "• <b>Barra</b>: [📁] Colección | [🎯] Modo mira | [★] Palabras clave.<br>• <b>Modo mira</b>: selecciona directamente GIFs o emojis de la pantalla.<br>• <b>Shift+Clic</b>: enviar consecutivamente sin cerrar el panel.",
-      em_picker_tip: "🔍 Haz clic en el GIF/emoji (clic en el fondo para cancelar)",
-      em_err_no_list: "No se encontró el contenedor de lista. ¡Abre primero la ventana de emoji o GIF!",
+      em_picker_tip:
+        "🔍 Haz clic en el GIF/emoji (clic en el fondo para cancelar)",
+      em_err_no_list:
+        "No se encontró el contenedor de lista. ¡Abre primero la ventana de emoji o GIF!",
       em_btn_add_title: "Guardar palabra clave de búsqueda",
       em_btn_active_title: "Clic: rellenar palabra clave (alternar)",
       em_btn_target_title: "Modo mira: clic en GIF/emoji para guardar",
@@ -1878,14 +2120,17 @@
       wm_menu_move: "📂 Mover al grupo",
       wm_group_prompt: "Introduce el nombre del nuevo grupo:",
       wm_edit_group: "Editar nombre del grupo:",
-      wm_group_del_confirm: "¿Disolver el grupo «{n}»? (los agujeros se conservarán)",
-      wm_group_select_prompt: "Introduce un número para seleccionar grupo:\n\n0. [Raíz/Sin categoría]\n{list}\n\nDeja vacío para crear «Nuevo grupo»:",
+      wm_group_del_confirm:
+        "¿Disolver el grupo «{n}»? (los agujeros se conservarán)",
+      wm_group_select_prompt:
+        "Introduce un número para seleccionar grupo:\n\n0. [Raíz/Sin categoría]\n{list}\n\nDeja vacío para crear «Nuevo grupo»:",
       wm_group_invalid: "¡Selección de grupo inválida!",
       wm_move_prompt: "¿A qué grupo mover? (introduce número)\n\n{list}",
       wm_icon_picker_title: "Seleccionar icono para {name}",
       wm_icon_set_success: "✅ Icono de {name} establecido",
       wm_icon_empty: "Primero añade un Emoji en el módulo de colección",
-      wm_title: "Control de agujero de gusano\n• Clic: crear nuevo\n• Pulsación larga 1s: menú de ajustes",
+      wm_title:
+        "Control de agujero de gusano\n• Clic: crear nuevo\n• Pulsación larga 1s: menú de ajustes",
       wm_settings_menu_title: "🌀 Ajustes del agujero de gusano",
       wm_settings_create: "Crear nuevo agujero de gusano",
       wm_settings_send_mode: "Método de envío y Modo API",
@@ -1924,7 +2169,8 @@
       wm_send_show_toast: "Mostrar notificación de envío",
       wm_send_goto_channel: "Ir al canal tras enviar",
       wm_send_paste_hint: "📋 Ctrl+V para pegar imagen",
-      wm_send_token_warn: "⚠️ Token expirado. Vuelve a abrir el panel API para detectarlo. Usando Modo A esta vez.",
+      wm_send_token_warn:
+        "⚠️ Token expirado. Vuelve a abrir el panel API para detectarlo. Usando Modo A esta vez.",
       wm_send_channel_fail: "❌ Error al cargar el canal",
       wm_send_editor_missing: "❌ Editor no encontrado",
       wm_send_uploading: "📎 Subiendo {n} imagen(es)...",
@@ -1933,12 +2179,15 @@
       wm_api_mode_label_a: "Modo A — Navegar (predeterminado)",
       wm_api_mode_label_b: "Modo B — API directa (sin cambio de página)",
       wm_api_warning_title: "⚠️ Aviso de riesgo",
-      wm_api_warning_body: "Usar un Token de usuario para llamar a la API de Discord viola los Términos de Servicio. Tu cuenta podría ser suspendida. Úsalo bajo tu propia responsabilidad.",
+      wm_api_warning_body:
+        "Usar un Token de usuario para llamar a la API de Discord viola los Términos de Servicio. Tu cuenta podría ser suspendida. Úsalo bajo tu propia responsabilidad.",
       wm_api_token_status_none: "Token: No detectado",
       wm_api_token_status_ready: "Token: Listo (solo en memoria)",
       wm_api_detect_btn: "Detectar mi Token",
-      wm_api_detect_confirm: "【Consentimiento de interceptación de Token】\n\nAl hacer clic en Aceptar, autorizas que este script intercepte tu Token de Discord para esta sesión.\n\n🔒 Garantías de seguridad:\n• Solo en memoria — nunca escrito en disco\n• Se borra al cerrar o recargar la página\n• Nunca transmitido a ningún servidor externo\n• Usado exclusivamente para enviar mensajes en tu nombre\n\n⚠️ Reconocimiento:\n• Entiendes que este token otorga acceso para enviar mensajes\n• Aceptas plena responsabilidad de todos los mensajes enviados\n\nProcede solo si confías en este script.",
-      wm_api_detect_waiting: "⬆️ Cambia a cualquier canal una vez para capturar el Token",
+      wm_api_detect_confirm:
+        "【Consentimiento de interceptación de Token】\n\nAl hacer clic en Aceptar, autorizas que este script intercepte tu Token de Discord para esta sesión.\n\n🔒 Garantías de seguridad:\n• Solo en memoria — nunca escrito en disco\n• Se borra al cerrar o recargar la página\n• Nunca transmitido a ningún servidor externo\n• Usado exclusivamente para enviar mensajes en tu nombre\n\n⚠️ Reconocimiento:\n• Entiendes que este token otorga acceso para enviar mensajes\n• Aceptas plena responsabilidad de todos los mensajes enviados\n\nProcede solo si confías en este script.",
+      wm_api_detect_waiting:
+        "⬆️ Cambia a cualquier canal una vez para capturar el Token",
       wm_api_enable_btn: "Activar Modo API",
       wm_api_disable_btn: "Desactivar Modo API (volver al Modo A)",
       wm_api_enabled_toast: "✅ Modo API activado",
@@ -1954,7 +2203,8 @@
       em_col_tab_new: "Nueva pestaña",
       em_col_tab_prompt: "Nombre de la nueva pestaña:",
       em_col_empty_tab: "Esta pestaña está vacía.",
-      em_col_del_tab_confirm: '¿Eliminar la pestaña "{n}" y todos sus elementos?',
+      em_col_del_tab_confirm:
+        '¿Eliminar la pestaña "{n}" y todos sus elementos?',
       em_modal_choose_tab: "¿En qué colección guardar?",
       em_modal_create_new: "+ Crear nueva...",
       em_tip_pick: "Establecer imagen de portada",
@@ -1967,17 +2217,41 @@
       menu_export: "📤 Exportar configuración (Backup)",
       menu_import: "⬇️ Importar configuración (Restaurar)",
       menu_change_lang: "🌐 Cambiar idioma",
-      custom_lang_desc: "Haz clic en「📤 Exportar texto」para obtener el JSON en inglés. Tradúcelo y usa「📥 Importar texto」para aplicarlo.",
+      custom_lang_desc:
+        "Haz clic en「📤 Exportar texto」para obtener el JSON en inglés. Tradúcelo y usa「📥 Importar texto」para aplicarlo.",
       custom_lang_export: "📤 Exportar texto",
       custom_lang_import: "📥 Importar texto",
       custom_lang_apply: "✅ Aplicar y recargar",
       custom_lang_loaded: "✅ Cargado: {name}",
-      custom_lang_activate: "🌐 Aplicar \"{name}\"",
+      custom_lang_activate: '🌐 Aplicar "{name}"',
       custom_lang_json_error: "⚠️ Error JSON: {msg}",
       custom_lang_paste_hint: "Pega el JSON traducido aquí …",
-    },
-
-    "pt-BR": {
+      copy_media_prefixed: "✅ {n} enlace(s) de medios con prefijo copiado(s)",
+      copy_media_urls: "✅ {n} enlace(s) de medios copiado(s)",
+      wormhole_reset_success: "✅ Datos eliminados, recargando…",
+      wh_panel_title: "🔗 Gestión de Webhook",
+      wh_enable: "Activar Webhook",
+      wh_tip: "Gestión de Webhook",
+      wh_add_name_ph: "Etiqueta (ej: Animales)",
+      wh_add_url_ph: "https://discord.com/api/webhooks/…",
+      wh_btn_add: "＋ Añadir",
+      wh_btn_test: "Probar",
+      wh_btn_delete: "Eliminar",
+      wh_test_ok: "✅ ¡Prueba enviada!",
+      wh_test_fail: "❌ Prueba fallida",
+      wh_send_content: "📨 Enviar mensaje al Webhook ▶",
+      wh_send_urls: "🔗 Enviar URLs al Webhook ▶",
+      wh_no_webhooks: "No hay Webhooks aún",
+      wh_send_ok: "✅ Enviado a [{name}]",
+      wh_send_fail: "❌ Error al enviar [{name}]",
+      wh_no_urls: "⚠️ No hay URLs en este mensaje",
+      wh_url_invalid: "⚠️ URL de Webhook inválida",
+      wh_btn_edit: "Editar",
+      wh_btn_save: "Guardar",
+      wh_btn_cancel: "Cancelar",
+      wh_keep_source: "📎 Incluir enlace de origen",
+      wh_keep_source_tip: "Al marcar, se añade el enlace original del mensaje al final del contenido enviado.",
+    },    "pt-BR": {
       name: "Português (Brasil)",
       fm_pinned_channels: "★ Canais fixados",
       fm_toggle_flat: "Alternar para: Vista plana",
@@ -2012,25 +2286,25 @@
 
       fm_sec_wormhole: "🌀 Buraco de minhoca — Básico",
       fm_sec_wormhole_content:
-        "• Clique em <span class='help-key'>＋</span> e cole uma URL de canal do Discord para criar um atalho.<br>"
-        + "• <b>Clique</b> em um buraco → pula instantaneamente para esse canal.<br>"
-        + "• <b>Botão direito</b> → menu: renomear, excluir, ícone, mover para grupo ou alternar VIP.<br>"
-        + "• <b>VIP (★)</b>: buracos fixados flutuam automaticamente para o topo.<br>"
-        + "• <b>Grupos</b>: organize buracos em pastas.<br>"
-        + "• <b>Modo foco</b>: visão compacta somente com ícones.",
+        "• Clique em <span class='help-key'>＋</span> e cole uma URL de canal do Discord para criar um atalho.<br>" +
+        "• <b>Clique</b> em um buraco → pula instantaneamente para esse canal.<br>" +
+        "• <b>Botão direito</b> → menu: renomear, excluir, ícone, mover para grupo ou alternar VIP.<br>" +
+        "• <b>VIP (★)</b>: buracos fixados flutuam automaticamente para o topo.<br>" +
+        "• <b>Grupos</b>: organize buracos em pastas.<br>" +
+        "• <b>Modo foco</b>: visão compacta somente com ícones.",
       fm_sec_wm_send: "✉️ Buraco de minhoca — Enviar mensagem",
       fm_sec_wm_send_content:
-        "• <b>Botão direito</b> → <b>Enviar mensagem aqui</b> para abrir o painel.<br>"
-        + "• <b>Modo A (Navegar)</b>: muda para o canal destino, injeta texto e retorna.<br>"
-        + "• <b>Shift+Clique</b> → abre o painel no canal atual.<br>"
-        + "• Suporta <b>colar imagens com Ctrl+V</b>.<br>"
-        + "• Opções inferiores: <b>Fechar automaticamente</b> / <b>Ir ao canal</b> / <b>Mostrar notificação</b>.",
+        "• <b>Botão direito</b> → <b>Enviar mensagem aqui</b> para abrir o painel.<br>" +
+        "• <b>Modo A (Navegar)</b>: muda para o canal destino, injeta texto e retorna.<br>" +
+        "• <b>Shift+Clique</b> → abre o painel no canal atual.<br>" +
+        "• Suporta <b>colar imagens com Ctrl+V</b>.<br>" +
+        "• Opções inferiores: <b>Fechar automaticamente</b> / <b>Ir ao canal</b> / <b>Mostrar notificação</b>.",
       fm_sec_wm_api: "⚡ Buraco de minhoca — Modo API (secreto)",
       fm_sec_wm_api_content:
-        "• <b>Mantenha pressionado o botão ＋ por 3 segundos</b> para desbloquear o Modo API.<br>"
-        + "• <b>Modo B (API direta)</b>: envia mensagens via Discord REST API sem trocar de página.<br>"
-        + "• O token é interceptado silenciosamente na memória — <b>nunca armazenado ou transmitido</b>.<br>"
-        + "• Apagado ao fechar a página.",
+        "• <b>Mantenha pressionado o botão ＋ por 3 segundos</b> para desbloquear o Modo API.<br>" +
+        "• <b>Modo B (API direta)</b>: envia mensagens via Discord REST API sem trocar de página.<br>" +
+        "• O token é interceptado silenciosamente na memória — <b>nunca armazenado ou transmitido</b>.<br>" +
+        "• Apagado ao fechar a página.",
       welcome_title: "Bem-vindo ao {script}",
       select_lang_subtitle: "Por favor, selecione o idioma da interface",
       help_btn: "📖 Manual",
@@ -2040,7 +2314,8 @@
         "Os recursos de conversão de URL (como vxtwitter, kkinstagram) dependem de serviços de terceiros.\nNão os use se não confiar nesses serviços.\nOs usuários devem ser capazes de identificar a segurança das URL.",
       manual_content:
         "【Guia de ícones】\n• ◫/≡ : Alternar estilo de menu (Plano / Grupo)\n• ⇄ : Trocar lógica de clique (Copiar / Inserir)\n• ␣ : Adicionar espaço ao final\n• ↵ : Adicionar nova linha ao final\n• ☆ : Painel de strings personalizadas\n• 🖱️ : Modo de ativação (Hover / Clique)\n• 🌐 : Alterar idioma\n\n【Ações】\n• **Clique**: Copiar (padrão)\n• **Pressão longa (0,5s)**: Inserir na caixa de texto\n• **Shift+Clique**: Copiar e inserir (mantém o menu aberto)",
-      manual_content_sections: "<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Início rápido</div><div class='mm-content'>Passe o cursor sobre qualquer mensagem do Discord → aparece um botão de copiar no canto superior direito.<br><b>Clique</b> para copiar · <b>Pressão longa 0,5s</b> para inserir · <b>Shift+Clique</b> para copiar e inserir.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Menu de cópia</div><div class='mm-content'>• Copiar texto, URL de mídia, primeiro link limpo, todos os links, Markdown, texto oculto.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ Download</div><div class='mm-content'>• Baixar imagens/mídias individualmente ou como ZIP.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 Conversão de URL</div><div class='mm-content'>Twitter/X, Instagram, Bilibili, Pixiv — conversão mútua para prévias no Discord.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Buraco de minhoca</div><div class='mm-content'>Atalhos de canal com um clique na barra lateral do Discord.</div></div>",
+      manual_content_sections:
+        "<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Início rápido</div><div class='mm-content'>Passe o cursor sobre qualquer mensagem do Discord → aparece um botão de copiar no canto superior direito.<br><b>Clique</b> para copiar · <b>Pressão longa 0,5s</b> para inserir · <b>Shift+Clique</b> para copiar e inserir.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Menu de cópia</div><div class='mm-content'>• Copiar texto, URL de mídia, primeiro link limpo, todos os links, Markdown, texto oculto.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ Download</div><div class='mm-content'>• Baixar imagens/mídias individualmente ou como ZIP.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 Conversão de URL</div><div class='mm-content'>Twitter/X, Instagram, Bilibili, Pixiv — conversão mútua para prévias no Discord.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Buraco de minhoca</div><div class='mm-content'>Atalhos de canal com um clique na barra lateral do Discord.</div></div>",
       reload_confirm: "Configurações salvas!\nRecarregar a página agora?",
       copy_text: "📋 Copiar texto",
       copy_media_url: "🖼️ Copiar URL de mídia",
@@ -2055,7 +2330,8 @@
       download_start: "🚀 Baixando...",
       download_zip_start: "📦 Compactando {n} arquivos...",
       download_fail: "❌ Falha no download",
-      download_cors_fail: "⚠️ CORS impede o download direto. Copie a URL e abra no navegador.",
+      download_cors_fail:
+        "⚠️ CORS impede o download direto. Copie a URL e abra no navegador.",
       original_url: "🔗 URL original",
       convert_all: "⚡ Converter tudo ({n})",
       convert_imgur: "🖼️ Converter para i.imgur.com",
@@ -2099,7 +2375,8 @@
       mode_click: "🖱️ Clique",
       mode_desc: "Modo: {mode} (clique para alternar)",
       mode_changed: "Modo alterado: {mode}",
-      export_success: "✅ Configurações exportadas!\n\nCopiadas para a área de transferência.",
+      export_success:
+        "✅ Configurações exportadas!\n\nCopiadas para a área de transferência.",
       import_prompt: "⬇️ Cole o código de backup (JSON):",
       import_success: "✅ Importação bem-sucedida!\nRecarregando página.",
       import_fail: "❌ Falha na importação: JSON inválido.",
@@ -2118,7 +2395,8 @@
       tip_lang: "Alterar idioma",
       tip_manual: "Manual",
       mod_msg_warn_title: "⚠️ Desativar Utilitário de Mensagens?",
-      mod_msg_warn_body: "⠿ O Utilitário de Mensagens é a função principal.\\nSe desativado, o botão ⠿ desaparecerá de todas as mensagens.",
+      mod_msg_warn_body:
+        "⠿ O Utilitário de Mensagens é a função principal.\\nSe desativado, o botão ⠿ desaparecerá de todas as mensagens.",
       mod_msg_warn_confirm: "Desativar",
       mod_msg_warn_cancel: "Cancelar",
       mod_msg_enable_menu: "Ativar ⠿ Utilitário de Mensagens",
@@ -2126,6 +2404,7 @@
       grp_convert: "🔄 Converter >",
       grp_download: "⬇️ Baixar >",
       grp_system: "⚙️ Sistema e símbolos >",
+      grp_webhook: "🔗 Webhook >",
       view_main: "Menu principal",
       view_symbols: "Strings personalizadas",
 
@@ -2133,7 +2412,8 @@
       em_content:
         "• <b>Barra</b>: [📁] Coleção | [🎯] Modo mira | [★] Palavras-chave.<br>• <b>Modo mira</b>: selecione GIFs ou emojis diretamente da tela.<br>• <b>Shift+Clique</b>: enviar consecutivamente sem fechar o painel.",
       em_picker_tip: "🔍 Clique no GIF/emoji (clique no fundo para cancelar)",
-      em_err_no_list: "Contêiner de lista não encontrado. Abra primeiro a janela de emoji ou GIF!",
+      em_err_no_list:
+        "Contêiner de lista não encontrado. Abra primeiro a janela de emoji ou GIF!",
       em_btn_add_title: "Salvar palavra-chave de pesquisa",
       em_btn_active_title: "Clique: preencher palavra-chave (alternar)",
       em_btn_target_title: "Modo mira: clique no GIF/emoji para salvar",
@@ -2158,14 +2438,17 @@
       wm_menu_move: "📂 Mover para grupo",
       wm_group_prompt: "Digite o nome do novo grupo:",
       wm_edit_group: "Editar nome do grupo:",
-      wm_group_del_confirm: "Dissolver o grupo «{n}»? (os buracos serão mantidos)",
-      wm_group_select_prompt: "Digite um número para selecionar o grupo:\n\n0. [Raiz/Sem categoria]\n{list}\n\nDeixe vazio para criar «Novo grupo»:",
+      wm_group_del_confirm:
+        "Dissolver o grupo «{n}»? (os buracos serão mantidos)",
+      wm_group_select_prompt:
+        "Digite um número para selecionar o grupo:\n\n0. [Raiz/Sem categoria]\n{list}\n\nDeixe vazio para criar «Novo grupo»:",
       wm_group_invalid: "Seleção de grupo inválida!",
       wm_move_prompt: "Para qual grupo mover? (digite número)\n\n{list}",
       wm_icon_picker_title: "Selecionar ícone para {name}",
       wm_icon_set_success: "✅ Ícone de {name} definido",
       wm_icon_empty: "Primeiro adicione um Emoji no módulo de coleção",
-      wm_title: "Controle do buraco de minhoca\n• Clique: criar novo\n• Pressão longa 1s: menu de configurações",
+      wm_title:
+        "Controle do buraco de minhoca\n• Clique: criar novo\n• Pressão longa 1s: menu de configurações",
       wm_settings_menu_title: "🌀 Configurações do buraco de minhoca",
       wm_settings_create: "Criar novo buraco de minhoca",
       wm_settings_send_mode: "Método de envio e Modo API",
@@ -2204,7 +2487,8 @@
       wm_send_show_toast: "Mostrar notificação de envio",
       wm_send_goto_channel: "Ir ao canal após enviar",
       wm_send_paste_hint: "📋 Ctrl+V para colar imagem",
-      wm_send_token_warn: "⚠️ Token expirado. Reabra o painel API para detectar novamente. Usando Modo A desta vez.",
+      wm_send_token_warn:
+        "⚠️ Token expirado. Reabra o painel API para detectar novamente. Usando Modo A desta vez.",
       wm_send_channel_fail: "❌ Falha ao carregar o canal",
       wm_send_editor_missing: "❌ Editor não encontrado",
       wm_send_uploading: "📎 Enviando {n} imagem(ns)...",
@@ -2213,12 +2497,15 @@
       wm_api_mode_label_a: "Modo A — Navegar (padrão)",
       wm_api_mode_label_b: "Modo B — API direta (sem troca de página)",
       wm_api_warning_title: "⚠️ Aviso de risco",
-      wm_api_warning_body: "Usar um Token de usuário para chamar a API do Discord viola os Termos de Serviço. Sua conta pode ser banida. Use por sua conta e risco.",
+      wm_api_warning_body:
+        "Usar um Token de usuário para chamar a API do Discord viola os Termos de Serviço. Sua conta pode ser banida. Use por sua conta e risco.",
       wm_api_token_status_none: "Token: Não detectado",
       wm_api_token_status_ready: "Token: Pronto (somente na memória)",
       wm_api_detect_btn: "Detectar meu Token",
-      wm_api_detect_confirm: "【Consentimento de interceptação de Token】\n\nAo clicar em OK, você autoriza que este script intercepte seu Token do Discord para esta sessão.\n\n🔒 Garantias de segurança:\n• Somente na memória — nunca gravado em disco\n• Apagado ao fechar ou recarregar a página\n• Nunca transmitido para qualquer servidor externo\n• Usado exclusivamente para enviar mensagens em seu nome\n\n⚠️ Reconhecimento:\n• Você entende que este token concede acesso para enviar mensagens\n• Você aceita total responsabilidade por todas as mensagens enviadas\n\nProssiga somente se confiar neste script.",
-      wm_api_detect_waiting: "⬆️ Mude para qualquer canal uma vez para capturar o Token",
+      wm_api_detect_confirm:
+        "【Consentimento de interceptação de Token】\n\nAo clicar em OK, você autoriza que este script intercepte seu Token do Discord para esta sessão.\n\n🔒 Garantias de segurança:\n• Somente na memória — nunca gravado em disco\n• Apagado ao fechar ou recarregar a página\n• Nunca transmitido para qualquer servidor externo\n• Usado exclusivamente para enviar mensagens em seu nome\n\n⚠️ Reconhecimento:\n• Você entende que este token concede acesso para enviar mensagens\n• Você aceita total responsabilidade por todas as mensagens enviadas\n\nProssiga somente se confiar neste script.",
+      wm_api_detect_waiting:
+        "⬆️ Mude para qualquer canal uma vez para capturar o Token",
       wm_api_enable_btn: "Ativar Modo API",
       wm_api_disable_btn: "Desativar Modo API (voltar ao Modo A)",
       wm_api_enabled_toast: "✅ Modo API ativado",
@@ -2247,17 +2534,42 @@
       menu_export: "📤 Exportar configurações (Backup)",
       menu_import: "⬇️ Importar configurações (Restaurar)",
       menu_change_lang: "🌐 Alterar idioma",
-      custom_lang_desc: "Clique em「📤 Exportar texto」para obter o JSON em inglês. Após traduzir, use「📥 Importar texto」para aplicar.",
+      custom_lang_desc:
+        "Clique em「📤 Exportar texto」para obter o JSON em inglês. Após traduzir, use「📥 Importar texto」para aplicar.",
       custom_lang_export: "📤 Exportar texto",
       custom_lang_import: "📥 Importar texto",
       custom_lang_apply: "✅ Aplicar e recarregar",
       custom_lang_loaded: "✅ Carregado: {name}",
-      custom_lang_activate: "🌐 Aplicar \"{name}\"",
+      custom_lang_activate: '🌐 Aplicar "{name}"',
       custom_lang_json_error: "⚠️ Erro JSON: {msg}",
       custom_lang_paste_hint: "Cole o JSON traduzido aqui …",
+      copy_media_prefixed: "✅ {n} link(s) de mídia com prefixo copiado(s)",
+      copy_media_urls: "✅ {n} link(s) de mídia copiado(s)",
+      wormhole_reset_success: "✅ Dados apagados, recarregando…",
+      wh_panel_title: "🔗 Gerenciar Webhook",
+      wh_enable: "Ativar Webhook",
+      wh_tip: "Gerenciar Webhook",
+      wh_add_name_ph: "Rótulo (ex: Animais)",
+      wh_add_url_ph: "https://discord.com/api/webhooks/…",
+      wh_btn_add: "＋ Adicionar",
+      wh_btn_test: "Testar",
+      wh_btn_delete: "Excluir",
+      wh_test_ok: "✅ Teste enviado!",
+      wh_test_fail: "❌ Teste falhou",
+      wh_send_content: "📨 Enviar mensagem ao Webhook ▶",
+      wh_send_urls: "🔗 Enviar URLs ao Webhook ▶",
+      wh_no_webhooks: "Nenhum Webhook cadastrado",
+      wh_send_ok: "✅ Enviado para [{name}]",
+      wh_send_fwh_url_invalid: "⚠️ URL de Webhook inválida",
+      wh_btn_edit: "Editar",
+      wh_btn_save: "Guardar",
+      wh_btn_cancel: "Cancelar",
+      wh_keep_source: "📎 Incluir link de origem",
+      wh_keep_source_tip: "Ao marcar, o link original da mensagem é adicionado ao final do conteúdo enviado.",o_urls: "⚠️ Nenhuma URL nesta mensagem",
+      wh_url_invalid: "⚠️ URL de Webhook inválida",
     },
 
-    "fr": {
+    fr: {
       name: "Français",
       fm_pinned_channels: "★ Salons épinglés",
       fm_toggle_flat: "Passer à : Vue plate",
@@ -2292,25 +2604,25 @@
 
       fm_sec_wormhole: "🌀 Trou de ver — Bases",
       fm_sec_wormhole_content:
-        "• Cliquez sur <span class='help-key'>＋</span> et collez une URL de salon Discord pour créer un raccourci.<br>"
-        + "• <b>Clic</b> sur un trou de ver → saut instantané vers ce salon.<br>"
-        + "• <b>Clic droit</b> → menu : renommer, supprimer, icône, déplacer vers un groupe ou basculer VIP.<br>"
-        + "• <b>VIP (★)</b> : les trous épinglés remontent automatiquement.<br>"
-        + "• <b>Groupes</b> : organisez les trous en dossiers.<br>"
-        + "• <b>Mode focus</b> : vue compacte icônes uniquement.",
+        "• Cliquez sur <span class='help-key'>＋</span> et collez une URL de salon Discord pour créer un raccourci.<br>" +
+        "• <b>Clic</b> sur un trou de ver → saut instantané vers ce salon.<br>" +
+        "• <b>Clic droit</b> → menu : renommer, supprimer, icône, déplacer vers un groupe ou basculer VIP.<br>" +
+        "• <b>VIP (★)</b> : les trous épinglés remontent automatiquement.<br>" +
+        "• <b>Groupes</b> : organisez les trous en dossiers.<br>" +
+        "• <b>Mode focus</b> : vue compacte icônes uniquement.",
       fm_sec_wm_send: "✉️ Trou de ver — Envoyer un message",
       fm_sec_wm_send_content:
-        "• <b>Clic droit</b> → <b>Envoyer un message ici</b> pour ouvrir le panneau.<br>"
-        + "• <b>Mode A (Navigation)</b> : change de salon, injecte le texte et revient.<br>"
-        + "• <b>Shift+Clic</b> → ouvre le panneau dans le salon actuel.<br>"
-        + "• Prend en charge le <b>collage d'images avec Ctrl+V</b>.<br>"
-        + "• Options du bas : <b>Fermeture auto</b> / <b>Aller au salon</b> / <b>Afficher la notification</b>.",
+        "• <b>Clic droit</b> → <b>Envoyer un message ici</b> pour ouvrir le panneau.<br>" +
+        "• <b>Mode A (Navigation)</b> : change de salon, injecte le texte et revient.<br>" +
+        "• <b>Shift+Clic</b> → ouvre le panneau dans le salon actuel.<br>" +
+        "• Prend en charge le <b>collage d'images avec Ctrl+V</b>.<br>" +
+        "• Options du bas : <b>Fermeture auto</b> / <b>Aller au salon</b> / <b>Afficher la notification</b>.",
       fm_sec_wm_api: "⚡ Trou de ver — Mode API (secret)",
       fm_sec_wm_api_content:
-        "• <b>Maintenez le bouton ＋ appuyé 3 secondes</b> pour déverrouiller le Mode API.<br>"
-        + "• <b>Mode B (API directe)</b> : envoie des messages via l'API REST Discord sans changer de page.<br>"
-        + "• Le token est intercepté silencieusement en mémoire — <b>jamais stocké ni transmis</b>.<br>"
-        + "• Effacé à la fermeture de la page.",
+        "• <b>Maintenez le bouton ＋ appuyé 3 secondes</b> pour déverrouiller le Mode API.<br>" +
+        "• <b>Mode B (API directe)</b> : envoie des messages via l'API REST Discord sans changer de page.<br>" +
+        "• Le token est intercepté silencieusement en mémoire — <b>jamais stocké ni transmis</b>.<br>" +
+        "• Effacé à la fermeture de la page.",
       welcome_title: "Bienvenue sur {script}",
       select_lang_subtitle: "Veuillez sélectionner la langue de l'interface",
       help_btn: "📖 Manuel",
@@ -2320,8 +2632,10 @@
         "Les fonctions de conversion d'URL (vxtwitter, kkinstagram, etc.) dépendent de services tiers.\nNe les utilisez pas si vous ne faites pas confiance à ces services.\nLes utilisateurs doivent être capables d'identifier la sécurité des URL.",
       manual_content:
         "【Guide des icônes】\n• ◫/≡ : Changer le style de menu (Plat / Groupe)\n• ⇄ : Inverser la logique de clic (Copier / Insérer)\n• ␣ : Ajouter un espace à la fin\n• ↵ : Ajouter une nouvelle ligne à la fin\n• ☆ : Panneau de chaînes personnalisées\n• 🖱️ : Mode d'activation (Survol / Clic)\n• 🌐 : Changer de langue\n\n【Actions】\n• **Clic** : Copier (défaut)\n• **Appui long (0,5s)** : Insérer dans la zone de texte\n• **Shift+Clic** : Copier et insérer (menu conservé)",
-      manual_content_sections: "<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Démarrage rapide</div><div class='mm-content'>Survolez un message Discord → un bouton de copie apparaît en haut à droite.<br><b>Clic</b> pour copier · <b>Appui long 0,5s</b> pour insérer · <b>Shift+Clic</b> pour copier et insérer.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Menu de copie</div><div class='mm-content'>• Copier le texte, l'URL des médias, le premier lien propre, tous les liens, Markdown, texte masqué.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ Télécharger</div><div class='mm-content'>• Télécharger images/médias individuellement ou en ZIP.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 Conversion d'URL</div><div class='mm-content'>Twitter/X, Instagram, Bilibili, Pixiv — conversion mutuelle pour les aperçus Discord.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Trou de ver</div><div class='mm-content'>Raccourcis de salon en un clic dans la barre latérale Discord.</div></div>",
-      reload_confirm: "Paramètres sauvegardés !\nRecharger la page maintenant ?",
+      manual_content_sections:
+        "<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Démarrage rapide</div><div class='mm-content'>Survolez un message Discord → un bouton de copie apparaît en haut à droite.<br><b>Clic</b> pour copier · <b>Appui long 0,5s</b> pour insérer · <b>Shift+Clic</b> pour copier et insérer.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Menu de copie</div><div class='mm-content'>• Copier le texte, l'URL des médias, le premier lien propre, tous les liens, Markdown, texte masqué.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ Télécharger</div><div class='mm-content'>• Télécharger images/médias individuellement ou en ZIP.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 Conversion d'URL</div><div class='mm-content'>Twitter/X, Instagram, Bilibili, Pixiv — conversion mutuelle pour les aperçus Discord.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Trou de ver</div><div class='mm-content'>Raccourcis de salon en un clic dans la barre latérale Discord.</div></div>",
+      reload_confirm:
+        "Paramètres sauvegardés !\nRecharger la page maintenant ?",
       copy_text: "📋 Copier le texte",
       copy_media_url: "🖼️ Copier l'URL des médias",
       no_content: "⚠️ Aucun contenu",
@@ -2335,7 +2649,8 @@
       download_start: "🚀 Téléchargement...",
       download_zip_start: "📦 Compression de {n} fichier(s)...",
       download_fail: "❌ Échec du téléchargement",
-      download_cors_fail: "⚠️ CORS empêche le téléchargement direct. Copiez l'URL et ouvrez-la dans le navigateur.",
+      download_cors_fail:
+        "⚠️ CORS empêche le téléchargement direct. Copiez l'URL et ouvrez-la dans le navigateur.",
       original_url: "🔗 URL originale",
       convert_all: "⚡ Tout convertir ({n})",
       convert_imgur: "🖼️ Convertir en i.imgur.com",
@@ -2379,7 +2694,8 @@
       mode_click: "🖱️ Clic",
       mode_desc: "Mode : {mode} (clic pour changer)",
       mode_changed: "Mode changé : {mode}",
-      export_success: "✅ Paramètres exportés !\n\nCopiés dans le presse-papiers.",
+      export_success:
+        "✅ Paramètres exportés !\n\nCopiés dans le presse-papiers.",
       import_prompt: "⬇️ Collez le code de sauvegarde (JSON) :",
       import_success: "✅ Importation réussie !\nRechargement de la page.",
       import_fail: "❌ Échec de l'importation : JSON invalide.",
@@ -2398,7 +2714,8 @@
       tip_lang: "Changer de langue",
       tip_manual: "Manuel",
       mod_msg_warn_title: "⚠️ Désactiver l'Utilitaire de Messages ?",
-      mod_msg_warn_body: "⠿ L'Utilitaire de Messages est la fonction principale.\\nSi désactivé, le bouton ⠿ disparaîtra de tous les messages.",
+      mod_msg_warn_body:
+        "⠿ L'Utilitaire de Messages est la fonction principale.\\nSi désactivé, le bouton ⠿ disparaîtra de tous les messages.",
       mod_msg_warn_confirm: "Désactiver",
       mod_msg_warn_cancel: "Annuler",
       mod_msg_enable_menu: "Activer ⠿ Utilitaire de Messages",
@@ -2406,17 +2723,21 @@
       grp_convert: "🔄 Convertir >",
       grp_download: "⬇️ Télécharger >",
       grp_system: "⚙️ Système et symboles >",
+      grp_webhook: "🔗 Webhook >",
       view_main: "Menu principal",
       view_symbols: "Chaînes personnalisées",
 
       em_title: "😊 Gestion intégrée des expressions/GIF",
       em_content:
         "• <b>Barre</b> : [📁] Collection | [🎯] Mode viseur | [★] Mots-clés.<br>• <b>Mode viseur</b> : sélectionnez directement des GIFs ou emojis à l'écran.<br>• <b>Shift+Clic</b> : envoyer consécutivement sans fermer le panneau.",
-      em_picker_tip: "🔍 Cliquez sur le GIF/emoji (clic sur le fond pour annuler)",
-      em_err_no_list: "Conteneur de liste introuvable. Ouvrez d'abord la fenêtre emoji ou GIF !",
+      em_picker_tip:
+        "🔍 Cliquez sur le GIF/emoji (clic sur le fond pour annuler)",
+      em_err_no_list:
+        "Conteneur de liste introuvable. Ouvrez d'abord la fenêtre emoji ou GIF !",
       em_btn_add_title: "Sauvegarder le mot-clé de recherche",
       em_btn_active_title: "Clic : remplir le mot-clé (basculer)",
-      em_btn_target_title: "Mode viseur : cliquez sur GIF/emoji pour sauvegarder",
+      em_btn_target_title:
+        "Mode viseur : cliquez sur GIF/emoji pour sauvegarder",
       em_btn_save_this: "Ajouter cet élément à la collection",
       em_no_favs: "Aucun favori pour l'instant",
       em_del_confirm: "Supprimer « {k} » ?",
@@ -2438,14 +2759,18 @@
       wm_menu_move: "📂 Déplacer vers le groupe",
       wm_group_prompt: "Entrez le nom du nouveau groupe :",
       wm_edit_group: "Modifier le nom du groupe :",
-      wm_group_del_confirm: "Dissoudre le groupe « {n} » ? (les trous seront conservés)",
-      wm_group_select_prompt: "Entrez un numéro pour sélectionner le groupe :\n\n0. [Racine/Non catégorisé]\n{list}\n\nLaissez vide pour créer « Nouveau groupe » :",
+      wm_group_del_confirm:
+        "Dissoudre le groupe « {n} » ? (les trous seront conservés)",
+      wm_group_select_prompt:
+        "Entrez un numéro pour sélectionner le groupe :\n\n0. [Racine/Non catégorisé]\n{list}\n\nLaissez vide pour créer « Nouveau groupe » :",
       wm_group_invalid: "Sélection de groupe invalide !",
-      wm_move_prompt: "Déplacer vers quel groupe ? (entrez le numéro)\n\n{list}",
+      wm_move_prompt:
+        "Déplacer vers quel groupe ? (entrez le numéro)\n\n{list}",
       wm_icon_picker_title: "Sélectionner l'icône pour {name}",
       wm_icon_set_success: "✅ Icône de {name} définie",
       wm_icon_empty: "Ajoutez d'abord un Emoji dans le module de collection",
-      wm_title: "Contrôle du trou de ver\n• Clic : créer nouveau\n• Appui long 1s : menu des paramètres",
+      wm_title:
+        "Contrôle du trou de ver\n• Clic : créer nouveau\n• Appui long 1s : menu des paramètres",
       wm_settings_menu_title: "🌀 Paramètres du trou de ver",
       wm_settings_create: "Créer un nouveau trou de ver",
       wm_settings_send_mode: "Méthode d'envoi et Mode API",
@@ -2484,7 +2809,8 @@
       wm_send_show_toast: "Afficher la notification d'envoi",
       wm_send_goto_channel: "Aller au salon après envoi",
       wm_send_paste_hint: "📋 Ctrl+V pour coller une image",
-      wm_send_token_warn: "⚠️ Token expiré. Rouvrez le panneau API pour le détecter à nouveau. Utilisation du Mode A cette fois.",
+      wm_send_token_warn:
+        "⚠️ Token expiré. Rouvrez le panneau API pour le détecter à nouveau. Utilisation du Mode A cette fois.",
       wm_send_channel_fail: "❌ Échec du chargement du salon",
       wm_send_editor_missing: "❌ Éditeur introuvable",
       wm_send_uploading: "📎 Envoi de {n} image(s)...",
@@ -2493,12 +2819,15 @@
       wm_api_mode_label_a: "Mode A — Navigation (défaut)",
       wm_api_mode_label_b: "Mode B — API directe (sans changement de page)",
       wm_api_warning_title: "⚠️ Avis de risque",
-      wm_api_warning_body: "Utiliser un Token utilisateur pour appeler l'API Discord viole les Conditions d'utilisation. Votre compte peut être banni. Utilisez à vos risques.",
+      wm_api_warning_body:
+        "Utiliser un Token utilisateur pour appeler l'API Discord viole les Conditions d'utilisation. Votre compte peut être banni. Utilisez à vos risques.",
       wm_api_token_status_none: "Token : Non détecté",
       wm_api_token_status_ready: "Token : Prêt (mémoire uniquement)",
       wm_api_detect_btn: "Détecter mon Token",
-      wm_api_detect_confirm: "【Consentement d'interception du Token】\n\nEn cliquant sur OK, vous autorisez ce script à intercepter votre Token Discord pour cette session.\n\n🔒 Garanties de sécurité :\n• Mémoire uniquement — jamais écrit sur disque\n• Effacé à la fermeture ou au rechargement de la page\n• Jamais transmis à un serveur externe\n• Utilisé exclusivement pour envoyer des messages en votre nom\n\n⚠️ Reconnaissance :\n• Vous comprenez que ce token accorde l'accès à l'envoi de messages\n• Vous acceptez l'entière responsabilité de tous les messages envoyés\n\nProcédez uniquement si vous faites confiance à ce script.",
-      wm_api_detect_waiting: "⬆️ Changez de salon une fois pour capturer le Token",
+      wm_api_detect_confirm:
+        "【Consentement d'interception du Token】\n\nEn cliquant sur OK, vous autorisez ce script à intercepter votre Token Discord pour cette session.\n\n🔒 Garanties de sécurité :\n• Mémoire uniquement — jamais écrit sur disque\n• Effacé à la fermeture ou au rechargement de la page\n• Jamais transmis à un serveur externe\n• Utilisé exclusivement pour envoyer des messages en votre nom\n\n⚠️ Reconnaissance :\n• Vous comprenez que ce token accorde l'accès à l'envoi de messages\n• Vous acceptez l'entière responsabilité de tous les messages envoyés\n\nProcédez uniquement si vous faites confiance à ce script.",
+      wm_api_detect_waiting:
+        "⬆️ Changez de salon une fois pour capturer le Token",
       wm_api_enable_btn: "Activer le Mode API",
       wm_api_disable_btn: "Désactiver le Mode API (retour au Mode A)",
       wm_api_enabled_toast: "✅ Mode API activé",
@@ -2510,11 +2839,12 @@
       wm_api_send_fail: "❌ Échec de l'API — vérifiez la console",
 
       em_col_title: "Mes collections",
-      em_col_add_success: 'Enregistré dans « {g} » !',
+      em_col_add_success: "Enregistré dans « {g} » !",
       em_col_tab_new: "Nouvel onglet",
       em_col_tab_prompt: "Nom du nouvel onglet :",
       em_col_empty_tab: "Cet onglet est vide.",
-      em_col_del_tab_confirm: 'Supprimer l\'onglet « {n} » et tous ses éléments ?',
+      em_col_del_tab_confirm:
+        "Supprimer l'onglet « {n} » et tous ses éléments ?",
       em_modal_choose_tab: "Enregistrer dans quelle collection ?",
       em_modal_create_new: "+ Créer une nouvelle...",
       em_tip_pick: "Définir l'image de couverture",
@@ -2527,7 +2857,8 @@
       menu_export: "📤 Exporter les paramètres (Sauvegarde)",
       menu_import: "⬇️ Importer les paramètres (Restaurer)",
       menu_change_lang: "🌐 Changer de langue",
-      custom_lang_desc: "Cliquez sur「📤 Exporter le texte」pour obtenir le JSON source en anglais. Traduisez-le puis utilisez「📥 Importer le texte」pour l'appliquer.",
+      custom_lang_desc:
+        "Cliquez sur「📤 Exporter le texte」pour obtenir le JSON source en anglais. Traduisez-le puis utilisez「📥 Importer le texte」pour l'appliquer.",
       custom_lang_export: "📤 Exporter le texte",
       custom_lang_import: "📥 Importer le texte",
       custom_lang_apply: "✅ Appliquer et recharger",
@@ -2535,9 +2866,34 @@
       custom_lang_activate: "🌐 Appliquer « {name} »",
       custom_lang_json_error: "⚠️ Erreur JSON : {msg}",
       custom_lang_paste_hint: "Collez le JSON traduit ici …",
+      copy_media_prefixed: "✅ {n} lien(s) média avec préfixe copié(s)",
+      copy_media_urls: "✅ {n} lien(s) média copié(s)",
+      wormhole_reset_success: "✅ Données supprimées, rechargement…",
+      wh_panel_title: "🔗 Gestion des Webhooks",
+      wh_enable: "Activer le Webhook",
+      wh_tip: "Gestion des Webhooks",
+      wh_add_name_ph: "Étiquette (ex : Animaux)",
+      wh_add_url_ph: "https://discord.com/api/webhooks/…",
+      wh_btn_add: "＋ Ajouter",
+      wh_btn_test: "Tester",
+      wh_btn_delete: "Supprimer",
+      wh_test_ok: "✅ Test envoyé !",
+      wh_test_fail: "❌ Test échoué",
+      wh_send_content: "📨 Envoyer le message au Webhook ▶",
+      wh_send_urls: "🔗 Envoyer les URLs au Webhook ▶",
+      wh_no_webhooks: "Aucun Webhook configuré",
+      wh_send_ok: "✅ Envoyé à [{name}]",
+      wh_send_fail: "❌ Échec d'envoi [{name}]",
+      wh_no_urls: "⚠️ Aucune URL dans ce message",
+      wh_url_invalid: "⚠️ URL de Webhook invalide",
+      wh_btn_edit: "Modifier",
+      wh_btn_save: "Enregistrer",
+      wh_btn_cancel: "Annuler",
+      wh_keep_source: "📎 Inclure le lien source",
+      wh_keep_source_tip: "Si coché, le lien original du message est ajouté à la fin du contenu envoyé.",
     },
 
-    "ru": {
+    ru: {
       name: "Русский",
       fm_pinned_channels: "★ Закреплённые каналы",
       fm_toggle_flat: "Переключить на: Плоский вид",
@@ -2572,25 +2928,25 @@
 
       fm_sec_wormhole: "🌀 Червоточина — Основы",
       fm_sec_wormhole_content:
-        "• Нажмите <span class='help-key'>＋</span> и вставьте URL канала Discord для создания ярлыка.<br>"
-        + "• <b>Клик</b> на червоточину → мгновенный переход к этому каналу.<br>"
-        + "• <b>Правый клик</b> → меню: переименовать, удалить, значок, перенести в группу или переключить VIP.<br>"
-        + "• <b>VIP (★)</b>: закреплённые червоточины автоматически всплывают наверх.<br>"
-        + "• <b>Группы</b>: организуйте червоточины в именованные папки.<br>"
-        + "• <b>Режим фокуса</b>: компактный вид только со значками.",
+        "• Нажмите <span class='help-key'>＋</span> и вставьте URL канала Discord для создания ярлыка.<br>" +
+        "• <b>Клик</b> на червоточину → мгновенный переход к этому каналу.<br>" +
+        "• <b>Правый клик</b> → меню: переименовать, удалить, значок, перенести в группу или переключить VIP.<br>" +
+        "• <b>VIP (★)</b>: закреплённые червоточины автоматически всплывают наверх.<br>" +
+        "• <b>Группы</b>: организуйте червоточины в именованные папки.<br>" +
+        "• <b>Режим фокуса</b>: компактный вид только со значками.",
       fm_sec_wm_send: "✉️ Червоточина — Отправка сообщений",
       fm_sec_wm_send_content:
-        "• <b>Правый клик</b> → <b>Отправить сообщение здесь</b> для открытия панели.<br>"
-        + "• <b>Режим A (Навигация)</b>: переходит на целевой канал, вставляет текст и возвращается.<br>"
-        + "• <b>Shift+Клик</b> → открывает панель в текущем канале.<br>"
-        + "• Поддерживает <b>вставку изображений через Ctrl+V</b>.<br>"
-        + "• Нижние опции: <b>Автозакрытие</b> / <b>Перейти на канал</b> / <b>Показать уведомление</b>.",
+        "• <b>Правый клик</b> → <b>Отправить сообщение здесь</b> для открытия панели.<br>" +
+        "• <b>Режим A (Навигация)</b>: переходит на целевой канал, вставляет текст и возвращается.<br>" +
+        "• <b>Shift+Клик</b> → открывает панель в текущем канале.<br>" +
+        "• Поддерживает <b>вставку изображений через Ctrl+V</b>.<br>" +
+        "• Нижние опции: <b>Автозакрытие</b> / <b>Перейти на канал</b> / <b>Показать уведомление</b>.",
       fm_sec_wm_api: "⚡ Червоточина — Режим API (секретный)",
       fm_sec_wm_api_content:
-        "• <b>Удерживайте кнопку ＋ 3 секунды</b> для разблокировки режима API.<br>"
-        + "• <b>Режим B (Прямой API)</b>: отправляет сообщения через Discord REST API без смены страницы.<br>"
-        + "• Токен перехватывается тихо в памяти — <b>никогда не сохраняется и не передаётся</b>.<br>"
-        + "• Очищается при закрытии страницы.",
+        "• <b>Удерживайте кнопку ＋ 3 секунды</b> для разблокировки режима API.<br>" +
+        "• <b>Режим B (Прямой API)</b>: отправляет сообщения через Discord REST API без смены страницы.<br>" +
+        "• Токен перехватывается тихо в памяти — <b>никогда не сохраняется и не передаётся</b>.<br>" +
+        "• Очищается при закрытии страницы.",
       welcome_title: "Добро пожаловать в {script}",
       select_lang_subtitle: "Пожалуйста, выберите язык интерфейса",
       help_btn: "📖 Руководство",
@@ -2600,7 +2956,8 @@
         "Функции конвертации URL (например, vxtwitter, kkinstagram) зависят от сторонних сервисов.\nНе используйте их, если не доверяете этим сервисам.\nПользователи должны уметь определять безопасность URL.",
       manual_content:
         "【Руководство по иконкам】\n• ◫/≡ : Сменить стиль меню (Плоский / Группа)\n• ⇄ : Поменять логику клика (Копировать / Вставить)\n• ␣ : Добавить пробел в конце\n• ↵ : Добавить новую строку в конце\n• ☆ : Панель пользовательских строк\n• 🖱️ : Режим активации (Hover / Клик)\n• 🌐 : Сменить язык\n\n【Действия】\n• **Клик**: Копировать (по умолчанию)\n• **Долгое нажатие (0,5с)**: Вставить в поле ввода\n• **Shift+Клик**: Копировать и вставить (меню остаётся открытым)",
-      manual_content_sections: "<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Быстрый старт</div><div class='mm-content'>Наведите курсор на любое сообщение Discord → в правом верхнем углу появится кнопка копирования.<br><b>Клик</b> для копирования · <b>Долгое нажатие 0,5с</b> для вставки · <b>Shift+Клик</b> для копирования и вставки.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Меню копирования</div><div class='mm-content'>• Копировать текст, URL медиа, первую чистую ссылку, все ссылки, Markdown, скрытый текст.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ Загрузка</div><div class='mm-content'>• Загружать изображения/медиа по отдельности или как ZIP.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 Конвертация URL</div><div class='mm-content'>Twitter/X, Instagram, Bilibili, Pixiv — взаимная конвертация для предпросмотра в Discord.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Червоточина</div><div class='mm-content'>Ярлыки каналов в один клик на боковой панели Discord.</div></div>",
+      manual_content_sections:
+        "<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Быстрый старт</div><div class='mm-content'>Наведите курсор на любое сообщение Discord → в правом верхнем углу появится кнопка копирования.<br><b>Клик</b> для копирования · <b>Долгое нажатие 0,5с</b> для вставки · <b>Shift+Клик</b> для копирования и вставки.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Меню копирования</div><div class='mm-content'>• Копировать текст, URL медиа, первую чистую ссылку, все ссылки, Markdown, скрытый текст.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ Загрузка</div><div class='mm-content'>• Загружать изображения/медиа по отдельности или как ZIP.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 Конвертация URL</div><div class='mm-content'>Twitter/X, Instagram, Bilibili, Pixiv — взаимная конвертация для предпросмотра в Discord.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Червоточина</div><div class='mm-content'>Ярлыки каналов в один клик на боковой панели Discord.</div></div>",
       reload_confirm: "Настройки сохранены!\nПерезагрузить страницу сейчас?",
       copy_text: "📋 Копировать текст",
       copy_media_url: "🖼️ Копировать URL медиа",
@@ -2615,7 +2972,8 @@
       download_start: "🚀 Загрузка...",
       download_zip_start: "📦 Сжатие {n} файл(ов)...",
       download_fail: "❌ Ошибка загрузки",
-      download_cors_fail: "⚠️ CORS не позволяет прямую загрузку. Скопируйте URL и откройте в браузере.",
+      download_cors_fail:
+        "⚠️ CORS не позволяет прямую загрузку. Скопируйте URL и откройте в браузере.",
       original_url: "🔗 Оригинальный URL",
       convert_all: "⚡ Конвертировать всё ({n})",
       convert_imgur: "🖼️ Конвертировать в i.imgur.com",
@@ -2659,7 +3017,8 @@
       mode_click: "🖱️ Клик",
       mode_desc: "Режим: {mode} (клик для переключения)",
       mode_changed: "Режим изменён: {mode}",
-      export_success: "✅ Настройки экспортированы!\n\nСкопированы в буфер обмена.",
+      export_success:
+        "✅ Настройки экспортированы!\n\nСкопированы в буфер обмена.",
       import_prompt: "⬇️ Вставьте код резервной копии (JSON):",
       import_success: "✅ Импорт успешен!\nСтраница перезагружается.",
       import_fail: "❌ Ошибка импорта: неверный JSON.",
@@ -2678,7 +3037,8 @@
       tip_lang: "Сменить язык",
       tip_manual: "Руководство",
       mod_msg_warn_title: "⚠️ Отключить утилиту сообщений?",
-      mod_msg_warn_body: "⠿ Утилита сообщений является основной функцией.\\nПри отключении кнопка ⠿ исчезнет со всех сообщений.",
+      mod_msg_warn_body:
+        "⠿ Утилита сообщений является основной функцией.\\nПри отключении кнопка ⠿ исчезнет со всех сообщений.",
       mod_msg_warn_confirm: "Отключить",
       mod_msg_warn_cancel: "Отмена",
       mod_msg_enable_menu: "Включить ⠿ утилиту сообщений",
@@ -2686,6 +3046,7 @@
       grp_convert: "🔄 Конвертировать >",
       grp_download: "⬇️ Скачать >",
       grp_system: "⚙️ Система и символы >",
+      grp_webhook: "🔗 Webhook >",
       view_main: "Главное меню",
       view_symbols: "Пользовательские строки",
 
@@ -2693,7 +3054,8 @@
       em_content:
         "• <b>Панель</b>: [📁] Коллекция | [🎯] Режим прицела | [★] Ключевые слова.<br>• <b>Режим прицела</b>: выбирайте GIF или эмодзи прямо с экрана.<br>• <b>Shift+Клик</b>: отправлять последовательно без закрытия панели.",
       em_picker_tip: "🔍 Нажмите на GIF/эмодзи (нажмите на фон для отмены)",
-      em_err_no_list: "Контейнер списка не найден. Сначала откройте окно эмодзи или GIF!",
+      em_err_no_list:
+        "Контейнер списка не найден. Сначала откройте окно эмодзи или GIF!",
       em_btn_add_title: "Сохранить ключевое слово поиска",
       em_btn_active_title: "Клик: заполнить ключевое слово (переключить)",
       em_btn_target_title: "Режим прицела: нажмите GIF/эмодзи для сохранения",
@@ -2718,14 +3080,17 @@
       wm_menu_move: "📂 Переместить в группу",
       wm_group_prompt: "Введите название новой группы:",
       wm_edit_group: "Изменить название группы:",
-      wm_group_del_confirm: "Расформировать группу «{n}»? (червоточины сохранятся)",
-      wm_group_select_prompt: "Введите номер для выбора группы:\n\n0. [Корень/Без категории]\n{list}\n\nОставьте пустым для создания «Новой группы»:",
+      wm_group_del_confirm:
+        "Расформировать группу «{n}»? (червоточины сохранятся)",
+      wm_group_select_prompt:
+        "Введите номер для выбора группы:\n\n0. [Корень/Без категории]\n{list}\n\nОставьте пустым для создания «Новой группы»:",
       wm_group_invalid: "Недопустимый выбор группы!",
       wm_move_prompt: "В какую группу переместить? (введите номер)\n\n{list}",
       wm_icon_picker_title: "Выбрать значок для {name}",
       wm_icon_set_success: "✅ Значок {name} установлен",
       wm_icon_empty: "Сначала добавьте эмодзи в модуле коллекции",
-      wm_title: "Управление червоточиной\n• Клик: создать новую\n• Долгое нажатие 1с: меню настроек",
+      wm_title:
+        "Управление червоточиной\n• Клик: создать новую\n• Долгое нажатие 1с: меню настроек",
       wm_settings_menu_title: "🌀 Настройки червоточины",
       wm_settings_create: "Создать новую червоточину",
       wm_settings_send_mode: "Метод отправки и режим API",
@@ -2764,7 +3129,8 @@
       wm_send_show_toast: "Показывать уведомление об отправке",
       wm_send_goto_channel: "Перейти на канал после отправки",
       wm_send_paste_hint: "📋 Ctrl+V для вставки изображения",
-      wm_send_token_warn: "⚠️ Токен истёк. Откройте панель API заново для повторного обнаружения. На этот раз используется режим A.",
+      wm_send_token_warn:
+        "⚠️ Токен истёк. Откройте панель API заново для повторного обнаружения. На этот раз используется режим A.",
       wm_send_channel_fail: "❌ Ошибка загрузки канала",
       wm_send_editor_missing: "❌ Редактор не найден",
       wm_send_uploading: "📎 Загрузка {n} изображени(й)...",
@@ -2773,12 +3139,15 @@
       wm_api_mode_label_a: "Режим A — Навигация (по умолчанию)",
       wm_api_mode_label_b: "Режим B — Прямой API (без смены страницы)",
       wm_api_warning_title: "⚠️ Предупреждение о рисках",
-      wm_api_warning_body: "Использование токена пользователя для вызова API Discord нарушает Условия использования. Ваш аккаунт может быть заблокирован. Используйте на свой страх и риск.",
+      wm_api_warning_body:
+        "Использование токена пользователя для вызова API Discord нарушает Условия использования. Ваш аккаунт может быть заблокирован. Используйте на свой страх и риск.",
       wm_api_token_status_none: "Токен: Не обнаружен",
       wm_api_token_status_ready: "Токен: Готов (только в памяти)",
       wm_api_detect_btn: "Обнаружить мой токен",
-      wm_api_detect_confirm: "【Согласие на перехват токена】\n\nНажав ОК, вы разрешаете этому скрипту перехватить ваш токен Discord для данной сессии.\n\n🔒 Гарантии безопасности:\n• Только в памяти — никогда не записывается на диск\n• Автоматически удаляется при закрытии или перезагрузке страницы\n• Никогда не передаётся на внешние серверы\n• Используется исключительно для отправки сообщений от вашего имени\n\n⚠️ Подтверждение:\n• Вы понимаете, что токен предоставляет доступ к отправке сообщений\n• Вы принимаете полную ответственность за все отправленные сообщения\n\nПродолжайте только если доверяете этому скрипту.",
-      wm_api_detect_waiting: "⬆️ Переключитесь в любой канал один раз, чтобы захватить Token",
+      wm_api_detect_confirm:
+        "【Согласие на перехват токена】\n\nНажав ОК, вы разрешаете этому скрипту перехватить ваш токен Discord для данной сессии.\n\n🔒 Гарантии безопасности:\n• Только в памяти — никогда не записывается на диск\n• Автоматически удаляется при закрытии или перезагрузке страницы\n• Никогда не передаётся на внешние серверы\n• Используется исключительно для отправки сообщений от вашего имени\n\n⚠️ Подтверждение:\n• Вы понимаете, что токен предоставляет доступ к отправке сообщений\n• Вы принимаете полную ответственность за все отправленные сообщения\n\nПродолжайте только если доверяете этому скрипту.",
+      wm_api_detect_waiting:
+        "⬆️ Переключитесь в любой канал один раз, чтобы захватить Token",
       wm_api_enable_btn: "Включить режим API",
       wm_api_disable_btn: "Отключить режим API (вернуться к режиму A)",
       wm_api_enabled_toast: "✅ Режим API включён",
@@ -2790,11 +3159,11 @@
       wm_api_send_fail: "❌ Ошибка API — проверьте консоль",
 
       em_col_title: "Мои коллекции",
-      em_col_add_success: 'Сохранено в «{g}»!',
+      em_col_add_success: "Сохранено в «{g}»!",
       em_col_tab_new: "Новая вкладка",
       em_col_tab_prompt: "Название новой вкладки:",
       em_col_empty_tab: "Эта вкладка пуста.",
-      em_col_del_tab_confirm: 'Удалить вкладку «{n}» со всеми элементами?',
+      em_col_del_tab_confirm: "Удалить вкладку «{n}» со всеми элементами?",
       em_modal_choose_tab: "В какую коллекцию сохранить?",
       em_modal_create_new: "+ Создать новую...",
       em_tip_pick: "Установить обложку",
@@ -2807,7 +3176,8 @@
       menu_export: "📤 Экспорт настроек (Резервная копия)",
       menu_import: "⬇️ Импорт настроек (Восстановление)",
       menu_change_lang: "🌐 Сменить язык",
-      custom_lang_desc: "Нажмите「📤 Экспорт текста」для получения исходного JSON на английском. Переведите и используйте「📥 Импорт текста」для применения.",
+      custom_lang_desc:
+        "Нажмите「📤 Экспорт текста」для получения исходного JSON на английском. Переведите и используйте「📥 Импорт текста」для применения.",
       custom_lang_export: "📤 Экспорт текста",
       custom_lang_import: "📥 Импорт текста",
       custom_lang_apply: "✅ Применить и перезагрузить",
@@ -2815,8 +3185,32 @@
       custom_lang_activate: "🌐 Применить «{name}»",
       custom_lang_json_error: "⚠️ Ошибка JSON: {msg}",
       custom_lang_paste_hint: "Вставьте переведённый JSON сюда …",
+      copy_media_prefixed: "✅ Скопировано {n} медиассылок с префиксом",
+      copy_media_urls: "✅ Скопировано {n} медиассылок",
+      wormhole_reset_success: "✅ Данные удалены, перезагрузка…",
+      wh_panel_title: "🔗 Управление Webhook",
+      wh_enable: "Включить Webhook",
+      wh_tip: "Управление Webhook",
+      wh_add_name_ph: "Метка (например: Животные)",
+      wh_add_url_ph: "https://discord.com/api/webhooks/…",
+      wh_btn_add: "＋ Добавить",
+      wh_btn_test: "Тест",
+      wh_btn_delete: "Удалить",
+      wh_test_ok: "✅ Тест отправлен!",
+      wh_test_fail: "❌ Тест не удался",
+      wh_send_content: "📨 Отправить сообщение в Webhook ▶",
+      wh_send_urls: "🔗 Отправить URL в Webhook ▶",
+      wh_no_webhooks: "Webhooks ещё не добавлены",
+      wh_send_ok: "✅ Отправлено в [{name}]",
+      wh_send_fail: "❌ Ошибка отправки [{name}]",
+      wh_no_urls: "⚠️ В этом сообщении нет URL",
+      wh_url_invalid: "⚠️ Недействительный URL Webhook",
+      wh_btn_edit: "Изменить",
+      wh_btn_save: "Сохранить",
+      wh_btn_cancel: "Отмена",
+      wh_keep_source: "📎 Включить ссылку на источник",
+      wh_keep_source_tip: "При включении ссылка на исходное сообщение добавляется в конец отправляемого контента.",
     },
-
   };
 
   let _customLangData = null;
@@ -2831,136 +3225,11 @@
 
   TRANSLATIONS["custom"] = { name: "Custom" };
 
-  class ObserverManager {
-    constructor() {
-      this.observers = new Map();
-      this.reconnectAttempts = new Map();
-      this.maxReconnectAttempts = 3;
-      this.reconnectDelay = 2000;
-    }
-
-    register(
-      name,
-      target,
-      callback,
-      options = { childList: true, subtree: true },
-    ) {
-      if (this.observers.has(name)) {
-        this.disconnect(name);
-      }
-
-      try {
-        const observer = new MutationObserver((mutations) => {
-          try {
-            callback(mutations, observer);
-          } catch (error) {
-            console.error(`[Observer:${name}] Callback error:`, error);
-            this._scheduleReconnect(name, target, callback, options);
-          }
-        });
-
-        observer.observe(target, options);
-
-        this.observers.set(name, {
-          observer,
-          target,
-          callback,
-          options,
-          startTime: Date.now(),
-        });
-
-        console.log(`[Observer:${name}] ✓ Started`);
-
-        this.reconnectAttempts.set(name, 0);
-      } catch (error) {
-        console.error(`[Observer:${name}] Failed to start:`, error);
-      }
-    }
-
-    disconnect(name) {
-      if (this.observers.has(name)) {
-        const { observer } = this.observers.get(name);
-        observer.disconnect();
-        this.observers.delete(name);
-        console.log(`[Observer:${name}] ✓ Disconnected`);
-      }
-    }
-
-    disconnectAll() {
-      this.observers.forEach((_, name) => this.disconnect(name));
-      console.log(`[ObserverManager] All observers disconnected`);
-    }
-
-    _scheduleReconnect(name, target, callback, options) {
-      const attempts = this.reconnectAttempts.get(name) || 0;
-
-      if (attempts >= this.maxReconnectAttempts) {
-        console.error(
-          `[Observer:${name}] Max reconnect attempts reached, giving up`,
-        );
-        return;
-      }
-
-      console.warn(
-        `[Observer:${name}] Scheduling reconnect (attempt ${attempts + 1}/${this.maxReconnectAttempts})`,
-      );
-
-      setTimeout(() => {
-        if (document.body.contains(target)) {
-          this.reconnectAttempts.set(name, attempts + 1);
-          this.register(name, target, callback, options);
-        } else {
-          console.error(`[Observer:${name}] Target element no longer exists`);
-        }
-      }, this.reconnectDelay);
-    }
-
-    getStatus() {
-      const status = {};
-      this.observers.forEach((data, name) => {
-        const uptime = Math.floor((Date.now() - data.startTime) / 1000);
-        status[name] = {
-          active: true,
-          uptime: `${uptime}s`,
-          target: data.target.tagName || "Unknown",
-        };
-      });
-      return status;
-    }
-
-    healthCheck() {
-      const issues = [];
-
-      this.observers.forEach((data, name) => {
-        if (!document.body.contains(data.target)) {
-          issues.push(`${name}: Target element removed`);
-          this.disconnect(name);
-        }
-      });
-
-      if (issues.length > 0) {
-        console.warn(`[ObserverManager] Health check found issues:`, issues);
-      }
-
-      return issues;
-    }
-  }
-
-  const observerManager = new ObserverManager();
-
-  GM_registerMenuCommand(t("mod_msg_enable_menu"), () => {
-    localStorage.setItem("mod_message", "true");
-    location.reload();
-  });
-
-  window.addEventListener("beforeunload", () => {
-    observerManager.disconnectAll();
-  });
-
   function initForwardingManager() {
-    console.log(
-      "[Discord Utilities] Initializing Forwarding Manager (v20.1 Memory Safe)...",
-    );
+    DEBUG &&
+      console.log(
+        "[Discord Utilities] Initializing Forwarding Manager (v20.1 Memory Safe)...",
+      );
 
     let pollInterval = null;
     let isPollingActive = false;
@@ -3202,7 +3471,7 @@
     const activeObservers = new WeakMap();
 
     async function handleForwardOpen() {
-      console.log(
+      DEBUG && console.log(
         "[ForwardingManager] Forward button clicked. Waiting for modal...",
       );
 
@@ -3243,14 +3512,15 @@
 
         listObserver.observe(modal, { childList: true, subtree: true });
         activeObservers.set(modal, listObserver);
-        DEBUG && console.log("[ForwardingManager] Local Observer attached to modal.");
+        DEBUG &&
+          console.log("[ForwardingManager] Local Observer attached to modal.");
 
         const removeObserver = new MutationObserver((mutations, obs) => {
           if (!document.body.contains(modal)) {
             listObserver.disconnect();
             activeObservers.delete(modal);
             obs.disconnect();
-            console.log(
+            DEBUG && console.log(
               "[ForwardingManager] Modal closed. Local Observer disconnected.",
             );
           }
@@ -3286,7 +3556,7 @@
       activeObservers.forEach((observer) => observer.disconnect());
       activeObservers.clear();
 
-      console.log("[ForwardingManager] Cleanup complete");
+      DEBUG && console.log("[ForwardingManager] Cleanup complete");
     }
     window.addEventListener("beforeunload", cleanup);
 
@@ -3693,11 +3963,11 @@
 
       const warmUpTerm = fullTerm.substring(0, 2);
       setNativeValue(searchInput, warmUpTerm);
-      console.log(`[Search] Step 1: Warm-up with "${warmUpTerm}"`);
+      DEBUG && console.log(`[Search] Step 1: Warm-up with "${warmUpTerm}"`);
 
       const timer = setTimeout(() => {
         setNativeValue(searchInput, fullTerm);
-        console.log(`[Search] Step 2: Full term "${fullTerm}"`);
+        DEBUG && console.log(`[Search] Step 2: Full term "${fullTerm}"`);
         setTimeout(() => {
           applyFilter(modal, fullTerm, server, type, true);
           searchTimers.delete(modal);
@@ -3987,7 +4257,7 @@
   }
 
   function initMessageUtility() {
-    console.log("[Discord Utilities] Initializing Message Utility...");
+    DEBUG && console.log("[Discord Utilities] Initializing Message Utility...");
     const BUTTON_TOP = -9;
     const BUTTON_RIGHT = 230;
     let globalCloseTimer = null;
@@ -4051,18 +4321,29 @@
         color:#aaa; font-size:14px; cursor:pointer; line-height:1;
         transition:all 0.15s ease; display:flex; align-items:center; justify-content:center;
       `;
-      closeBtn.onmouseenter = () => { closeBtn.style.background="rgba(237,66,69,0.3)"; closeBtn.style.color="#fff"; };
-      closeBtn.onmouseleave = () => { closeBtn.style.background="rgba(255,255,255,0.08)"; closeBtn.style.color="#aaa"; };
-      closeBtn.onclick = () => { overlay.remove(); animStyle.remove(); };
+      closeBtn.onmouseenter = () => {
+        closeBtn.style.background = "rgba(237,66,69,0.3)";
+        closeBtn.style.color = "#fff";
+      };
+      closeBtn.onmouseleave = () => {
+        closeBtn.style.background = "rgba(255,255,255,0.08)";
+        closeBtn.style.color = "#aaa";
+      };
+      closeBtn.onclick = () => {
+        overlay.remove();
+        animStyle.remove();
+      };
       container.appendChild(closeBtn);
 
       const welcome = document.createElement("h2");
       welcome.innerText = t("welcome_title", { script: SCRIPT_NAME });
-      welcome.style.cssText = "margin:0 0 6px; font-size:20px; font-weight:700; color:#fff; letter-spacing:-0.01em;";
+      welcome.style.cssText =
+        "margin:0 0 6px; font-size:20px; font-weight:700; color:#fff; letter-spacing:-0.01em;";
 
       const subtitle = document.createElement("p");
       subtitle.innerText = t("select_lang_subtitle");
-      subtitle.style.cssText = "margin:0 0 20px; color:rgba(255,255,255,0.45); font-size:13px;";
+      subtitle.style.cssText =
+        "margin:0 0 20px; color:rgba(255,255,255,0.45); font-size:13px;";
 
       const noticeBox = document.createElement("div");
       noticeBox.style.cssText = `
@@ -4072,10 +4353,12 @@
       `;
       const noticeTitle = document.createElement("h3");
       noticeTitle.innerText = t("security_notice_title");
-      noticeTitle.style.cssText = "color:#f87171; margin:0 0 7px; font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px;";
+      noticeTitle.style.cssText =
+        "color:#f87171; margin:0 0 7px; font-size:14px; font-weight:600; display:flex; align-items:center; gap:6px;";
       const noticeContent = document.createElement("p");
       noticeContent.innerText = t("security_notice_content");
-      noticeContent.style.cssText = "color:rgba(255,255,255,0.7); font-size:12.5px; line-height:1.6; margin:0; white-space:pre-line;";
+      noticeContent.style.cssText =
+        "color:rgba(255,255,255,0.7); font-size:12.5px; line-height:1.6; margin:0; white-space:pre-line;";
       noticeBox.appendChild(noticeTitle);
       noticeBox.appendChild(noticeContent);
 
@@ -4084,20 +4367,24 @@
       container.appendChild(noticeBox);
 
       const btnContainer = document.createElement("div");
-      btnContainer.style.cssText = "display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:12px;";
+      btnContainer.style.cssText =
+        "display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-bottom:12px;";
 
-      Object.keys(TRANSLATIONS).filter(lc => lc !== "custom").forEach((langCode) => {
-        const btn = document.createElement("button");
-        btn.className = "lang-btn";
-        btn.innerText = TRANSLATIONS[langCode].name;
-        btn.onclick = () => {
-          config.lang = langCode;
-          localStorage.setItem("copyMenuLanguage", langCode);
-          overlay.remove(); animStyle.remove();
-          if (confirm(t("reload_confirm"))) location.reload();
-        };
-        btnContainer.appendChild(btn);
-      });
+      Object.keys(TRANSLATIONS)
+        .filter((lc) => lc !== "custom")
+        .forEach((langCode) => {
+          const btn = document.createElement("button");
+          btn.className = "lang-btn";
+          btn.innerText = TRANSLATIONS[langCode].name;
+          btn.onclick = () => {
+            config.lang = langCode;
+            localStorage.setItem("copyMenuLanguage", langCode);
+            overlay.remove();
+            animStyle.remove();
+            if (confirm(t("reload_confirm"))) location.reload();
+          };
+          btnContainer.appendChild(btn);
+        });
 
       const customLangBtn = document.createElement("button");
       customLangBtn.className = "lang-btn";
@@ -4114,12 +4401,14 @@
       `;
 
       const customTitle = document.createElement("p");
-      customTitle.style.cssText = "margin:0 0 10px; color:rgba(255,255,255,0.75); font-size:13px; line-height:1.6;";
+      customTitle.style.cssText =
+        "margin:0 0 10px; color:rgba(255,255,255,0.75); font-size:13px; line-height:1.6;";
       customTitle.innerHTML = `<b style="color:#5865F2">🌐 Custom</b><br>${t("custom_lang_desc")}`;
       customPanel.appendChild(customTitle);
 
       const customBtnRow = document.createElement("div");
-      customBtnRow.style.cssText = "display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;";
+      customBtnRow.style.cssText =
+        "display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;";
 
       const exportBtn = document.createElement("button");
       exportBtn.innerText = t("custom_lang_export");
@@ -4128,11 +4417,18 @@
         background:rgba(59,165,92,0.25); color:#3ba55c;
         border:1px solid rgba(59,165,92,0.4); border-radius:8px; transition:all 0.15s;
       `;
-      exportBtn.onmouseenter = () => { exportBtn.style.background="rgba(59,165,92,0.4)"; exportBtn.style.color="#fff"; };
-      exportBtn.onmouseleave = () => { exportBtn.style.background="rgba(59,165,92,0.25)"; exportBtn.style.color="#3ba55c"; };
+      exportBtn.onmouseenter = () => {
+        exportBtn.style.background = "rgba(59,165,92,0.4)";
+        exportBtn.style.color = "#fff";
+      };
+      exportBtn.onmouseleave = () => {
+        exportBtn.style.background = "rgba(59,165,92,0.25)";
+        exportBtn.style.color = "#3ba55c";
+      };
       exportBtn.onclick = () => {
         const exportData = {
-          _note: "Translate the VALUES only. Do NOT change the KEYS. Keep {placeholders} like {n} {s} {t} untouched. Preserve HTML tags and class='...' attributes as-is. The 'name' field will be shown in the language selector.",
+          _note:
+            "Translate the VALUES only. Do NOT change the KEYS. Keep {placeholders} like {n} {s} {t} untouched. Preserve HTML tags and class='...' attributes as-is. The 'name' field will be shown in the language selector.",
           name: "My Custom Language",
         };
         const enTranslations = TRANSLATIONS["en"];
@@ -4143,7 +4439,9 @@
         const blob = new Blob([jsonStr], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
-        a.href = url; a.download = "discord-toolkit-custom-lang.json"; a.click();
+        a.href = url;
+        a.download = "discord-toolkit-custom-lang.json";
+        a.click();
         URL.revokeObjectURL(url);
       };
       customBtnRow.appendChild(exportBtn);
@@ -4155,8 +4453,14 @@
         background:rgba(88,101,242,0.25); color:#7289da;
         border:1px solid rgba(88,101,242,0.4); border-radius:8px; transition:all 0.15s;
       `;
-      importBtn.onmouseenter = () => { importBtn.style.background="rgba(88,101,242,0.45)"; importBtn.style.color="#fff"; };
-      importBtn.onmouseleave = () => { importBtn.style.background="rgba(88,101,242,0.25)"; importBtn.style.color="#7289da"; };
+      importBtn.onmouseenter = () => {
+        importBtn.style.background = "rgba(88,101,242,0.45)";
+        importBtn.style.color = "#fff";
+      };
+      importBtn.onmouseleave = () => {
+        importBtn.style.background = "rgba(88,101,242,0.25)";
+        importBtn.style.color = "#7289da";
+      };
 
       const importArea = document.createElement("div");
       importArea.style.cssText = "display:none; margin-top:10px;";
@@ -4170,7 +4474,8 @@
         font-size:12px; font-family:monospace; resize:vertical; box-sizing:border-box;
       `;
       const importError = document.createElement("p");
-      importError.style.cssText = "color:#ed4245; font-size:12px; margin:4px 0 0; display:none;";
+      importError.style.cssText =
+        "color:#ed4245; font-size:12px; margin:4px 0 0; display:none;";
 
       const importConfirmBtn = document.createElement("button");
       importConfirmBtn.innerText = t("custom_lang_apply");
@@ -4179,20 +4484,31 @@
         background:rgba(88,101,242,0.4); color:#fff;
         border:1px solid rgba(88,101,242,0.5); border-radius:8px; transition:all 0.15s;
       `;
-      importConfirmBtn.onmouseenter = () => { importConfirmBtn.style.background="rgba(88,101,242,0.7)"; };
-      importConfirmBtn.onmouseleave = () => { importConfirmBtn.style.background="rgba(88,101,242,0.4)"; };
+      importConfirmBtn.onmouseenter = () => {
+        importConfirmBtn.style.background = "rgba(88,101,242,0.7)";
+      };
+      importConfirmBtn.onmouseleave = () => {
+        importConfirmBtn.style.background = "rgba(88,101,242,0.4)";
+      };
       importConfirmBtn.onclick = () => {
         try {
           const parsed = JSON.parse(importTextarea.value.trim());
-          if (typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("must be a JSON object");
+          if (typeof parsed !== "object" || Array.isArray(parsed))
+            throw new Error("must be a JSON object");
           delete parsed["_note"];
-          localStorage.setItem("copyMenuLanguage_custom", JSON.stringify(parsed));
+          localStorage.setItem(
+            "copyMenuLanguage_custom",
+            JSON.stringify(parsed),
+          );
           localStorage.setItem("copyMenuLanguage", "custom");
           _customLangData = parsed;
-          overlay.remove(); animStyle.remove();
+          overlay.remove();
+          animStyle.remove();
           location.reload();
         } catch (err) {
-          importError.textContent = t("custom_lang_json_error", { msg: err.message });
+          importError.textContent = t("custom_lang_json_error", {
+            msg: err.message,
+          });
           importError.style.display = "block";
         }
       };
@@ -4201,7 +4517,8 @@
       importArea.appendChild(importConfirmBtn);
 
       importBtn.onclick = () => {
-        importArea.style.display = importArea.style.display === "none" ? "block" : "none";
+        importArea.style.display =
+          importArea.style.display === "none" ? "block" : "none";
         importError.style.display = "none";
       };
       customBtnRow.appendChild(importBtn);
@@ -4212,8 +4529,11 @@
       if (_customLangData) {
         const langName = _customLangData.name || "Custom";
         const statusRow = document.createElement("p");
-        statusRow.style.cssText = "margin:10px 0 0; color:#3ba55c; font-size:12px;";
-        statusRow.innerHTML = t("custom_lang_loaded", { name: `<b>${escHtml(langName)}</b>` });
+        statusRow.style.cssText =
+          "margin:10px 0 0; color:#3ba55c; font-size:12px;";
+        statusRow.innerHTML = t("custom_lang_loaded", {
+          name: `<b>${escHtml(langName)}</b>`,
+        });
 
         const activateBtn = document.createElement("button");
         activateBtn.innerText = t("custom_lang_activate", { name: langName });
@@ -4222,11 +4542,16 @@
           background:rgba(88,101,242,0.35); color:#fff;
           border:1px solid rgba(88,101,242,0.5); border-radius:8px; transition:all 0.15s;
         `;
-        activateBtn.onmouseenter = () => { activateBtn.style.background="rgba(88,101,242,0.6)"; };
-        activateBtn.onmouseleave = () => { activateBtn.style.background="rgba(88,101,242,0.35)"; };
+        activateBtn.onmouseenter = () => {
+          activateBtn.style.background = "rgba(88,101,242,0.6)";
+        };
+        activateBtn.onmouseleave = () => {
+          activateBtn.style.background = "rgba(88,101,242,0.35)";
+        };
         activateBtn.onclick = () => {
           localStorage.setItem("copyMenuLanguage", "custom");
-          overlay.remove(); animStyle.remove();
+          overlay.remove();
+          animStyle.remove();
           location.reload();
         };
         customPanel.appendChild(statusRow);
@@ -4244,11 +4569,18 @@
       helpBtn.innerText = t("help_btn");
       helpBtn.style.cssText =
         "background:none; border:none; color:rgba(255,255,255,0.35); cursor:pointer; font-size:12px; text-decoration:underline; margin-top:4px;";
-      helpBtn.onmouseenter = () => { helpBtn.style.color="#3ba55c"; };
-      helpBtn.onmouseleave = () => { helpBtn.style.color="rgba(255,255,255,0.35)"; };
+      helpBtn.onmouseenter = () => {
+        helpBtn.style.color = "#3ba55c";
+      };
+      helpBtn.onmouseleave = () => {
+        helpBtn.style.color = "rgba(255,255,255,0.35)";
+      };
       helpBtn.onclick = () => {
         const existingManual = document.getElementById("msg-manual-overlay");
-        if (existingManual) { existingManual.remove(); return; }
+        if (existingManual) {
+          existingManual.remove();
+          return;
+        }
 
         const manualOverlay = document.createElement("div");
         manualOverlay.id = "msg-manual-overlay";
@@ -4309,14 +4641,24 @@
         manualOverlay.appendChild(modal);
         document.body.appendChild(manualOverlay);
 
-        const close = () => { manualOverlay.remove(); style.remove(); };
+        const close = () => {
+          manualOverlay.remove();
+          style.remove();
+        };
         document.getElementById("mm-close-btn").onclick = close;
-        manualOverlay.addEventListener("click", (e) => { if (e.target === manualOverlay) close(); });
+        manualOverlay.addEventListener("click", (e) => {
+          if (e.target === manualOverlay) close();
+        });
       };
       container.appendChild(helpBtn);
 
       overlay.appendChild(container);
-      overlay.addEventListener("click", (e) => { if (e.target === overlay) { overlay.remove(); animStyle.remove(); } });
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) {
+          overlay.remove();
+          animStyle.remove();
+        }
+      });
       document.body.appendChild(overlay);
     }
 
@@ -4693,33 +5035,39 @@
         discord_sticker_collections: JSON.parse(
           GM_getValue("discord_sticker_collections", "{}"),
         ),
-        discord_emoji_native_mode: GM_getValue("discord_emoji_native_mode", true),
+        discord_emoji_native_mode: GM_getValue(
+          "discord_emoji_native_mode",
+          true,
+        ),
       };
 
       const moduleDData = GM_getValue("discord_wormholes_v2", null);
 
       const wormholePrefs = {
-        wh_api_mode:        localStorage.getItem("wh_api_mode"),
-        wh_dock_position:   localStorage.getItem("wh_dock_position"),
-        wh_send_autoclose:  localStorage.getItem("wh_send_autoclose"),
-        wh_send_goto:       localStorage.getItem("wh_send_goto"),
+        wh_api_mode: localStorage.getItem("wh_api_mode"),
+        wh_dock_position: localStorage.getItem("wh_dock_position"),
+        wh_send_autoclose: localStorage.getItem("wh_send_autoclose"),
+        wh_send_goto: localStorage.getItem("wh_send_goto"),
         wh_send_show_toast: localStorage.getItem("wh_send_show_toast"),
         wormhole_focus_mode: localStorage.getItem("wormhole_focus_mode"),
         wormhole_focus_size: localStorage.getItem("wormhole_focus_size"),
       };
 
       const headerModPrefs = {
-        antiHijack:   localStorage.getItem("discord_header_mod_def_antiHijack"),
-        concealName:  localStorage.getItem("discord_header_mod_def_concealName"),
+        antiHijack: localStorage.getItem("discord_header_mod_def_antiHijack"),
+        concealName: localStorage.getItem("discord_header_mod_def_concealName"),
       };
 
       const moduleToggles = {
         mod_forwarding: localStorage.getItem("mod_forwarding"),
-        mod_message:    localStorage.getItem("mod_message"),
-        mod_emoji:      localStorage.getItem("mod_emoji"),
-        mod_header:     localStorage.getItem("mod_header"),
-        mod_wormhole:   localStorage.getItem("mod_wormhole"),
+        mod_message: localStorage.getItem("mod_message"),
+        mod_emoji: localStorage.getItem("mod_emoji"),
+        mod_header: localStorage.getItem("mod_header"),
+        mod_wormhole: localStorage.getItem("mod_wormhole"),
+        mod_webhook: localStorage.getItem("mod_webhook"),
       };
+
+      const webhookList = JSON.parse(GM_getValue("discord_webhook_list", "[]"));
 
       const forwardingPref = GM_getValue("discord_forward_pref", true);
 
@@ -4733,6 +5081,7 @@
         wormholePrefs: wormholePrefs,
         headerModPrefs: headerModPrefs,
         moduleToggles: moduleToggles,
+        webhookList: webhookList,
       };
 
       const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -4771,13 +5120,18 @@
 
         if (data.config) {
           const c = data.config;
-          if (c.lang)        localStorage.setItem("copyMenuLanguage", c.lang);
-          if (c.triggerMode) localStorage.setItem("copyTriggerMode", c.triggerMode);
-          if (c.menuStyle)   localStorage.setItem("copyMenuStyle", c.menuStyle);
-          if (c.swapLogic != null)   localStorage.setItem("copySwapLogic", c.swapLogic);
-          if (c.appendSpace != null) localStorage.setItem("copyAppendSpace", c.appendSpace);
-          if (c.appendNewLine != null) localStorage.setItem("copyAppendNewLine", c.appendNewLine);
-          if (c.linkText !== undefined) localStorage.setItem("copyLinkText", c.linkText);
+          if (c.lang) localStorage.setItem("copyMenuLanguage", c.lang);
+          if (c.triggerMode)
+            localStorage.setItem("copyTriggerMode", c.triggerMode);
+          if (c.menuStyle) localStorage.setItem("copyMenuStyle", c.menuStyle);
+          if (c.swapLogic != null)
+            localStorage.setItem("copySwapLogic", c.swapLogic);
+          if (c.appendSpace != null)
+            localStorage.setItem("copyAppendSpace", c.appendSpace);
+          if (c.appendNewLine != null)
+            localStorage.setItem("copyAppendNewLine", c.appendNewLine);
+          if (c.linkText !== undefined)
+            localStorage.setItem("copyLinkText", c.linkText);
           if (Array.isArray(c.symbols)) {
             localStorage.setItem("copySymbols", JSON.stringify(c.symbols));
             config.symbols = c.symbols;
@@ -4822,7 +5176,10 @@
             JSON.stringify(data.discord_sticker_collections),
           );
         if (data.discord_emoji_native_mode != null)
-          GM_setValue("discord_emoji_native_mode", data.discord_emoji_native_mode);
+          GM_setValue(
+            "discord_emoji_native_mode",
+            data.discord_emoji_native_mode,
+          );
 
         if (data.wormholes) {
           if (data.wormholes.groups || data.wormholes.wormholes) {
@@ -4832,25 +5189,51 @@
 
         if (data.wormholePrefs) {
           const wp = data.wormholePrefs;
-          if (wp.wh_api_mode != null)        localStorage.setItem("wh_api_mode", wp.wh_api_mode);
-          if (wp.wh_dock_position != null)   localStorage.setItem("wh_dock_position", wp.wh_dock_position);
-          if (wp.wh_send_autoclose != null)  localStorage.setItem("wh_send_autoclose", wp.wh_send_autoclose);
-          if (wp.wh_send_goto != null)       localStorage.setItem("wh_send_goto", wp.wh_send_goto);
-          if (wp.wh_send_show_toast != null) localStorage.setItem("wh_send_show_toast", wp.wh_send_show_toast);
-          if (wp.wormhole_focus_mode != null) localStorage.setItem("wormhole_focus_mode", wp.wormhole_focus_mode);
-          if (wp.wormhole_focus_size != null) localStorage.setItem("wormhole_focus_size", wp.wormhole_focus_size);
+          if (wp.wh_api_mode != null)
+            localStorage.setItem("wh_api_mode", wp.wh_api_mode);
+          if (wp.wh_dock_position != null)
+            localStorage.setItem("wh_dock_position", wp.wh_dock_position);
+          if (wp.wh_send_autoclose != null)
+            localStorage.setItem("wh_send_autoclose", wp.wh_send_autoclose);
+          if (wp.wh_send_goto != null)
+            localStorage.setItem("wh_send_goto", wp.wh_send_goto);
+          if (wp.wh_send_show_toast != null)
+            localStorage.setItem("wh_send_show_toast", wp.wh_send_show_toast);
+          if (wp.wormhole_focus_mode != null)
+            localStorage.setItem("wormhole_focus_mode", wp.wormhole_focus_mode);
+          if (wp.wormhole_focus_size != null)
+            localStorage.setItem("wormhole_focus_size", wp.wormhole_focus_size);
+        }
+
+        if (Array.isArray(data.webhookList) && data.webhookList.length > 0) {
+          GM_setValue("discord_webhook_list", JSON.stringify(data.webhookList));
         }
 
         if (data.headerModPrefs) {
           const hp = data.headerModPrefs;
-          if (hp.antiHijack != null)  localStorage.setItem("discord_header_mod_def_antiHijack", hp.antiHijack);
-          if (hp.concealName != null) localStorage.setItem("discord_header_mod_def_concealName", hp.concealName);
+          if (hp.antiHijack != null)
+            localStorage.setItem(
+              "discord_header_mod_def_antiHijack",
+              hp.antiHijack,
+            );
+          if (hp.concealName != null)
+            localStorage.setItem(
+              "discord_header_mod_def_concealName",
+              hp.concealName,
+            );
         }
 
         if (data.moduleToggles) {
           const mt = data.moduleToggles;
-          const modKeys = ["mod_forwarding", "mod_message", "mod_emoji", "mod_header", "mod_wormhole"];
-          modKeys.forEach(k => {
+          const modKeys = [
+            "mod_forwarding",
+            "mod_message",
+            "mod_emoji",
+            "mod_header",
+            "mod_wormhole",
+            "mod_webhook",
+          ];
+          modKeys.forEach((k) => {
             if (mt[k] != null) localStorage.setItem(k, mt[k]);
           });
         }
@@ -5024,7 +5407,7 @@
         for (const selector of embedSelectors) {
           embedAuthor = container.querySelector(selector);
           if (embedAuthor) {
-            console.log(
+            DEBUG && console.log(
               "[Filename] Found embed author with selector:",
               selector,
               embedAuthor,
@@ -5104,7 +5487,7 @@
 
               if (text.length > 0) {
                 contentSnippet = text;
-                console.log(
+                DEBUG && console.log(
                   "[Filename] Content snippet set to:",
                   contentSnippet,
                 );
@@ -5113,7 +5496,8 @@
             }
           }
 
-          DEBUG && console.log("[Filename] Final content snippet:", contentSnippet);
+          DEBUG &&
+            console.log("[Filename] Final content snippet:", contentSnippet);
 
           let mediaId = "";
           try {
@@ -5151,7 +5535,7 @@
                 /\.(jpg|jpeg|png|gif|webp|mp4|webm)(\?|$)/i,
               )?.[1] || "jpg";
             const filename = `@${username}_${dateStr}_${contentSnippet}_${index + 1}.${ext}`;
-            console.log(
+            DEBUG && console.log(
               "[Filename] Using full format (username+date+content):",
               filename,
             );
@@ -5174,7 +5558,11 @@
                 /\.(jpg|jpeg|png|gif|webp|mp4|webm)(\?|$)/i,
               )?.[1] || "jpg";
             const filename = `@${username}_${tweetId}_${contentSnippet}_${index + 1}.${ext}`;
-            DEBUG && console.log("[Filename] Using username+tweetId+content:", filename);
+            DEBUG &&
+              console.log(
+                "[Filename] Using username+tweetId+content:",
+                filename,
+              );
             return filename;
           }
 
@@ -5184,7 +5572,8 @@
                 /\.(jpg|jpeg|png|gif|webp|mp4|webm)(\?|$)/i,
               )?.[1] || "jpg";
             const filename = `@${username}_${tweetId}_${index + 1}.${ext}`;
-            DEBUG && console.log("[Filename] Using username+tweetId:", filename);
+            DEBUG &&
+              console.log("[Filename] Using username+tweetId:", filename);
             return filename;
           }
 
@@ -5194,7 +5583,8 @@
                 /\.(jpg|jpeg|png|gif|webp|mp4|webm)(\?|$)/i,
               )?.[1] || "jpg";
             const filename = `@${username}_${contentSnippet}_${index + 1}.${ext}`;
-            DEBUG && console.log("[Filename] Using username+content:", filename);
+            DEBUG &&
+              console.log("[Filename] Using username+content:", filename);
             return filename;
           }
 
@@ -5247,6 +5637,16 @@
         !activeVideo.src.startsWith("blob:")
       )
         return activeVideo.src;
+
+      const originalLinkEl = msg.querySelector('a[class*="originalLink_"]');
+      if (originalLinkEl) {
+        const safeSrc = originalLinkEl.dataset.safeSrc || originalLinkEl.href;
+        if (safeSrc && (safeSrc.includes("discordapp.net") || safeSrc.includes("discordapp.com"))) {
+          return safeSrc;
+        }
+      }
+      const discordMediaImg = msg.querySelector('img[src*="media.discordapp.net/attachments/"]');
+      if (discordMediaImg) return discordMediaImg.src;
 
       const externalLink = msg.querySelector(
         'a[href*="//"]:not([href*="discord.com"]):not([href*="discordapp.net"])',
@@ -5344,10 +5744,11 @@
       if (!url) return false;
       if (/\.(mp4|webm|mov|mkv|jpg|jpeg|png|gif|webp)([?#].*)?$/i.test(url))
         return true;
+      if (/[?&]format=(jpg|jpeg|png|gif|webp|mp4|webm)(&|$)/i.test(url))
+        return true;
       if (
         url.includes("video.twimg.com") ||
-        url.includes("cdn.discordapp.com") ||
-        url.includes("media.discordapp.net") ||
+        url.includes("pbs.twimg.com") ||
         url.includes("i.imgur.com")
       )
         return true;
@@ -5486,7 +5887,7 @@
         }
 
         if (this.activeDownloads.size >= this.maxConcurrent) {
-          console.log(
+          DEBUG && console.log(
             `[Download] 📋 Queued: ${filename} (${this.queue.length + 1} in queue)`,
           );
           return new Promise((resolve) => {
@@ -5577,7 +5978,7 @@
         console.warn(`[Download] ❌ Failed (${reason}): ${filename}`);
 
         if (retryCount < this.maxRetries) {
-          console.log(
+          DEBUG && console.log(
             `[Download] 🔄 Retry ${retryCount + 1}/${this.maxRetries} after ${this.retryDelay}ms`,
           );
           setTimeout(() => {
@@ -5589,7 +5990,7 @@
         }
 
         if (fallbackUrl && fallbackUrl !== url) {
-          console.log(`[Download] 🔀 Switching to fallback: ${fallbackUrl}`);
+          DEBUG && console.log(`[Download] 🔀 Switching to fallback: ${fallbackUrl}`);
           this.download(fallbackUrl, `fallback_${filename}`, null, 0).then(
             resolve,
           );
@@ -5607,7 +6008,9 @@
         let isCorsRestricted = false;
         try {
           const hostname = new URL(url).hostname;
-          isCorsRestricted = corsRestrictedHosts.some((h) => hostname.endsWith(h));
+          isCorsRestricted = corsRestrictedHosts.some((h) =>
+            hostname.endsWith(h),
+          );
         } catch (_) {}
 
         if (isCorsRestricted) {
@@ -5633,7 +6036,7 @@
 
           setTimeout(() => URL.revokeObjectURL(url), 10000);
 
-          console.log(`[Download] ✅ Success: ${filename}`);
+          DEBUG && console.log(`[Download] ✅ Success: ${filename}`);
         } catch (error) {
           console.error(`[Download] 💾 Save failed:`, error);
           showToast(`❌ ${t("download_fail")}: ${filename}`);
@@ -5643,7 +6046,7 @@
       _processQueue() {
         if (this.queue.length === 0) {
           if (this.stats.total > 0) {
-            console.log(
+            DEBUG && console.log(
               `[Download] 📊 Stats - Success: ${this.stats.success}, Failed: ${this.stats.failed}, Total: ${this.stats.total}`,
             );
           }
@@ -5665,7 +6068,7 @@
       }
 
       batchDownload(urlList, baseFilename = "discord_img") {
-        console.log(
+        DEBUG && console.log(
           `[Download] 📦 Starting batch download: ${urlList.length} files`,
         );
 
@@ -5713,16 +6116,22 @@
         }
         if (!textEl) {
           textEl =
-            msg.querySelector('[class*="markup-"]:not([class*="repliedMessage"] [class*="markup-"])') ||
-            msg.querySelector('[class*="messageContent"]:not([class*="repliedMessage"] [class*="messageContent"])');
+            msg.querySelector(
+              '[class*="markup-"]:not([class*="repliedMessage"] [class*="markup-"])',
+            ) ||
+            msg.querySelector(
+              '[class*="messageContent"]:not([class*="repliedMessage"] [class*="messageContent"])',
+            );
         }
 
         let mainText = "";
         if (textEl) {
           const clone = textEl.cloneNode(true);
-          clone.querySelectorAll(
-            'span[class*="edited"], span[class*="timestamp"], time, [class*="spoilerWarning"], button',
-          ).forEach((el) => el.remove());
+          clone
+            .querySelectorAll(
+              'span[class*="edited"], span[class*="timestamp"], time, [class*="spoilerWarning"], button',
+            )
+            .forEach((el) => el.remove());
           clone.querySelectorAll('[aria-hidden="true"]').forEach((el) => {
             el.removeAttribute("aria-hidden");
             el.style.display = "inline";
@@ -5731,35 +6140,56 @@
         }
 
         if (!mainText) {
-          const isForwarded = msg.querySelector('[class*="headerContainer__"]') !== null;
+          const isForwarded =
+            msg.querySelector('[class*="headerContainer__"]') !== null;
           if (isForwarded) {
-            const allContentEls2 = Array.from(msg.querySelectorAll('[id^="message-content-"]'));
-            const forwardedTexts = allContentEls2.slice(1).map((el) => {
-              const clone = el.cloneNode(true);
-              clone.querySelectorAll(
-                'span[class*="edited"], span[class*="timestamp"], time, [class*="spoilerWarning"], button',
-              ).forEach((n) => n.remove());
-              clone.querySelectorAll("a[href]").forEach((a) => {
-                const href = a.getAttribute("href");
-                if (href && href.startsWith("http") && !clone.innerText.includes(href)) {
-                  a.insertAdjacentText("afterend", " " + href);
-                }
-              });
-              return clone.innerText.trim();
-            }).filter(Boolean);
+            const allContentEls2 = Array.from(
+              msg.querySelectorAll('[id^="message-content-"]'),
+            );
+            const forwardedTexts = allContentEls2
+              .slice(1)
+              .map((el) => {
+                const clone = el.cloneNode(true);
+                clone
+                  .querySelectorAll(
+                    'span[class*="edited"], span[class*="timestamp"], time, [class*="spoilerWarning"], button',
+                  )
+                  .forEach((n) => n.remove());
+                clone.querySelectorAll("a[href]").forEach((a) => {
+                  const href = a.getAttribute("href");
+                  if (
+                    href &&
+                    href.startsWith("http") &&
+                    !clone.innerText.includes(href)
+                  ) {
+                    a.insertAdjacentText("afterend", " " + href);
+                  }
+                });
+                return clone.innerText.trim();
+              })
+              .filter(Boolean);
             mainText = forwardedTexts.join("\n");
           }
         }
 
         if (replyBlock) {
-          const replyContentEl = replyBlock.querySelector('[id^="message-content-"], [class*="repliedTextContent"]');
+          const replyContentEl = replyBlock.querySelector(
+            '[id^="message-content-"], [class*="repliedTextContent"]',
+          );
           if (replyContentEl) {
             const replyClone = replyContentEl.cloneNode(true);
-            replyClone.querySelectorAll('span[class*="edited"], time, button').forEach((el) => el.remove());
+            replyClone
+              .querySelectorAll('span[class*="edited"], time, button')
+              .forEach((el) => el.remove());
             const replyText = replyClone.innerText.trim();
-            const replyAuthor = replyBlock.querySelector('[class*="username"]')?.innerText?.trim() || "";
+            const replyAuthor =
+              replyBlock
+                .querySelector('[class*="username"]')
+                ?.innerText?.trim() || "";
             if (replyText && replyText !== "無法載入訊息") {
-              const prefix = replyAuthor ? `> @${replyAuthor}: ${replyText}` : `> ${replyText}`;
+              const prefix = replyAuthor
+                ? `> @${replyAuthor}: ${replyText}`
+                : `> ${replyText}`;
               mainText = mainText ? `${prefix}\n${mainText}` : prefix;
             }
           }
@@ -5926,10 +6356,14 @@
 
     function showModuleSettingsPanel(anchorEl) {
       const existing = document.getElementById("mod-settings-panel");
-      if (existing) { existing.remove(); return; }
+      if (existing) {
+        existing.remove();
+        return;
+      }
 
       const lang = getConfig().lang || navigator.language || "en-US";
-      const getLang = (labels) => labels[lang] || labels["zh-TW"] || labels["en-US"];
+      const getLang = (labels) =>
+        labels[lang] || labels["zh-TW"] || labels["en-US"];
 
       const panel = document.createElement("div");
       panel.id = "mod-settings-panel";
@@ -5947,19 +6381,29 @@
       `;
 
       const title = document.createElement("div");
-      title.style.cssText = "padding: 0 14px 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #72767d;";
-      title.textContent = { "zh-TW": "功能模組開關", "zh-CN": "功能模块开关", "ja": "モジュール設定", "ko": "모듈 설정" }[lang] || "Module Settings";
+      title.style.cssText =
+        "padding: 0 14px 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #72767d;";
+      title.textContent =
+        {
+          "zh-TW": "功能模組開關",
+          "zh-CN": "功能模块开关",
+          ja: "モジュール設定",
+          ko: "모듈 설정",
+        }[lang] || "Module Settings";
       panel.appendChild(title);
 
       const sep = document.createElement("div");
-      sep.style.cssText = "height: 1px; background: rgba(255,255,255,0.07); margin: 0 0 6px;";
+      sep.style.cssText =
+        "height: 1px; background: rgba(255,255,255,0.07); margin: 0 0 6px;";
       panel.appendChild(sep);
 
-      MODULE_DEFS.forEach(mod => {
+      MODULE_DEFS.forEach((mod) => {
         const row = document.createElement("div");
-        row.style.cssText = "display:flex; align-items:center; justify-content:space-between; padding: 6px 14px; cursor:pointer; border-radius:4px; margin: 0 4px;";
-        row.onmouseenter = () => row.style.background = "rgba(255,255,255,0.06)";
-        row.onmouseleave = () => row.style.background = "";
+        row.style.cssText =
+          "display:flex; align-items:center; justify-content:space-between; padding: 6px 14px; cursor:pointer; border-radius:4px; margin: 0 4px;";
+        row.onmouseenter = () =>
+          (row.style.background = "rgba(255,255,255,0.06)");
+        row.onmouseleave = () => (row.style.background = "");
 
         const label = document.createElement("span");
         label.style.cssText = "display:flex; align-items:center; gap:7px;";
@@ -6005,27 +6449,39 @@
               box-shadow:0 12px 40px rgba(0,0,0,0.6);
             `;
             const warnTitle = document.createElement("div");
-            warnTitle.style.cssText = "font-size:15px; font-weight:700; margin-bottom:12px; color:#fff;";
+            warnTitle.style.cssText =
+              "font-size:15px; font-weight:700; margin-bottom:12px; color:#fff;";
             warnTitle.textContent = t("mod_msg_warn_title");
             const warnBody = document.createElement("div");
-            warnBody.style.cssText = "white-space:pre-line; color:#b9bbbe; margin-bottom:18px;";
+            warnBody.style.cssText =
+              "white-space:pre-line; color:#b9bbbe; margin-bottom:18px;";
             warnBody.textContent = t("mod_msg_warn_body");
             const btnRow = document.createElement("div");
-            btnRow.style.cssText = "display:flex; gap:10px; justify-content:flex-end;";
+            btnRow.style.cssText =
+              "display:flex; gap:10px; justify-content:flex-end;";
             const cancelBtn = document.createElement("button");
             cancelBtn.textContent = t("mod_msg_warn_cancel");
-            cancelBtn.style.cssText = "padding:7px 16px; border-radius:5px; background:#4f545c; color:#fff; border:none; cursor:pointer; font-size:13px;";
+            cancelBtn.style.cssText =
+              "padding:7px 16px; border-radius:5px; background:#4f545c; color:#fff; border:none; cursor:pointer; font-size:13px;";
             cancelBtn.onclick = () => dlg.remove();
             const confirmBtn = document.createElement("button");
             confirmBtn.textContent = t("mod_msg_warn_confirm");
-            confirmBtn.style.cssText = "padding:7px 16px; border-radius:5px; background:#ed4245; color:#fff; border:none; cursor:pointer; font-size:13px;";
+            confirmBtn.style.cssText =
+              "padding:7px 16px; border-radius:5px; background:#ed4245; color:#fff; border:none; cursor:pointer; font-size:13px;";
             confirmBtn.onclick = () => {
               dlg.remove();
               setModEnabled(mod.storageKey, false);
               updateToggle(false);
               const hint = document.createElement("div");
-              hint.style.cssText = "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#23272a;color:#dcddde;padding:8px 16px;border-radius:6px;font-size:12px;z-index:999999;box-shadow:0 4px 12px rgba(0,0,0,0.4);pointer-events:none;";
-              hint.textContent = mod.icon + " " + getLang(mod.label) + " — " + t("mod_msg_warn_confirm") + " (重新整頁生效)";
+              hint.style.cssText =
+                "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#23272a;color:#dcddde;padding:8px 16px;border-radius:6px;font-size:12px;z-index:999999;box-shadow:0 4px 12px rgba(0,0,0,0.4);pointer-events:none;";
+              hint.textContent =
+                mod.icon +
+                " " +
+                getLang(mod.label) +
+                " — " +
+                t("mod_msg_warn_confirm") +
+                " (重新整頁生效)";
               document.body.appendChild(hint);
               setTimeout(() => hint.remove(), 3000);
             };
@@ -6036,7 +6492,9 @@
             box.appendChild(btnRow);
             dlg.appendChild(box);
             document.body.appendChild(dlg);
-            dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.remove(); });
+            dlg.addEventListener("click", (e) => {
+              if (e.target === dlg) dlg.remove();
+            });
             return;
           }
 
@@ -6052,8 +6510,18 @@
             pointer-events: none;
           `;
           const actionLabel = next
-            ? ({ "zh-TW": "已啟用", "zh-CN": "已启用", "ja": "有効", "ko": "활성화됨" }[lang] || "Enabled")
-            : ({ "zh-TW": "已停用", "zh-CN": "已停用", "ja": "無効", "ko": "비활성화됨" }[lang] || "Disabled");
+            ? {
+                "zh-TW": "已啟用",
+                "zh-CN": "已启用",
+                ja: "有効",
+                ko: "활성화됨",
+              }[lang] || "Enabled"
+            : {
+                "zh-TW": "已停用",
+                "zh-CN": "已停用",
+                ja: "無効",
+                ko: "비활성화됨",
+              }[lang] || "Disabled";
           hint.textContent = `${mod.icon} ${getLang(mod.label)} — ${actionLabel}`;
           document.body.appendChild(hint);
           setTimeout(() => hint.remove(), 2000);
@@ -6065,15 +6533,21 @@
       });
 
       const sep2 = document.createElement("div");
-      sep2.style.cssText = "height: 1px; background: rgba(255,255,255,0.07); margin: 8px 0 4px;";
+      sep2.style.cssText =
+        "height: 1px; background: rgba(255,255,255,0.07); margin: 8px 0 4px;";
       panel.appendChild(sep2);
 
       const manualBtn = document.createElement("div");
-      manualBtn.style.cssText = "padding: 6px 14px; cursor:pointer; color:#72767d; font-size:12px; display:flex; align-items:center; gap:6px; border-radius:4px; margin: 0 4px;";
-      manualBtn.innerHTML = `<span>📖</span><span>${{ "zh-TW": "查看使用說明", "zh-CN": "查看使用说明", "ja": "マニュアルを見る", "ko": "사용 설명서 보기" }[lang] || "View Manual"}</span>`;
-      manualBtn.onmouseenter = () => manualBtn.style.background = "rgba(255,255,255,0.06)";
-      manualBtn.onmouseleave = () => manualBtn.style.background = "";
-      manualBtn.onclick = () => { panel.remove(); showManualModal(); };
+      manualBtn.style.cssText =
+        "padding: 6px 14px; cursor:pointer; color:#72767d; font-size:12px; display:flex; align-items:center; gap:6px; border-radius:4px; margin: 0 4px;";
+      manualBtn.innerHTML = `<span>📖</span><span>${{ "zh-TW": "查看使用說明", "zh-CN": "查看使用说明", ja: "マニュアルを見る", ko: "사용 설명서 보기" }[lang] || "View Manual"}</span>`;
+      manualBtn.onmouseenter = () =>
+        (manualBtn.style.background = "rgba(255,255,255,0.06)");
+      manualBtn.onmouseleave = () => (manualBtn.style.background = "");
+      manualBtn.onclick = () => {
+        panel.remove();
+        showManualModal();
+      };
       panel.appendChild(manualBtn);
 
       document.body.appendChild(panel);
@@ -6086,7 +6560,8 @@
       if (left + pw > window.innerWidth - 6) left = window.innerWidth - pw - 6;
 
       let top = rect.top;
-      if (top + ph > window.innerHeight - 10) top = window.innerHeight - ph - 10;
+      if (top + ph > window.innerHeight - 10)
+        top = window.innerHeight - ph - 10;
       if (top < 6) top = 6;
 
       panel.style.top = top + "px";
@@ -6098,12 +6573,18 @@
           document.removeEventListener("mousedown", closeHandler, true);
         }
       };
-      setTimeout(() => document.addEventListener("mousedown", closeHandler, true), 50);
+      setTimeout(
+        () => document.addEventListener("mousedown", closeHandler, true),
+        50,
+      );
     }
 
     function showManualModal() {
       const existing = document.getElementById("mod-manual-modal");
-      if (existing) { existing.remove(); return; }
+      if (existing) {
+        existing.remove();
+        return;
+      }
 
       const overlay = document.createElement("div");
       overlay.id = "mod-manual-modal";
@@ -6122,7 +6603,8 @@
       `;
 
       const head = document.createElement("div");
-      head.style.cssText = "padding: 14px 18px 10px; font-size: 15px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center;";
+      head.style.cssText =
+        "padding: 14px 18px 10px; font-size: 15px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center;";
       head.innerHTML = `<span>📖 ${t("tip_manual")}</span><span style="cursor:pointer;font-size:18px;color:#72767d;" id="mod-manual-close">✕</span>`;
 
       const body = document.createElement("div");
@@ -6135,7 +6617,9 @@
       document.body.appendChild(overlay);
 
       const close = () => overlay.remove();
-      overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) close();
+      });
       box.querySelector("#mod-manual-close").onclick = close;
     }
 
@@ -6253,16 +6737,25 @@
 
       if (isSymbolsView) {
         const PAGE_SIZE = 12;
-        const totalPages = Math.max(1, Math.ceil(config.symbols.length / PAGE_SIZE));
+        const totalPages = Math.max(
+          1,
+          Math.ceil(config.symbols.length / PAGE_SIZE),
+        );
         const currentPage = Math.min(symbolsPage, totalPages - 1);
-        const pageSymbols = config.symbols.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+        const pageSymbols = config.symbols.slice(
+          currentPage * PAGE_SIZE,
+          (currentPage + 1) * PAGE_SIZE,
+        );
 
         if (!window._symDragState) {
           window._symDragState = { srcIndex: -1, hoverTimer: null };
         }
         const DS = window._symDragState;
         const clearDropTimer = () => {
-          if (DS.hoverTimer) { clearTimeout(DS.hoverTimer); DS.hoverTimer = null; }
+          if (DS.hoverTimer) {
+            clearTimeout(DS.hoverTimer);
+            DS.hoverTimer = null;
+          }
         };
 
         if (config.symbols.length) {
@@ -6270,12 +6763,14 @@
             const absIdx = currentPage * PAGE_SIZE + localIdx;
 
             const row = document.createElement("div");
-            row.style.cssText = "display:flex; align-items:center; justify-content:space-between; padding:0 12px;";
+            row.style.cssText =
+              "display:flex; align-items:center; justify-content:space-between; padding:0 12px;";
             row.dataset.absIdx = absIdx;
 
             const handle = document.createElement("span");
             handle.textContent = "⠿";
-            handle.style.cssText = "color:#555; margin-right:6px; font-size:14px; cursor:grab; user-select:none; flex-shrink:0;";
+            handle.style.cssText =
+              "color:#555; margin-right:6px; font-size:14px; cursor:grab; user-select:none; flex-shrink:0;";
             handle.draggable = true;
 
             handle.addEventListener("dragstart", (e) => {
@@ -6283,23 +6778,31 @@
               e.dataTransfer.effectAllowed = "move";
               e.dataTransfer.setData("text/plain", String(absIdx));
               handle.style.color = "#7289da";
-              setTimeout(() => { row.style.opacity = "0.4"; }, 0);
+              setTimeout(() => {
+                row.style.opacity = "0.4";
+              }, 0);
             });
             handle.addEventListener("dragend", () => {
               row.style.opacity = "1";
               handle.style.color = "#555";
               clearDropTimer();
-              dropdown.querySelectorAll("[data-abs-idx]").forEach(el => el.style.outline = "");
+              dropdown
+                .querySelectorAll("[data-abs-idx]")
+                .forEach((el) => (el.style.outline = ""));
               DS.srcIndex = -1;
             });
 
             row.addEventListener("dragover", (e) => {
               e.preventDefault();
               e.dataTransfer.dropEffect = "move";
-              dropdown.querySelectorAll("[data-abs-idx]").forEach(el => el.style.outline = "");
+              dropdown
+                .querySelectorAll("[data-abs-idx]")
+                .forEach((el) => (el.style.outline = ""));
               row.style.outline = "1px dashed #7289da";
             });
-            row.addEventListener("dragleave", () => { row.style.outline = ""; });
+            row.addEventListener("dragleave", () => {
+              row.style.outline = "";
+            });
             row.addEventListener("drop", (e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -6321,7 +6824,8 @@
 
             const insertBtn = document.createElement("button");
             insertBtn.textContent = t("insert_symbol", { s: s });
-            insertBtn.style.cssText = "flex:1; white-space:nowrap; text-align:left; padding:6px 0;";
+            insertBtn.style.cssText =
+              "flex:1; white-space:nowrap; text-align:left; padding:6px 0;";
             bindButtonAction(insertBtn, s, s);
 
             const delBtn = document.createElement("button");
@@ -6331,7 +6835,10 @@
               e.stopPropagation();
               config.symbols = config.symbols.filter((item) => item !== s);
               saveSymbols();
-              const newTotal = Math.max(1, Math.ceil(config.symbols.length / PAGE_SIZE));
+              const newTotal = Math.max(
+                1,
+                Math.ceil(config.symbols.length / PAGE_SIZE),
+              );
               const newPage = Math.min(currentPage, newTotal - 1);
               refreshCallback(true, newPage);
               showToast(t("delete_confirm", { s: s }));
@@ -6351,14 +6858,18 @@
 
         if (totalPages > 1) {
           const pageBar = document.createElement("div");
-          pageBar.style.cssText = "display:flex; align-items:center; justify-content:center; gap:6px; padding:4px 12px;";
+          pageBar.style.cssText =
+            "display:flex; align-items:center; justify-content:center; gap:6px; padding:4px 12px;";
 
           const makePagBtn = (label, targetPage, disabled) => {
             const btn = document.createElement("button");
             btn.textContent = label;
             btn.style.cssText = `width:28px; padding:2px 0; opacity:${disabled ? "0.3" : "1"};`;
             btn.disabled = disabled;
-            btn.onclick = (e) => { e.stopPropagation(); refreshCallback(true, targetPage); };
+            btn.onclick = (e) => {
+              e.stopPropagation();
+              refreshCallback(true, targetPage);
+            };
 
             btn.addEventListener("dragover", (e) => {
               e.preventDefault();
@@ -6392,8 +6903,13 @@
           const prevBtn = makePagBtn("◀", currentPage - 1, currentPage === 0);
           const pageLabel = document.createElement("span");
           pageLabel.textContent = `${currentPage + 1} / ${totalPages}`;
-          pageLabel.style.cssText = "font-size:11px; color:#aaa; min-width:40px; text-align:center;";
-          const nextBtn = makePagBtn("▶", currentPage + 1, currentPage === totalPages - 1);
+          pageLabel.style.cssText =
+            "font-size:11px; color:#aaa; min-width:40px; text-align:center;";
+          const nextBtn = makePagBtn(
+            "▶",
+            currentPage + 1,
+            currentPage === totalPages - 1,
+          );
 
           pageBar.appendChild(prevBtn);
           pageBar.appendChild(pageLabel);
@@ -6409,7 +6925,10 @@
           const val = prompt(t("add_symbol_prompt"))?.trim();
           if (val && !config.symbols.includes(val)) {
             config.symbols = [...config.symbols, val];
-            const newTotal = Math.max(1, Math.ceil(config.symbols.length / PAGE_SIZE));
+            const newTotal = Math.max(
+              1,
+              Math.ceil(config.symbols.length / PAGE_SIZE),
+            );
             refreshCallback(true, newTotal - 1);
             showToast(t("add_success"));
           }
@@ -6424,7 +6943,10 @@
           if (val && config.symbols.includes(val)) {
             config.symbols = config.symbols.filter((s) => s !== val);
             saveSymbols();
-            const newTotal = Math.max(1, Math.ceil(config.symbols.length / PAGE_SIZE));
+            const newTotal = Math.max(
+              1,
+              Math.ceil(config.symbols.length / PAGE_SIZE),
+            );
             const newPage = Math.min(currentPage, newTotal - 1);
             refreshCallback(true, newPage);
             showToast(t("delete_confirm", { s: val }));
@@ -6434,7 +6956,7 @@
         manageDiv.appendChild(removeBtn);
         dropdown.appendChild(manageDiv);
       } else {
-        const sections = { copy: [], convert: [], download: [], system: [] };
+        const sections = { copy: [], convert: [], download: [], system: [], webhook: [] };
         const addItem = (
           section,
           label,
@@ -6457,10 +6979,7 @@
             editBtn.onclick = (e) => {
               e.stopPropagation();
               cancelCloseGlobalMenu();
-              const newVal = prompt(
-                t("enter_link_text"),
-                config.linkText,
-              );
+              const newVal = prompt(t("enter_link_text"), config.linkText);
               if (newVal !== null) {
                 const finalVal = newVal.trim() === "" ? "" : newVal.trim();
                 localStorage.setItem("copyLinkText", finalVal);
@@ -6479,15 +6998,44 @@
         else if (mediaUrl) addItem("copy", t("copy_media_url"), mediaUrl);
         else addItem("copy", t("no_content"), "");
 
+        const _attachmentSeenPaths = new Set();
         const attachmentLinks = Array.from(
           container.querySelectorAll('a[class*="originalLink"]'),
-        ).filter(link => {
+        ).filter((link) => {
           const href = link.href || "";
-          return (
+          const isDiscordCdn =
             href.includes("cdn.discordapp.com/attachments/") ||
-            href.includes("media.discordapp.net/attachments/") ||
-            isLikelyMediaFile(href)
-          );
+            href.includes("media.discordapp.net/attachments/");
+          if (!isDiscordCdn) {
+            const safeSrc = link.dataset?.safeSrc || "";
+            if (safeSrc.includes("/external/")) return true;
+            if (/[?&]format=(jpg|jpeg|png|gif|webp)(&|$)/i.test(href)) return true;
+            return isLikelyMediaFile(href);
+          }
+
+          try {
+            const pathname = new URL(href).pathname;
+            const hasNonMediaExt = /\.(zip|rar|7z|gz|tar|pdf|txt|doc|docx|xls|xlsx|ppt|pptx|json|xml|csv|exe|dmg|apk|js|ts|html|css)([?#]|$)/i.test(pathname);
+            if (hasNonMediaExt) return false;
+            if (_attachmentSeenPaths.has(pathname)) return false;
+            _attachmentSeenPaths.add(pathname);
+          } catch (_) {}
+
+          return true;
+        });
+
+        const _fileSeenPaths = new Set([..._attachmentSeenPaths]);
+        const fileAttachmentLinks = Array.from(
+          container.querySelectorAll('a[class*="fileNameLink_"], a[class*="metadataDownload_"]'),
+        ).filter((link) => {
+          const href = link.href || "";
+          if (!href.includes("cdn.discordapp.com/attachments/")) return false;
+          try {
+            const pathname = new URL(href).pathname;
+            if (_fileSeenPaths.has(pathname)) return false;
+            _fileSeenPaths.add(pathname);
+          } catch (_) {}
+          return true;
         });
 
         const allVideoElements = Array.from(
@@ -6495,12 +7043,14 @@
         );
 
         const markdownMediaLinks = (() => {
-          const allAnchors = Array.from(container.querySelectorAll('a[href]'));
+          const allAnchors = Array.from(container.querySelectorAll("a[href]"));
           const existingHrefs = new Set([
-            ...attachmentLinks.map(l => l.href),
-            ...allVideoElements.map(v => v.src || v.querySelector("source")?.src || ""),
+            ...attachmentLinks.map((l) => l.href),
+            ...allVideoElements.map(
+              (v) => v.src || v.querySelector("source")?.src || "",
+            ),
           ]);
-          return allAnchors.filter(a => {
+          return allAnchors.filter((a) => {
             const href = a.href;
             if (!href || existingHrefs.has(href)) return false;
             return isLikelyMediaFile(href);
@@ -6522,20 +7072,31 @@
             return url.split("?")[0];
           }
         };
-        const markdownMediaHrefs = new Set(markdownMediaLinks.map(a => resolveUrlForComparison(a.href)));
+        const markdownMediaHrefs = new Set(
+          markdownMediaLinks.map((a) => resolveUrlForComparison(a.href)),
+        );
         const embedVideos = allVideoElements.filter((video) => {
           const videoSrc = video.src || video.querySelector("source")?.src;
           if (!videoSrc) return false;
           const videoKey = resolveUrlForComparison(videoSrc);
 
-          if (attachmentLinks.some((link) => resolveUrlForComparison(link.href) === videoKey)) return false;
+          if (
+            attachmentLinks.some(
+              (link) => resolveUrlForComparison(link.href) === videoKey,
+            )
+          )
+            return false;
 
           if (markdownMediaHrefs.has(videoKey)) return false;
 
           return true;
         });
 
-        const totalDownloadCount = attachmentLinks.length + embedVideos.length + markdownMediaLinks.length;
+        const totalDownloadCount =
+          attachmentLinks.length +
+          fileAttachmentLinks.length +
+          embedVideos.length +
+          markdownMediaLinks.length;
 
         if (totalDownloadCount > 0) {
           const dlBtn = document.createElement("button");
@@ -6592,8 +7153,9 @@
                 attachmentLinks.length + i,
               );
 
-              if (filename && !filename.match(/\.(mp4|webm|mov|mkv)$/i)) {
-                filename = filename.replace(/\.\w+$/, "") + ".mp4";
+              if (filename && !filename.match(/\.(mp4|webm|mov|mkv|avi|m4v)$/i)) {
+                const extFromUrl = rawUrl?.match(/\.(mp4|webm|mov|mkv|avi|m4v)([?#]|$)/i)?.[1];
+                filename = filename.replace(/\.\w+$/, "") + "." + (extFromUrl || "mp4");
               }
 
               setTimeout(
@@ -6613,127 +7175,114 @@
                 (baseOffset + i) * 75,
               );
 
-              let filename = generateSmartFilename(container, rawUrl, baseOffset + i);
-              if (filename && !/\.(mp4|webm|mov|mkv|jpg|jpeg|png|gif|webp)$/i.test(filename)) {
-                const extMatch = rawUrl.match(/\.(mp4|webm|mov|mkv|jpg|jpeg|png|gif|webp)([?#]|$)/i);
-                filename = filename.replace(/\.\w+$/, "") + (extMatch ? "." + extMatch[1] : ".mp4");
+              let filename = generateSmartFilename(
+                container,
+                rawUrl,
+                baseOffset + i,
+              );
+              if (
+                filename &&
+                !/\.(mp4|webm|mov|mkv|jpg|jpeg|png|gif|webp)$/i.test(filename)
+              ) {
+                const extMatch = rawUrl.match(
+                  /\.(mp4|webm|mov|mkv|jpg|jpeg|png|gif|webp)([?#]|$)/i,
+                );
+                filename =
+                  filename.replace(/\.\w+$/, "") +
+                  (extMatch ? "." + extMatch[1] : ".mp4");
               }
 
               setTimeout(
-                () => { if (rawUrl) downloadFile(rawUrl, filename); },
+                () => {
+                  if (rawUrl) downloadFile(rawUrl, filename);
+                },
                 (baseOffset + i) * 200,
               );
             });
 
+            const fileBaseOffset = attachmentLinks.length + embedVideos.length + markdownMediaLinks.length;
+            fileAttachmentLinks.forEach((link, i) => {
+              const rawUrl = link.href;
+              const displayName = link.textContent?.trim() || "";
+              let filename = displayName || (() => {
+                try {
+                  const p = new URL(rawUrl).pathname;
+                  return decodeURIComponent(p.substring(p.lastIndexOf("/") + 1)).split("?")[0];
+                } catch (_) { return `discord_file_${Date.now()}_${i}`; }
+              })();
+
+              setTimeout(() => {
+                downloadFile(rawUrl, filename);
+              }, (fileBaseOffset + i) * 200);
+            });
+
             closeGlobalMenu();
+          };
+
+          const extractSourceUrl = (proxyUrl) => {
+            try {
+              const cleanUrl = proxyUrl.split("?")[0];
+              const match = cleanUrl.match(/\/external\/([^?]+)/);
+              if (!match) return proxyUrl;
+              const decoded = decodeURIComponent(match[1]);
+              const parts = decoded.split("/");
+              const protocolIdx = parts.findIndex((p) => p === "http" || p === "https");
+              if (protocolIdx !== -1) {
+                return `${parts[protocolIdx]}://${parts.slice(protocolIdx + 1).join("/")}`.replace(/%3A/g, ":");
+              }
+              if (parts.length >= 3 && parts[0].length >= 40) {
+                const rem = parts.slice(1);
+                const pi2 = rem.findIndex((p) => p === "http" || p === "https");
+                if (pi2 !== -1) return `${rem[pi2]}://${rem.slice(pi2 + 1).join("/")}`.replace(/%3A/g, ":");
+                if (rem.length >= 2) return `https://${rem.join("/")}`.replace(/%3A/g, ":");
+              }
+              if (decoded.startsWith("http://") || decoded.startsWith("https://")) return decoded;
+              return cleanUrl;
+            } catch (_) { return proxyUrl.split("?")[0]; }
+          };
+
+          const _collectMediaUrls = () => {
+            const urls = [];
+            attachmentLinks.forEach((link) => {
+              const href = link.href;
+              const raw = href.includes("/external/") ? extractSourceUrl(href) : (resolveRealFileUrl(link) || href);
+              if (raw) urls.push(raw);
+            });
+            embedVideos.forEach((video) => {
+              const rawUrl = video.src || video.querySelector("source")?.src;
+              if (rawUrl) urls.push(rawUrl.includes("/external/") ? extractSourceUrl(rawUrl) : rawUrl);
+            });
+            markdownMediaLinks.forEach((link) => { if (link.href) urls.push(link.href); });
+            fileAttachmentLinks.forEach((link) => { if (link.href) urls.push(link.href); });
+            return urls;
           };
 
           dlBtn.addEventListener("contextmenu", (e) => {
             e.preventDefault();
             e.stopPropagation();
 
-            const mediaUrls = [];
+            const collected = _collectMediaUrls();
+            if (collected.length === 0) return;
 
-            const extractSourceUrl = (proxyUrl) => {
-              try {
-                const cleanUrl = proxyUrl.split("?")[0];
+            let textToCopy;
+            let toastMsg;
 
-                const match = cleanUrl.match(/\/external\/([^?]+)/);
-                if (!match) return proxyUrl;
+            if (e.shiftKey) {
+              const prefix = config.linkText || "";
+              textToCopy = collected.map((u) => `[${prefix || u}](${u})`).join("\n");
+              toastMsg = t("copy_media_prefixed", { n: collected.length });
+            } else {
+              textToCopy = collected.join("\n");
+              toastMsg = t("copy_media_urls", { n: collected.length });
+            }
 
-                const encodedPath = match[1];
-                const decoded = decodeURIComponent(encodedPath);
-
-                const parts = decoded.split("/");
-
-                const protocolIdx = parts.findIndex(
-                  (p) => p === "http" || p === "https",
-                );
-
-                if (protocolIdx !== -1) {
-                  const protocol = parts[protocolIdx];
-                  const urlPath = parts.slice(protocolIdx + 1).join("/");
-                  const sourceUrl = `${protocol}://${urlPath}`;
-                  return sourceUrl.replace(/%3A/g, ":");
-                }
-
-                if (parts.length >= 3 && parts[0].length >= 40) {
-                  const remainingParts = parts.slice(1);
-                  const protoIdx2 = remainingParts.findIndex(
-                    (p) => p === "http" || p === "https",
-                  );
-
-                  if (protoIdx2 !== -1) {
-                    const protocol = remainingParts[protoIdx2];
-                    const urlPath = remainingParts
-                      .slice(protoIdx2 + 1)
-                      .join("/");
-                    return `${protocol}://${urlPath}`.replace(/%3A/g, ":");
-                  }
-
-                  if (remainingParts.length >= 2) {
-                    return `https://${remainingParts.join("/")}`.replace(
-                      /%3A/g,
-                      ":",
-                    );
-                  }
-                }
-
-                if (
-                  decoded.startsWith("http://") ||
-                  decoded.startsWith("https://")
-                ) {
-                  return decoded;
-                }
-
-                return cleanUrl;
-              } catch (err) {
-                console.warn("[extractSourceUrl] Failed:", err);
-                return proxyUrl.split("?")[0];
-              }
-            };
-
-            attachmentLinks.forEach((link) => {
-              const href = link.href;
-              if (href.includes("/external/")) {
-                mediaUrls.push(extractSourceUrl(href));
-              } else {
-                const rawUrl = resolveRealFileUrl(link);
-                if (rawUrl) mediaUrls.push(rawUrl);
-              }
-            });
-
-            embedVideos.forEach((video) => {
-              const rawUrl = video.src || video.querySelector("source")?.src;
-              if (rawUrl) {
-                if (rawUrl.includes("/external/")) {
-                  mediaUrls.push(extractSourceUrl(rawUrl));
-                } else {
-                  mediaUrls.push(rawUrl);
-                }
-              }
-            });
-
-            markdownMediaLinks.forEach((link) => {
-              const href = link.href;
-              if (href) mediaUrls.push(href);
-            });
-
-            if (mediaUrls.length > 0) {
-              const urlText = mediaUrls.join("\n");
-              if (typeof GM_setClipboard === "function") {
-                GM_setClipboard(urlText);
-                showToast(`✅ 已複製 ${mediaUrls.length} 個媒體連結`);
-              } else {
-                navigator.clipboard
-                  .writeText(urlText)
-                  .then(() => {
-                    showToast(`✅ 已複製 ${mediaUrls.length} 個媒體連結`);
-                  })
-                  .catch(() => {
-                    showToast("❌ 複製失敗");
-                  });
-              }
+            if (typeof GM_setClipboard === "function") {
+              GM_setClipboard(textToCopy);
+              showToast(toastMsg);
+            } else {
+              navigator.clipboard.writeText(textToCopy)
+                .then(() => showToast(toastMsg))
+                .catch(() => showToast(t("copy_fail")));
             }
 
             closeGlobalMenu();
@@ -6780,10 +7329,7 @@
           editBtn.onclick = (e) => {
             e.stopPropagation();
             cancelCloseGlobalMenu();
-            const newVal = prompt(
-              t("enter_link_text"),
-              config.linkText,
-            );
+            const newVal = prompt(t("enter_link_text"), config.linkText);
             if (newVal !== null) {
               const finalVal = newVal.trim() === "" ? "" : newVal.trim();
               localStorage.setItem("copyLinkText", finalVal);
@@ -6952,25 +7498,18 @@
         DOMAIN_GROUPS.forEach((group) => {
           processGroup(group.type, (data, isBatch) => {
             if (isBatch) {
-              let primaryTarget = "";
-              if (group.type === "twitter") primaryTarget = "vxtwitter.com";
-              else if (group.type === "reddit") primaryTarget = "vxreddit.com";
-              else if (group.type === "instagram")
-                primaryTarget = "kkinstagram.com";
-              else if (group.type === "tiktok") primaryTarget = "vxtiktok.com";
-              else if (group.type === "threads")
-                primaryTarget = "fixthreads.seria.moe";
-              else if (group.type === "facebook")
-                primaryTarget = "facebed.com";
-
-              const allConverted = data
-                .map((d) => `https://${primaryTarget}${d.path}`)
-                .join("\n");
-              addItem(
-                "convert",
-                t("convert_all", { n: data.length }) + ` ${primaryTarget}`,
-                allConverted,
-              );
+              const sourceDomains = new Set(data.map((d) => d.host));
+              group.domains.forEach((domain) => {
+                if (sourceDomains.size === 1 && sourceDomains.has(domain)) return;
+                const allConverted = data
+                  .map((d) => `https://${domain}${d.path}`)
+                  .join("\n");
+                addItem(
+                  "convert",
+                  t("convert_all", { n: data.length }) + ` ${domain}`,
+                  allConverted,
+                );
+              });
             } else {
               group.domains.forEach((domain) => {
                 if (domain !== data.host)
@@ -7040,7 +7579,7 @@
 
         links.forEach((url) => {
           const shortsMatch = url.match(
-            /^https?:\/\/(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})([?&].*)?$/
+            /^https?:\/\/(?:www\.)?youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})([?&].*)?$/,
           );
           if (shortsMatch) {
             const videoId = shortsMatch[1];
@@ -7055,8 +7594,171 @@
           }
         });
 
+        if (typeof window.webhookModule !== "undefined" && window.webhookModule.getWebhooks().length > 0) {
+
+          const _getMsgPermalink = () => {
+            const listId = container.getAttribute("data-list-item-id") || "";
+            const idMatch = listId.match(/chat-messages-(\d+)-(\d+)$/);
+            if (idMatch) {
+              const channelId = idMatch[1];
+              const messageId = idMatch[2];
+              const pathMatch = location.pathname.match(/^\/channels\/([^/]+)\//);
+              if (pathMatch) {
+                return `https://discord.com/channels/${pathMatch[1]}/${channelId}/${messageId}`;
+              }
+            }
+            const a = container.querySelector('a[class*="timestamp_"][href*="/channels/"]');
+            if (a) {
+              const href = a.getAttribute("href") || "";
+              if (href.startsWith("/channels/")) return "https://discord.com" + href;
+            }
+            return null;
+          };
+
+          const _getSrcPref = (id) => {
+            const wh = window.webhookModule.getWebhooks().find((w) => w.id === id);
+            return wh?.keepSource === true;
+          };
+          const _setSrcPref = (id, val) => {
+            const list = window.webhookModule.getWebhooks().map((w) =>
+              w.id === id ? { ...w, keepSource: val } : w
+            );
+            GM_setValue("discord_webhook_list", JSON.stringify(list));
+          };
+
+          const makeWebhookParent = (label, onSelect) => {
+            const wrapper = document.createElement("div");
+            wrapper.style.cssText = "display:flex;flex-direction:column;";
+
+            const parentBtn = document.createElement("button");
+            parentBtn.textContent = label;
+            parentBtn.style.cssText = "text-align:left;";
+            wrapper.appendChild(parentBtn);
+
+            const childList = document.createElement("div");
+            childList.style.cssText = [
+              "display:none", "flex-direction:column",
+              "padding-left:8px",
+              "border-left:2px solid rgba(88,101,242,0.4)",
+              "margin-left:12px",
+            ].join(";");
+
+            window.webhookModule.getWebhooks().forEach((wh) => {
+              const row = document.createElement("div");
+              row.style.cssText = [
+                "display:flex", "align-items:center",
+                "gap:4px", "padding:2px 0",
+              ].join(";");
+
+              const nameBtn = document.createElement("button");
+              nameBtn.textContent = wh.name;
+              nameBtn.style.cssText = [
+                "flex:1", "text-align:left", "font-size:12px",
+                "padding:4px 8px", "opacity:0.85",
+              ].join(";");
+              nameBtn.onmouseenter = () => {
+                nameBtn.style.opacity = "1";
+                nameBtn.style.background = "rgba(88,101,242,0.15)";
+              };
+              nameBtn.onmouseleave = () => {
+                nameBtn.style.opacity = "0.85";
+                nameBtn.style.background = "";
+              };
+              nameBtn.onclick = (e) => {
+                e.stopPropagation();
+                cancelCloseGlobalMenu();
+                onSelect(wh, _getSrcPref(wh.id));
+                closeGlobalMenu();
+              };
+
+              const chk = document.createElement("input");
+              chk.type = "checkbox";
+              chk.checked = _getSrcPref(wh.id);
+              chk.title = t("wh_keep_source");
+              chk.style.cssText = [
+                "accent-color:#5865f2", "cursor:pointer",
+                "flex-shrink:0", "width:13px", "height:13px",
+              ].join(";");
+              chk.addEventListener("change", (e) => {
+                e.stopPropagation();
+                _setSrcPref(wh.id, chk.checked);
+              });
+              chk.onclick = (e) => {
+                e.stopPropagation();
+                cancelCloseGlobalMenu();
+              };
+
+              const hint = document.createElement("span");
+              hint.textContent = "❓";
+              hint.title = t("wh_keep_source_tip");
+              hint.style.cssText = [
+                "font-size:11px", "cursor:default",
+                "opacity:0.55", "flex-shrink:0",
+                "line-height:1", "user-select:none",
+              ].join(";");
+              hint.onmouseenter = () => { hint.style.opacity = "1"; };
+              hint.onmouseleave = () => { hint.style.opacity = "0.55"; };
+              hint.onclick = (e) => {
+                e.stopPropagation();
+                cancelCloseGlobalMenu();
+              };
+
+              row.appendChild(nameBtn);
+              row.appendChild(chk);
+              row.appendChild(hint);
+              childList.appendChild(row);
+            });
+
+            let expanded = false;
+            parentBtn.onclick = (e) => {
+              e.stopPropagation();
+              cancelCloseGlobalMenu();
+              expanded = !expanded;
+              childList.style.display = expanded ? "flex" : "none";
+              parentBtn.textContent = label.replace("▶", expanded ? "▼" : "▶");
+            };
+
+            wrapper.appendChild(childList);
+            return wrapper;
+          };
+
+          sections.webhook.push(makeWebhookParent(t("wh_send_content"), (wh, keepSource) => {
+            const msgText = getMessageText(container);
+            if (!msgText) { showToast(t("no_content")); return; }
+            const permalink = keepSource ? _getMsgPermalink() : null;
+            const payload = permalink ? `${msgText}\n${permalink}` : msgText;
+            const channelUrl = (wh.guild_id && wh.channel_id)
+              ? `https://discord.com/channels/${wh.guild_id}/${wh.channel_id}`
+              : null;
+            window.webhookModule.sendContent(wh.url, payload, wh.name, channelUrl);
+          }));
+
+          sections.webhook.push(makeWebhookParent(t("wh_send_urls"), (wh, keepSource) => {
+            const textUrls = (links || []).filter(
+              (u) => !u.includes("discord.com/channels/")
+            );
+            const mediaUrls = [];
+            container.querySelectorAll('a[class*="originalLink"], a[class*="fileNameLink_"], a[class*="metadataDownload_"]').forEach((a) => {
+              if (a.href && !mediaUrls.includes(a.href)) mediaUrls.push(a.href);
+            });
+            container.querySelectorAll("video source, video[src]").forEach((el) => {
+              const src = el.src || el.getAttribute("src");
+              if (src && !mediaUrls.includes(src)) mediaUrls.push(src);
+            });
+            const allUrls = [...new Set([...textUrls, ...mediaUrls])].filter(Boolean);
+            if (keepSource) {
+              const permalink = _getMsgPermalink();
+              if (permalink && !allUrls.includes(permalink)) allUrls.push(permalink);
+            }
+            const channelUrl = (wh.guild_id && wh.channel_id)
+              ? `https://discord.com/channels/${wh.guild_id}/${wh.channel_id}`
+              : null;
+            window.webhookModule.sendUrls(wh.url, allUrls, wh.name, channelUrl);
+          }));
+        }
+
         if (config.menuStyle === "group") {
-          ["copy", "download", "convert", "system"].forEach((k) => {
+          ["copy", "download", "convert", "webhook", "system"].forEach((k) => {
             if (sections[k].length) {
               const groupEl = document.createElement("div");
               groupEl.className = "msg-copy-item-group";
@@ -7072,7 +7774,7 @@
             }
           });
         } else {
-          ["copy", "download", "convert", "system"].forEach((k) => {
+          ["copy", "download", "convert", "webhook", "system"].forEach((k) => {
             if (sections[k].length) {
               sections[k].forEach((el) => dropdown.appendChild(el));
               dropdown.appendChild(createDivider());
@@ -7105,15 +7807,65 @@
       msg.dataset.copyAttached = "true";
       msg.classList.add("msg-copy-container");
 
-      if (getComputedStyle(msg).position === "static") {
-        msg.style.position = "relative";
-      }
+      msg.style.position = "relative";
 
       const btn = document.createElement("button");
       btn.className = "msg-copy-btn";
       btn.textContent = "⠿";
 
       let _isMenuRendered = false;
+
+      const _calcDropdownPos = (anchorBtn, dropdown) => {
+        const btnRect = anchorBtn.getBoundingClientRect();
+        const dropdownRect = dropdown.getBoundingClientRect();
+        let top = btnRect.bottom + window.scrollY;
+        let left = btnRect.right - dropdownRect.width + window.scrollX;
+
+        if (btnRect.bottom + dropdownRect.height > window.innerHeight) {
+          top = btnRect.top + window.scrollY - dropdownRect.height;
+        }
+        if (left + dropdownRect.width > window.innerWidth) {
+          left = window.innerWidth - dropdownRect.width - 10;
+        }
+
+        dropdown.style.top = `${top}px`;
+        dropdown.style.left = `${left}px`;
+      };
+
+      let _symbolsPage = (() => {
+        try {
+          return (
+            parseInt(localStorage.getItem("copySymbolsPage") || "0", 10) || 0
+          );
+        } catch (_) {
+          return 0;
+        }
+      })();
+
+      const renderMenuInternal = (isSymbols, page) => {
+        if (typeof page === "number") {
+          _symbolsPage = page;
+          try {
+            localStorage.setItem("copySymbolsPage", String(page));
+          } catch (_) {}
+        }
+        closeGlobalMenu();
+        const text = getMessageText(msg);
+        const mediaUrl = extractExternalMediaUrl(msg);
+        const dropdown = createDropdown(
+          msg,
+          text,
+          mediaUrl,
+          isSymbols,
+          (n) => renderMenuInternal(n),
+          (c, p) => renderMenuInternal(c, p),
+          _symbolsPage,
+        );
+        document.body.appendChild(dropdown);
+        globalActiveDropdown = dropdown;
+        dropdown.style.display = "flex";
+        _calcDropdownPos(btn, dropdown);
+      };
 
       const showMenu = () => {
         if (globalActiveDropdown) closeGlobalMenu();
@@ -7138,73 +7890,31 @@
         document.body.appendChild(dropdown);
         globalActiveDropdown = dropdown;
         dropdown.style.display = "flex";
-
-        const btnRect = btn.getBoundingClientRect();
-        const dropdownRect = dropdown.getBoundingClientRect();
-        let top = btnRect.bottom + window.scrollY;
-        let left = btnRect.right - dropdownRect.width + window.scrollX;
-
-        if (btnRect.bottom + dropdownRect.height > window.innerHeight) {
-          top = btnRect.top + window.scrollY - dropdownRect.height;
-        }
-        if (left + dropdownRect.width > window.innerWidth) {
-          left = window.innerWidth - dropdownRect.width - 10;
-        }
-
-        dropdown.style.top = `${top}px`;
-        dropdown.style.left = `${left}px`;
-      };
-
-      let _symbolsPage = (() => {
-        try { return parseInt(localStorage.getItem("copySymbolsPage") || "0", 10) || 0; } catch(_) { return 0; }
-      })();
-
-      const renderMenuInternal = (isSymbols, page) => {
-        if (typeof page === "number") {
-          _symbolsPage = page;
-          try { localStorage.setItem("copySymbolsPage", String(page)); } catch(_) {}
-        }
-        closeGlobalMenu();
-        const text = getMessageText(msg);
-        const mediaUrl = extractExternalMediaUrl(msg);
-        const dropdown = createDropdown(
-          msg,
-          text,
-          mediaUrl,
-          isSymbols,
-          (n) => renderMenuInternal(n),
-          (c, p) => renderMenuInternal(c, p),
-          _symbolsPage,
-        );
-        document.body.appendChild(dropdown);
-        globalActiveDropdown = dropdown;
-        dropdown.style.display = "flex";
-        const btnRect = btn.getBoundingClientRect();
-        const dropdownRect = dropdown.getBoundingClientRect();
-        let top = btnRect.bottom + window.scrollY;
-        let left = btnRect.right - dropdownRect.width + window.scrollX;
-        if (btnRect.bottom + dropdownRect.height > window.innerHeight)
-          top = btnRect.top + window.scrollY - dropdownRect.height;
-        if (left + dropdownRect.width > window.innerWidth)
-          left = window.innerWidth - dropdownRect.width - 10;
-        dropdown.style.top = `${top}px`;
-        dropdown.style.left = `${left}px`;
+        _calcDropdownPos(btn, dropdown);
       };
 
       const discordBtnContainer = (() => {
         for (const child of msg.children) {
-          const childClass = typeof child.className === "string" ? child.className : (child.getAttribute?.("class") ?? "");
+          const childClass =
+            typeof child.className === "string"
+              ? child.className
+              : (child.getAttribute?.("class") ?? "");
           if (childClass.includes("buttonContainer")) {
             return child;
           }
         }
         for (const child of msg.children) {
           for (const grandchild of child.children) {
-            const gcClass = typeof grandchild.className === "string" ? grandchild.className : (grandchild.getAttribute?.("class") ?? "");
+            const gcClass =
+              typeof grandchild.className === "string"
+                ? grandchild.className
+                : (grandchild.getAttribute?.("class") ?? "");
             if (gcClass.includes("buttonContainer")) {
-              if (!grandchild.closest('[class*="content__"]') &&
-                  !grandchild.closest('[class*="embedFull"]') &&
-                  !grandchild.closest('[class*="container_b7e1cb"]')) {
+              if (
+                !grandchild.closest('[class*="content__"]') &&
+                !grandchild.closest('[class*="embedFull"]') &&
+                !grandchild.closest('[class*="container_b7e1cb"]')
+              ) {
                 return grandchild;
               }
             }
@@ -7277,7 +7987,57 @@
         .querySelectorAll("div[data-list-item-id]")
         .forEach((node) => io.observe(node));
 
-      window.addEventListener("beforeunload", () => io.disconnect(), { once: true });
+      let _lastUrl = location.href;
+      let _urlCheckTimer = null;
+
+      const _handleUrlChange = () => {
+        if (location.href === _lastUrl) return;
+        _lastUrl = location.href;
+        io.disconnect();
+        setTimeout(() => {
+          document
+            .querySelectorAll("div[data-list-item-id]")
+            .forEach((node) => {
+              if (!node.dataset.copyAttached) attachToMessage(node);
+              io.observe(node);
+            });
+          DEBUG &&
+            console.log(
+              "[MessageUtility] IO observer reset after navigation",
+            );
+        }, 500);
+      };
+
+      if (typeof navigation !== "undefined" && navigation.addEventListener) {
+        navigation.addEventListener("navigate", _handleUrlChange, { passive: true });
+      } else {
+        window.addEventListener("popstate", _handleUrlChange, { passive: true });
+      }
+
+      const _checkUrlChange = () => {
+        _handleUrlChange();
+        _urlCheckTimer = setTimeout(_checkUrlChange, 1000);
+      };
+      _urlCheckTimer = setTimeout(_checkUrlChange, 1000);
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          clearTimeout(_urlCheckTimer);
+          _urlCheckTimer = null;
+        } else {
+          _handleUrlChange();
+          _urlCheckTimer = setTimeout(_checkUrlChange, 1000);
+        }
+      }, { passive: true });
+
+      window.addEventListener(
+        "beforeunload",
+        () => {
+          io.disconnect();
+          clearTimeout(_urlCheckTimer);
+        },
+        { once: true },
+      );
 
       document.addEventListener(
         "mouseover",
@@ -7290,16 +8050,18 @@
         { passive: true },
       );
 
-      DEBUG && console.log("[MessageUtility] Hybrid injection mode initialized");
+      DEBUG &&
+        console.log("[MessageUtility] Hybrid injection mode initialized");
     }
 
     init();
   }
 
   function initEmojiSearchHelper() {
-    console.log(
-      "[Discord Utilities] Initializing Expression Search Helper v22.10 (Sticker Fix)...",
-    );
+    DEBUG &&
+      console.log(
+        "[Discord Utilities] Initializing Expression Search Helper v22.10 (Sticker Fix)...",
+      );
 
     const NATIVE_MODE_KEY = "discord_emoji_native_mode";
     function getNativeMode() {
@@ -7672,15 +8434,23 @@
         showEmojiToast(t("em_col_add_success", { g: colName }));
 
         if (type === TYPES.GIF || type === TYPES.STICKER) {
-          const downloadUrl = (typeof item === "object")
-            ? (item.url || item.content || item.stableUrl)
-            : item;
+          const downloadUrl =
+            typeof item === "object"
+              ? item.url || item.content || item.stableUrl
+              : item;
           if (downloadUrl && downloadUrl.startsWith("http")) {
-            fetchAndCacheMedia(downloadUrl).then(dataUrl => {
+            fetchAndCacheMedia(downloadUrl).then((dataUrl) => {
               if (dataUrl) {
-                DEBUG && console.log("[GifCache] Pre-cached on save:", downloadUrl.slice(0, 60));
+                DEBUG &&
+                  console.log(
+                    "[GifCache] Pre-cached on save:",
+                    downloadUrl.slice(0, 60),
+                  );
               } else {
-                console.warn("[GifCache] Pre-cache failed (CDN may have expired already):", downloadUrl.slice(0, 80));
+                console.warn(
+                  "[GifCache] Pre-cache failed (CDN may have expired already):",
+                  downloadUrl.slice(0, 80),
+                );
               }
             });
           }
@@ -7704,8 +8474,8 @@
     }
 
     const GIF_CACHE_PREFIX = "gifcache_";
-    const GIF_CACHE_INDEX  = "gifcache_index";
-    const GIF_MAX_BYTES    = 400 * 1024;
+    const GIF_CACHE_INDEX = "gifcache_index";
+    const GIF_MAX_BYTES = 400 * 1024;
 
     let _idbPromise = null;
     function openGifIDB() {
@@ -7715,32 +8485,36 @@
         req.onupgradeneeded = (e) => {
           e.target.result.createObjectStore("blobs", { keyPath: "id" });
         };
-        req.onsuccess  = (e) => resolve(e.target.result);
-        req.onerror    = (e) => reject(e.target.error);
+        req.onsuccess = (e) => resolve(e.target.result);
+        req.onerror = (e) => reject(e.target.error);
       });
       return _idbPromise;
     }
     async function idbPut(id, dataUrl) {
       const db = await openGifIDB();
       return new Promise((res, rej) => {
-        const tx  = db.transaction("blobs", "readwrite");
+        const tx = db.transaction("blobs", "readwrite");
         tx.objectStore("blobs").put({ id, dataUrl });
         tx.oncomplete = () => res();
-        tx.onerror    = (e) => rej(e.target.error);
+        tx.onerror = (e) => rej(e.target.error);
       });
     }
     async function idbGet(id) {
       const db = await openGifIDB();
       return new Promise((res, rej) => {
-        const tx  = db.transaction("blobs", "readonly");
+        const tx = db.transaction("blobs", "readonly");
         const req = tx.objectStore("blobs").get(id);
         req.onsuccess = (e) => res(e.target.result?.dataUrl || null);
-        req.onerror   = (e) => rej(e.target.error);
+        req.onerror = (e) => rej(e.target.error);
       });
     }
 
     function gifCacheKey(url) {
-      try { return new URL(url).pathname; } catch { return url; }
+      try {
+        return new URL(url).pathname;
+      } catch {
+        return url;
+      }
     }
 
     async function readGifCache(url) {
@@ -7749,11 +8523,11 @@
       try {
         const val = GM_getValue(gmKey, null);
         if (val) return val;
-      } catch(_) {}
+      } catch (_) {}
       try {
         const val = await idbGet(k);
         if (val) return val;
-      } catch(_) {}
+      } catch (_) {}
       return null;
     }
 
@@ -7768,9 +8542,12 @@
         }
         try {
           const idx = JSON.parse(GM_getValue(GIF_CACHE_INDEX, "[]"));
-          if (!idx.includes(k)) { idx.push(k); GM_setValue(GIF_CACHE_INDEX, JSON.stringify(idx)); }
-        } catch(_) {}
-      } catch(e) {
+          if (!idx.includes(k)) {
+            idx.push(k);
+            GM_setValue(GIF_CACHE_INDEX, JSON.stringify(idx));
+          }
+        } catch (_) {}
+      } catch (e) {
         console.warn("[GifCache] write failed:", e);
       }
     }
@@ -7779,8 +8556,11 @@
       return new Promise(async (resolve) => {
         try {
           const cached = await readGifCache(url);
-          if (cached) { resolve(cached); return; }
-        } catch(_) {}
+          if (cached) {
+            resolve(cached);
+            return;
+          }
+        } catch (_) {}
 
         GM_xmlhttpRequest({
           method: "GET",
@@ -7788,42 +8568,56 @@
           responseType: "arraybuffer",
           timeout: 15000,
           onload(res) {
-            if (res.status !== 200) { resolve(null); return; }
+            if (res.status !== 200) {
+              resolve(null);
+              return;
+            }
             try {
               const bytes = new Uint8Array(res.response);
-              const mime  = res.responseHeaders.match(/content-type:\s*([^\r\n;]+)/i)?.[1]?.trim()
-                         || (url.includes(".gif") ? "image/gif" : "image/webp");
+              const mime =
+                res.responseHeaders
+                  .match(/content-type:\s*([^\r\n;]+)/i)?.[1]
+                  ?.trim() ||
+                (url.includes(".gif") ? "image/gif" : "image/webp");
               let binary = "";
-              for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+              for (let i = 0; i < bytes.length; i++)
+                binary += String.fromCharCode(bytes[i]);
               const b64 = "data:" + mime + ";base64," + btoa(binary);
               writeGifCache(url, b64).catch(() => {});
               resolve(b64);
-            } catch(e) {
+            } catch (e) {
               console.error("[GifCache] encode error:", e);
               resolve(null);
             }
           },
-          onerror()  { resolve(null); },
-          ontimeout(){ resolve(null); },
+          onerror() {
+            resolve(null);
+          },
+          ontimeout() {
+            resolve(null);
+          },
         });
       });
     }
 
     async function attachGifFallback(imgEl, originalUrl, stableUrl) {
       if (!originalUrl || !originalUrl.startsWith("http")) return;
-      const cacheTarget = (stableUrl && stableUrl.startsWith("http")) ? stableUrl : originalUrl;
+      const cacheTarget =
+        stableUrl && stableUrl.startsWith("http") ? stableUrl : originalUrl;
 
       let cachedDataUrl = null;
-      try { cachedDataUrl = await readGifCache(cacheTarget); } catch(_) {}
+      try {
+        cachedDataUrl = await readGifCache(cacheTarget);
+      } catch (_) {}
 
       if (cachedDataUrl) {
         imgEl.src = cachedDataUrl;
         return;
       }
 
-      imgEl.onerror = async function() {
+      imgEl.onerror = async function () {
         this.onerror = null;
-        this.alt   = "🖼️";
+        this.alt = "🖼️";
         this.title = cacheTarget;
         this.style.cssText = [
           "object-fit:contain",
@@ -7834,7 +8628,11 @@
           "align-items:center",
           "justify-content:center",
         ].join(";");
-        DEBUG && console.warn("[GifCache] CDN expired, no local cache:", cacheTarget.slice(0, 80));
+        DEBUG &&
+          console.warn(
+            "[GifCache] CDN expired, no local cache:",
+            cacheTarget.slice(0, 80),
+          );
       };
     }
 
@@ -7970,9 +8768,10 @@
           el.src = displayUrl;
 
           const _cacheTarget = actualContent || displayUrl;
-          const _stableUrl = (typeof content === "object" && content !== null)
-            ? (content.stableUrl || null)
-            : null;
+          const _stableUrl =
+            typeof content === "object" && content !== null
+              ? content.stableUrl || null
+              : null;
           if (_cacheTarget && _cacheTarget.startsWith("http")) {
             attachGifFallback(el, _cacheTarget, _stableUrl);
           } else {
@@ -8200,18 +8999,23 @@
         return null;
       }
 
+      let _rafId = null;
       function onMouseMove(e) {
-        const target = getTarget(e);
-        if (target) {
-          const tr = target.getBoundingClientRect();
-          frame.style.left = tr.left + "px";
-          frame.style.top = tr.top + "px";
-          frame.style.width = tr.width + "px";
-          frame.style.height = tr.height + "px";
-          frame.style.display = "block";
-        } else {
-          frame.style.display = "none";
-        }
+        if (_rafId) return;
+        _rafId = requestAnimationFrame(() => {
+          _rafId = null;
+          const target = getTarget(e);
+          if (target) {
+            const tr = target.getBoundingClientRect();
+            frame.style.left = tr.left + "px";
+            frame.style.top = tr.top + "px";
+            frame.style.width = tr.width + "px";
+            frame.style.height = tr.height + "px";
+            frame.style.display = "block";
+          } else {
+            frame.style.display = "none";
+          }
+        });
       }
 
       function killEvent(e) {
@@ -8234,13 +9038,23 @@
             ) {
               content = target.src;
             } else if (target.tagName === "VIDEO") {
-              const cdnSrc = target.src || target.querySelector("source")?.src || "";
+              const cdnSrc =
+                target.src || target.querySelector("source")?.src || "";
               const pageUrl = getKlipyPageUrl(target) || "";
               const finalUrl = pageUrl || cdnSrc;
               if (finalUrl) {
-                const thumb = _klipyThumbCache.get(pageUrl) || cdnSrc || pageUrl;
+                const thumb =
+                  _klipyThumbCache.get(pageUrl) || cdnSrc || pageUrl;
                 content = pageUrl
-                  ? { url: finalUrl, content: finalUrl, stableUrl: finalUrl, thumbnail: thumb, mediaType: TYPES.GIF, filename: finalUrl.split("/").pop(), createdAt: new Date().toISOString() }
+                  ? {
+                      url: finalUrl,
+                      content: finalUrl,
+                      stableUrl: finalUrl,
+                      thumbnail: thumb,
+                      mediaType: TYPES.GIF,
+                      filename: finalUrl.split("/").pop(),
+                      createdAt: new Date().toISOString(),
+                    }
                   : cdnSrc;
               }
             } else if (target.alt && target.alt.length < 10) {
@@ -8264,7 +9078,9 @@
         document.removeEventListener("click", onInteraction, true);
         document.removeEventListener("mousedown", onInteraction, true);
         document.removeEventListener("mouseup", onInteraction, true);
-        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mousemove", onMouseMove, {
+          passive: true,
+        });
         batchTargetMode = false;
         activeBatchCollection = null;
         activeBatchType = null;
@@ -8281,7 +9097,7 @@
       document.addEventListener("click", onInteraction, true);
       document.addEventListener("mousedown", onInteraction, true);
       document.addEventListener("mouseup", onInteraction, true);
-      document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mousemove", onMouseMove, { passive: true });
     }
 
     function handleTargetClickLogic(type, content) {
@@ -8682,9 +9498,10 @@
               const isNative = getNativeMode();
               wrap.style.opacity = "0.5";
               try {
-                const rawUrl = typeof url === "object"
-                  ? (url.url || url.stableUrl || url.content)
-                  : url;
+                const rawUrl =
+                  typeof url === "object"
+                    ? url.url || url.stableUrl || url.content
+                    : url;
                 const result = await detectAnimatedUrl(rawUrl);
                 if (isNative) {
                   const nativeTag = getNativeEmojiTag(result.url, result.isGif);
@@ -8859,13 +9676,15 @@
         idleTimer = setTimeout(triggerDarkness, 30000);
       };
 
-      document.addEventListener("mousemove", resetIdleTimer);
+      document.addEventListener("mousemove", resetIdleTimer, { passive: true });
       document.addEventListener("keydown", resetIdleTimer);
 
       const cleanupIdle = () => {
         clearTimeout(idleTimer);
         clearDarkness();
-        document.removeEventListener("mousemove", resetIdleTimer);
+        document.removeEventListener("mousemove", resetIdleTimer, {
+          passive: true,
+        });
         document.removeEventListener("keydown", resetIdleTimer);
       };
       btnContainer._cleanupIdle = cleanupIdle;
@@ -8973,7 +9792,12 @@
       const origSend = XMLHttpRequest.prototype.send;
 
       XMLHttpRequest.prototype.open = function (method, url, ...rest) {
-        this._klipyUrl = (typeof url === "string" && url.includes("discord.com/api") && url.includes("klipy")) ? url : null;
+        this._klipyUrl =
+          typeof url === "string" &&
+          url.includes("discord.com/api") &&
+          url.includes("klipy")
+            ? url
+            : null;
         return origOpen.call(this, method, url, ...rest);
       };
 
@@ -8982,8 +9806,10 @@
           this.addEventListener("load", function () {
             try {
               const data = JSON.parse(this.responseText);
-              const items = Array.isArray(data) ? data : (data.gifs || data.results || []);
-              items.forEach(item => {
+              const items = Array.isArray(data)
+                ? data
+                : data.gifs || data.results || [];
+              items.forEach((item) => {
                 if (item.src && item.url) {
                   const cdnKey = item.src.replace(/^https?:/, "");
                   _klipyUrlCache.set(cdnKey, item.url);
@@ -9006,67 +9832,73 @@
         if (!src) return null;
         if (_klipyUrlCache.has(src)) return _klipyUrlCache.get(src);
         const srcNoProto = src.replace(/^https?:/, "");
-        if (_klipyUrlCache.has(srcNoProto)) return _klipyUrlCache.get(srcNoProto);
+        if (_klipyUrlCache.has(srcNoProto))
+          return _klipyUrlCache.get(srcNoProto);
       } catch (_) {}
       return null;
     }
 
     function injectGifOverlay(node) {
-      if (!node || processedNodes.has(node)) return;
-      const card = node.closest('div[class*="result"], div[role="gridcell"]');
-      if (!card) return;
-      processedNodes.add(node);
-      card.classList.add("my-gif-card");
-      if (window.getComputedStyle(card).position === "static") {
-        card.style.position = "relative";
+    if (!node || processedNodes.has(node)) return;
+
+    let card = node.closest('[role="gridcell"], div[class*="result"]');
+    if (!card) return;
+
+    processedNodes.add(node);
+
+    card.classList.add("my-gif-card");
+
+    const overlay = document.createElement("div");
+    overlay.className = "my-gif-overlay-bar";
+
+    const targetBtn = document.createElement("div");
+    targetBtn.className = "my-overlay-btn";
+    targetBtn.innerHTML = ICON_TARGET;
+    targetBtn.title = t("em_btn_save_this");
+    targetBtn.style.marginRight = "4px";
+    targetBtn.onclick = (e) => {
+      e.stopPropagation();
+      let pageUrl = "";
+      let cdnSrc = "";
+      const media = card.querySelector("video, img");
+      if (media) {
+        cdnSrc = media.src || media.querySelector("source")?.src || "";
+        pageUrl = getKlipyPageUrl(media) || "";
       }
-      const overlay = document.createElement("div");
-      overlay.className = "my-gif-overlay-bar";
-      const targetBtn = document.createElement("div");
-      targetBtn.className = "my-overlay-btn";
-      targetBtn.innerHTML = ICON_TARGET;
-      targetBtn.title = t("em_btn_save_this");
-      targetBtn.style.marginRight = "4px";
-      targetBtn.onclick = (e) => {
-        e.stopPropagation();
-        let pageUrl = "";
-        let cdnSrc = "";
-        const media = card.querySelector("video, img");
-        if (media) {
-          cdnSrc = media.src || media.querySelector("source")?.src || "";
-          pageUrl = getKlipyPageUrl(media) || "";
-        }
-        const finalUrl = pageUrl || cdnSrc;
-        if (!finalUrl) return;
-        const thumb = _klipyThumbCache.get(pageUrl) || cdnSrc || pageUrl;
-        const payload = {
-          url: finalUrl,
-          content: finalUrl,
-          stableUrl: finalUrl,
-          thumbnail: thumb,
-          mediaType: TYPES.GIF,
-          filename: finalUrl.split("/").pop(),
-          createdAt: new Date().toISOString(),
-        };
-        showSaveModal(TYPES.GIF, finalUrl, (col) =>
-          addToCollection(TYPES.GIF, col, payload),
-        );
+      const finalUrl = pageUrl || cdnSrc;
+      if (!finalUrl) return;
+
+      const thumb = _klipyThumbCache.get(pageUrl) || cdnSrc || pageUrl;
+      const payload = {
+        url: finalUrl,
+        content: finalUrl,
+        stableUrl: finalUrl,
+        thumbnail: thumb,
+        mediaType: TYPES.GIF,
+        filename: finalUrl.split("/").pop(),
+        createdAt: new Date().toISOString(),
       };
-      overlay.appendChild(targetBtn);
-      const folderBtn = document.createElement("div");
-      folderBtn.className = "my-overlay-btn";
-      folderBtn.innerHTML = ICON_FOLDER;
-      folderBtn.title = t("em_col_title");
-      folderBtn.onclick = (e) => {
-        e.stopPropagation();
-        closeAllMenus();
-        const input = document.querySelector('input[placeholder*="Tenor"]');
-        renderTabsView(input, TYPES.GIF);
-        showDropdown(folderBtn);
-      };
-      overlay.appendChild(folderBtn);
-      card.appendChild(overlay);
-    }
+      showSaveModal(TYPES.GIF, finalUrl, (col) =>
+        addToCollection(TYPES.GIF, col, payload),
+      );
+    };
+    overlay.appendChild(targetBtn);
+
+    const folderBtn = document.createElement("div");
+    folderBtn.className = "my-overlay-btn";
+    folderBtn.innerHTML = ICON_FOLDER;
+    folderBtn.title = t("em_col_title");
+    folderBtn.onclick = (e) => {
+      e.stopPropagation();
+      closeAllMenus();
+      const input = document.querySelector('input[placeholder*="Tenor"]');
+      renderTabsView(input, TYPES.GIF);
+      showDropdown(folderBtn);
+    };
+    overlay.appendChild(folderBtn);
+
+    card.appendChild(overlay);
+  }
 
     const dropdown = document.createElement("div");
     dropdown.className = "my-popover-menu";
@@ -9098,7 +9930,7 @@
         pickerContainer.querySelector('div[class*="header"]');
 
       if (isDynamicList && !activeLocalObservers.has(pickerContainer)) {
-        console.log(
+        DEBUG && console.log(
           "[EmojiSearchHelper] Attaching local observer to dynamic list...",
         );
 
@@ -9146,7 +9978,7 @@
             localObserver.disconnect();
             activeLocalObservers.delete(pickerContainer);
             obs.disconnect();
-            console.log("[EmojiSearchHelper] Local observer disconnected.");
+            DEBUG && console.log("[EmojiSearchHelper] Local observer disconnected.");
           }
         });
         removeObserver.observe(document.body, {
@@ -9166,7 +9998,10 @@
           );
 
           if (btn) {
-            DEBUG && console.log("[EmojiHelper] Button clicked, waiting for picker...");
+            DEBUG &&
+              console.log(
+                "[EmojiHelper] Button clicked, waiting for picker...",
+              );
             waitForPicker();
           }
         },
@@ -9190,7 +10025,7 @@
             'div[class*="expressionPicker"], div[role="dialog"], div[class*="layer"]',
           );
           obs.disconnect();
-          console.log("[EmojiHelper] Picker found! Injecting tools...");
+          DEBUG && console.log("[EmojiHelper] Picker found! Injecting tools...");
           injectEmojiInputTools(container);
         }
       });
@@ -9213,8 +10048,10 @@
       };
 
       const injectIntoPopout = (popoutNode) => {
+        if (popoutNode.querySelector(".my-chat-save-btn")) return;
+
         const img = popoutNode.querySelector(
-          'img[class*="primaryEmoji_"], img[class*="sticker_"], img[class*="pngImage_"]',
+          'img[class*="primaryEmoji_"], img[class*="sticker_"], img[class*="pngImage_"], img[class*="reactionTooltipEmoji_"], img.emoji[src*="/emojis/"]',
         );
         if (!img) return;
 
@@ -9234,10 +10071,37 @@
         btn.innerHTML = ICON_FOLDER;
         btn.title = t("em_btn_save_this");
 
-        btn.style.cssText = `
+        const isReactionTooltip =
+          !!popoutNode.closest('div[class*="reactionTooltip"]') ||
+          popoutNode.className.includes("reactionTooltip");
+
+        if (isReactionTooltip) {
+          btn.style.cssText = `
+              position: absolute;
+              top: -6px;
+              left: -6px;
+              z-index: 1001;
+              background: rgba(0, 0, 0, 0.75);
+              color: #ffffff;
+              width: 22px; height: 22px;
+              border-radius: 4px;
+              display: flex; align-items: center; justify-content: center;
+              cursor: pointer;
+              backdrop-filter: blur(2px);
+              box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+              transition: background 0.2s;
+              font-size: 13px;
+          `;
+          const inner =
+            popoutNode.querySelector('div[class*="reactionTooltipInner"]') ||
+            popoutNode;
+          inner.style.position = "relative";
+          inner.appendChild(btn);
+        } else {
+          btn.style.cssText = `
               position: absolute;
               top: 7px;
-              left: 7px;  /* Changed from right to left */
+              left: 7px;
               z-index: 1000;
               background: rgba(0, 0, 0, 0.7);
               color: #ffffff;
@@ -9249,6 +10113,7 @@
               box-shadow: 0 2px 5px rgba(0,0,0,0.3);
               transition: all 0.2s;
           `;
+        }
 
         btn.onmouseenter = () => {
           btn.style.background = "#5865F2";
@@ -9278,7 +10143,8 @@
               try {
                 const result = await detectAnimatedUrl(src);
                 if (result.isGif) {
-                  finalUrl = result.url.split("?")[0] + "?size=56&quality=lossless";
+                  finalUrl =
+                    result.url.split("?")[0] + "?size=56&quality=lossless";
                 } else {
                   finalUrl = src.split("?")[0] + "?size=56";
                 }
@@ -9297,35 +10163,70 @@
           btn.style.cursor = "pointer";
         };
 
-        popoutNode.style.position = "relative";
-        popoutNode.appendChild(btn);
+        if (!isReactionTooltip) {
+          popoutNode.style.position = "relative";
+          popoutNode.appendChild(btn);
+        }
       };
 
+      const POPOUT_IMG_SEL =
+        'img[class*="primaryEmoji_"], img[class*="sticker_"], img[class*="pngImage_"], img[class*="reactionTooltipEmoji_"], img.emoji[src*="/emojis/"]';
+
+      const _hoverInjectHandler = (e) => {
+    const target = e.target;
+    if (!target || target.nodeType !== 1) return;
+
+    const imgEl = target.matches && target.matches(POPOUT_IMG_SEL) ? target : target.closest ? target.closest(POPOUT_IMG_SEL) : null;
+    if (!imgEl) return;
+
+    if (imgEl.closest('div[class*="expressionPicker"]') ||
+        imgEl.closest('[id^="sticker-picker"]') ||
+        imgEl.closest('[id^="emoji-picker"]')) {
+      return;
+    }
+
+    const layerRoot = imgEl.closest('div[class*="clickTrapContainer"]') || imgEl.closest('div[class*="layerContainer"]');
+    if (!layerRoot) return;
+
+    const popoutContainer = imgEl.closest('div[class*="reactionTooltip"]') || imgEl.closest('div[class*="emojiSection_"]') || imgEl.closest('div[class*="stickerSection_"]') || layerRoot;
+    if (!popoutContainer) return;
+
+    if (popoutContainer.querySelector(".my-chat-save-btn")) return;
+    injectIntoPopout(popoutContainer);
+  };
+      document.addEventListener("mouseover", _hoverInjectHandler, true);
+
       let _entitySaverDebounce = null;
+      let _pendingNodes = [];
       const observer = new MutationObserver((mutations) => {
+        if (document.hidden) return;
+
+        for (const mutation of mutations) {
+          for (const node of mutation.addedNodes) {
+            if (node.nodeType === 1) _pendingNodes.push(node);
+          }
+        }
         clearTimeout(_entitySaverDebounce);
         _entitySaverDebounce = setTimeout(() => {
-          for (const mutation of mutations) {
-            for (const node of mutation.addedNodes) {
-              if (node.nodeType !== 1) continue;
-
-              const emojiSection = node.querySelector
-                ? node.querySelector('div[class*="emojiSection_"]')
-                : null;
-              const stickerSection = node.querySelector
-                ? node.querySelector('div[class*="stickerSection_"]')
-                : null;
-
-              if (emojiSection) injectIntoPopout(emojiSection);
-              else if (stickerSection) injectIntoPopout(stickerSection);
-              else if (
-                node.classList &&
-                typeof node.className === "string" &&
-                (node.className.includes("emojiSection_") ||
-                  node.className.includes("stickerSection_"))
-              ) {
-                injectIntoPopout(node);
-              }
+          const nodes = _pendingNodes;
+          _pendingNodes = [];
+          for (const node of nodes) {
+            if (node.nodeType !== 1) continue;
+            const emojiSection = node.querySelector
+              ? node.querySelector('div[class*="emojiSection_"]')
+              : null;
+            const stickerSection = node.querySelector
+              ? node.querySelector('div[class*="stickerSection_"]')
+              : null;
+            if (emojiSection) injectIntoPopout(emojiSection);
+            else if (stickerSection) injectIntoPopout(stickerSection);
+            else if (
+              node.classList &&
+              typeof node.className === "string" &&
+              (node.className.includes("emojiSection_") ||
+                node.className.includes("stickerSection_"))
+            ) {
+              injectIntoPopout(node);
             }
           }
         }, 80);
@@ -9448,32 +10349,37 @@
       };
 
       let _inputBtnDebounce = null;
-      const observer = new MutationObserver((mutations) => {
+
+      const observer = new MutationObserver(() => {
+        if (document.hidden) return;
+
         clearTimeout(_inputBtnDebounce);
         _inputBtnDebounce = setTimeout(() => {
-          let handled = false;
-          for (const mutation of mutations) {
-            for (const node of mutation.addedNodes) {
-              if (node.nodeType !== 1) continue;
-              if (node.matches?.('div[class*="buttons__"]')) {
-                injectButton(node);
-                handled = true;
-              }
-              const inner = node.querySelector?.('div[class*="buttons__"]');
-              if (inner) { injectButton(inner); handled = true; }
-            }
-          }
-          if (!handled) {
-            document.querySelectorAll('div[class*="buttons__"]').forEach(injectButton);
-          }
+          const targets = document.querySelectorAll(
+            'div[class*="buttons__"]:not(.dmt-injected)',
+          );
+
+          targets.forEach((node) => {
+            node.classList.add("dmt-injected");
+            injectButton(node);
+          });
         }, 100);
       });
 
       observer.observe(document.body, { childList: true, subtree: true });
 
-      document
-        .querySelectorAll('div[class*="buttons__"]')
-        .forEach(injectButton);
+      let _scanRetry = 0;
+      const MAX_SCAN_RETRY = 5;
+      const _initialScan = () => {
+        const found = document.querySelectorAll('div[class*="buttons__"]');
+        if (found.length > 0) {
+          found.forEach(injectButton);
+        } else if (_scanRetry < MAX_SCAN_RETRY) {
+          _scanRetry++;
+          setTimeout(_initialScan, 500);
+        }
+      };
+      setTimeout(_initialScan, 300);
     }
 
     initChatInputButton();
@@ -9481,14 +10387,524 @@
     setupTrigger();
   }
 
-  console.log(
-    "[EmojiSearchHelper] Event-driven interface ready: window.injectEmojiInputTools",
-  );
+  DEBUG &&
+    console.log(
+      "[EmojiSearchHelper] Event-driven interface ready: window.injectEmojiInputTools",
+    );
+
+  function initWebhookManager() {
+    DEBUG && console.log("[Discord Utilities] Initializing Webhook Manager v1.1...");
+
+    const STORAGE_KEY = "discord_webhook_list";
+
+    const WH_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`;
+
+    function _showToast(message, duration = 2500, onClick = null) {
+      let toast = document.querySelector(".msg-copy-toast");
+      if (!toast) {
+        toast = document.createElement("div");
+        toast.className = "msg-copy-toast";
+        document.body.appendChild(toast);
+      }
+      toast.textContent = message + (onClick ? " ↗" : "");
+      const isClickable = typeof onClick === "function";
+      toast.style.cssText = [
+        "position:fixed", "bottom:24px", "left:50%",
+        "transform:translateX(-50%)",
+        "background:#23272a", "color:#fff",
+        "padding:10px 18px", "border-radius:8px",
+        "font-size:13px", "z-index:2147483647",
+        "box-shadow:0 4px 16px rgba(0,0,0,.5)",
+        `pointer-events:${isClickable ? "auto" : "none"}`,
+        `cursor:${isClickable ? "pointer" : "default"}`,
+        `text-decoration:${isClickable ? "underline" : "none"}`,
+        "text-underline-offset:3px",
+        "opacity:1", "transition:opacity .3s",
+      ].join(";");
+      toast.onclick = isClickable ? (e) => { e.stopPropagation(); onClick(); } : null;
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => {
+        toast.style.opacity = "0";
+        setTimeout(() => toast.remove(), 300);
+      }, duration);
+    }
+
+    function getData() {
+      try { return JSON.parse(GM_getValue(STORAGE_KEY, "[]")) || []; }
+      catch (_) { return []; }
+    }
+    function saveData(list) {
+      GM_setValue(STORAGE_KEY, JSON.stringify(list));
+    }
+
+    function _fetchWebhookMeta(webhookUrl) {
+      return new Promise((resolve) => {
+        const m = webhookUrl.match(/\/api\/webhooks\/(\d+)\/([^/?#]+)/);
+        if (!m) { resolve(null); return; }
+        GM_xmlhttpRequest({
+          method: "GET",
+          url: `https://discord.com/api/webhooks/${m[1]}/${m[2]}`,
+          onload(res) {
+            try {
+              if (res.status === 200) {
+                const d = JSON.parse(res.responseText);
+                resolve(d.guild_id && d.channel_id
+                  ? { guild_id: d.guild_id, channel_id: d.channel_id }
+                  : null);
+              } else { resolve(null); }
+            } catch (_) { resolve(null); }
+          },
+          onerror()  { resolve(null); },
+          ontimeout() { resolve(null); },
+          timeout: 8000,
+        });
+      });
+    }
+
+    function _applyMeta(id, meta) {
+      if (!meta) return;
+      const list = getData().map((w) =>
+        w.id === id ? { ...w, guild_id: meta.guild_id, channel_id: meta.channel_id } : w
+      );
+      saveData(list);
+    }
+
+    function addWebhook(name, url) {
+      const entry = { id: Date.now(), name: name.trim(), url: url.trim(),
+                      guild_id: null, channel_id: null };
+      const list = getData();
+      list.push(entry);
+      saveData(list);
+      _fetchWebhookMeta(url).then((meta) => _applyMeta(entry.id, meta));
+      return list;
+    }
+    function removeWebhook(id) {
+      const list = getData().filter((w) => w.id !== id);
+      saveData(list);
+      return list;
+    }
+    function editWebhook(id, name, url) {
+      const list = getData().map((w) =>
+        w.id === id
+          ? { ...w, name: name.trim(), url: url.trim(), guild_id: null, channel_id: null }
+          : w
+      );
+      saveData(list);
+      _fetchWebhookMeta(url).then((meta) => _applyMeta(id, meta));
+      return list;
+    }
+
+    function _post(webhookUrl, content) {
+      return new Promise((resolve, reject) => {
+        GM_xmlhttpRequest({
+          method: "POST",
+          url: webhookUrl,
+          headers: { "Content-Type": "application/json" },
+          data: JSON.stringify({ content: String(content).slice(0, 2000) }),
+          onload(res) {
+            if (res.status === 200 || res.status === 204) resolve();
+            else reject(new Error(`HTTP ${res.status}: ${res.responseText}`));
+          },
+          onerror(err) { reject(new Error(String(err))); },
+          ontimeout()  { reject(new Error("timeout")); },
+          timeout: 10000,
+        });
+      });
+    }
+
+    async function testWebhook(webhookUrl) {
+      return _post(webhookUrl, "🔗 Webhook test — Discord Message Toolkit");
+    }
+
+    function _spaNavigate(channelUrl) {
+      try {
+        const urlObj    = new URL(channelUrl);
+        const segments  = urlObj.pathname.split("/").filter(Boolean);
+        const guildId   = segments[1];
+        const channelId = segments[2];
+        if (!channelId) throw new Error("no channelId");
+
+        const chPath = `/channels/${guildId}/${channelId}`;
+
+        const anchor = document.querySelector(`a[href="${chPath}"]`);
+        if (anchor) { anchor.click(); return; }
+
+        const guildAnchor = document.querySelector(
+          `a[href="/channels/${guildId}"], a[href="/channels/${guildId}/"]`
+        );
+        if (guildAnchor) {
+          guildAnchor.click();
+          const attempt = (retry = 0) => {
+            const ch = document.querySelector(`a[href="${chPath}"]`);
+            if (ch) { ch.click(); return; }
+            if (retry < 15) setTimeout(() => attempt(retry + 1), 150);
+            else _wormholeOrFallback(channelUrl);
+          };
+          setTimeout(() => attempt(), 200);
+          return;
+        }
+
+        _wormholeOrFallback(channelUrl);
+      } catch (_) {
+        _wormholeOrFallback(channelUrl);
+      }
+    }
+
+    function _wormholeOrFallback(channelUrl) {
+      if (window.wormholeModule?.navigateToChannel) {
+        window.wormholeModule.navigateToChannel(channelUrl);
+        return;
+      }
+      try {
+        const path = new URL(channelUrl).pathname;
+        window.history.pushState(null, "", path);
+        window.dispatchEvent(new PopStateEvent("popstate", { state: null }));
+      } catch (_) {
+        window.location.href = channelUrl;
+      }
+    }
+
+    async function sendContent(webhookUrl, msgText, whName, channelUrl = null) {
+      try {
+        await _post(webhookUrl, msgText);
+        const onClick = channelUrl ? () => _spaNavigate(channelUrl) : null;
+        _showToast(t("wh_send_ok", { name: whName }), 4000, onClick);
+      } catch (e) {
+        DEBUG && console.error("[Webhook] sendContent failed:", e);
+        _showToast(t("wh_send_fail", { name: whName }));
+      }
+    }
+
+    async function sendUrls(webhookUrl, urls, whName, channelUrl = null) {
+      if (!urls.length) { _showToast(t("wh_no_urls")); return; }
+      try {
+        await _post(webhookUrl, urls.join("\n"));
+        const onClick = channelUrl ? () => _spaNavigate(channelUrl) : null;
+        _showToast(t("wh_send_ok", { name: whName }), 4000, onClick);
+      } catch (e) {
+        DEBUG && console.error("[Webhook] sendUrls failed:", e);
+        _showToast(t("wh_send_fail", { name: whName }));
+      }
+    }
+
+    const PANEL_CSS = `
+      .wh-panel { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+        background:#2b2d31; border-radius:12px; padding:20px 22px;
+        min-width:420px; max-width:520px; color:#dcddde; font-size:13px;
+        box-shadow:0 12px 40px rgba(0,0,0,.65); z-index:2147483641;
+        display:flex; flex-direction:column; gap:12px; }
+      .wh-overlay { position:fixed; inset:0; z-index:2147483640; background:rgba(0,0,0,.45); }
+      .wh-title-row { display:flex; align-items:center; justify-content:space-between; }
+      .wh-title { font-size:15px; font-weight:700; color:#fff; }
+      .wh-close { cursor:pointer; color:#b9bbbe; font-size:18px; line-height:1; padding:2px 4px; }
+      .wh-close:hover { color:#fff; }
+      .wh-list { display:flex; flex-direction:column; gap:6px; max-height:230px; overflow-y:auto; }
+      .wh-empty { color:#72767d; font-size:12px; padding:8px 0; }
+      .wh-row { display:flex; align-items:center; gap:8px; padding:8px 10px;
+        background:#1e1f22; border-radius:8px; }
+      .wh-info { flex:1; min-width:0; }
+      .wh-name { font-weight:600; color:#fff; font-size:13px; }
+      .wh-url  { color:#72767d; font-size:11px; white-space:nowrap;
+        overflow:hidden; text-overflow:ellipsis; }
+      .wh-btn  { padding:4px 10px; border:none; border-radius:5px; cursor:pointer;
+        font-size:12px; white-space:nowrap; }
+      .wh-btn-test   { background:#5865f2; color:#fff; }
+      .wh-btn-delete { background:#4f545c; color:#fff; }
+      .wh-btn:hover  { filter:brightness(1.15); }
+      .wh-btn:disabled { opacity:.5; cursor:default; filter:none; }
+      .wh-form { display:flex; flex-direction:column; gap:6px;
+        border-top:1px solid rgba(255,255,255,.08); padding-top:10px; }
+      .wh-input { padding:8px 10px; background:#1e1f22; border:1px solid #3f4147;
+        border-radius:6px; color:#dcddde; font-size:13px; outline:none; width:100%;
+        box-sizing:border-box; }
+      .wh-input:focus { border-color:#5865f2; }
+      .wh-add-btn { padding:8px; border:none; border-radius:6px;
+        background:#57f287; color:#000; cursor:pointer; font-size:13px;
+        font-weight:600; }
+      .wh-add-btn:hover { filter:brightness(1.08); }
+      .wh-nav-btn { cursor:pointer; display:flex; align-items:center;
+        justify-content:center; width:24px; height:24px; opacity:.7;
+        transition:opacity .15s; color:var(--interactive-normal,#b9bbbe); flex-shrink:0; }
+      .wh-nav-btn:hover { opacity:1; }
+    `;
+    if (!document.getElementById("wh-style")) {
+      const s = document.createElement("style");
+      s.id = "wh-style";
+      s.textContent = PANEL_CSS;
+      document.head.appendChild(s);
+    }
+
+    let _overlay = null;
+
+    function closePanel() {
+      _overlay?.remove();
+      _overlay = null;
+    }
+
+    function openPanel() {
+      closePanel();
+
+      const overlay = document.createElement("div");
+      overlay.className = "wh-overlay";
+      overlay.onclick = (e) => { if (e.target === overlay) closePanel(); };
+
+      const panel = document.createElement("div");
+      panel.className = "wh-panel";
+
+      const titleRow = document.createElement("div");
+      titleRow.className = "wh-title-row";
+      const titleEl = document.createElement("div");
+      titleEl.className = "wh-title";
+      titleEl.textContent = t("wh_panel_title");
+      const closeBtn = document.createElement("span");
+      closeBtn.className = "wh-close";
+      closeBtn.textContent = "✕";
+      closeBtn.onclick = closePanel;
+      titleRow.appendChild(titleEl);
+      titleRow.appendChild(closeBtn);
+      panel.appendChild(titleRow);
+
+      const listEl = document.createElement("div");
+      listEl.className = "wh-list";
+
+      const renderList = () => {
+        listEl.innerHTML = "";
+        const list = getData();
+        if (!list.length) {
+          const empty = document.createElement("div");
+          empty.className = "wh-empty";
+          empty.textContent = t("wh_no_webhooks");
+          listEl.appendChild(empty);
+          return;
+        }
+        list.forEach((wh) => {
+          const row = document.createElement("div");
+          row.className = "wh-row";
+          row.style.flexDirection = "column";
+          row.style.alignItems = "stretch";
+
+          const viewMode = document.createElement("div");
+          viewMode.style.cssText = "display:flex;align-items:center;gap:8px;";
+
+          const info = document.createElement("div");
+          info.className = "wh-info";
+          const nameEl = document.createElement("div");
+          nameEl.className = "wh-name";
+          nameEl.textContent = wh.name;
+          const urlEl = document.createElement("div");
+          urlEl.className = "wh-url";
+          urlEl.textContent = wh.url;
+          info.appendChild(nameEl);
+          info.appendChild(urlEl);
+
+          const testBtn = document.createElement("button");
+          testBtn.className = "wh-btn wh-btn-test";
+          testBtn.textContent = t("wh_btn_test");
+          testBtn.onclick = async () => {
+            testBtn.disabled = true;
+            testBtn.textContent = "…";
+            try {
+              await testWebhook(wh.url);
+              testBtn.textContent = "✅";
+              _showToast(t("wh_test_ok"));
+              _fetchWebhookMeta(wh.url).then((meta) => _applyMeta(wh.id, meta));
+            } catch (e) {
+              DEBUG && console.error("[Webhook] test failed:", e);
+              testBtn.textContent = "❌";
+              _showToast(t("wh_test_fail"));
+            }
+            setTimeout(() => {
+              testBtn.textContent = t("wh_btn_test");
+              testBtn.disabled = false;
+            }, 2000);
+          };
+
+          const editBtn = document.createElement("button");
+          editBtn.className = "wh-btn";
+          editBtn.style.background = "#4f545c";
+          editBtn.style.color = "#fff";
+          editBtn.textContent = t("wh_btn_edit");
+
+          const delBtn = document.createElement("button");
+          delBtn.className = "wh-btn wh-btn-delete";
+          delBtn.textContent = t("wh_btn_delete");
+          delBtn.onclick = () => { removeWebhook(wh.id); renderList(); };
+
+          viewMode.appendChild(info);
+          viewMode.appendChild(testBtn);
+          viewMode.appendChild(editBtn);
+          viewMode.appendChild(delBtn);
+
+          const editMode = document.createElement("div");
+          editMode.style.cssText = "display:none;flex-direction:column;gap:6px;padding-top:6px;";
+
+          const nameInput = document.createElement("input");
+          nameInput.className = "wh-input";
+          nameInput.value = wh.name;
+          nameInput.placeholder = t("wh_add_name_ph");
+
+          const urlInput = document.createElement("input");
+          urlInput.className = "wh-input";
+          urlInput.value = wh.url;
+          urlInput.placeholder = t("wh_add_url_ph");
+
+          const btnRow = document.createElement("div");
+          btnRow.style.cssText = "display:flex;gap:6px;";
+
+          const saveBtn = document.createElement("button");
+          saveBtn.className = "wh-btn wh-btn-test";
+          saveBtn.style.flex = "1";
+          saveBtn.textContent = t("wh_btn_save");
+
+          const cancelBtn = document.createElement("button");
+          cancelBtn.className = "wh-btn wh-btn-delete";
+          cancelBtn.textContent = t("wh_btn_cancel");
+
+          btnRow.appendChild(saveBtn);
+          btnRow.appendChild(cancelBtn);
+          editMode.appendChild(nameInput);
+          editMode.appendChild(urlInput);
+          editMode.appendChild(btnRow);
+
+          const enterEdit = () => {
+            viewMode.style.display = "none";
+            editMode.style.display = "flex";
+            nameInput.focus();
+          };
+          const leaveEdit = () => {
+            viewMode.style.display = "flex";
+            editMode.style.display = "none";
+          };
+
+          editBtn.onclick = enterEdit;
+          cancelBtn.onclick = leaveEdit;
+
+          saveBtn.onclick = () => {
+            const newName = nameInput.value.trim();
+            const newUrl  = urlInput.value.trim();
+            if (!newName) { nameInput.focus(); return; }
+            if (!newUrl.startsWith("https://discord.com/api/webhooks/")) {
+              _showToast(t("wh_url_invalid")); return;
+            }
+            editWebhook(wh.id, newName, newUrl);
+            renderList();
+          };
+
+          [nameInput, urlInput].forEach((el) =>
+            el.addEventListener("keydown", (e) => {
+              if (e.key === "Enter")  { e.preventDefault(); saveBtn.click(); }
+              if (e.key === "Escape") { e.preventDefault(); leaveEdit(); }
+            })
+          );
+
+          row.appendChild(viewMode);
+          row.appendChild(editMode);
+          listEl.appendChild(row);
+        });
+      };
+
+      renderList();
+      panel.appendChild(listEl);
+
+      const form = document.createElement("div");
+      form.className = "wh-form";
+
+      const nameInput = document.createElement("input");
+      nameInput.className = "wh-input";
+      nameInput.placeholder = t("wh_add_name_ph");
+
+      const urlInput = document.createElement("input");
+      urlInput.className = "wh-input";
+      urlInput.placeholder = t("wh_add_url_ph");
+
+      const addBtn = document.createElement("button");
+      addBtn.className = "wh-add-btn";
+      addBtn.textContent = t("wh_btn_add");
+      addBtn.onclick = () => {
+        const name = nameInput.value.trim();
+        const url  = urlInput.value.trim();
+        if (!name) { nameInput.focus(); return; }
+        if (!url.startsWith("https://discord.com/api/webhooks/")) {
+          _showToast(t("wh_url_invalid")); return;
+        }
+        addWebhook(name, url);
+        nameInput.value = "";
+        urlInput.value  = "";
+        renderList();
+      };
+
+      [nameInput, urlInput].forEach((el) =>
+        el.addEventListener("keydown", (e) => { if (e.key === "Enter") addBtn.click(); })
+      );
+
+      form.appendChild(nameInput);
+      form.appendChild(urlInput);
+      form.appendChild(addBtn);
+      panel.appendChild(form);
+
+      overlay.appendChild(panel);
+      document.body.appendChild(overlay);
+      _overlay = overlay;
+      nameInput.focus();
+    }
+
+    function injectButton() {
+      const trailing = document.querySelector('div[class*="trailing_"]');
+      if (!trailing || trailing.querySelector(".wh-nav-btn")) return;
+
+      const btn = document.createElement("div");
+      btn.className = "wh-nav-btn";
+      btn.innerHTML = WH_SVG;
+      btn.title = t("wh_tip");
+      btn.onclick = (e) => { e.stopPropagation(); _overlay ? closePanel() : openPanel(); };
+
+      const whGroup = trailing.querySelector(".my-wormhole-creator-btn")?.closest("div[style]");
+      if (whGroup) trailing.insertBefore(btn, whGroup);
+      else trailing.prepend(btn);
+    }
+
+    injectButton();
+
+    let _btnDebounceTimer = null;
+    let _btnObserverTarget = null;
+    const _btnObserver = new MutationObserver(() => {
+      if (document.hidden) return;
+      clearTimeout(_btnDebounceTimer);
+      _btnDebounceTimer = setTimeout(() => {
+        injectButton();
+        const trailing = document.querySelector('div[class*="trailing_"]');
+        if (trailing && trailing !== _btnObserverTarget) {
+          _btnObserverTarget = trailing;
+          _btnObserver.disconnect();
+          _btnObserver.observe(trailing, { childList: true });
+          _btnObserver.observe(document.body, { childList: true });
+        }
+      }, 150);
+    });
+    const _initialTrailing = document.querySelector('div[class*="trailing_"]');
+    if (_initialTrailing) {
+      _btnObserverTarget = _initialTrailing;
+      _btnObserver.observe(_initialTrailing, { childList: true });
+      _btnObserver.observe(document.body, { childList: true });
+    } else {
+      _btnObserver.observe(document.body, { childList: true, subtree: true });
+    }
+    window.addEventListener("beforeunload", () => _btnObserver.disconnect(), { once: true });
+
+    window.webhookModule = {
+      getWebhooks: getData,
+      sendContent,
+      sendUrls,
+    };
+
+    DEBUG && console.log("[WebhookManager] Ready. Webhooks:", getData().length);
+  }
 
   function initHeaderMods() {
-    console.log(
-      "[Discord Utilities] Initializing Header Mods (Fix Long Press)...",
-    );
+    DEBUG &&
+      console.log(
+        "[Discord Utilities] Initializing Header Mods (Fix Long Press)...",
+      );
 
     const STORAGE_PREFIX = "discord_header_mod_def_";
     const PRESS_DELAY = 500;
@@ -9584,13 +11000,13 @@
         desc: {
           "zh-TW": "長按 0.5 秒儲存為預設狀態",
           "zh-CN": "长按 0.5 秒保存为默认状态",
-          "en":    "Long press 0.5s to save as default",
-          "ja":    "0.5秒長押しでデフォルトとして保存",
-          "ko":    "0.5초 길게 눌러 기본값으로 저장",
-          "es":    "Mantén 0.5s para guardar como predeterminado",
+          en: "Long press 0.5s to save as default",
+          ja: "0.5秒長押しでデフォルトとして保存",
+          ko: "0.5초 길게 눌러 기본값으로 저장",
+          es: "Mantén 0.5s para guardar como predeterminado",
           "pt-BR": "Pressione 0.5s para salvar como padrão",
-          "fr":    "Maintenir 0.5s pour enregistrer par défaut",
-          "ru":    "Удержание 0.5с для сохранения по умолчанию",
+          fr: "Maintenir 0.5s pour enregistrer par défaut",
+          ru: "Удержание 0.5с для сохранения по умолчанию",
         },
       },
       concealName: {
@@ -9619,13 +11035,13 @@
         desc: {
           "zh-TW": "長按 0.5 秒儲存為預設狀態",
           "zh-CN": "长按 0.5 秒保存为默认状态",
-          "en":    "Long press 0.5s to save as default",
-          "ja":    "0.5秒長押しでデフォルトとして保存",
-          "ko":    "0.5초 길게 눌러 기본값으로 저장",
-          "es":    "Mantén 0.5s para guardar como predeterminado",
+          en: "Long press 0.5s to save as default",
+          ja: "0.5秒長押しでデフォルトとして保存",
+          ko: "0.5초 길게 눌러 기본값으로 저장",
+          es: "Mantén 0.5s para guardar como predeterminado",
           "pt-BR": "Pressione 0.5s para salvar como padrão",
-          "fr":    "Maintenir 0.5s pour enregistrer par défaut",
-          "ru":    "Удержание 0.5с для сохранения по умолчанию",
+          fr: "Maintenir 0.5s pour enregistrer par défaut",
+          ru: "Удержание 0.5с для сохранения по умолчанию",
         },
       },
     };
@@ -9653,7 +11069,10 @@
 
     const concealHandler = (() => {
       const REPLACE_PREFIX = "_";
-      const _origFileNameDesc = Object.getOwnPropertyDescriptor(File.prototype, "name");
+      const _origFileNameDesc = Object.getOwnPropertyDescriptor(
+        File.prototype,
+        "name",
+      );
       const _getFilename = _origFileNameDesc.get;
       const randomString = (len = 6) =>
         Math.random()
@@ -9701,19 +11120,28 @@
       const _statusLabels = {
         "zh-TW": { on: "預設：開啟", off: "預設：關閉", mem: "💾 記憶狀態" },
         "zh-CN": { on: "默认：开启", off: "默认：关闭", mem: "💾 记忆状态" },
-        "en":    { on: "Default: ON",  off: "Default: OFF",  mem: "💾 Memory" },
-        "ja":    { on: "デフォルト: ON", off: "デフォルト: OFF", mem: "💾 記憶" },
-        "ko":    { on: "기본값: ON", off: "기본값: OFF", mem: "💾 메모리" },
-        "es":    { on: "Predeterminado: ON", off: "Predeterminado: OFF", mem: "💾 Memoria" },
-        "pt-BR": { on: "Padrão: ATIVO", off: "Padrão: INATIVO", mem: "💾 Memória" },
-        "fr":    { on: "Par défaut: ON", off: "Par défaut: OFF", mem: "💾 Mémoire" },
-        "ru":    { on: "По умолч.: ВКЛ", off: "По умолч.: ВЫКЛ", mem: "💾 Память" },
+        en: { on: "Default: ON", off: "Default: OFF", mem: "💾 Memory" },
+        ja: { on: "デフォルト: ON", off: "デフォルト: OFF", mem: "💾 記憶" },
+        ko: { on: "기본값: ON", off: "기본값: OFF", mem: "💾 메모리" },
+        es: {
+          on: "Predeterminado: ON",
+          off: "Predeterminado: OFF",
+          mem: "💾 Memoria",
+        },
+        "pt-BR": {
+          on: "Padrão: ATIVO",
+          off: "Padrão: INATIVO",
+          mem: "💾 Memória",
+        },
+        fr: { on: "Par défaut: ON", off: "Par défaut: OFF", mem: "💾 Mémoire" },
+        ru: { on: "По умолч.: ВКЛ", off: "По умолч.: ВЫКЛ", mem: "💾 Память" },
       };
       const _sl = _statusLabels[_lang] || _statusLabels["en"];
       const statusText = isDefaultOn ? _sl.on : _sl.off;
-      const _descText = (typeof config.desc === "object")
-        ? (config.desc[_lang] || config.desc["en"])
-        : config.desc;
+      const _descText =
+        typeof config.desc === "object"
+          ? config.desc[_lang] || config.desc["en"]
+          : config.desc;
 
       globalTooltip.innerHTML = `
             <div class="header-mod-list">${listHTML}</div>
@@ -9832,6 +11260,7 @@
 
     let _headerModDebounce = null;
     const observer = new MutationObserver(() => {
+      if (document.hidden) return;
       clearTimeout(_headerModDebounce);
       _headerModDebounce = setTimeout(() => {
         if (
@@ -9844,7 +11273,9 @@
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
-    window.addEventListener("beforeunload", () => concealHandler.restore(), { once: true });
+    window.addEventListener("beforeunload", () => concealHandler.restore(), {
+      once: true,
+    });
 
     setTimeout(injectButtons, 2000);
   }
@@ -9868,19 +11299,19 @@
       this.activeDropdown = null;
       this.dropdownCloseTimer = null;
       this.focusMode = this.getFocusMode();
-      this._cachedToken  = null;
+      this._cachedToken = null;
       this._tokenWatcher = null;
     }
 
     initialize() {
-      console.log("[Wormhole Module V3] Initializing...");
+      DEBUG && console.log("[Wormhole Module V3] Initializing...");
       this.injectStyles();
       this.setupGlobalListeners();
 
       if (this.getApiMode() && !this._cachedToken) {
         this._startTokenInterceptor((token) => {
           this._cachedToken = token;
-          console.log("[WH API] Token pre-fetched at init ✅");
+          DEBUG && console.log("[WH API] Token pre-fetched at init ✅");
         });
       }
 
@@ -9927,8 +11358,8 @@
           }
           localStorage.setItem(this.STORAGE_KEY, JSON.stringify(emptyData));
 
-          this.showToast("✅ 資料已清除，正在重新整理...");
-          console.log("[Wormhole] Data reset complete.");
+          this.showToast(t("wormhole_reset_success"));
+          DEBUG && console.log("[Wormhole] Data reset complete.");
 
           setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
@@ -10059,7 +11490,10 @@
       createBtn.onmouseleave = clearTimer;
 
       createBtn.onclick = (e) => {
-        if (isLongPress) { isLongPress = false; return; }
+        if (isLongPress) {
+          isLongPress = false;
+          return;
+        }
         this.createNewWormhole();
       };
 
@@ -10084,13 +11518,20 @@
 
     injectWormholeDisplay(titleContainer) {
       if (!this._isValidChannelHeader(titleContainer)) {
-        console.warn("[Wormhole] Rejected invalid inject target:", titleContainer);
+        console.warn(
+          "[Wormhole] Rejected invalid inject target:",
+          titleContainer,
+        );
         return;
       }
 
       document.querySelectorAll(".my-wormhole-container").forEach((c) => {
         if (c.parentElement !== titleContainer) {
-          console.warn("[Wormhole] Removing stray container from:", c.parentElement);
+          DEBUG &&
+            console.warn(
+              "[Wormhole] Removing stray container from:",
+              c.parentElement,
+            );
           c.remove();
         }
       });
@@ -10221,7 +11662,10 @@
 
       clearTimeout(this.refreshTimer);
       this.refreshTimer = setTimeout(() => {
-        if (this.getDockPosition() === "input") { this._injectInputDock(); return; }
+        if (this.getDockPosition() === "input") {
+          this._injectInputDock();
+          return;
+        }
         const allRetry = document.querySelectorAll('div[class*="title_"]');
         for (const candidate of allRetry) {
           if (this._isValidChannelHeader(candidate)) {
@@ -10305,7 +11749,7 @@
         if (!row2.children.length) return;
         const rect = container.getBoundingClientRect();
         row2.style.left = rect.left + "px";
-        row2.style.top  = (rect.bottom) + "px";
+        row2.style.top = rect.bottom + "px";
         row2.style.opacity = "1";
         row2.style.pointerEvents = "auto";
         row2.style.transform = "translateY(0)";
@@ -10369,16 +11813,17 @@
           tip.style.color = isVip ? "#ffd700" : "#e3e5e8";
           const rect = chip.getBoundingClientRect();
           const x = rect.left + rect.width / 2;
-          const y = rect.bottom + 7;
           tip.style.left = "0px";
           tip.style.top = "0px";
           tip.style.opacity = "1";
           requestAnimationFrame(() => {
             const tw = tip.offsetWidth;
+            const th = tip.offsetHeight;
             const safeX = Math.min(
               Math.max(x - tw / 2, 6),
               window.innerWidth - tw - 6,
             );
+            const y = rect.top - th - 7;
             tip.style.left = `${safeX}px`;
             tip.style.top = `${y}px`;
           });
@@ -10428,7 +11873,15 @@
       chip.dataset.wormholeUrl = wormhole.url;
 
       chip.draggable = true;
-      DEBUG && console.log("[VIP Chip] Created:", wormhole.name, "draggable:", chip.draggable, "id:", wormhole.id);
+      DEBUG &&
+        console.log(
+          "[VIP Chip] Created:",
+          wormhole.name,
+          "draggable:",
+          chip.draggable,
+          "id:",
+          wormhole.id,
+        );
 
       this.attachChipEvents(chip, wormhole, true);
       this.attachDragEvents(chip, wormhole, "vip");
@@ -10449,7 +11902,15 @@
       chip.dataset.wormholeUrl = wormhole.url;
 
       chip.draggable = true;
-      DEBUG && console.log("[Wormhole Chip] Created:", wormhole.name, "draggable:", chip.draggable, "id:", wormhole.id);
+      DEBUG &&
+        console.log(
+          "[Wormhole Chip] Created:",
+          wormhole.name,
+          "draggable:",
+          chip.draggable,
+          "id:",
+          wormhole.id,
+        );
 
       this.attachChipEvents(chip, wormhole, false);
       this.attachDragEvents(chip, wormhole, "normal");
@@ -10528,7 +11989,7 @@
             cancelPress();
           }
         }
-      });
+      }, { passive: true });
 
       chip.addEventListener("mouseup", cancelPress);
       chip.addEventListener("mouseleave", cancelPress);
@@ -10571,7 +12032,13 @@
       let isDragging = false;
 
       chip.addEventListener("dragstart", (e) => {
-        DEBUG && console.log("[Drag] dragstart triggered for:", wormhole.name, "id:", wormhole.id);
+        DEBUG &&
+          console.log(
+            "[Drag] dragstart triggered for:",
+            wormhole.name,
+            "id:",
+            wormhole.id,
+          );
 
         dragStartX = e.clientX;
         dragStartY = e.clientY;
@@ -10587,7 +12054,11 @@
           }),
         );
 
-        DEBUG && console.log("[Drag] Drag data set:", { wormholeId: wormhole.id, type });
+        DEBUG &&
+          console.log("[Drag] Drag data set:", {
+            wormholeId: wormhole.id,
+            type,
+          });
 
         const dragImage = chip.cloneNode(true);
         dragImage.style.opacity = "0.7";
@@ -10660,12 +12131,13 @@
           const targetId = parseInt(wormhole.id);
           const targetType = type;
 
-          DEBUG && console.log("[Drag] Drop data:", {
-            draggedId,
-            targetId,
-            draggedType,
-            targetType,
-          });
+          DEBUG &&
+            console.log("[Drag] Drop data:", {
+              draggedId,
+              targetId,
+              draggedType,
+              targetType,
+            });
 
           if (draggedType !== targetType) {
             console.warn("[Drag] 跨區塊拖曳被拒絕，保持原本的分類邊界");
@@ -10690,7 +12162,15 @@
       draggedId = parseInt(draggedId);
       targetId = parseInt(targetId);
 
-      DEBUG && console.log("[Swap] Start swapping:", draggedId, "↔", targetId, "in", listType);
+      DEBUG &&
+        console.log(
+          "[Swap] Start swapping:",
+          draggedId,
+          "↔",
+          targetId,
+          "in",
+          listType,
+        );
 
       if (listType === "vip") {
         const dIdx = data.vipWormholes.findIndex(
@@ -10902,7 +12382,9 @@
       };
 
       addItem(this.t("wm_menu_edit"), "✎", () => this.editWormhole(wormhole));
-      addItem(this.t("wm_menu_send"), "✉️", () => this.openSendMessageOverlay(wormhole));
+      addItem(this.t("wm_menu_send"), "✉️", () =>
+        this.openSendMessageOverlay(wormhole),
+      );
 
       const label = isPinned
         ? this.t("wm_menu_vip_remove")
@@ -10918,7 +12400,7 @@
         true,
       );
 
-     this._positionMenu(dropdown, triggerElement);
+      this._positionMenu(dropdown, triggerElement);
     }
 
     createGroupContextMenu(group, triggerElement) {
@@ -10946,11 +12428,10 @@
       addItem(this.t("wm_menu_edit"), "✎", () => this.editGroup(group));
       addItem(this.t("wm_menu_del"), "🗑️", () => this.deleteGroup(group), true);
 
-     this._positionMenu(dropdown, triggerElement);
+      this._positionMenu(dropdown, triggerElement);
     }
 
     createDropdownElement() {
-
       const d = document.createElement("div");
       d.className = "my-popover-menu";
       d.style.padding = "4px";
@@ -10987,7 +12468,9 @@
     switchDockPosition(pos) {
       this.setDockPosition(pos);
 
-      document.querySelectorAll(".my-wormhole-container").forEach(c => c.remove());
+      document
+        .querySelectorAll(".my-wormhole-container")
+        .forEach((c) => c.remove());
       document.getElementById("wh-input-dock")?.remove();
       this._cleanupNavbarDock();
       document.getElementById("wh-titlebar-dock")?.remove();
@@ -11020,8 +12503,9 @@
 
       const reposition = () => {
         const rect = trailingGroup.getBoundingClientRect();
-        dock.style.left = (rect.left - dock.offsetWidth - 6) + "px";
-        dock.style.top  = (rect.top + (rect.height - dock.offsetHeight) / 2) + "px";
+        dock.style.left = rect.left - dock.offsetWidth - 6 + "px";
+        dock.style.top =
+          rect.top + (rect.height - dock.offsetHeight) / 2 + "px";
       };
 
       requestAnimationFrame(() => {
@@ -11032,7 +12516,10 @@
         this._navbarDockRepositionThrottled = () => {
           if (this._navbarRafPending) return;
           this._navbarRafPending = true;
-          requestAnimationFrame(() => { this._navbarRafPending = false; reposition(); });
+          requestAnimationFrame(() => {
+            this._navbarRafPending = false;
+            reposition();
+          });
         };
       });
     }
@@ -11087,7 +12574,6 @@
     }
 
     _injectInputDock() {
-
       const SELECTORS = [
         'div[class*="scrollableContainer_"]',
         'form[class*="form_"]',
@@ -11101,13 +12587,18 @@
       }
 
       if (!anchorEl) {
-        console.warn("[WH Dock] Could not find chat input area, will retry on next DOM change");
+        console.warn(
+          "[WH Dock] Could not find chat input area, will retry on next DOM change",
+        );
         return;
       }
 
       const parentEl = anchorEl.parentNode;
       const parentStyle = window.getComputedStyle(parentEl);
-      if (parentStyle.display === "flex" && parentStyle.flexDirection === "row") {
+      if (
+        parentStyle.display === "flex" &&
+        parentStyle.flexDirection === "row"
+      ) {
         anchorEl = parentEl;
       }
 
@@ -11123,7 +12614,10 @@
 
     openSettingsMenu(anchorEl) {
       const existing = document.getElementById("wh-settings-menu");
-      if (existing) { existing.remove(); return; }
+      if (existing) {
+        existing.remove();
+        return;
+      }
 
       const menu = document.createElement("div");
       menu.id = "wh-settings-menu";
@@ -11136,8 +12630,22 @@
       menu.appendChild(titleEl);
 
       const actions = [
-        { key: "wm_settings_create",    icon: "➕", action: () => { menu.remove(); this.createNewWormhole(); } },
-        { key: "wm_settings_send_mode", icon: "✉️", action: () => { menu.remove(); this.openApiModePanel(); } },
+        {
+          key: "wm_settings_create",
+          icon: "➕",
+          action: () => {
+            menu.remove();
+            this.createNewWormhole();
+          },
+        },
+        {
+          key: "wm_settings_send_mode",
+          icon: "✉️",
+          action: () => {
+            menu.remove();
+            this.openApiModePanel();
+          },
+        },
       ];
       actions.forEach(({ key, icon, action }) => {
         const row = document.createElement("div");
@@ -11157,20 +12665,25 @@
       menu.appendChild(posHeader);
 
       const positions = [
-        { pos: "navbar",   key: "wm_settings_position_navbar",   icon: "🧭" },
-        { pos: "titlebar", key: "wm_settings_position_titlebar",  icon: "📌" },
-        { pos: "input",    key: "wm_settings_position_input",     icon: "⌨️" },
-        { pos: "topleft",  key: "wm_settings_position_topleft",   icon: "📍" },
+        { pos: "navbar", key: "wm_settings_position_navbar", icon: "🧭" },
+        { pos: "titlebar", key: "wm_settings_position_titlebar", icon: "📌" },
+        { pos: "input", key: "wm_settings_position_input", icon: "⌨️" },
+        { pos: "topleft", key: "wm_settings_position_topleft", icon: "📍" },
       ];
       positions.forEach(({ pos, key, icon }) => {
         const isActive = currentDock === pos;
         const sub = document.createElement("div");
-        sub.className = "wh-sm-item wh-sm-pos" + (isActive ? " wh-sm-active" : "");
+        sub.className =
+          "wh-sm-item wh-sm-pos" + (isActive ? " wh-sm-active" : "");
         sub.innerHTML = `
           <span class="wh-sm-icon">${icon}</span>
           <span class="wh-sm-pos-label">${this.t(key)}</span>
           <span class="wh-sm-radio">${isActive ? "●" : "○"}</span>`;
-        if (!isActive) sub.onclick = () => { menu.remove(); this.switchDockPosition(pos); };
+        if (!isActive)
+          sub.onclick = () => {
+            menu.remove();
+            this.switchDockPosition(pos);
+          };
         menu.appendChild(sub);
       });
 
@@ -11193,9 +12706,15 @@
         sizes.forEach(({ key, val }) => {
           const isActive = currentSize === val;
           const sizeRow = document.createElement("div");
-          sizeRow.className = "wh-sm-item wh-sm-pos" + (isActive ? " wh-sm-active" : "");
+          sizeRow.className =
+            "wh-sm-item wh-sm-pos" + (isActive ? " wh-sm-active" : "");
           sizeRow.innerHTML = `<span class="wh-sm-pos-label">${this.t(key)}</span><span class="wh-sm-radio">${isActive ? "●" : "○"}</span>`;
-          if (!isActive) sizeRow.onclick = () => { menu.remove(); this.setFocusSize(val); this.applyFocusMode(true); };
+          if (!isActive)
+            sizeRow.onclick = () => {
+              menu.remove();
+              this.setFocusSize(val);
+              this.applyFocusMode(true);
+            };
           menu.appendChild(sizeRow);
         });
       }
@@ -11227,10 +12746,10 @@
       const rect = anchorEl.getBoundingClientRect();
       const mw = 220;
       let left = rect.left;
-      let top  = rect.bottom + 6;
+      let top = rect.bottom + 6;
       if (left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8;
       menu.style.left = `${left}px`;
-      menu.style.top  = `${top}px`;
+      menu.style.top = `${top}px`;
 
       const onOutside = (e) => {
         if (!menu.contains(e.target) && e.target !== anchorEl) {
@@ -11238,22 +12757,24 @@
           document.removeEventListener("mousedown", onOutside, true);
         }
       };
-      setTimeout(() => document.addEventListener("mousedown", onOutside, true), 0);
+      setTimeout(
+        () => document.addEventListener("mousedown", onOutside, true),
+        0,
+      );
     }
 
     openApiModePanel() {
       if (document.getElementById("wh-api-panel")) return;
 
       let panelApiMode = this.getApiMode();
-      const hasToken   = !!this._cachedToken;
+      const hasToken = !!this._cachedToken;
 
       const tokenSectionEnabled = () => panelApiMode;
 
       const panel = document.createElement("div");
       panel.id = "wh-api-panel";
 
-      const interceptorCode =
-`// 同時攔截 XHR 與 fetch，取得後立即還原（單次觸發）
+      const interceptorCode = `// 同時攔截 XHR 與 fetch，取得後立即還原（單次觸發）
 // 方法一：XHR setRequestHeader（Discord 主要走此路徑）
 const origSetHeader = unsafeWindow.XMLHttpRequest.prototype.setRequestHeader;
 unsafeWindow.XMLHttpRequest.prototype.setRequestHeader = function(name, value) {
@@ -11306,19 +12827,21 @@ unsafeWindow.fetch = function(...args) {
 
           <div id="wh-api-token-section" class="${panelApiMode ? "" : "disabled"}">
             <div id="wh-api-token-status" class="${hasToken ? "ok" : ""}">
-              ${hasToken
-                ? `${this.t("wm_api_token_status_ready")}：${this._cachedToken.substring(0, 8)}***`
-                : this.t("wm_api_token_status_none")}
+              ${
+                hasToken
+                  ? `${this.t("wm_api_token_status_ready")}：${this._cachedToken.substring(0, 8)}***`
+                  : this.t("wm_api_token_status_none")
+              }
             </div>
             <div id="wh-api-token-actions">
-              <button id="wh-api-detect-btn" ${(hasToken || !panelApiMode) ? "disabled" : ""}>
+              <button id="wh-api-detect-btn" ${hasToken || !panelApiMode ? "disabled" : ""}>
                 ${this.t("wm_api_detect_btn")}
               </button>
-              <button id="wh-api-clear-token-btn" ${(!hasToken || !panelApiMode) ? "disabled" : ""}>
+              <button id="wh-api-clear-token-btn" ${!hasToken || !panelApiMode ? "disabled" : ""}>
                 ${this.t("wm_api_clear_token")}
               </button>
             </div>
-            <div id="wh-api-detect-status">${hasToken ? "" : (panelApiMode ? `<span style="color:#f0b232;font-weight:500;">${this.t("wm_api_detect_waiting")}</span>` : this.t("wm_api_plan_b_first"))}</div>
+            <div id="wh-api-detect-status">${hasToken ? "" : panelApiMode ? `<span style="color:#f0b232;font-weight:500;">${this.t("wm_api_detect_waiting")}</span>` : this.t("wm_api_plan_b_first")}</div>
           </div>
 
           <div id="wh-api-footer">
@@ -11383,24 +12906,24 @@ unsafeWindow.fetch = function(...args) {
 
       const closePanel = () => panel.remove();
 
-      const tokenSection  = panel.querySelector("#wh-api-token-section");
-      const tokenStatus   = panel.querySelector("#wh-api-token-status");
-      const detectBtn     = panel.querySelector("#wh-api-detect-btn");
+      const tokenSection = panel.querySelector("#wh-api-token-section");
+      const tokenStatus = panel.querySelector("#wh-api-token-status");
+      const detectBtn = panel.querySelector("#wh-api-detect-btn");
       const clearTokenBtn = panel.querySelector("#wh-api-clear-token-btn");
-      const detectStatus  = panel.querySelector("#wh-api-detect-status");
-      const applyBtn      = panel.querySelector("#wh-api-apply-btn");
+      const detectStatus = panel.querySelector("#wh-api-detect-status");
+      const applyBtn = panel.querySelector("#wh-api-apply-btn");
 
       const refreshTokenUI = () => {
         const tok = this._cachedToken;
-        tokenSection.className  = panelApiMode ? "" : "disabled";
-        tokenStatus.className   = tok ? "ok" : "";
+        tokenSection.className = panelApiMode ? "" : "disabled";
+        tokenStatus.className = tok ? "ok" : "";
         tokenStatus.textContent = tok
           ? `${this.t("wm_api_token_status_ready")}：${tok.substring(0, 8)}***`
           : this.t("wm_api_token_status_none");
-        detectBtn.disabled     = !panelApiMode || !!tok;
+        detectBtn.disabled = !panelApiMode || !!tok;
         clearTokenBtn.disabled = !panelApiMode || !tok;
-        applyBtn.disabled      = panelApiMode && !tok;
-        applyBtn.textContent   = panelApiMode
+        applyBtn.disabled = panelApiMode && !tok;
+        applyBtn.textContent = panelApiMode
           ? this.t("wm_api_enable_btn")
           : this.t("wm_api_disable_btn");
         if (!panelApiMode) {
@@ -11413,8 +12936,8 @@ unsafeWindow.fetch = function(...args) {
         }
       };
 
-      panel.querySelector("#wh-api-backdrop").onclick   = closePanel;
-      panel.querySelector("#wh-api-close").onclick      = closePanel;
+      panel.querySelector("#wh-api-backdrop").onclick = closePanel;
+      panel.querySelector("#wh-api-close").onclick = closePanel;
       panel.querySelector("#wh-api-cancel-btn").onclick = closePanel;
 
       panel.querySelector("#wh-api-reset-btn").onclick = () => {
@@ -11422,10 +12945,12 @@ unsafeWindow.fetch = function(...args) {
         this.resetAllData();
       };
 
-      panel.querySelectorAll('input[name="wh-mode"]').forEach(radio => {
+      panel.querySelectorAll('input[name="wh-mode"]').forEach((radio) => {
         radio.addEventListener("change", () => {
           panelApiMode = radio.value === "b";
-          panel.querySelectorAll(".wh-api-radio").forEach(l => l.classList.remove("active"));
+          panel
+            .querySelectorAll(".wh-api-radio")
+            .forEach((l) => l.classList.remove("active"));
           radio.closest(".wh-api-radio").classList.add("active");
           refreshTokenUI();
 
@@ -11454,11 +12979,15 @@ unsafeWindow.fetch = function(...args) {
 
       applyBtn.onclick = () => {
         this.setApiMode(panelApiMode);
-        this.showToast(panelApiMode ? this.t("wm_api_enabled_toast") : this.t("wm_api_disabled_toast"));
+        this.showToast(
+          panelApiMode
+            ? this.t("wm_api_enabled_toast")
+            : this.t("wm_api_disabled_toast"),
+        );
         if (panelApiMode && !this._cachedToken) {
           this._startTokenInterceptor((token) => {
             this._cachedToken = token;
-            console.log("[WH API] Token pre-fetched after mode switch ✅");
+            DEBUG && console.log("[WH API] Token pre-fetched after mode switch ✅");
           });
         } else if (!panelApiMode) {
           this._stopTokenInterceptor();
@@ -11479,7 +13008,7 @@ unsafeWindow.fetch = function(...args) {
     _startTokenInterceptor(onToken) {
       if (this._tokenWatcher) return;
 
-      const uw = (typeof unsafeWindow !== "undefined") ? unsafeWindow : window;
+      const uw = typeof unsafeWindow !== "undefined" ? unsafeWindow : window;
       const self = this;
       let stopped = false;
 
@@ -11490,14 +13019,18 @@ unsafeWindow.fetch = function(...args) {
         uw.XMLHttpRequest.prototype.setRequestHeader = origXhrSetHeader;
         uw.fetch = origFetch;
         self._tokenWatcher = null;
-        console.log("[WH API] Token intercepted ✅ (length:", token.length, ")");
+        DEBUG && console.log(
+          "[WH API] Token intercepted ✅ (length:",
+          token.length,
+          ")",
+        );
         onToken(token);
       };
 
       const origXhrSetHeader = uw.XMLHttpRequest.prototype.setRequestHeader;
       const origFetch = uw.fetch;
 
-      uw.XMLHttpRequest.prototype.setRequestHeader = function(name, value) {
+      uw.XMLHttpRequest.prototype.setRequestHeader = function (name, value) {
         try {
           if (name.toLowerCase() === "authorization") {
             handleToken(value);
@@ -11506,18 +13039,23 @@ unsafeWindow.fetch = function(...args) {
         return origXhrSetHeader.apply(this, arguments);
       };
 
-      uw.fetch = function(...args) {
+      uw.fetch = function (...args) {
         try {
-          const url = typeof args[0] === "string"
-            ? args[0]
-            : (args[0] instanceof Request ? args[0].url : (args[0]?.url || ""));
+          const url =
+            typeof args[0] === "string"
+              ? args[0]
+              : args[0] instanceof Request
+                ? args[0].url
+                : args[0]?.url || "";
           const headers = args[1]?.headers;
           if (url.includes("discord.com/api") && headers) {
             let token = null;
             if (typeof headers.get === "function") {
-              token = headers.get("Authorization") || headers.get("authorization");
+              token =
+                headers.get("Authorization") || headers.get("authorization");
             } else if (typeof headers === "object") {
-              token = headers["Authorization"] || headers["authorization"] || null;
+              token =
+                headers["Authorization"] || headers["authorization"] || null;
             }
             if (token) handleToken(token);
           }
@@ -11530,14 +13068,16 @@ unsafeWindow.fetch = function(...args) {
         uw.XMLHttpRequest.prototype.setRequestHeader = origXhrSetHeader;
         uw.fetch = origFetch;
       };
-      console.log("[WH API] Token interceptor started (XHR + fetch via unsafeWindow)");
+      DEBUG && console.log(
+        "[WH API] Token interceptor started (XHR + fetch via unsafeWindow)",
+      );
     }
 
     _stopTokenInterceptor() {
       if (this._tokenWatcher) {
         this._tokenWatcher();
         this._tokenWatcher = null;
-        console.log("[WH API] Token interceptor stopped");
+        DEBUG && console.log("[WH API] Token interceptor stopped");
       }
     }
 
@@ -11546,12 +13086,15 @@ unsafeWindow.fetch = function(...args) {
 
       const overlay = document.createElement("div");
       overlay.id = "wh-send-overlay";
-      const ph = this.t("wm_send_placeholder").replace("#{name}", wormhole.name);
+      const ph = this.t("wm_send_placeholder").replace(
+        "#{name}",
+        wormhole.name,
+      );
 
       const apiUnlocked = localStorage.getItem("wh_api_mode") !== null;
-      let   isApiMode   = this.getApiMode();
-      const hasToken    = !!this._cachedToken;
-      const needsToken  = isApiMode && !hasToken;
+      let isApiMode = this.getApiMode();
+      const hasToken = !!this._cachedToken;
+      const needsToken = isApiMode && !hasToken;
 
       if (needsToken) {
         let tokenDetected = false;
@@ -11594,15 +13137,20 @@ unsafeWindow.fetch = function(...args) {
           <hr id="wh-send-divider">
           <div id="wh-send-footer">
             <div id="wh-send-footer-left">
-              ${apiUnlocked ? `
+              ${
+                apiUnlocked
+                  ? `
               <button id="wh-send-mode-toggle" class="${isApiMode ? "is-api" : "is-nav"}">
-                ${isApiMode
-                  ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> ${this.t("wm_send_mode_api")}`
-                  : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg> ${this.t("wm_send_mode_nav")}`
+                ${
+                  isApiMode
+                    ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> ${this.t("wm_send_mode_api")}`
+                    : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg> ${this.t("wm_send_mode_nav")}`
                 }
               </button>
               <span id="wh-send-mode-desc">${isApiMode ? this.t("wm_send_mode_desc_api") : this.t("wm_send_mode_desc_nav")}</span>
-              ` : ""}
+              `
+                  : ""
+              }
             </div>
             <div id="wh-send-actions">
               <button id="wh-send-cancel-btn">${this.t("wm_send_cancel")}</button>
@@ -11691,14 +13239,14 @@ unsafeWindow.fetch = function(...args) {
 
       document.body.appendChild(overlay);
 
-      const input       = overlay.querySelector("#wh-send-input");
-      const status      = overlay.querySelector("#wh-send-status");
-      const submitBtn   = overlay.querySelector("#wh-send-submit-btn");
-      const modeDesc    = overlay.querySelector("#wh-send-mode-desc");
-      const autocloseEl   = overlay.querySelector("#wh-send-autoclose");
-      const gotoEl        = overlay.querySelector("#wh-send-goto");
-      const gotoLabel     = overlay.querySelector("#wh-send-goto-label");
-      const showToastEl   = overlay.querySelector("#wh-send-show-toast");
+      const input = overlay.querySelector("#wh-send-input");
+      const status = overlay.querySelector("#wh-send-status");
+      const submitBtn = overlay.querySelector("#wh-send-submit-btn");
+      const modeDesc = overlay.querySelector("#wh-send-mode-desc");
+      const autocloseEl = overlay.querySelector("#wh-send-autoclose");
+      const gotoEl = overlay.querySelector("#wh-send-goto");
+      const gotoLabel = overlay.querySelector("#wh-send-goto-label");
+      const showToastEl = overlay.querySelector("#wh-send-show-toast");
 
       const syncMutex = () => {
         const acChecked = autocloseEl.checked;
@@ -11708,7 +13256,10 @@ unsafeWindow.fetch = function(...args) {
       };
 
       autocloseEl.addEventListener("change", () => {
-        localStorage.setItem("wh_send_autoclose", autocloseEl.checked ? "true" : "false");
+        localStorage.setItem(
+          "wh_send_autoclose",
+          autocloseEl.checked ? "true" : "false",
+        );
         syncMutex();
       });
 
@@ -11717,23 +13268,38 @@ unsafeWindow.fetch = function(...args) {
       });
 
       showToastEl.addEventListener("change", () => {
-        localStorage.setItem("wh_send_show_toast", showToastEl.checked ? "true" : "false");
+        localStorage.setItem(
+          "wh_send_show_toast",
+          showToastEl.checked ? "true" : "false",
+        );
       });
-      const preview   = overlay.querySelector("#wh-send-paste-preview");
+      const preview = overlay.querySelector("#wh-send-paste-preview");
       let pendingFiles = [];
 
-      const setStatus = (msg, cls = "") => { status.textContent = msg; status.className = cls; };
+      const setStatus = (msg, cls = "") => {
+        status.textContent = msg;
+        status.className = cls;
+      };
       const lock = (on) => {
-        [input, submitBtn,
+        [
+          input,
+          submitBtn,
           overlay.querySelector("#wh-send-cancel-btn"),
           overlay.querySelector("#wh-send-close"),
-        ].forEach(el => { if (el) el.disabled = on; });
+        ].forEach((el) => {
+          if (el) el.disabled = on;
+        });
       };
-      const escHandler = (e) => { if (e.key === "Escape") closeOverlay(); };
-      const closeOverlay = () => { overlay.remove(); document.removeEventListener("keydown", escHandler); };
+      const escHandler = (e) => {
+        if (e.key === "Escape") closeOverlay();
+      };
+      const closeOverlay = () => {
+        overlay.remove();
+        document.removeEventListener("keydown", escHandler);
+      };
 
-      overlay.querySelector("#wh-send-backdrop").onclick   = closeOverlay;
-      overlay.querySelector("#wh-send-close").onclick      = closeOverlay;
+      overlay.querySelector("#wh-send-backdrop").onclick = closeOverlay;
+      overlay.querySelector("#wh-send-close").onclick = closeOverlay;
       overlay.querySelector("#wh-send-cancel-btn").onclick = closeOverlay;
       document.addEventListener("keydown", escHandler);
 
@@ -11747,7 +13313,10 @@ unsafeWindow.fetch = function(...args) {
           toggleBtn.innerHTML = isApiMode
             ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> ${this.t("wm_send_mode_api")}`
             : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg> ${this.t("wm_send_mode_nav")}`;
-          if (descEl) descEl.textContent = isApiMode ? this.t("wm_send_mode_desc_api") : this.t("wm_send_mode_desc_nav");
+          if (descEl)
+            descEl.textContent = isApiMode
+              ? this.t("wm_send_mode_desc_api")
+              : this.t("wm_send_mode_desc_nav");
         };
       }
 
@@ -11786,13 +13355,16 @@ unsafeWindow.fetch = function(...args) {
       });
 
       input.addEventListener("keydown", (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); submitBtn.click(); }
+        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+          e.preventDefault();
+          submitBtn.click();
+        }
       });
       requestAnimationFrame(() => input.focus());
 
       submitBtn.onclick = async () => {
-        const text    = input.value.trim();
-        const hasImg  = pendingFiles.length > 0;
+        const text = input.value.trim();
+        const hasImg = pendingFiles.length > 0;
 
         if (!text && !hasImg) {
           setStatus(this.t("wm_send_empty"), "err");
@@ -11818,14 +13390,24 @@ unsafeWindow.fetch = function(...args) {
           const useApi = this.getApiMode() && !!this._cachedToken;
 
           if (useApi) {
-            const ok = await this._sendViaApi(wormhole, text, setStatus, hasImg ? pendingFiles : []);
+            const ok = await this._sendViaApi(
+              wormhole,
+              text,
+              setStatus,
+              hasImg ? pendingFiles : [],
+            );
             if (!ok) {
               setStatus(this.t("wm_api_send_fail"), "err");
               lock(false);
               return;
             }
           } else {
-            const ok = await this._sendViaWormhole(wormhole, text, setStatus, hasImg ? pendingFiles : []);
+            const ok = await this._sendViaWormhole(
+              wormhole,
+              text,
+              setStatus,
+              hasImg ? pendingFiles : [],
+            );
             if (!ok) {
               setStatus(this.t("wm_send_fail"), "err");
               lock(false);
@@ -11836,13 +13418,18 @@ unsafeWindow.fetch = function(...args) {
           pendingFiles = [];
           preview.innerHTML = "";
 
-          setStatus(this.t("wm_send_success").replace("#{name}", wormhole.name), "ok");
+          setStatus(
+            this.t("wm_send_success").replace("#{name}", wormhole.name),
+            "ok",
+          );
           if (localStorage.getItem("wh_send_show_toast") !== "false") {
             this._showSendToast(wormhole);
           }
 
-          const autoClose = localStorage.getItem("wh_send_autoclose") !== "false";
-          const gotoChannel = !autoClose && localStorage.getItem("wh_send_goto") === "true";
+          const autoClose =
+            localStorage.getItem("wh_send_autoclose") !== "false";
+          const gotoChannel =
+            !autoClose && localStorage.getItem("wh_send_goto") === "true";
 
           if (gotoChannel) {
             setTimeout(() => {
@@ -11870,8 +13457,14 @@ unsafeWindow.fetch = function(...args) {
     }
 
     async _sendImagesViaA(wormhole, files, text, setStatus) {
-      const originUrl   = window.location.href;
-      const targetPath  = (() => { try { return new URL(wormhole.url).pathname; } catch { return null; } })();
+      const originUrl = window.location.href;
+      const targetPath = (() => {
+        try {
+          return new URL(wormhole.url).pathname;
+        } catch {
+          return null;
+        }
+      })();
       const alreadyHere = targetPath && window.location.pathname === targetPath;
 
       if (!alreadyHere) {
@@ -11885,7 +13478,10 @@ unsafeWindow.fetch = function(...args) {
       }
 
       const result = this._getSlateEditor();
-      if (!result) { setStatus(this.t("wm_send_editor_missing"), "err"); return false; }
+      if (!result) {
+        setStatus(this.t("wm_send_editor_missing"), "err");
+        return false;
+      }
       const { editor, slateEl } = result;
 
       editor.children = [{ type: "line", children: [{ text: "" }] }];
@@ -11895,7 +13491,10 @@ unsafeWindow.fetch = function(...args) {
       if (text) {
         slateEl.focus();
         if (!editor.selection) {
-          editor.selection = { anchor: { path: [0,0], offset: 0 }, focus: { path: [0,0], offset: 0 } };
+          editor.selection = {
+            anchor: { path: [0, 0], offset: 0 },
+            focus: { path: [0, 0], offset: 0 },
+          };
         }
         editor.insertText(text);
         await this._tick(80);
@@ -11908,21 +13507,33 @@ unsafeWindow.fetch = function(...args) {
 
       slateEl.focus();
       await this._tick(60);
-      slateEl.dispatchEvent(new ClipboardEvent("paste", {
-        clipboardData: dt,
-        bubbles: true,
-        cancelable: true,
-      }));
+      slateEl.dispatchEvent(
+        new ClipboardEvent("paste", {
+          clipboardData: dt,
+          bubbles: true,
+          cancelable: true,
+        }),
+      );
 
       await this._tick(600);
 
       slateEl.focus();
       await this._tick(60);
-      slateEl.dispatchEvent(new KeyboardEvent("keydown", {
-        key: "Enter", code: "Enter", keyCode: 13, which: 13,
-        bubbles: true, cancelable: true, composed: true,
-        shiftKey: false, ctrlKey: false, metaKey: false, altKey: false,
-      }));
+      slateEl.dispatchEvent(
+        new KeyboardEvent("keydown", {
+          key: "Enter",
+          code: "Enter",
+          keyCode: 13,
+          which: 13,
+          bubbles: true,
+          cancelable: true,
+          composed: true,
+          shiftKey: false,
+          ctrlKey: false,
+          metaKey: false,
+          altKey: false,
+        }),
+      );
       DEBUG && console.log("[WH Send] Image + text dispatched via paste+Enter");
 
       if (!alreadyHere) {
@@ -11942,7 +13553,10 @@ unsafeWindow.fetch = function(...args) {
       } catch (_) {}
 
       if (!channelId) {
-        console.error("[WH API] Cannot parse channelId from URL:", wormhole.url);
+        console.error(
+          "[WH API] Cannot parse channelId from URL:",
+          wormhole.url,
+        );
         setStatus("❌ 無法解析頻道 ID，請確認蟲洞連結格式", "err");
         return false;
       }
@@ -11960,7 +13574,7 @@ unsafeWindow.fetch = function(...args) {
           return {
             headers: {
               "Content-Type": "application/json",
-              "Authorization": this._cachedToken,
+              Authorization: this._cachedToken,
             },
             data: JSON.stringify({
               content: text,
@@ -11975,42 +13589,50 @@ unsafeWindow.fetch = function(...args) {
           id: String(i),
           filename: f.name || `image_${i}.png`,
         }));
-        formData.append("payload_json", JSON.stringify({
-          content: text || "",
-          nonce: String(Math.floor(Math.random() * 1e13)),
-          tts: false,
-          attachments,
-        }));
+        formData.append(
+          "payload_json",
+          JSON.stringify({
+            content: text || "",
+            nonce: String(Math.floor(Math.random() * 1e13)),
+            tts: false,
+            attachments,
+          }),
+        );
         for (let i = 0; i < files.length; i++) {
-          formData.append(`files[${i}]`, files[i], files[i].name || `image_${i}.png`);
+          formData.append(
+            `files[${i}]`,
+            files[i],
+            files[i].name || `image_${i}.png`,
+          );
         }
 
-        const blob = await new Promise(resolve => {
+        const blob = await new Promise((resolve) => {
           const req = new Request("", { method: "POST", body: formData });
           req.blob ? req.blob().then(resolve) : resolve(null);
         }).catch(() => null);
 
         return {
           headers: {
-            "Authorization": this._cachedToken,
+            Authorization: this._cachedToken,
           },
           data: formData,
         };
       };
 
       const reqOpts = await buildRequest();
-      const doRequest = () => new Promise((resolve) => {
-        GM_xmlhttpRequest({
-          method: "POST",
-          url: `https://discord.com/api/v10/channels/${channelId}/messages`,
-          headers: reqOpts.headers,
-          data: reqOpts.data,
-          timeout: 30000,
-          onload: (res) => resolve(res),
-          onerror: (err) => resolve({ status: 0, _err: err }),
-          ontimeout: ()  => resolve({ status: 0, _err: "timeout" }),
+      const doRequest = () =>
+        new Promise((resolve) => {
+          GM_xmlhttpRequest({
+            method: "POST",
+            url: `https://discord.com/api/v10/channels/${channelId}/messages`,
+            headers: reqOpts.headers,
+            data: reqOpts.data,
+            timeout: 30000,
+            onload: (res) => resolve(res),
+            onerror: (err) => resolve({ status: 0, _err: err }),
+            ontimeout: () => resolve({ status: 0, _err: "timeout" }),
+          });
         });
-      });
 
       setStatus(hasFiles ? "📡 上傳圖片並傳送..." : "📡 傳送中...");
       let res = await doRequest();
@@ -12023,12 +13645,15 @@ unsafeWindow.fetch = function(...args) {
         } catch (_) {}
         console.warn(`[WH API] Rate limited. Waiting ${retryAfterMs}ms...`);
         setStatus(`⏳ 速率限制，${Math.ceil(retryAfterMs / 1000)}s 後重試...`);
-        await new Promise(r => setTimeout(r, retryAfterMs));
+        await new Promise((r) => setTimeout(r, retryAfterMs));
         res = await doRequest();
       }
 
       if (res.status === 200 || res.status === 201) {
-        DEBUG && console.log(`[WH API] Message sent ✅ → channel ${channelId}${hasFiles ? ` (+${files.length} file(s))` : ""}`);
+        DEBUG &&
+          console.log(
+            `[WH API] Message sent ✅ → channel ${channelId}${hasFiles ? ` (+${files.length} file(s))` : ""}`,
+          );
         return true;
       }
 
@@ -12043,7 +13668,9 @@ unsafeWindow.fetch = function(...args) {
           40002: "必須先驗證身分",
         };
         const code = body.code;
-        detail = codeMap[code] ? `${codeMap[code]} (${code})` : `${body.message || ""} (${code || res.status})`;
+        detail = codeMap[code]
+          ? `${codeMap[code]} (${code})`
+          : `${body.message || ""} (${code || res.status})`;
         console.error("[WH API] Send failed:", body);
       } catch (_) {
         if (res._err) console.error("[WH API] Network error:", res._err);
@@ -12058,8 +13685,14 @@ unsafeWindow.fetch = function(...args) {
         return this._sendImagesViaA(wormhole, files, text, setStatus);
       }
 
-      const originUrl   = window.location.href;
-      const targetPath  = (() => { try { return new URL(wormhole.url).pathname; } catch { return null; } })();
+      const originUrl = window.location.href;
+      const targetPath = (() => {
+        try {
+          return new URL(wormhole.url).pathname;
+        } catch {
+          return null;
+        }
+      })();
       const alreadyHere = targetPath && window.location.pathname === targetPath;
 
       if (!alreadyHere) {
@@ -12089,8 +13722,15 @@ unsafeWindow.fetch = function(...args) {
       return new Promise((resolve) => {
         const deadline = Date.now() + timeout;
         const timer = setInterval(() => {
-          if (this._getSlateEditor())  { clearInterval(timer); resolve(true);  return; }
-          if (Date.now() >= deadline)  { clearInterval(timer); resolve(false); }
+          if (this._getSlateEditor()) {
+            clearInterval(timer);
+            resolve(true);
+            return;
+          }
+          if (Date.now() >= deadline) {
+            clearInterval(timer);
+            resolve(false);
+          }
         }, 80);
       });
     }
@@ -12100,8 +13740,12 @@ unsafeWindow.fetch = function(...args) {
         const deadline = Date.now() + timeout;
         const timer = setInterval(() => {
           const ed = this._getSlateEditor();
-          const isEmpty = !ed || (ed.editor?.children?.[0]?.children?.[0]?.text === "");
-          if (isEmpty || Date.now() >= deadline) { clearInterval(timer); resolve(); }
+          const isEmpty =
+            !ed || ed.editor?.children?.[0]?.children?.[0]?.text === "";
+          if (isEmpty || Date.now() >= deadline) {
+            clearInterval(timer);
+            resolve();
+          }
         }, 80);
       });
     }
@@ -12109,12 +13753,16 @@ unsafeWindow.fetch = function(...args) {
     _getSlateEditor() {
       const sl = document.querySelector('[data-slate-editor="true"]');
       if (!sl) return null;
-      const fk = Object.keys(sl).find(k => k.startsWith("__reactFiber"));
+      const fk = Object.keys(sl).find((k) => k.startsWith("__reactFiber"));
       if (!fk) return null;
       let fiber = sl[fk];
       for (let i = 0; i < 15 && fiber; i++) {
         const ed = fiber.memoizedProps?.editor;
-        if (ed && typeof ed.insertText === "function" && typeof ed.onChange === "function") {
+        if (
+          ed &&
+          typeof ed.insertText === "function" &&
+          typeof ed.onChange === "function"
+        ) {
           return { editor: ed, slateEl: sl };
         }
         fiber = fiber.return;
@@ -12124,7 +13772,10 @@ unsafeWindow.fetch = function(...args) {
 
     async _injectAndSend(text) {
       const result = this._getSlateEditor();
-      if (!result) { console.error("[WH Send] Cannot get Slate editor"); return false; }
+      if (!result) {
+        console.error("[WH Send] Cannot get Slate editor");
+        return false;
+      }
       const { editor, slateEl } = result;
       try {
         editor.children = [{ type: "line", children: [{ text: "" }] }];
@@ -12133,22 +13784,38 @@ unsafeWindow.fetch = function(...args) {
 
         slateEl.focus();
         if (!editor.selection) {
-          editor.selection = { anchor: { path: [0,0], offset: 0 }, focus: { path: [0,0], offset: 0 } };
+          editor.selection = {
+            anchor: { path: [0, 0], offset: 0 },
+            focus: { path: [0, 0], offset: 0 },
+          };
         }
         editor.insertText(text);
         await this._tick(100);
 
         const inserted = editor.children?.[0]?.children?.[0]?.text || "";
-        if (!inserted) { console.error("[WH Send] insertText failed"); return false; }
+        if (!inserted) {
+          console.error("[WH Send] insertText failed");
+          return false;
+        }
 
         slateEl.focus();
         await this._tick(60);
-        slateEl.dispatchEvent(new KeyboardEvent("keydown", {
-          key: "Enter", code: "Enter", keyCode: 13, which: 13,
-          bubbles: true, cancelable: true, composed: true,
-          shiftKey: false, ctrlKey: false, metaKey: false, altKey: false,
-        }));
-        console.log("[WH Send] Enter dispatched");
+        slateEl.dispatchEvent(
+          new KeyboardEvent("keydown", {
+            key: "Enter",
+            code: "Enter",
+            keyCode: 13,
+            which: 13,
+            bubbles: true,
+            cancelable: true,
+            composed: true,
+            shiftKey: false,
+            ctrlKey: false,
+            metaKey: false,
+            altKey: false,
+          }),
+        );
+        DEBUG && console.log("[WH Send] Enter dispatched");
         return true;
       } catch (err) {
         console.error("[WH Send] _injectAndSend error:", err);
@@ -12156,28 +13823,32 @@ unsafeWindow.fetch = function(...args) {
       }
     }
 
-    _tick(ms) { return new Promise(r => setTimeout(r, ms)); }
+    _tick(ms) {
+      return new Promise((r) => setTimeout(r, ms));
+    }
 
     _positionMenu(menu, triggerEl) {
       const gap = 8;
       menu.style.position = "fixed";
-      menu.style.top  = "-9999px";
+      menu.style.top = "-9999px";
       menu.style.left = "-9999px";
       requestAnimationFrame(() => {
         const rect = triggerEl.getBoundingClientRect();
         const mh = menu.offsetHeight || 160;
-        const mw = menu.offsetWidth  || 160;
+        const mw = menu.offsetWidth || 160;
         const spaceBelow = window.innerHeight - rect.bottom - gap;
 
-        const top = spaceBelow >= mh
-          ? rect.bottom + gap
-          : Math.max(gap, rect.top - mh - gap);
+        const top =
+          spaceBelow >= mh
+            ? rect.bottom + gap
+            : Math.max(gap, rect.top - mh - gap);
 
         let left = rect.left;
-        if (left + mw > window.innerWidth - gap) left = window.innerWidth - mw - gap;
+        if (left + mw > window.innerWidth - gap)
+          left = window.innerWidth - mw - gap;
         if (left < gap) left = gap;
 
-        menu.style.top  = `${top}px`;
+        menu.style.top = `${top}px`;
         menu.style.left = `${left}px`;
       });
     }
@@ -12454,7 +14125,7 @@ unsafeWindow.fetch = function(...args) {
           }
         }
 
-        console.log("[Wormhole] No server icon found");
+        DEBUG && console.log("[Wormhole] No server icon found");
         return null;
       } catch (e) {
         console.error("[Wormhole] Failed to get server icon:", e);
@@ -12515,7 +14186,10 @@ unsafeWindow.fetch = function(...args) {
 
     openFocusSizeMenu(anchorEl) {
       const existingMenu = document.getElementById("wh-focus-size-menu");
-      if (existingMenu) { existingMenu.remove(); return; }
+      if (existingMenu) {
+        existingMenu.remove();
+        return;
+      }
 
       const currentSize = this.getFocusSize();
       const menu = document.createElement("div");
@@ -12562,10 +14236,10 @@ unsafeWindow.fetch = function(...args) {
       const rect = anchorEl.getBoundingClientRect();
       const mw = 140;
       let left = rect.left;
-      let top  = rect.bottom + 5;
+      let top = rect.bottom + 5;
       if (left + mw > window.innerWidth - 8) left = window.innerWidth - mw - 8;
       menu.style.left = `${left}px`;
-      menu.style.top  = `${top}px`;
+      menu.style.top = `${top}px`;
 
       const onOutside = (e) => {
         if (!menu.contains(e.target) && e.target !== anchorEl) {
@@ -12573,7 +14247,10 @@ unsafeWindow.fetch = function(...args) {
           document.removeEventListener("mousedown", onOutside, true);
         }
       };
-      setTimeout(() => document.addEventListener("mousedown", onOutside, true), 0);
+      setTimeout(
+        () => document.addEventListener("mousedown", onOutside, true),
+        0,
+      );
     }
 
     getFocusMode() {
@@ -12611,14 +14288,15 @@ unsafeWindow.fetch = function(...args) {
     }
 
     applyFocusMode(enabled, containerEl = null) {
-      const container = containerEl || document.querySelector(".my-wormhole-container");
+      const container =
+        containerEl || document.querySelector(".my-wormhole-container");
 
       const sz = this._focusSizePx(this.getFocusSize());
-      const vipSz      = Math.round(sz * 0.78);
-      const imgSz      = Math.round(sz * 0.82);
-      const vipImgSz   = Math.round(vipSz * 0.82);
-      const iconFs     = Math.round(sz * 0.62);
-      const overlap    = "-" + Math.round(sz * 0.22) + "px";
+      const vipSz = Math.round(sz * 0.78);
+      const imgSz = Math.round(sz * 0.82);
+      const vipImgSz = Math.round(vipSz * 0.82);
+      const iconFs = Math.round(sz * 0.62);
+      const overlap = "-" + Math.round(sz * 0.22) + "px";
       const vipOverlap = "-" + Math.round(vipSz * 0.2) + "px";
 
       let sizeStyle = document.getElementById("wh-focus-size-override");
@@ -12695,7 +14373,9 @@ unsafeWindow.fetch = function(...args) {
       toast.addEventListener("click", () => dismiss(true));
 
       const timer = setTimeout(() => dismiss(false), 3000);
-      toast.addEventListener("click", () => clearTimeout(timer), { once: true });
+      toast.addEventListener("click", () => clearTimeout(timer), {
+        once: true,
+      });
     }
 
     t(key, params = {}) {
@@ -12820,79 +14500,115 @@ unsafeWindow.fetch = function(...args) {
 
       if (el.querySelector('[class*="guildIcon_"]')) return true;
 
-      if (el.querySelector('[data-text-variant]')) return true;
+      if (el.querySelector("[data-text-variant]")) return true;
 
-      if (el.getAttribute("role") === "button" && el.getAttribute("aria-label")) return true;
+      if (el.getAttribute("role") === "button" && el.getAttribute("aria-label"))
+        return true;
 
       return false;
     }
 
     _removeStrayContainers() {
+      if (!this._strayCheckNeeded) return;
+      this._strayCheckNeeded = false;
       const dockPos = this.getDockPosition();
       document.querySelectorAll(".my-wormhole-container").forEach((c) => {
         const parent = c.parentElement;
-        if (!parent) { c.remove(); return; }
+        if (!parent) {
+          c.remove();
+          return;
+        }
 
         if (dockPos === "input") {
           if (parent.id === "wh-input-dock") return;
-          console.warn("[Wormhole] Removing stray container (input mode) from:", parent);
+          DEBUG &&
+            console.warn(
+              "[Wormhole] Removing stray container (input mode) from:",
+              parent,
+            );
           c.remove();
           return;
         }
         if (dockPos === "navbar") {
           if (parent.id === "wh-navbar-dock") return;
-          console.warn("[Wormhole] Removing stray container (navbar mode) from:", parent);
+          DEBUG &&
+            console.warn(
+              "[Wormhole] Removing stray container (navbar mode) from:",
+              parent,
+            );
           c.remove();
           return;
         }
         if (dockPos === "topleft") {
           if (parent.id === "wh-topleft-dock") return;
-          console.warn("[Wormhole] Removing stray container (topleft mode) from:", parent);
+          DEBUG &&
+            console.warn(
+              "[Wormhole] Removing stray container (topleft mode) from:",
+              parent,
+            );
           c.remove();
           return;
         }
         if (parent.id === "wh-titlebar-dock") return;
         if (this._isValidChannelHeader(parent)) return;
-        console.warn("[Wormhole] Removing stray container from:", parent);
+        DEBUG &&
+          console.warn("[Wormhole] Removing stray container from:", parent);
         c.remove();
       });
     }
 
     setupObserver() {
+      this._strayCheckNeeded = false;
       let debounceTimer = null;
       this.observer = new MutationObserver(() => {
+        if (document.hidden) return;
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
           this._removeStrayContainers();
 
-          const trailingGroup = document.querySelector('div[class*="trailing_"]');
+          const trailingGroup = document.querySelector(
+            'div[class*="trailing_"]',
+          );
           if (trailingGroup) this.injectCreatorButton(trailingGroup);
 
           const pos = this.getDockPosition();
 
           if (pos === "input") {
-            if (!document.getElementById("wh-input-dock")) this._injectInputDock();
+            if (!document.getElementById("wh-input-dock")) {
+              this._strayCheckNeeded = true;
+              this._injectInputDock();
+            }
             return;
           }
 
           if (pos === "navbar") {
-            if (!document.getElementById("wh-navbar-dock")) this._injectNavbarDock();
+            if (!document.getElementById("wh-navbar-dock")) {
+              this._strayCheckNeeded = true;
+              this._injectNavbarDock();
+            }
             return;
           }
 
           if (pos === "topleft") {
-            if (!document.getElementById("wh-topleft-dock")) this._injectTopLeftDock();
+            if (!document.getElementById("wh-topleft-dock")) {
+              this._strayCheckNeeded = true;
+              this._injectTopLeftDock();
+            }
             return;
           }
 
-          if (!document.getElementById("wh-titlebar-dock")) this._injectTitlebarDock();
+          if (!document.getElementById("wh-titlebar-dock")) {
+            this._strayCheckNeeded = true;
+            this._injectTitlebarDock();
+          }
         }, 100);
       });
       this.observer.observe(document.body, { childList: true, subtree: true });
     }
 
     _setupModalWatcher() {
-      const MODAL_SEL = '[class*="carouselModal_"], [class*="imageModal_"], [class*="layerModal_"]';
+      const MODAL_SEL =
+        '[class*="carouselModal_"], [class*="imageModal_"], [class*="layerModal_"]';
       const setNavbarDockVisibility = (visible) => {
         const dock = document.getElementById("wh-navbar-dock");
         if (dock) dock.style.opacity = visible ? "1" : "0";
@@ -12900,6 +14616,7 @@ unsafeWindow.fetch = function(...args) {
       };
 
       const check = () => {
+        if (document.hidden) return;
         const hasModal = !!document.querySelector(MODAL_SEL);
         setNavbarDockVisibility(!hasModal);
       };
@@ -13215,15 +14932,19 @@ unsafeWindow.fetch = function(...args) {
         const data = window.wormholeModule.getData();
         console.log("Groups:", data.groups);
         console.log("VIP Wormholes:", data.vipWormholes);
-        console.log("Total Wormholes:", window.wormholeModule.getAllWormholes().length);
+        console.log(
+          "Total Wormholes:",
+          window.wormholeModule.getAllWormholes().length,
+        );
       };
     }
   }
 
   if (isModEnabled("mod_forwarding")) initForwardingManager();
-  if (isModEnabled("mod_message"))    initMessageUtility();
-  if (isModEnabled("mod_emoji"))      initEmojiSearchHelper();
-  if (isModEnabled("mod_header"))     initHeaderMods();
+  if (isModEnabled("mod_message")) initMessageUtility();
+  if (isModEnabled("mod_emoji")) initEmojiSearchHelper();
+  if (isModEnabled("mod_header")) initHeaderMods();
+  if (isModEnabled("mod_webhook")) initWebhookManager();
 
   if (!isModEnabled("mod_message")) {
     const rescueBtn = document.createElement("div");
@@ -13250,25 +14971,37 @@ unsafeWindow.fetch = function(...args) {
       "opacity:0.5",
       "transition:opacity 0.2s",
     ].join(";");
-    rescueBtn.onmouseenter = () => { rescueBtn.style.opacity = "1"; };
-    rescueBtn.onmouseleave = () => { rescueBtn.style.opacity = "0.5"; };
+    rescueBtn.onmouseenter = () => {
+      rescueBtn.style.opacity = "1";
+    };
+    rescueBtn.onmouseleave = () => {
+      rescueBtn.style.opacity = "0.5";
+    };
     rescueBtn.onclick = () => {
       const existing = document.getElementById("mod-settings-panel-rescue");
-      if (existing) { existing.remove(); return; }
+      if (existing) {
+        existing.remove();
+        return;
+      }
       const lang = getConfig().lang || navigator.language || "en-US";
-      const getLang = (labels) => labels[lang] || labels["zh-TW"] || labels["en-US"];
+      const getLang = (labels) =>
+        labels[lang] || labels["zh-TW"] || labels["en-US"];
       const overlay = document.createElement("div");
       overlay.id = "mod-settings-panel-rescue";
-      overlay.style.cssText = "position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);";
+      overlay.style.cssText =
+        "position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);";
       const box = document.createElement("div");
-      box.style.cssText = "background:#2b2d31;border-radius:12px;padding:20px 24px;min-width:280px;max-width:360px;color:#dcddde;font-size:13px;box-shadow:0 12px 40px rgba(0,0,0,0.6);";
+      box.style.cssText =
+        "background:#2b2d31;border-radius:12px;padding:20px 24px;min-width:280px;max-width:360px;color:#dcddde;font-size:13px;box-shadow:0 12px 40px rgba(0,0,0,0.6);";
       const title = document.createElement("div");
-      title.style.cssText = "font-size:15px;font-weight:700;color:#fff;margin-bottom:14px;";
+      title.style.cssText =
+        "font-size:15px;font-weight:700;color:#fff;margin-bottom:14px;";
       title.textContent = "⚙️ Discord Message Toolkit";
       box.appendChild(title);
-      MODULE_DEFS.forEach(mod => {
+      MODULE_DEFS.forEach((mod) => {
         const row = document.createElement("div");
-        row.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.06);";
+        row.style.cssText =
+          "display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.06);";
         const nameSpan = document.createElement("span");
         nameSpan.textContent = `${mod.icon} ${getLang(mod.label)}`;
         const enabled = isModEnabled(mod.storageKey);
@@ -13290,17 +15023,30 @@ unsafeWindow.fetch = function(...args) {
         box.appendChild(row);
       });
       const closeBtn = document.createElement("button");
-      closeBtn.textContent = "✕ " + ({"zh-TW":"關閉","zh-CN":"关闭","ja":"閉じる","ko":"닫기"}[lang] || "Close");
-      closeBtn.style.cssText = "margin-top:14px;width:100%;padding:7px;border:none;border-radius:6px;background:#4f545c;color:#fff;cursor:pointer;font-size:13px;";
+      closeBtn.textContent =
+        "✕ " +
+        ({ "zh-TW": "關閉", "zh-CN": "关闭", ja: "閉じる", ko: "닫기" }[lang] ||
+          "Close");
+      closeBtn.style.cssText =
+        "margin-top:14px;width:100%;padding:7px;border:none;border-radius:6px;background:#4f545c;color:#fff;cursor:pointer;font-size:13px;";
       closeBtn.onclick = () => overlay.remove();
       box.appendChild(closeBtn);
       overlay.appendChild(box);
-      overlay.addEventListener("click", e => { if (e.target === overlay) overlay.remove(); });
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) overlay.remove();
+      });
       document.body.appendChild(overlay);
     };
-    document.addEventListener("DOMContentLoaded", () => document.body.appendChild(rescueBtn));
+    document.addEventListener("DOMContentLoaded", () =>
+      document.body.appendChild(rescueBtn),
+    );
     if (document.body) document.body.appendChild(rescueBtn);
   }
 
-  console.log("[Discord Utilities] Modules loaded:", MODULE_DEFS.map(m => `${m.icon}${isModEnabled(m.storageKey) ? "✓" : "✗"}`).join(" "));
+  DEBUG && console.log(
+    "[Discord Utilities] Modules loaded:",
+    MODULE_DEFS.map(
+      (m) => `${m.icon}${isModEnabled(m.storageKey) ? "✓" : "✗"}`,
+    ).join(" "),
+  );
 })();
