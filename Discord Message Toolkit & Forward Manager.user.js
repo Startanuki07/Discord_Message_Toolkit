@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      1.6.2
+// @version      1.6.3
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -42,9 +42,16 @@
 (function () {
   "use strict";
 
-  const DEBUG = false;
+  const DEBUG = GM_getValue("debugModeEnabled", false);
+
+  if (!window.unsafeWindow) {
+    console.warn(
+      "[Discord Utilities] unsafeWindow unavailable - Content Security Policy may block some features"
+    );
+  }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
+  const SCRIPT_VERSION = "1.6.2";
 
   const ConfigManager = {
     _cache: null,
@@ -3245,24 +3252,21 @@
             .my-sub-btn:hover { background: rgba(255,255,255,0.2); color: #fff; opacity: 1; }
             .my-sub-btn.is-active { background: #248046 !important; color: #fff !important; opacity: 1; box-shadow: 0 0 5px rgba(36, 128, 70, 0.6); }
 
-            /* 按鈕顏色定義 */
-            .btn-user-zone { background-color: transparent !important; color: #949BA4 !important; border: 1px solid rgba(148, 155, 164, 0.2) !important; width: 28px; padding: 0 !important; }
+.btn-user-zone { background-color: transparent !important; color: #949BA4 !important; border: 1px solid rgba(148, 155, 164, 0.2) !important; width: 28px; padding: 0 !important; }
             .btn-user-zone:hover { background-color: rgba(148, 155, 164, 0.1) !important; color: #dbdee1 !important; border-color: rgba(148, 155, 164, 0.5) !important; }
             .btn-user-zone.has-items { color: #dbdee1 !important; border-color: rgba(148, 155, 164, 0.5) !important; }
             .btn-star-main { background-color: rgba(240, 178, 50, 0.15) !important; color: #ffc44f !important; border: 1px solid rgba(240, 178, 50, 0.4) !important; min-width: 100px; justify-content: space-between; }
             .btn-star-item { background-color: rgba(240, 178, 50, 0.05) !important; color: #ffc44f !important; border: 1px solid rgba(240, 178, 50, 0.2) !important; }
             .btn-history-group { background-color: rgba(88, 101, 242, 0.1) !important; color: #dee0fc !important; border: 1px solid rgba(88, 101, 242, 0.2) !important; }
 
-            /* 功能按鈕 */
-            .btn-toggle-mode { background: transparent !important; color: #b5bac1 !important; padding: 4px !important; width: 28px; }
+.btn-toggle-mode { background: transparent !important; color: #b5bac1 !important; padding: 4px !important; width: 28px; }
             .btn-toggle-mode:hover { color: #fff !important; background: rgba(255,255,255,0.1) !important; }
             .btn-help { background: transparent !important; color: #b5bac1 !important; padding: 0 6px !important; min-width: 24px; margin-left: 2px; }
             .btn-help:hover { color: #fff !important; background: rgba(255,255,255,0.1) !important; }
             .btn-add { background: transparent !important; color: #2dc770 !important; border: 1px dashed rgba(45, 199, 112, 0.4) !important; opacity: 0.7; }
             .btn-add:hover { opacity: 1; background: rgba(45, 199, 112, 0.1) !important; }
 
-            /* 下拉選單 */
-            .my-dropdown-menu { position: absolute; top: 100%; left: 0; background: #2b2d31; border: 1px solid #1e1f22; border-radius: 4px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); padding: 4px; display: none; flex-direction: column; gap: 2px; z-index: 999;
+.my-dropdown-menu { position: absolute; top: 100%; left: 0; background: #2b2d31; border: 1px solid #1e1f22; border-radius: 4px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); padding: 4px; display: none; flex-direction: column; gap: 2px; z-index: 999;
             min-width: 320px; max-height: 500px; overflow-y: auto; }
 
             .my-dropdown-menu.show { display: flex; }
@@ -3270,8 +3274,7 @@
             .dropdown-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; color: #dbdee1; font-size: 13px; cursor: pointer; border-radius: 2px; transition: background 0.1s; max-width: 100%; }
             .dropdown-item:hover { background: #404249; color: #fff; }
 
-            /* 列表按鈕 */
-            .my-list-star-btn { background: transparent; border: none; cursor: pointer; color: #4e5058; padding: 4px; margin-right: 4px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s; }
+.my-list-star-btn { background: transparent; border: none; cursor: pointer; color: #4e5058; padding: 4px; margin-right: 4px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s; }
             .my-list-star-btn:hover { transform: scale(1.1); color: #dbdee1; background: rgba(255,255,255,0.05); }
             .my-list-star-btn.is-active { color: #f0b232; }
             .my-list-user-btn { color: #4e5058; }
@@ -3281,11 +3284,9 @@
             .my-target-row { background-color: rgba(255, 255, 255, 0.03) !important; box-shadow: inset 2px 0 0 rgba(255, 255, 255, 0.2); }
             .my-user-tagged::before { content: "👤"; color: #949BA4; margin-right: 4px; font-weight: normal; }
 
-            /* Text Truncation Utility */
-            .my-ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.my-ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
-            /* Help Modal */
-            .my-help-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); animation: fadeIn 0.2s; }
+.my-help-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); animation: fadeIn 0.2s; }
             .my-help-modal { background: #313338; width: 500px; max-width: 90%; max-height: 80vh; border-radius: 8px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #1e1f22; color: #dbdee1; font-size: 14px; line-height: 1.5; animation: slideUp 0.2s; }
             .my-help-header { padding: 16px; border-bottom: 1px solid #1e1f22; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 16px; background: #2b2d31; }
             .my-help-body { padding: 16px; overflow-y: auto; }
@@ -3298,14 +3299,12 @@
             @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
             @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-/* [Module D] Wormhole Styles */
-            .my-wormhole-creator-btn { color: #b5bac1; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin: 0 4px; transition: color 0.2s; }
+.my-wormhole-creator-btn { color: #b5bac1; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin: 0 4px; transition: color 0.2s; }
             .my-wormhole-creator-btn:hover { color: #5865F2; }
 
             .my-wormhole-container { display: flex; align-items: center; gap: 4px; margin-left: 8px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 8px; }
 
-            /* 一般蟲洞樣式 */
-            .my-wormhole-chip {
+.my-wormhole-chip {
                 background: rgba(30, 31, 34, 0.6);
                 border: 1px solid rgba(88, 101, 242, 0.3);
                 color: #dbdee1;
@@ -3320,30 +3319,27 @@
             .my-wormhole-chip:active { transform: translateY(0); }
             .my-wormhole-chip.editing { border-color: #ed4245; animation: my-shake-anim 0.3s ease-in-out infinite; }
 
-            /* 圖示樣式 */
-            .my-wormhole-icon { font-size: 10px; opacity: 0.7; display: flex; align-items: center; }
+.my-wormhole-icon { font-size: 10px; opacity: 0.7; display: flex; align-items: center; }
 
-            /* [VIP 樣式修正] 極簡化：無框、無星號、金色文字 */
-            .my-wormhole-chip.vip {
-                background: transparent;      /* 移除背景 */
-                border: none;                 /* 移除外框 */
-                color: #f0b232;               /* 金色文字 */
-                padding: 2px 4px;             /* 縮小間距 */
-                font-weight: bold;            /* 加粗 */
-                box-shadow: none;             /* 移除陰影 */
+.my-wormhole-chip.vip {
+                background: transparent;      
+                border: none;                 
+                color: #f0b232;               
+                padding: 2px 4px;             
+                font-weight: bold;            
+                box-shadow: none;             
             }
             .my-wormhole-chip.vip:hover {
-                background: rgba(240, 178, 50, 0.1); /* Hover 時給一點點金色背景 */
+                background: rgba(240, 178, 50, 0.1); 
                 color: #ffd700;
                 transform: translateY(-1px);
             }
-            /* VIP 模式下強制隱藏圖示 */
+            
             .my-wormhole-chip.vip .my-wormhole-icon {
                 display: none;
             }
 
-            /* 群組樣式 (若您有實作群組功能) */
-            .my-wormhole-group-chip {
+.my-wormhole-group-chip {
                 background: rgba(43, 45, 49, 0.8);
                 border: 1px dashed rgba(255,255,255,0.2);
                 color: #949ba4;
@@ -3353,8 +3349,7 @@
             }
             .my-wormhole-group-chip:hover { border-color: #dbdee1; color: #fff; }
 
-            /* 群組下拉選單 */
-            .my-wormhole-dropdown {
+.my-wormhole-dropdown {
                 position: absolute; top: 100%; left: 0;
                 background: #1e1f22; border: 1px solid #000;
                 border-radius: 4px; padding: 4px; z-index: 2000;
@@ -4797,8 +4792,7 @@
         flex-shrink: 0;
     }
 
-    /* Custom link edit button */
-    .msg-copy-edit-btn {
+.msg-copy-edit-btn {
         position: absolute;
         right: 8px;
         top: 50%;
@@ -4816,8 +4810,7 @@
         border-radius: 3px;
     }
 
-    /* Group Mode Submenus */
-    .msg-copy-item-group {
+.msg-copy-item-group {
         padding: 6px 12px;
         cursor: pointer;
         position: relative;
@@ -4833,8 +4826,7 @@
         color: #fff;
     }
 
-    /* Floating Submenu Portal Style */
-    .msg-copy-portal-menu {
+.msg-copy-portal-menu {
         position: fixed;
         background: #2f3136;
         border: 1px solid #202225;
@@ -4863,8 +4855,7 @@
         background: rgba(255, 255, 255, 0.1);
     }
 
-    /* Manager Footer (Only for Symbols View) */
-    .msg-copy-manage {
+.msg-copy-manage {
         font-size: 13px;
         color: #bbb;
         padding: 4px 12px 6px 12px;
@@ -5914,7 +5905,7 @@
               "User-Agent":
                 "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
               Accept:
-                "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+                "image/avif,image/webp,image/apng,image/svg+xml,image*;q=0.8",
             },
             timeout: 30000,
 
@@ -8081,7 +8072,7 @@
       "🇰🇷 [네이티브] 코드 전송 (Nitro 필요) / [링크] URL 전송";
 
     const EMOJI_STYLES = `
-            /* 基礎按鈕樣式 */
+            
             .my-tool-btn { display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin: 0 1px; cursor: pointer; color: #b5bac1; border-radius: 4px; transition: all 0.2s; flex-shrink: 0; position: relative; }
             .my-tool-btn:hover { color: #dbdee1; background: rgba(255,255,255,0.1); }
             .my-tool-btn.is-active { color: #f0b232; }
@@ -8089,24 +8080,20 @@
             .my-tool-btn.target-mode:hover { color: #f23f43; }
             .my-tool-btn.batch-active { color: #43b581 !important; background: rgba(67, 181, 129, 0.2); }
 
-            /* GIF Overlay */
-            .my-gif-overlay-bar { position: absolute; top: 4px; right: 36px; display: none; gap: 4px; padding: 2px; z-index: 100; background: rgba(0,0,0,0.6); border-radius: 4px; pointer-events: auto; }
+.my-gif-overlay-bar { position: absolute; top: 4px; right: 36px; display: none; gap: 4px; padding: 2px; z-index: 100; background: rgba(0,0,0,0.6); border-radius: 4px; pointer-events: auto; }
             .my-gif-card:hover > .my-gif-overlay-bar { display: flex !important; }
             .my-overlay-btn { width: 22px; height: 22px; color: #f2f3f5; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
             .my-overlay-btn:hover { background: rgba(88, 101, 242, 1); }
 
-            /* Popover Menu */
-            .my-popover-menu { position: fixed; background: #2b2d31; border: 1px solid #1e1f22; border-radius: 4px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); padding: 0; display: none; flex-direction: column; z-index: 2147483647; min-width: 340px; max-width: 620px; max-height: 550px; overflow: hidden; }
+.my-popover-menu { position: fixed; background: #2b2d31; border: 1px solid #1e1f22; border-radius: 4px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); padding: 0; display: none; flex-direction: column; z-index: 2147483647; min-width: 340px; max-width: 620px; max-height: 550px; overflow: hidden; }
             .my-popover-menu.show { display: flex; }
 
-            /* Menu Items */
-            .my-menu-item { padding: 6px 10px; color: #dbdee1; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.my-menu-item { padding: 6px 10px; color: #dbdee1; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.03); }
             .my-menu-item:hover { background: #404249; color: #fff; }
             .my-emoji-preview-box { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
             .my-emoji-icon-preview { width: 100%; height: 100%; border-radius: 3px; object-fit: contain; background: rgba(0,0,0,0.2); }
 
-            /* SVG Icon Placeholder */
-            .my-emoji-icon-placeholder {
+.my-emoji-icon-placeholder {
                 width: 100%; height: 100%; border-radius: 4px;
                 background: linear-gradient(135deg, #5865F2 0%, #4752C4 100%);
                 display: flex; align-items: center; justify-content: center;
@@ -8127,8 +8114,7 @@
             .my-emoji-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
             .my-emoji-btn.delete:hover { background: #ed4245; color: #fff; }
 
-            /* Tabs Layout */
-            .my-tabs-header { display: flex; align-items: center; background: #1e1f22; border-bottom: 1px solid #111214; padding: 0 4px; width: 100%; box-sizing: border-box; }
+.my-tabs-header { display: flex; align-items: center; background: #1e1f22; border-bottom: 1px solid #111214; padding: 0 4px; width: 100%; box-sizing: border-box; }
             .my-tab-scroll-area { display: flex; align-items: center; overflow-x: auto; flex: 1; scrollbar-width: none; }
             .my-tab-scroll-area::-webkit-scrollbar { display: none; }
             .my-tab-controls { display: flex; align-items: center; flex-shrink: 0; padding-left: 4px; border-left: 1px solid rgba(255,255,255,0.05); margin-left: 4px; }
@@ -8140,8 +8126,7 @@
             .my-tab-add { padding: 8px; color: #43b581; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; }
             .my-tab-add:hover { color: #fff; background: #3ba55d; }
 
-            /* [Black-Gold Mode Switch] */
-            .my-mode-switch {
+.my-mode-switch {
                 position: relative;
                 padding: 4px 10px; font-size: 11px; border-radius: 12px;
                 cursor: pointer;
@@ -8177,17 +8162,14 @@
                 100% { opacity: 0; transform: scale(0.5) rotate(30deg); }
             }
 
-            /* Content Area */
-            .my-tab-content { padding: 8px; overflow-y: auto; max-height: 400px; min-height: 180px; background: #313338; }
+.my-tab-content { padding: 8px; overflow-y: auto; max-height: 400px; min-height: 180px; background: #313338; }
 
-            /* Grid System */
-            .my-col-grid { display: grid; gap: 8px; width: 100%; box-sizing: border-box; }
+.my-col-grid { display: grid; gap: 8px; width: 100%; box-sizing: border-box; }
             .my-col-grid.emoji { grid-template-columns: repeat(auto-fill, 58px); gap: 4px; justify-content: start; }
             .my-col-grid.sticker { grid-template-columns: repeat(auto-fill, 100px); justify-content: center; }
             .my-col-grid.gif { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
 
-            /* Wrappers & Images */
-            .my-col-img-wrapper { position: relative; background: #2b2d31; border-radius: 4px; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+.my-col-img-wrapper { position: relative; background: #2b2d31; border-radius: 4px; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
             .my-col-grid.emoji .my-col-img-wrapper { width: 58px; height: 58px; background: transparent; border-radius: 2px; box-shadow: none; }
             .my-col-grid.emoji .my-col-img-wrapper:hover { background: rgba(255,255,255,0.08); }
             .my-col-grid.sticker .my-col-img-wrapper { width: 100px; height: 100px; background: transparent; box-shadow: none; }
@@ -8197,14 +8179,12 @@
             .my-col-img-wrapper:hover .my-col-img { transform: scale(1.1); }
             .my-col-text { font-size: 32px; user-select: none; }
 
-            /* Delete Button */
-            .my-col-del-btn { position: absolute; top: 0; right: 0; width: 20px; height: 20px; background: rgba(0,0,0,0.6); color: #ed4245; display: flex; align-items: center; justify-content: center; border-bottom-left-radius: 6px; z-index: 999; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.1s; pointer-events: auto; }
+.my-col-del-btn { position: absolute; top: 0; right: 0; width: 20px; height: 20px; background: rgba(0,0,0,0.6); color: #ed4245; display: flex; align-items: center; justify-content: center; border-bottom-left-radius: 6px; z-index: 999; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.1s; pointer-events: auto; }
             .my-col-del-btn > * { pointer-events: none; }
             .my-col-img-wrapper:hover .my-col-del-btn, .my-col-del-btn:hover { opacity: 1; }
             .my-col-del-btn:hover { background: #ed4245; color: #fff; }
 
-            /* Modal & Picker */
-            .my-save-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #313338; border: 1px solid #1e1f22; box-shadow: 0 0 0 100vw rgba(0,0,0,0.7); border-radius: 8px; z-index: 2147483649; width: 250px; overflow: hidden; animation: myPop 0.2s ease-out; }
+.my-save-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #313338; border: 1px solid #1e1f22; box-shadow: 0 0 0 100vw rgba(0,0,0,0.7); border-radius: 8px; z-index: 2147483649; width: 250px; overflow: hidden; animation: myPop 0.2s ease-out; }
             .my-save-header { background: #2b2d31; padding: 10px; font-size: 14px; font-weight: bold; color: #fff; text-align: center; border-bottom: 1px solid #1e1f22; }
             .my-save-list { max-height: 300px; overflow-y: auto; }
             .my-save-item { padding: 10px 15px; cursor: pointer; color: #dbdee1; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.03); transition: background 0.1s; }
@@ -8216,24 +8196,22 @@
             .my-picker-tip { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: #5865F2; color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 2147483648; pointer-events: none; }
             .my-picker-frame { position: fixed; pointer-events: none; z-index: 2147483648; box-shadow: 0 0 0 2px #5865F2, 0 0 20px rgba(88, 101, 242, 0.5); border-radius: 4px; }
 
-            /* [New Feature] Eat & Shine Animation (吃飽與閃光特效) */
-            @keyframes my-eat-shine {
+@keyframes my-eat-shine {
                 0% { transform: scale(1); filter: none; color: var(--interactive-normal); }
-                /* 瞬間膨脹到 2.5 倍，變金色，發出強力金光 */
+                
                 20% { transform: scale(2.5) rotate(-15deg); filter: drop-shadow(0 0 15px #ffd700); color: #ffd700; }
-                /* 回縮 */
+                
                 40% { transform: scale(1.6) rotate(10deg); filter: drop-shadow(0 0 10px #ffd700); color: #ffd700; }
-                /* 再次小彈跳 */
+                
                 60% { transform: scale(1.9) rotate(-5deg); filter: drop-shadow(0 0 8px #ffd700); color: #ffd700; }
-                /* 穩定下來 */
+                
                 80% { transform: scale(1.2) rotate(0deg); filter: drop-shadow(0 0 5px #ffd700); color: #ffd700; }
                 100% { transform: scale(1); filter: none; color: var(--interactive-normal); }
             }
-            /* 使用 cubic-bezier 產生果凍般的彈性效果 */
+            
             .my-eat-anim { animation: my-eat-shine 0.8s cubic-bezier(0.25, 1.5, 0.5, 1); }
 
-            /* 一般 Hover 狀態的輕微晃動 (保持不變或移除，視需求) */
-            @keyframes my-gentle-shake {
+@keyframes my-gentle-shake {
                 0% { transform: rotate(0deg); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } 100% { transform: rotate(0deg); }
             }
 
@@ -8242,7 +8220,7 @@
                 transition: transform 0.2s;
             }
             .my-chat-input-folder-btn button:hover {
-                /* 平常 Hover 只有輕微搖晃，不要跟吃飽特效搶戲 */
+                
                 animation: my-gentle-shake 0.5s ease-in-out infinite;
                 color: var(--interactive-hover) !important;
             }
@@ -8254,23 +8232,23 @@
                 border-top-right-radius: 4px;
                 box-shadow: 0 -4px 12px rgba(0,0,0,0.5);
             }
-            /* [New] 準心引導動畫 (緩慢閃爍) */
+            
             @keyframes target-sparkle {
                 0% { transform: scale(1); filter: drop-shadow(0 0 0 transparent); color: #b5bac1; }
                 50% { transform: scale(1.15); filter: drop-shadow(0 0 5px #f0b232); color: #fff; }
                 100% { transform: scale(1); filter: drop-shadow(0 0 0 transparent); color: #b5bac1; }
             }
             .my-tool-btn.target-mode.animating {
-                animation: target-sparkle 3s ease-in-out infinite; /* 3秒一次，緩慢呼吸 */
+                animation: target-sparkle 3s ease-in-out infinite; 
             }
-            /* 當滑鼠移上去時暫停動畫，避免干擾 */
+            
             .my-tool-btn.target-mode.animating:hover {
                 animation-play-state: paused;
-                color: #f23f43 !important; /* 保持原本的紅色 hover */
+                color: #f23f43 !important; 
                 filter: none;
                 transform: scale(1.1);
             }
-/* [New] 浮誇版引導動畫：聲納震波 + 強光 */
+
             @keyframes super-pulse {
                 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(240, 178, 50, 0.7); color: #b5bac1; }
                 50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(240, 178, 50, 0); color: #fff; filter: drop-shadow(0 0 8px #ffd700); }
@@ -8289,8 +8267,7 @@
                 box-shadow: none;
             }
 
-            /* [New] 黑幕降臨 */
-            .my-idle-darkness {
+.my-idle-darkness {
                 position: fixed;
                 top: 0; left: 0; width: 100vw; height: 100vh;
                 background: rgba(0, 0, 0, 0.85);
@@ -8304,16 +8281,15 @@
                 pointer-events: auto;
             }
 
-            /* [Fix] 聚光燈分身樣式 (Fixed定位) */
-            .my-tool-btn.spotlight-active {
-                position: fixed !important; /* 脫離父容器 */
-                z-index: 2147483646 !important; /* 比黑幕高 */
+.my-tool-btn.spotlight-active {
+                position: fixed !important; 
+                z-index: 2147483646 !important; 
                 color: #ffd700 !important;
                 background: transparent !important;
                 filter: drop-shadow(0 0 15px #ffd700) !important;
                 animation: none !important;
-                transform: scale(1.5) !important; /* 放大一點更明顯 */
-                pointer-events: none; /* 讓滑鼠移動能穿透它觸發恢復 */
+                transform: scale(1.5) !important; 
+                pointer-events: none; 
                 transition: all 0.5s ease;
             }
         `;
@@ -10926,8 +10902,7 @@
             100% { transform: scale(1); }
         }
 
-        /* 全域 Tooltip */
-        .header-mod-global-tooltip {
+.header-mod-global-tooltip {
             position: fixed; background: #111214; border: 1px solid #2b2d31;
             box-shadow: 0 8px 16px rgba(0,0,0,0.6); border-radius: 8px;
             padding: 8px 12px; z-index: 2147483647; width: max-content; pointer-events: none;
@@ -13202,7 +13177,7 @@ unsafeWindow.fetch = function(...args) {
           #wh-send-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:2px}
           #wh-send-footer-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
           #wh-send-actions{display:flex;gap:8px;flex-shrink:0}
-          /* ── 模式切換按鈕：帶外框，明確可點擊 ── */
+          
           #wh-send-mode-toggle{
             display:inline-flex;align-items:center;gap:5px;
             padding:4px 10px;border-radius:5px;cursor:pointer;
@@ -14650,16 +14625,16 @@ unsafeWindow.fetch = function(...args) {
             .my-wormhole-creator-btn:hover { color: #5865F2; }
             .my-wormhole-focus-btn { color: #b5bac1; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; transition: all 0.2s; }
             .my-wormhole-focus-btn:hover { color: #5865F2; transform: scale(1.1); }
-            /* Input dock: 輸入框上緣停靠列 */
+            
             #wh-input-dock { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px; padding: 0 12px; min-height: 28px; background: rgba(30,31,34,0.6); border-bottom: 1px solid rgba(255,255,255,0.06); width: 100%; box-sizing: border-box; flex-shrink: 0; order: -1; }
             #wh-input-dock .my-wormhole-container { margin-left: 0; border-left: none; padding-left: 0; }
-            /* Navbar dock: 導航欄停靠列 */
+            
             #wh-navbar-dock { position: fixed; display: flex; align-items: center; z-index: 2147483640; overflow: visible; pointer-events: auto; }
             #wh-navbar-dock .my-wormhole-container { margin-left: 0; border-left: none; padding-left: 0; overflow: visible; }
-            /* Titlebar dock: 頻道標題欄下方停靠列 */
+            
             #wh-titlebar-dock { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px; padding: 2px 16px; background: transparent; border-bottom: 1px solid rgba(255,255,255,0.05); width: 100%; box-sizing: border-box; flex-shrink: 0; min-height: 36px; }
             #wh-titlebar-dock .my-wormhole-container { margin-left: 0; border-left: none; padding-left: 0; }
-            /* Top-left dock: 左上角固定水平停靠列 */
+            
             #wh-topleft-dock { position: fixed; top: 4px; left: 72px; display: flex; flex-direction: row; align-items: center; gap: 0; z-index: 2147483640; overflow: visible; pointer-events: auto; background: rgba(30,31,34,0.88); backdrop-filter: blur(8px); border: 1px solid rgba(88,101,242,0.25); border-radius: 20px; padding: 3px 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.5); }
             #wh-topleft-dock .my-wormhole-container { margin-left: 0; border-left: none; padding-left: 0; overflow: visible; flex-direction: row; align-items: center; }
             #wh-topleft-dock .wh-row-1 { flex-direction: row; align-items: center; gap: 0; flex-wrap: nowrap; }
@@ -14667,7 +14642,7 @@ unsafeWindow.fetch = function(...args) {
             #wh-topleft-dock:hover .wh-row-2 { opacity: 1; pointer-events: auto; }
             #wh-topleft-dock .my-wormhole-chip,
             #wh-topleft-dock .my-wormhole-vip-chip { max-width: 120px; width: auto; box-sizing: border-box; margin-bottom: 0; }
-            /* titlebar / input dock 聚焦模式：chip 固定小尺寸，不膨脹 */
+            
             #wh-titlebar-dock .my-wormhole-container.focus-mode,
             #wh-input-dock .my-wormhole-container.focus-mode { padding-top: 0; }
             #wh-titlebar-dock .my-wormhole-container.focus-mode .my-wormhole-chip,
@@ -14682,17 +14657,17 @@ unsafeWindow.fetch = function(...args) {
                top: 100% + padding-top 代替 gap，確保滑鼠移動時 hover 不中斷 */
             .wh-row-2 {
                 position: absolute;
-                top: 100%;           /* 緊接 row1 底部，無真空地帶 */
+                top: 100%;           
                 left: 0;
                 display: flex;
                 align-items: flex-start;
                 gap: 4px;
-                flex-wrap: wrap;     /* 自然換行，可承載最多 10 列 */
-                max-width: 520px;    /* 限制彈出寬度，超過即換行 */
+                flex-wrap: wrap;     
+                max-width: 520px;    
                 background: rgba(30,31,34,0.97);
                 border: 1px solid rgba(88,101,242,0.35);
                 border-radius: 0 0 8px 8px;
-                padding: 10px 8px 6px 8px;  /* padding-top=10px 就是視覺間距，同時保持 hover 連續 */
+                padding: 10px 8px 6px 8px;  
                 z-index: 10003;
                 opacity: 0;
                 pointer-events: none;
@@ -14702,8 +14677,7 @@ unsafeWindow.fetch = function(...args) {
             }
             .my-wormhole-container:hover .wh-row-2:not(:empty) { opacity: 1; pointer-events: auto; transform: translateY(0); }
 
-            /* ── row2 chip：回歸圓形，外觀與 row1 一致，文字隱藏 ── */
-            .wh-row-2 .my-wormhole-chip,
+.wh-row-2 .my-wormhole-chip,
             .wh-row-2 .my-wormhole-vip-chip {
                 flex-direction: row;
                 align-items: center;
@@ -14719,7 +14693,7 @@ unsafeWindow.fetch = function(...args) {
                 border: 2px solid rgba(88, 101, 242, 0.35);
                 box-shadow: none;
                 gap: 0;
-                overflow: visible;   /* tooltip 需要溢出 */
+                overflow: visible;   
             }
             .wh-row-2 .my-wormhole-chip:hover,
             .wh-row-2 .my-wormhole-vip-chip:hover {
@@ -14737,8 +14711,7 @@ unsafeWindow.fetch = function(...args) {
                 box-shadow: 0 4px 12px rgba(255,215,0,0.25);
             }
 
-            /* 圖示大小 */
-            .wh-row-2 .my-wormhole-chip img.my-wormhole-icon,
+.wh-row-2 .my-wormhole-chip img.my-wormhole-icon,
             .wh-row-2 .my-wormhole-vip-chip img {
                 width: 22px !important;
                 height: 22px !important;
@@ -14750,16 +14723,12 @@ unsafeWindow.fetch = function(...args) {
                 line-height: 1;
             }
 
-            /* row2 文字隱藏 */
-            .wh-row-2 .my-wormhole-chip .item-name,
+.wh-row-2 .my-wormhole-chip .item-name,
             .wh-row-2 .my-wormhole-vip-chip .vip-text {
                 display: none !important;
             }
 
-            /* ── Tooltip 由 JS 負責（body 層級，不受 header overflow 限制）── */
-
-            /* 聚焦模式樣式 */
-            .my-wormhole-container.focus-mode { position: relative; padding-top: 0; align-items: center; }
+.my-wormhole-container.focus-mode { position: relative; padding-top: 0; align-items: center; }
             .my-wormhole-container.focus-mode .my-wormhole-vip-chip,
             .my-wormhole-container.focus-mode .my-wormhole-chip {
                 width: var(--wh-focus-chip, 32px);
@@ -14793,7 +14762,7 @@ unsafeWindow.fetch = function(...args) {
                 height: var(--wh-focus-img, 26px) !important;
                 border-radius: 50%;
             }
-            /* VIP 圖示縮小配合容器 */
+            
             .my-wormhole-container.focus-mode .my-wormhole-vip-chip img {
                 width: var(--wh-focus-vip-img, 18px) !important;
                 height: var(--wh-focus-vip-img, 18px) !important;
@@ -14802,20 +14771,20 @@ unsafeWindow.fetch = function(...args) {
             .my-wormhole-container.focus-mode .my-wormhole-chip .my-wormhole-icon {
                 font-size: var(--wh-focus-icon-fs, 18px);
             }
-            /* VIP icon 縮小 */
+            
             .my-wormhole-container.focus-mode .my-wormhole-vip-chip .vip-icon {
                 font-size: 17px;
             }
             .my-wormhole-container.focus-mode .vip-text,
             .my-wormhole-container.focus-mode .item-name { display: none; }
-            /* 共用 hover */
+            
             .my-wormhole-container.focus-mode .my-wormhole-vip-chip:hover,
             .my-wormhole-container.focus-mode .my-wormhole-chip:hover {
                 transform: scale(1.15);
                 box-shadow: 0 6px 20px rgba(88, 101, 242, 0.6);
                 z-index: 10;
             }
-            /* VIP hover：放大回原始 48px，覆蓋 scale，用明確尺寸展開 */
+            
             .my-wormhole-container.focus-mode .my-wormhole-vip-chip:hover {
                 width: 40px !important;
                 height: 40px !important;
@@ -14833,8 +14802,7 @@ unsafeWindow.fetch = function(...args) {
                 font-size: 28px;
             }
 
-            /* 聚焦模式Tooltip提示 */
-            .my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-vip-chip::after,
+.my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-vip-chip::after,
             .my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-chip::after {
                 content: attr(data-wormhole-name);
                 position: absolute;
@@ -14860,8 +14828,7 @@ unsafeWindow.fetch = function(...args) {
                 transform: translateX(-50%) scale(1);
             }
 
-            /* 拖曳樣式 */
-            .my-wormhole-vip-chip.dragging,
+.my-wormhole-vip-chip.dragging,
             .my-wormhole-chip.dragging {
                 opacity: 0.5 !important;
                 transform: scale(0.95) !important;
@@ -14883,8 +14850,7 @@ unsafeWindow.fetch = function(...args) {
                 75% { transform: translateX(2px); }
             }
 
-            /* 聚焦模式下的拖曳樣式調整 */
-            .my-wormhole-container.focus-mode .my-wormhole-vip-chip.dragging,
+.my-wormhole-container.focus-mode .my-wormhole-vip-chip.dragging,
             .my-wormhole-container.focus-mode .my-wormhole-chip.dragging {
                 opacity: 0.5 !important;
                 transform: scale(0.8) !important;
@@ -14901,8 +14867,7 @@ unsafeWindow.fetch = function(...args) {
                 z-index: 10;
             }
 
-            /* 確保聚焦模式下拖曳時Tooltip不顯示 */
-            .my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-vip-chip.dragging::after,
+.my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-vip-chip.dragging::after,
             .my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-chip.dragging::after {
                 display: none;
             }
@@ -14922,55 +14887,73 @@ unsafeWindow.fetch = function(...args) {
   }
 
   if (isModEnabled("mod_wormhole")) {
-    const wormholeModule = new WormholeModule();
-    wormholeModule.initialize();
-    window.wormholeModule = wormholeModule;
+    try {
+      const wormholeModule = new WormholeModule();
+      wormholeModule.initialize();
+      window.wormholeModule = wormholeModule;
 
-    if (DEBUG) {
-      window.testWormhole = () => {
-        console.log("=== Wormhole Pro Debug ===");
-        const data = window.wormholeModule.getData();
-        console.log("Groups:", data.groups);
-        console.log("VIP Wormholes:", data.vipWormholes);
-        console.log(
-          "Total Wormholes:",
-          window.wormholeModule.getAllWormholes().length,
-        );
-      };
+      if (DEBUG) {
+        window.testWormhole = () => {
+          console.log("=== Wormhole Pro Debug ===");
+          const data = window.wormholeModule.getData();
+          console.log("Groups:", data.groups);
+          console.log("VIP Wormholes:", data.vipWormholes);
+          console.log(
+            "Total Wormholes:",
+            window.wormholeModule.getAllWormholes().length,
+          );
+        };
+      }
+    } catch (err) {
+      console.error("[Wormhole] Initialization failed:", err);
     }
   }
 
-  if (isModEnabled("mod_forwarding")) initForwardingManager();
-  if (isModEnabled("mod_message")) initMessageUtility();
-  if (isModEnabled("mod_emoji")) initEmojiSearchHelper();
-  if (isModEnabled("mod_header")) initHeaderMods();
-  if (isModEnabled("mod_webhook")) initWebhookManager();
+  const initModules = [
+    { name: "Forwarding", fn: initForwardingManager, key: "mod_forwarding" },
+    { name: "Message", fn: initMessageUtility, key: "mod_message" },
+    { name: "Emoji", fn: initEmojiSearchHelper, key: "mod_emoji" },
+    { name: "Header", fn: initHeaderMods, key: "mod_header" },
+    { name: "Webhook", fn: initWebhookManager, key: "mod_webhook" },
+  ];
+
+  initModules.forEach(({ name, fn, key }) => {
+    if (isModEnabled(key)) {
+      try {
+        fn();
+      } catch (err) {
+        console.error(`[${name}] Initialization failed:`, err);
+      }
+    }
+  });
 
   if (!isModEnabled("mod_message")) {
     const rescueBtn = document.createElement("div");
     rescueBtn.id = "dmt-rescue-btn";
     rescueBtn.title = t("mod_msg_enable_menu");
     rescueBtn.textContent = "⚙️";
-    rescueBtn.style.cssText = [
-      "position:fixed",
-      "bottom:20px",
-      "right:20px",
-      "z-index:2147483646",
-      "width:36px",
-      "height:36px",
-      "border-radius:50%",
-      "background:#5865f2",
-      "color:#fff",
-      "font-size:18px",
-      "display:flex",
-      "align-items:center",
-      "justify-content:center",
-      "cursor:pointer",
-      "box-shadow:0 2px 10px rgba(0,0,0,0.5)",
-      "user-select:none",
-      "opacity:0.5",
-      "transition:opacity 0.2s",
-    ].join(";");
+    
+    Object.assign(rescueBtn.style, {
+      position: "fixed",
+      bottom: "20px",
+      right: "20px",
+      zIndex: "2147483646",
+      width: "36px",
+      height: "36px",
+      borderRadius: "50%",
+      background: "#5865f2",
+      color: "#fff",
+      fontSize: "18px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      cursor: "pointer",
+      boxShadow: "0 2px 10px rgba(0,0,0,0.5)",
+      userSelect: "none",
+      opacity: "0.5",
+      transition: "opacity 0.2s",
+    });
+    
     rescueBtn.onmouseenter = () => {
       rescueBtn.style.opacity = "1";
     };
@@ -14988,27 +14971,69 @@ unsafeWindow.fetch = function(...args) {
         labels[lang] || labels["zh-TW"] || labels["en-US"];
       const overlay = document.createElement("div");
       overlay.id = "mod-settings-panel-rescue";
-      overlay.style.cssText =
-        "position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);";
+      Object.assign(overlay.style, {
+        position: "fixed",
+        inset: "0",
+        zIndex: "2147483647",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "rgba(0,0,0,0.55)",
+      });
       const box = document.createElement("div");
-      box.style.cssText =
-        "background:#2b2d31;border-radius:12px;padding:20px 24px;min-width:280px;max-width:360px;color:#dcddde;font-size:13px;box-shadow:0 12px 40px rgba(0,0,0,0.6);";
+      Object.assign(box.style, {
+        background: "#2b2d31",
+        borderRadius: "12px",
+        padding: "20px 24px",
+        minWidth: "280px",
+        maxWidth: "360px",
+        color: "#dcddde",
+        fontSize: "13px",
+        boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
+      });
       const title = document.createElement("div");
-      title.style.cssText =
-        "font-size:15px;font-weight:700;color:#fff;margin-bottom:14px;";
+      Object.assign(title.style, {
+        fontSize: "15px",
+        fontWeight: "700",
+        color: "#fff",
+        marginBottom: "14px",
+      });
       title.textContent = "⚙️ Discord Message Toolkit";
       box.appendChild(title);
       MODULE_DEFS.forEach((mod) => {
         const row = document.createElement("div");
-        row.style.cssText =
-          "display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.06);";
+        Object.assign(row.style, {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "7px 0",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+        });
         const nameSpan = document.createElement("span");
         nameSpan.textContent = `${mod.icon} ${getLang(mod.label)}`;
         const enabled = isModEnabled(mod.storageKey);
         const toggleEl = document.createElement("div");
-        toggleEl.style.cssText = `width:34px;height:18px;border-radius:9px;background:${enabled ? "#5865f2" : "#4f545c"};position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;`;
+        Object.assign(toggleEl.style, {
+          width: "34px",
+          height: "18px",
+          borderRadius: "9px",
+          background: enabled ? "#5865f2" : "#4f545c",
+          position: "relative",
+          cursor: "pointer",
+          transition: "background 0.2s",
+          flexShrink: "0",
+        });
         const thumb = document.createElement("div");
-        thumb.style.cssText = `width:14px;height:14px;border-radius:50%;background:#fff;position:absolute;top:2px;left:${enabled ? "18px" : "2px"};transition:left 0.2s;`;
+        Object.assign(thumb.style, {
+          width: "14px",
+          height: "14px",
+          borderRadius: "50%",
+          background: "#fff",
+          position: "absolute",
+          top: "2px",
+          left: enabled ? "18px" : "2px",
+          transition: "left 0.2s",
+        });
         toggleEl.appendChild(thumb);
         toggleEl.onclick = () => {
           const nowOn = isModEnabled(mod.storageKey);
@@ -15016,7 +15041,18 @@ unsafeWindow.fetch = function(...args) {
           setModEnabled(mod.storageKey, next);
           toggleEl.style.background = next ? "#5865f2" : "#4f545c";
           thumb.style.left = next ? "18px" : "2px";
-          setTimeout(() => location.reload(), 400);
+          
+          const lang = getConfig().lang || navigator.language || "en-US";
+          const reloadMsg = {
+            "zh-TW": "設定已更新。需要重新整理頁面才能生效。是否立即重新整理？",
+            "zh-CN": "设置已更新。需要刷新页面才能生效。是否立即刷新？",
+            ja: "設定を更新しました。ページをリロードして有効にします。今すぐリロードしますか？",
+            ko: "설정을 업데이트했습니다. 페이지를 새로고침해야 적용됩니다. 지금 새로고침하시겠습니까?",
+          }[lang] || "Settings updated. Reload page to apply changes?";
+          
+          if (confirm(reloadMsg)) {
+            setTimeout(() => location.reload(), 300);
+          }
         };
         row.appendChild(nameSpan);
         row.appendChild(toggleEl);
@@ -15027,8 +15063,17 @@ unsafeWindow.fetch = function(...args) {
         "✕ " +
         ({ "zh-TW": "關閉", "zh-CN": "关闭", ja: "閉じる", ko: "닫기" }[lang] ||
           "Close");
-      closeBtn.style.cssText =
-        "margin-top:14px;width:100%;padding:7px;border:none;border-radius:6px;background:#4f545c;color:#fff;cursor:pointer;font-size:13px;";
+      Object.assign(closeBtn.style, {
+        marginTop: "14px",
+        width: "100%",
+        padding: "7px",
+        border: "none",
+        borderRadius: "6px",
+        background: "#4f545c",
+        color: "#fff",
+        cursor: "pointer",
+        fontSize: "13px",
+      });
       closeBtn.onclick = () => overlay.remove();
       box.appendChild(closeBtn);
       overlay.appendChild(box);
@@ -15043,8 +15088,44 @@ unsafeWindow.fetch = function(...args) {
     if (document.body) document.body.appendChild(rescueBtn);
   }
 
+  GM_registerMenuCommand(
+    `🐛 Toggle Debug Mode (${DEBUG ? "ON" : "OFF"})`,
+    () => {
+      const current = GM_getValue("debugModeEnabled", false);
+      GM_setValue("debugModeEnabled", !current);
+      const msg = !current
+        ? "[Discord Utilities] Debug mode enabled. Please reload the page."
+        : "[Discord Utilities] Debug mode disabled. Please reload the page.";
+      alert(msg);
+      console.log(msg);
+    }
+  );
+
+  GM_registerMenuCommand(
+    "📊 Show Module Status",
+    () => {
+      const status = MODULE_DEFS.map(
+        (m) => `${m.icon}${isModEnabled(m.storageKey) ? "✓" : "✗"}`
+      ).join(" ");
+      console.log("[Discord Utilities] Module Status:", status);
+      alert(`Module Status:\n${status}`);
+    }
+  );
+
+  window.addEventListener("error", (event) => {
+    if (event.filename && event.filename.includes("greasyfork")) {
+      console.error(
+        `[Discord Utilities] Uncaught error at ${event.filename}:${event.lineno}:${event.colno}`,
+        event.error
+      );
+      if (DEBUG) {
+        alert(`[Error] ${event.message}\n\nCheck console for details.`);
+      }
+    }
+  });
+
   DEBUG && console.log(
-    "[Discord Utilities] Modules loaded:",
+    "[Discord Utilities] v" + SCRIPT_VERSION + " loaded successfully. Modules:",
     MODULE_DEFS.map(
       (m) => `${m.icon}${isModEnabled(m.storageKey) ? "✓" : "✗"}`,
     ).join(" "),
