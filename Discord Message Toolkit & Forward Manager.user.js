@@ -51,7 +51,39 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "1.6.6";
+  const SCRIPT_VERSION = "1.6.7";
+
+  const GMStore = {
+    
+    get(key, defaultVal, json = false) {
+      try {
+        const raw = GM_getValue(key, undefined);
+        if (raw === undefined || raw === null) return defaultVal;
+        if (!json) return raw;
+        const parsed = JSON.parse(raw);
+        return parsed ?? defaultVal;
+      } catch (e) {
+        DEBUG && console.warn(`[GMStore.get] key="${key}" 解析失敗，回傳預設值`, e);
+        return defaultVal;
+      }
+    },
+
+    set(key, value, json = false) {
+      try {
+        GM_setValue(key, json ? JSON.stringify(value) : value);
+      } catch (e) {
+        DEBUG && console.warn(`[GMStore.set] key="${key}" 寫入失敗`, e);
+      }
+    },
+
+    del(key) {
+      try {
+        GM_deleteValue(key);
+      } catch (e) {
+        DEBUG && console.warn(`[GMStore.del] key="${key}" 刪除失敗`, e);
+      }
+    },
+  };
 
   const ConfigManager = {
     _cache: null,
@@ -268,7 +300,11 @@
     }
   }
 
-  const TranslationCache = new TranslationCacheManager(500);
+  const _transCacheSize = (() => {
+    const v = parseInt(localStorage.getItem("copyTransCacheSize"), 10);
+    return Number.isFinite(v) && v >= 50 && v <= 2000 ? v : 500;
+  })();
+  const TranslationCache = new TranslationCacheManager(_transCacheSize);
 
   function t(key, params = {}) {
     const config = getConfig();
@@ -4506,8 +4542,16 @@
       importConfirmBtn.onclick = () => {
         try {
           const parsed = JSON.parse(importTextarea.value.trim());
-          if (typeof parsed !== "object" || Array.isArray(parsed))
-            throw new Error("must be a JSON object");
+          if (typeof parsed !== "object" || Array.isArray(parsed) || parsed === null)
+            throw new Error("must be a plain JSON object");
+          const invalidKeys = Object.entries(parsed).filter(
+            ([k, v]) => k !== "_note" && v !== null && typeof v !== "string"
+          );
+          if (invalidKeys.length > 0) {
+            throw new Error(
+              `non-string values found in keys: ${invalidKeys.map(([k]) => k).slice(0, 5).join(", ")}${invalidKeys.length > 5 ? "…" : ""}`
+            );
+          }
           delete parsed["_note"];
           localStorage.setItem(
             "copyMenuLanguage_custom",
@@ -7986,6 +8030,8 @@
         if (!node.dataset.copyAttached) attachToMessage(node);
       });
 
+      const _ioMarginRaw = parseInt(localStorage.getItem("copyIOMargin"), 10);
+      const _ioMargin = [100, 300, 500].includes(_ioMarginRaw) ? _ioMarginRaw : 300;
       const io = new IntersectionObserver(
         (entries) => {
           for (const { target, isIntersecting } of entries) {
@@ -7996,7 +8042,7 @@
         },
         {
           root: document,
-          rootMargin: "300px",
+          rootMargin: `${_ioMargin}px`,
           threshold: 0.1,
         },
       );
@@ -8026,33 +8072,57 @@
         }, 500);
       };
 
+      let _usingNavigationApi = false;
       if (typeof navigation !== "undefined" && navigation.addEventListener) {
         navigation.addEventListener("navigate", _handleUrlChange, { passive: true });
+        _usingNavigationApi = true;
       } else {
         window.addEventListener("popstate", _handleUrlChange, { passive: true });
       }
 
-      const _checkUrlChange = () => {
-        _handleUrlChange();
-        _urlCheckTimer = setTimeout(_checkUrlChange, 1000);
-      };
-      _urlCheckTimer = setTimeout(_checkUrlChange, 1000);
+      let _pollInterval = 1000;
+      const _pollIntervalSlow = 5000;
+      let _cooldownTimer = null;
 
-      document.addEventListener("visibilitychange", () => {
+      const _checkUrlChange = () => {
+        const changed = location.href !== _lastUrl;
+        if (changed) {
+          _handleUrlChange();
+          _pollInterval = 1000;
+          clearTimeout(_cooldownTimer);
+          _cooldownTimer = setTimeout(() => {
+            _pollInterval = _pollIntervalSlow;
+          }, 5000);
+        }
+        _urlCheckTimer = setTimeout(_checkUrlChange, _pollInterval);
+      };
+      _urlCheckTimer = setTimeout(_checkUrlChange, _pollInterval);
+
+      const _pollVisibilityHandler = () => {
         if (document.hidden) {
           clearTimeout(_urlCheckTimer);
+          clearTimeout(_cooldownTimer);
           _urlCheckTimer = null;
         } else {
           _handleUrlChange();
-          _urlCheckTimer = setTimeout(_checkUrlChange, 1000);
+          _pollInterval = 1000;
+          _urlCheckTimer = setTimeout(_checkUrlChange, _pollInterval);
         }
-      }, { passive: true });
+      };
+      document.addEventListener("visibilitychange", _pollVisibilityHandler, { passive: true });
 
       window.addEventListener(
         "beforeunload",
         () => {
           io.disconnect();
           clearTimeout(_urlCheckTimer);
+          clearTimeout(_cooldownTimer);
+          document.removeEventListener("visibilitychange", _pollVisibilityHandler);
+          if (_usingNavigationApi) {
+            navigation.removeEventListener("navigate", _handleUrlChange);
+          } else {
+            window.removeEventListener("popstate", _handleUrlChange);
+          }
         },
         { once: true },
       );
