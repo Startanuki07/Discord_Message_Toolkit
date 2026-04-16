@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      1.6.4
+// @version      1.6.5
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -51,7 +51,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "1.6.2";
+  const SCRIPT_VERSION = "1.6.6";
 
   const ConfigManager = {
     _cache: null,
@@ -78,7 +78,8 @@
                     JSON.parse(localStorage.getItem("copySymbols")) ||
                     this._defaults.symbols
                   );
-                } catch {
+                } catch (e) {
+                  DEBUG && console.warn("[ConfigManager] 解析 copySymbols 失敗，回退預設值", e);
                   return this._defaults.symbols;
                 }
               }
@@ -3257,21 +3258,24 @@
             .my-sub-btn:hover { background: rgba(255,255,255,0.2); color: #fff; opacity: 1; }
             .my-sub-btn.is-active { background: #248046 !important; color: #fff !important; opacity: 1; box-shadow: 0 0 5px rgba(36, 128, 70, 0.6); }
 
-.btn-user-zone { background-color: transparent !important; color: #949BA4 !important; border: 1px solid rgba(148, 155, 164, 0.2) !important; width: 28px; padding: 0 !important; }
+            
+            .btn-user-zone { background-color: transparent !important; color: #949BA4 !important; border: 1px solid rgba(148, 155, 164, 0.2) !important; width: 28px; padding: 0 !important; }
             .btn-user-zone:hover { background-color: rgba(148, 155, 164, 0.1) !important; color: #dbdee1 !important; border-color: rgba(148, 155, 164, 0.5) !important; }
             .btn-user-zone.has-items { color: #dbdee1 !important; border-color: rgba(148, 155, 164, 0.5) !important; }
             .btn-star-main { background-color: rgba(240, 178, 50, 0.15) !important; color: #ffc44f !important; border: 1px solid rgba(240, 178, 50, 0.4) !important; min-width: 100px; justify-content: space-between; }
             .btn-star-item { background-color: rgba(240, 178, 50, 0.05) !important; color: #ffc44f !important; border: 1px solid rgba(240, 178, 50, 0.2) !important; }
             .btn-history-group { background-color: rgba(88, 101, 242, 0.1) !important; color: #dee0fc !important; border: 1px solid rgba(88, 101, 242, 0.2) !important; }
 
-.btn-toggle-mode { background: transparent !important; color: #b5bac1 !important; padding: 4px !important; width: 28px; }
+            
+            .btn-toggle-mode { background: transparent !important; color: #b5bac1 !important; padding: 4px !important; width: 28px; }
             .btn-toggle-mode:hover { color: #fff !important; background: rgba(255,255,255,0.1) !important; }
             .btn-help { background: transparent !important; color: #b5bac1 !important; padding: 0 6px !important; min-width: 24px; margin-left: 2px; }
             .btn-help:hover { color: #fff !important; background: rgba(255,255,255,0.1) !important; }
             .btn-add { background: transparent !important; color: #2dc770 !important; border: 1px dashed rgba(45, 199, 112, 0.4) !important; opacity: 0.7; }
             .btn-add:hover { opacity: 1; background: rgba(45, 199, 112, 0.1) !important; }
 
-.my-dropdown-menu { position: absolute; top: 100%; left: 0; background: #2b2d31; border: 1px solid #1e1f22; border-radius: 4px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); padding: 4px; display: none; flex-direction: column; gap: 2px; z-index: 999;
+            
+            .my-dropdown-menu { position: absolute; top: 100%; left: 0; background: #2b2d31; border: 1px solid #1e1f22; border-radius: 4px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); padding: 4px; display: none; flex-direction: column; gap: 2px; z-index: 999;
             min-width: 320px; max-height: 500px; overflow-y: auto; }
 
             .my-dropdown-menu.show { display: flex; }
@@ -3279,7 +3283,8 @@
             .dropdown-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; color: #dbdee1; font-size: 13px; cursor: pointer; border-radius: 2px; transition: background 0.1s; max-width: 100%; }
             .dropdown-item:hover { background: #404249; color: #fff; }
 
-.my-list-star-btn { background: transparent; border: none; cursor: pointer; color: #4e5058; padding: 4px; margin-right: 4px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s; }
+            
+            .my-list-star-btn { background: transparent; border: none; cursor: pointer; color: #4e5058; padding: 4px; margin-right: 4px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s; }
             .my-list-star-btn:hover { transform: scale(1.1); color: #dbdee1; background: rgba(255,255,255,0.05); }
             .my-list-star-btn.is-active { color: #f0b232; }
             .my-list-user-btn { color: #4e5058; }
@@ -3289,9 +3294,11 @@
             .my-target-row { background-color: rgba(255, 255, 255, 0.03) !important; box-shadow: inset 2px 0 0 rgba(255, 255, 255, 0.2); }
             .my-user-tagged::before { content: "👤"; color: #949BA4; margin-right: 4px; font-weight: normal; }
 
-.my-ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+            
+            .my-ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
-.my-help-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); animation: fadeIn 0.2s; }
+            
+            .my-help-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); animation: fadeIn 0.2s; }
             .my-help-modal { background: #313338; width: 500px; max-width: 90%; max-height: 80vh; border-radius: 8px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #1e1f22; color: #dbdee1; font-size: 14px; line-height: 1.5; animation: slideUp 0.2s; }
             .my-help-header { padding: 16px; border-bottom: 1px solid #1e1f22; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 16px; background: #2b2d31; }
             .my-help-body { padding: 16px; overflow-y: auto; }
@@ -3304,12 +3311,14 @@
             @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
             @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-.my-wormhole-creator-btn { color: #b5bac1; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin: 0 4px; transition: color 0.2s; }
+
+            .my-wormhole-creator-btn { color: #b5bac1; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin: 0 4px; transition: color 0.2s; }
             .my-wormhole-creator-btn:hover { color: #5865F2; }
 
             .my-wormhole-container { display: flex; align-items: center; gap: 4px; margin-left: 8px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 8px; }
 
-.my-wormhole-chip {
+            
+            .my-wormhole-chip {
                 background: rgba(30, 31, 34, 0.6);
                 border: 1px solid rgba(88, 101, 242, 0.3);
                 color: #dbdee1;
@@ -3324,9 +3333,11 @@
             .my-wormhole-chip:active { transform: translateY(0); }
             .my-wormhole-chip.editing { border-color: #ed4245; animation: my-shake-anim 0.3s ease-in-out infinite; }
 
-.my-wormhole-icon { font-size: 10px; opacity: 0.7; display: flex; align-items: center; }
+            
+            .my-wormhole-icon { font-size: 10px; opacity: 0.7; display: flex; align-items: center; }
 
-.my-wormhole-chip.vip {
+            
+            .my-wormhole-chip.vip {
                 background: transparent;      
                 border: none;                 
                 color: #f0b232;               
@@ -3344,7 +3355,8 @@
                 display: none;
             }
 
-.my-wormhole-group-chip {
+            
+            .my-wormhole-group-chip {
                 background: rgba(43, 45, 49, 0.8);
                 border: 1px dashed rgba(255,255,255,0.2);
                 color: #949ba4;
@@ -3354,7 +3366,8 @@
             }
             .my-wormhole-group-chip:hover { border-color: #dbdee1; color: #fff; }
 
-.my-wormhole-dropdown {
+            
+            .my-wormhole-dropdown {
                 position: absolute; top: 100%; left: 0;
                 background: #1e1f22; border: 1px solid #000;
                 border-radius: 4px; padding: 4px; z-index: 2000;
@@ -4797,7 +4810,8 @@
         flex-shrink: 0;
     }
 
-.msg-copy-edit-btn {
+    
+    .msg-copy-edit-btn {
         position: absolute;
         right: 8px;
         top: 50%;
@@ -4815,7 +4829,8 @@
         border-radius: 3px;
     }
 
-.msg-copy-item-group {
+    
+    .msg-copy-item-group {
         padding: 6px 12px;
         cursor: pointer;
         position: relative;
@@ -4831,7 +4846,8 @@
         color: #fff;
     }
 
-.msg-copy-portal-menu {
+    
+    .msg-copy-portal-menu {
         position: fixed;
         background: #2f3136;
         border: 1px solid #202225;
@@ -4860,7 +4876,8 @@
         background: rgba(255, 255, 255, 0.1);
     }
 
-.msg-copy-manage {
+    
+    .msg-copy-manage {
         font-size: 13px;
         color: #bbb;
         padding: 4px 12px 6px 12px;
@@ -7064,7 +7081,8 @@
               }
             }
             return new URL(url).pathname;
-          } catch {
+          } catch (e) {
+            DEBUG && console.warn("[resolveUrlForComparison] URL 解析失敗，回退原始值", url, e);
             return url.split("?")[0];
           }
         };
@@ -7947,7 +7965,7 @@
       });
     }
 
-    document.addEventListener("click", (e) => {
+    const _globalCloseMenuHandler = (e) => {
       if (
         !e.target.closest(".msg-copy-dropdown") &&
         !e.target.closest(".msg-copy-btn") &&
@@ -7955,7 +7973,11 @@
       ) {
         closeGlobalMenu();
       }
-    });
+    };
+    document.addEventListener("click", _globalCloseMenuHandler);
+    window.addEventListener("beforeunload", () => {
+      document.removeEventListener("click", _globalCloseMenuHandler);
+    }, { once: true });
 
     function init() {
       if (!config.lang) showLanguageSelector();
@@ -8085,20 +8107,24 @@
             .my-tool-btn.target-mode:hover { color: #f23f43; }
             .my-tool-btn.batch-active { color: #43b581 !important; background: rgba(67, 181, 129, 0.2); }
 
-.my-gif-overlay-bar { position: absolute; top: 4px; right: 36px; display: none; gap: 4px; padding: 2px; z-index: 100; background: rgba(0,0,0,0.6); border-radius: 4px; pointer-events: auto; }
+            
+            .my-gif-overlay-bar { position: absolute; top: 4px; right: 36px; display: none; gap: 4px; padding: 2px; z-index: 100; background: rgba(0,0,0,0.6); border-radius: 4px; pointer-events: auto; }
             .my-gif-card:hover > .my-gif-overlay-bar { display: flex !important; }
             .my-overlay-btn { width: 22px; height: 22px; color: #f2f3f5; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
             .my-overlay-btn:hover { background: rgba(88, 101, 242, 1); }
 
-.my-popover-menu { position: fixed; background: #2b2d31; border: 1px solid #1e1f22; border-radius: 4px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); padding: 0; display: none; flex-direction: column; z-index: 2147483647; min-width: 340px; max-width: 620px; max-height: 550px; overflow: hidden; }
+            
+            .my-popover-menu { position: fixed; background: #2b2d31; border: 1px solid #1e1f22; border-radius: 4px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); padding: 0; display: none; flex-direction: column; z-index: 2147483647; min-width: 340px; max-width: 620px; max-height: 550px; overflow: hidden; }
             .my-popover-menu.show { display: flex; }
 
-.my-menu-item { padding: 6px 10px; color: #dbdee1; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.03); }
+            
+            .my-menu-item { padding: 6px 10px; color: #dbdee1; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.03); }
             .my-menu-item:hover { background: #404249; color: #fff; }
             .my-emoji-preview-box { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
             .my-emoji-icon-preview { width: 100%; height: 100%; border-radius: 3px; object-fit: contain; background: rgba(0,0,0,0.2); }
 
-.my-emoji-icon-placeholder {
+            
+            .my-emoji-icon-placeholder {
                 width: 100%; height: 100%; border-radius: 4px;
                 background: linear-gradient(135deg, #5865F2 0%, #4752C4 100%);
                 display: flex; align-items: center; justify-content: center;
@@ -8119,7 +8145,8 @@
             .my-emoji-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
             .my-emoji-btn.delete:hover { background: #ed4245; color: #fff; }
 
-.my-tabs-header { display: flex; align-items: center; background: #1e1f22; border-bottom: 1px solid #111214; padding: 0 4px; width: 100%; box-sizing: border-box; }
+            
+            .my-tabs-header { display: flex; align-items: center; background: #1e1f22; border-bottom: 1px solid #111214; padding: 0 4px; width: 100%; box-sizing: border-box; }
             .my-tab-scroll-area { display: flex; align-items: center; overflow-x: auto; flex: 1; scrollbar-width: none; }
             .my-tab-scroll-area::-webkit-scrollbar { display: none; }
             .my-tab-controls { display: flex; align-items: center; flex-shrink: 0; padding-left: 4px; border-left: 1px solid rgba(255,255,255,0.05); margin-left: 4px; }
@@ -8131,7 +8158,8 @@
             .my-tab-add { padding: 8px; color: #43b581; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; }
             .my-tab-add:hover { color: #fff; background: #3ba55d; }
 
-.my-mode-switch {
+            
+            .my-mode-switch {
                 position: relative;
                 padding: 4px 10px; font-size: 11px; border-radius: 12px;
                 cursor: pointer;
@@ -8167,14 +8195,17 @@
                 100% { opacity: 0; transform: scale(0.5) rotate(30deg); }
             }
 
-.my-tab-content { padding: 8px; overflow-y: auto; max-height: 400px; min-height: 180px; background: #313338; }
+            
+            .my-tab-content { padding: 8px; overflow-y: auto; max-height: 400px; min-height: 180px; background: #313338; }
 
-.my-col-grid { display: grid; gap: 8px; width: 100%; box-sizing: border-box; }
+            
+            .my-col-grid { display: grid; gap: 8px; width: 100%; box-sizing: border-box; }
             .my-col-grid.emoji { grid-template-columns: repeat(auto-fill, 58px); gap: 4px; justify-content: start; }
             .my-col-grid.sticker { grid-template-columns: repeat(auto-fill, 100px); justify-content: center; }
             .my-col-grid.gif { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
 
-.my-col-img-wrapper { position: relative; background: #2b2d31; border-radius: 4px; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+            
+            .my-col-img-wrapper { position: relative; background: #2b2d31; border-radius: 4px; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
             .my-col-grid.emoji .my-col-img-wrapper { width: 58px; height: 58px; background: transparent; border-radius: 2px; box-shadow: none; }
             .my-col-grid.emoji .my-col-img-wrapper:hover { background: rgba(255,255,255,0.08); }
             .my-col-grid.sticker .my-col-img-wrapper { width: 100px; height: 100px; background: transparent; box-shadow: none; }
@@ -8184,12 +8215,14 @@
             .my-col-img-wrapper:hover .my-col-img { transform: scale(1.1); }
             .my-col-text { font-size: 32px; user-select: none; }
 
-.my-col-del-btn { position: absolute; top: 0; right: 0; width: 20px; height: 20px; background: rgba(0,0,0,0.6); color: #ed4245; display: flex; align-items: center; justify-content: center; border-bottom-left-radius: 6px; z-index: 999; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.1s; pointer-events: auto; }
+            
+            .my-col-del-btn { position: absolute; top: 0; right: 0; width: 20px; height: 20px; background: rgba(0,0,0,0.6); color: #ed4245; display: flex; align-items: center; justify-content: center; border-bottom-left-radius: 6px; z-index: 999; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.1s; pointer-events: auto; }
             .my-col-del-btn > * { pointer-events: none; }
             .my-col-img-wrapper:hover .my-col-del-btn, .my-col-del-btn:hover { opacity: 1; }
             .my-col-del-btn:hover { background: #ed4245; color: #fff; }
 
-.my-save-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #313338; border: 1px solid #1e1f22; box-shadow: 0 0 0 100vw rgba(0,0,0,0.7); border-radius: 8px; z-index: 2147483649; width: 250px; overflow: hidden; animation: myPop 0.2s ease-out; }
+            
+            .my-save-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #313338; border: 1px solid #1e1f22; box-shadow: 0 0 0 100vw rgba(0,0,0,0.7); border-radius: 8px; z-index: 2147483649; width: 250px; overflow: hidden; animation: myPop 0.2s ease-out; }
             .my-save-header { background: #2b2d31; padding: 10px; font-size: 14px; font-weight: bold; color: #fff; text-align: center; border-bottom: 1px solid #1e1f22; }
             .my-save-list { max-height: 300px; overflow-y: auto; }
             .my-save-item { padding: 10px 15px; cursor: pointer; color: #dbdee1; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.03); transition: background 0.1s; }
@@ -8201,7 +8234,8 @@
             .my-picker-tip { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: #5865F2; color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 2147483648; pointer-events: none; }
             .my-picker-frame { position: fixed; pointer-events: none; z-index: 2147483648; box-shadow: 0 0 0 2px #5865F2, 0 0 20px rgba(88, 101, 242, 0.5); border-radius: 4px; }
 
-@keyframes my-eat-shine {
+            
+            @keyframes my-eat-shine {
                 0% { transform: scale(1); filter: none; color: var(--interactive-normal); }
                 
                 20% { transform: scale(2.5) rotate(-15deg); filter: drop-shadow(0 0 15px #ffd700); color: #ffd700; }
@@ -8216,7 +8250,8 @@
             
             .my-eat-anim { animation: my-eat-shine 0.8s cubic-bezier(0.25, 1.5, 0.5, 1); }
 
-@keyframes my-gentle-shake {
+            
+            @keyframes my-gentle-shake {
                 0% { transform: rotate(0deg); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } 100% { transform: rotate(0deg); }
             }
 
@@ -8272,7 +8307,8 @@
                 box-shadow: none;
             }
 
-.my-idle-darkness {
+            
+            .my-idle-darkness {
                 position: fixed;
                 top: 0; left: 0; width: 100vw; height: 100vh;
                 background: rgba(0, 0, 0, 0.85);
@@ -8286,7 +8322,8 @@
                 pointer-events: auto;
             }
 
-.my-tool-btn.spotlight-active {
+            
+            .my-tool-btn.spotlight-active {
                 position: fixed !important; 
                 z-index: 2147483646 !important; 
                 color: #ffd700 !important;
@@ -8493,7 +8530,8 @@
     function gifCacheKey(url) {
       try {
         return new URL(url).pathname;
-      } catch {
+      } catch (e) {
+        DEBUG && console.warn("[gifCacheKey] URL 解析失敗，回退原始字串", url, e);
         return url;
       }
     }
@@ -9383,7 +9421,7 @@
 
       if (type === TYPES.GIF) {
         const refreshBtn = document.createElement("div");
-        
+
         refreshBtn.innerHTML = `
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M23 4v6h-6"></path>
@@ -9391,9 +9429,9 @@
             <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"></path>
           </svg>
         `;
-        
+
         refreshBtn.title = t("em_col_refresh_tooltip");
-        
+
         Object.assign(refreshBtn.style, {
           cursor: "pointer",
           width: "24px",
@@ -9424,29 +9462,57 @@
         refreshBtn.addEventListener("mousedown", (e) => e.stopPropagation());
         refreshBtn.onclick = async (e) => {
           e.stopPropagation();
-          
-          const imgs = dropdown.querySelectorAll(".my-col-img");
-          imgs.forEach((img) => {
-            if (img.tagName === "IMG") {
-              img.onerror = null;
-              img.style.background = "transparent";
-              img.style.opacity = "0.7";
-              
-              const originalSrc = img.src.split("?")[0];
-              const timestamp = Date.now();
-              img.src = `${originalSrc}?t=${timestamp}`;
-              
-              setTimeout(() => {
-                if (img.complete && img.naturalHeight > 0) {
-                  img.style.opacity = "1";
+
+          const currentItems = cols[currentActiveTab] || [];
+          let refreshCount = 0;
+          let failCount = 0;
+
+          refreshBtn.style.opacity = "0.3";
+          refreshBtn.style.pointerEvents = "none";
+
+          const clearCacheForUrl = async (url) => {
+            try {
+              const k = url.split("?")[0];
+              GM_deleteValue(GIF_CACHE_PREFIX + k);
+              await idbDelete(k).catch(() => {});
+            } catch (_) {}
+          };
+
+          for (const item of currentItems) {
+            const url = typeof item === "object"
+              ? item.url || item.content
+              : item;
+
+            if (url && url.startsWith("http")) {
+              try {
+                await clearCacheForUrl(url);
+
+                const newDataUrl = await fetchAndCacheMedia(url);
+
+                if (newDataUrl) {
+                  refreshCount++;
+                } else {
+                  failCount++;
                 }
-              }, 200);
+              } catch (err) {
+                DEBUG && console.error("[GifRefresh] Cache error:", err);
+                failCount++;
+              }
             }
-          });
-          
-          setTimeout(() => {
-            renderTabsView(input, type);
-          }, 400);
+          }
+
+          refreshBtn.style.opacity = "0.6";
+          refreshBtn.style.pointerEvents = "auto";
+
+          renderTabsView(input, type);
+
+          const msg = refreshCount > 0
+            ? `✨ 已重新快取 ${refreshCount} 個 GIF${failCount > 0 ? `（${failCount} 個失敗）` : ""}`
+            : failCount > 0
+            ? `⚠️ 無法刷新此分頁的 GIF`
+            : `ℹ️ 此分頁無有效的 GIF`;
+
+          showToast(msg);
         };
         controls.appendChild(refreshBtn);
       }
@@ -10982,7 +11048,8 @@
             100% { transform: scale(1); }
         }
 
-.header-mod-global-tooltip {
+        
+        .header-mod-global-tooltip {
             position: fixed; background: #111214; border: 1px solid #2b2d31;
             box-shadow: 0 8px 16px rgba(0,0,0,0.6); border-radius: 8px;
             padding: 8px 12px; z-index: 2147483647; width: max-content; pointer-events: none;
@@ -11115,12 +11182,16 @@
     }
     toggleAntiHijack(State.antiHijack);
 
-    document.addEventListener("visibilitychange", () => {
+    const _wormholeVisibilityHandler = () => {
       document.documentElement.classList.toggle(
         "wormhole-page-hidden",
         document.hidden,
       );
-    });
+    };
+    document.addEventListener("visibilitychange", _wormholeVisibilityHandler);
+    window.addEventListener("beforeunload", () => {
+      document.removeEventListener("visibilitychange", _wormholeVisibilityHandler);
+    }, { once: true });
 
     const concealHandler = (() => {
       const REPLACE_PREFIX = "_";
@@ -13516,7 +13587,8 @@ unsafeWindow.fetch = function(...args) {
       const targetPath = (() => {
         try {
           return new URL(wormhole.url).pathname;
-        } catch {
+        } catch (e) {
+          DEBUG && console.warn("[_sendImagesViaA] wormhole.url 解析失敗", wormhole.url, e);
           return null;
         }
       })();
@@ -13744,7 +13816,8 @@ unsafeWindow.fetch = function(...args) {
       const targetPath = (() => {
         try {
           return new URL(wormhole.url).pathname;
-        } catch {
+        } catch (e) {
+          DEBUG && console.warn("[sendTextViaA] wormhole.url 解析失敗", wormhole.url, e);
           return null;
         }
       })();
@@ -14757,7 +14830,8 @@ unsafeWindow.fetch = function(...args) {
             }
             .my-wormhole-container:hover .wh-row-2:not(:empty) { opacity: 1; pointer-events: auto; transform: translateY(0); }
 
-.wh-row-2 .my-wormhole-chip,
+            
+            .wh-row-2 .my-wormhole-chip,
             .wh-row-2 .my-wormhole-vip-chip {
                 flex-direction: row;
                 align-items: center;
@@ -14791,7 +14865,8 @@ unsafeWindow.fetch = function(...args) {
                 box-shadow: 0 4px 12px rgba(255,215,0,0.25);
             }
 
-.wh-row-2 .my-wormhole-chip img.my-wormhole-icon,
+            
+            .wh-row-2 .my-wormhole-chip img.my-wormhole-icon,
             .wh-row-2 .my-wormhole-vip-chip img {
                 width: 22px !important;
                 height: 22px !important;
@@ -14803,12 +14878,16 @@ unsafeWindow.fetch = function(...args) {
                 line-height: 1;
             }
 
-.wh-row-2 .my-wormhole-chip .item-name,
+            
+            .wh-row-2 .my-wormhole-chip .item-name,
             .wh-row-2 .my-wormhole-vip-chip .vip-text {
                 display: none !important;
             }
 
-.my-wormhole-container.focus-mode { position: relative; padding-top: 0; align-items: center; }
+            
+
+            
+            .my-wormhole-container.focus-mode { position: relative; padding-top: 0; align-items: center; }
             .my-wormhole-container.focus-mode .my-wormhole-vip-chip,
             .my-wormhole-container.focus-mode .my-wormhole-chip {
                 width: var(--wh-focus-chip, 32px);
@@ -14882,7 +14961,8 @@ unsafeWindow.fetch = function(...args) {
                 font-size: 28px;
             }
 
-.my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-vip-chip::after,
+            
+            .my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-vip-chip::after,
             .my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-chip::after {
                 content: attr(data-wormhole-name);
                 position: absolute;
@@ -14908,7 +14988,8 @@ unsafeWindow.fetch = function(...args) {
                 transform: translateX(-50%) scale(1);
             }
 
-.my-wormhole-vip-chip.dragging,
+            
+            .my-wormhole-vip-chip.dragging,
             .my-wormhole-chip.dragging {
                 opacity: 0.5 !important;
                 transform: scale(0.95) !important;
@@ -14930,7 +15011,8 @@ unsafeWindow.fetch = function(...args) {
                 75% { transform: translateX(2px); }
             }
 
-.my-wormhole-container.focus-mode .my-wormhole-vip-chip.dragging,
+            
+            .my-wormhole-container.focus-mode .my-wormhole-vip-chip.dragging,
             .my-wormhole-container.focus-mode .my-wormhole-chip.dragging {
                 opacity: 0.5 !important;
                 transform: scale(0.8) !important;
@@ -14947,7 +15029,8 @@ unsafeWindow.fetch = function(...args) {
                 z-index: 10;
             }
 
-.my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-vip-chip.dragging::after,
+            
+            .my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-vip-chip.dragging::after,
             .my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-chip.dragging::after {
                 display: none;
             }
@@ -15012,7 +15095,7 @@ unsafeWindow.fetch = function(...args) {
     rescueBtn.id = "dmt-rescue-btn";
     rescueBtn.title = t("mod_msg_enable_menu");
     rescueBtn.textContent = "⚙️";
-    
+
     Object.assign(rescueBtn.style, {
       position: "fixed",
       bottom: "20px",
@@ -15033,7 +15116,7 @@ unsafeWindow.fetch = function(...args) {
       opacity: "0.5",
       transition: "opacity 0.2s",
     });
-    
+
     rescueBtn.onmouseenter = () => {
       rescueBtn.style.opacity = "1";
     };
@@ -15121,7 +15204,7 @@ unsafeWindow.fetch = function(...args) {
           setModEnabled(mod.storageKey, next);
           toggleEl.style.background = next ? "#5865f2" : "#4f545c";
           thumb.style.left = next ? "18px" : "2px";
-          
+
           const lang = getConfig().lang || navigator.language || "en-US";
           const reloadMsg = {
             "zh-TW": "設定已更新。需要重新整理頁面才能生效。是否立即重新整理？",
@@ -15129,7 +15212,7 @@ unsafeWindow.fetch = function(...args) {
             ja: "設定を更新しました。ページをリロードして有効にします。今すぐリロードしますか？",
             ko: "설정을 업데이트했습니다. 페이지를 새로고침해야 적용됩니다. 지금 새로고침하시겠습니까?",
           }[lang] || "Settings updated. Reload page to apply changes?";
-          
+
           if (confirm(reloadMsg)) {
             setTimeout(() => location.reload(), 300);
           }
