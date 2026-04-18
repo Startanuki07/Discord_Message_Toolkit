@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      1.6.5
+// @version      1.6.6
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -51,7 +51,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "1.6.7";
+  const SCRIPT_VERSION = "1.6.8";
 
   const GMStore = {
     
@@ -622,6 +622,15 @@
       em_modal_choose_tab: "Save to which collection?",
       em_modal_create_new: "+ Create New...",
       em_col_refresh_tooltip: "Refresh GIF preview (refresh expired CDN cache)",
+      em_refresh_no_expired:   "ℹ️ No expired GIFs in this tab",
+      em_refresh_consent:      "⚠️ About GIF Refresh\n\nThis feature will use a third-party proxy (fixcdn.hyonsu.com)\nto obtain fresh Discord attachment credentials.\n\nNotes:\n• Your image URLs will be sent to fixcdn.hyonsu.com\n• This is a third-party service, unrelated to Discord or this script\n• Search 'fixcdn hyonsu' to learn more before proceeding\n\nContinue?",
+      em_refresh_cancel_tip:   "ℹ️ Cancelled. Manual steps:\n① Find the original GIF on Discord\n② Re-add it to your collection",
+      em_refresh_loading:      "Refreshing...",
+      em_refresh_ok:           "✨ Refreshed {n} GIF(s){fail} {track}",
+      em_refresh_partial_fail: " ({f} failed)",
+      em_refresh_fail:         "⚠️ Could not refresh GIFs in this tab",
+      em_refresh_track_api:    "(Discord API)",
+      em_refresh_track_cdn:    "(fixcdn)",
 
       em_tip_pick: "Set cover image",
       em_tip_edit: "Edit note",
@@ -948,6 +957,15 @@
       em_modal_choose_tab: "儲存到哪個收藏庫？",
       em_modal_create_new: "+ 建立新的...",
       em_col_refresh_tooltip: "重新整理 GIF 預覽 (刷新過期的 CDN 快取)",
+      em_refresh_no_expired:   "ℹ️ 此分頁無過期的 GIF",
+      em_refresh_consent:      "⚠️ 關於 GIF 刷新功能\n\n此功能將透過第三方代理伺服器（fixcdn.hyonsu.com）\n重新取得 Discord 附件連結的存取憑證。\n\n注意事項：\n• 你的圖片網址（URL）將傳送至 fixcdn.hyonsu.com\n• 該服務為第三方個人維護，與 Discord 及本腳本無關\n• 建議搜尋「fixcdn hyonsu」了解其運作方式後再決定\n\n是否繼續？",
+      em_refresh_cancel_tip:   "ℹ️ 已取消。手動更新步驟：\n① 在 Discord 找到原始 GIF 訊息\n② 重新點選收藏加入蒐藏匣",
+      em_refresh_loading:      "Refreshing...",
+      em_refresh_ok:           "✨ 已刷新 {n} 個 GIF{fail} {track}",
+      em_refresh_partial_fail: "（{f} 個失敗）",
+      em_refresh_fail:         "⚠️ 無法刷新此分頁的 GIF",
+      em_refresh_track_api:    "（Discord API）",
+      em_refresh_track_cdn:    "（fixcdn）",
       em_tip_pick: "設定封面圖",
       em_tip_edit: "編輯備註",
       em_tip_delete: "刪除",
@@ -1272,6 +1290,15 @@
       em_modal_choose_tab: "保存到哪个收藏库？",
       em_modal_create_new: "+ 创建新的...",
       em_col_refresh_tooltip: "刷新 GIF 预览 (刷新过期的 CDN 缓存)",
+      em_refresh_no_expired:   "ℹ️ 此分页无过期的 GIF",
+      em_refresh_consent:      "⚠️ 关于 GIF 刷新功能\n\n此功能将通过第三方代理服务器（fixcdn.hyonsu.com）\n重新获取 Discord 附件链接的访问凭证。\n\n注意事项：\n• 你的图片网址（URL）将发送至 fixcdn.hyonsu.com\n• 该服务为第三方个人维护，与 Discord 及本脚本无关\n• 建议搜索「fixcdn hyonsu」了解其运作方式后再決定\n\n是否继续？",
+      em_refresh_cancel_tip:   "ℹ️ 已取消。手动更新步骤：\n① 在 Discord 找到原始 GIF 消息\n② 重新点选收藏加入收藏库",
+      em_refresh_loading:      "Refreshing...",
+      em_refresh_ok:           "✨ 已刷新 {n} 个 GIF{fail} {track}",
+      em_refresh_partial_fail: "（{f} 个失败）",
+      em_refresh_fail:         "⚠️ 无法刷新此分页的 GIF",
+      em_refresh_track_api:    "（Discord API）",
+      em_refresh_track_cdn:    "（fixcdn）",
       em_tip_pick: "设置封面图",
       em_tip_edit: "编辑备注",
       em_tip_delete: "删除",
@@ -1605,6 +1632,15 @@
       em_modal_choose_tab: "どのコレクションに保存しますか？",
       em_modal_create_new: "+ 新しく作成...",
       em_col_refresh_tooltip: "GIF プレビューを更新 (期限切れの CDN キャッシュをリフレッシュ)",
+      em_refresh_no_expired:   "ℹ️ このタブに期限切れのGIFはありません",
+      em_refresh_consent:      "⚠️ GIF更新について\n\nこの機能はサードパーティのプロキシ（fixcdn.hyonsu.com）を使用して\nDiscord添付ファイルのアクセス資格情報を更新します。\n\n注意事項：\n• 画像のURLがfixcdn.hyonsu.comに送信されます\n• このサービスはDiscordや本スクリプトと無関係の第三者が運営しています\n• 続行前に「fixcdn hyonsu」を検索して確認することをお勧めします\n\n続行しますか？",
+      em_refresh_cancel_tip:   "ℹ️ キャンセルしました。手動更新手順：\n① DiscordでオリジナルGIFメッセージを見つける\n② 再度コレクションに追加する",
+      em_refresh_loading:      "Refreshing...",
+      em_refresh_ok:           "✨ {n}件のGIFを更新しました{fail} {track}",
+      em_refresh_partial_fail: "（{f}件失敗）",
+      em_refresh_fail:         "⚠️ このタブのGIFを更新できませんでした",
+      em_refresh_track_api:    "（Discord API）",
+      em_refresh_track_cdn:    "（fixcdn）",
       em_tip_pick: "カバー画像を設定",
       em_tip_edit: "メモを編集",
       em_tip_delete: "削除",
@@ -1936,6 +1972,15 @@
       em_modal_choose_tab: "어느 컬렉션에 저장하시겠습니까?",
       em_modal_create_new: "+ 새로 만들기...",
       em_col_refresh_tooltip: "GIF 미리보기 새로고침 (만료된 CDN 캐시 새로고침)",
+      em_refresh_no_expired:   "ℹ️ 이 탭에 만료된 GIF가 없습니다",
+      em_refresh_consent:      "⚠️ GIF 새로고침에 대하여\n\n이 기능은 서드파티 프록시(fixcdn.hyonsu.com)를 통해\nDiscord 첨부 파일 접근 자격을 갱신합니다.\n\n주의 사항:\n• 이미지 URL이 fixcdn.hyonsu.com에 전송됩니다\n• 해당 서비스는 Discord 및 이 스크립트와 무관한 제3자가 운영합니다\n• 진행 전 'fixcdn hyonsu'를 검색하여 확인하시기 바랍니다\n\n계속하시겠습니까?",
+      em_refresh_cancel_tip:   "ℹ️ 취소됨. 수동 업데이트 방법:\n① Discord에서 원본 GIF 메시지 찾기\n② 다시 콜렉션에 추가하기",
+      em_refresh_loading:      "Refreshing...",
+      em_refresh_ok:           "✨ GIF {n}개 새로고침 완료{fail} {track}",
+      em_refresh_partial_fail: " ({f}개 실패)",
+      em_refresh_fail:         "⚠️ 이 탭의 GIF를 새로고침할 수 없습니다",
+      em_refresh_track_api:    "(Discord API)",
+      em_refresh_track_cdn:    "(fixcdn)",
       em_tip_pick: "커버 이미지 설정",
       em_tip_edit: "메모 편집",
       em_tip_delete: "삭제",
@@ -8266,7 +8311,7 @@
             }
 
             
-            .my-tab-content { padding: 8px; overflow-y: auto; max-height: 400px; min-height: 180px; background: #313338; }
+            .my-tab-content { padding: 8px; overflow-y: auto; max-height: 400px; min-height: 180px; background: #313338; position: relative; }
 
             
             .my-col-grid { display: grid; gap: 8px; width: 100%; box-sizing: border-box; }
@@ -8325,14 +8370,33 @@
                 0% { transform: rotate(0deg); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } 100% { transform: rotate(0deg); }
             }
 
-            .my-chat-input-folder-btn button {
-                background: transparent !important;
-                transition: transform 0.2s;
+            
+            .my-chat-input-folder-btn {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-right: 4px;
+                flex-shrink: 0;
             }
-            .my-chat-input-folder-btn button:hover {
-                
+            .dmt-folder-btn {
+                background: transparent;
+                border: none;
+                cursor: pointer;
+                padding: 0;
+                width: 32px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 4px;
+                color: var(--interactive-normal, #b5bac1);
+                transition: color 0.15s, background 0.15s;
+                flex-shrink: 0;
+            }
+            .dmt-folder-btn:hover {
+                background: var(--background-modifier-hover, rgba(79,84,92,0.16));
+                color: var(--interactive-hover, #dbdee1);
                 animation: my-gentle-shake 0.5s ease-in-out infinite;
-                color: var(--interactive-hover) !important;
             }
 
             .my-popover-menu.input-mode {
@@ -8596,6 +8660,15 @@
         req.onerror = (e) => rej(e.target.error);
       });
     }
+    async function idbDelete(id) {
+      const db = await openGifIDB();
+      return new Promise((res) => {
+        const tx = db.transaction("blobs", "readwrite");
+        tx.objectStore("blobs").delete(id);
+        tx.oncomplete = () => res();
+        tx.onerror   = () => res();
+      });
+    }
 
     function gifCacheKey(url) {
       try {
@@ -8687,6 +8760,18 @@
           },
         });
       });
+    }
+
+    function isDiscordUrlExpired(url) {
+      const m = url.match(/[?&]ex=([0-9a-f]+)/i);
+      if (!m) return false;
+      return Date.now() > parseInt(m[1], 16) * 1000;
+    }
+
+    function toFixcdnUrl(url) {
+      return url
+        .replace("cdn.discordapp.com", "fixcdn.hyonsu.com")
+        .replace("media.discordapp.net", "fixcdn.hyonsu.com");
     }
 
     async function attachGifFallback(imgEl, originalUrl, stableUrl) {
@@ -9534,53 +9619,155 @@
           e.stopPropagation();
 
           const currentItems = cols[currentActiveTab] || [];
-          let refreshCount = 0;
-          let failCount = 0;
+
+          const expiredItems = currentItems.filter((item) => {
+            const url = typeof item === "object" ? item.url || item.content : item;
+            return url && url.startsWith("http") && isDiscordUrlExpired(url);
+          });
+
+          if (expiredItems.length === 0) {
+            showToast(t("em_refresh_no_expired"));
+            return;
+          }
+
+          const token = window.wormholeModule?._cachedToken || null;
+
+          if (!token) {
+            const CONSENT_KEY = "dmt_fixcdn_consent";
+            if (localStorage.getItem(CONSENT_KEY) !== "1") {
+              const agreed = confirm(t("em_refresh_consent"));
+              if (!agreed) {
+                showToast(t("em_refresh_cancel_tip"));
+                return;
+              }
+              localStorage.setItem(CONSENT_KEY, "1");
+            }
+          }
+
+          if (!document.getElementById("dmt-gif-refresh-style")) {
+            const s = document.createElement("style");
+            s.id = "dmt-gif-refresh-style";
+            s.textContent = [
+              "@keyframes dmt-spin { to { transform: rotate(360deg); } }",
+              "@keyframes dmt-pulse { 0%,100%{ opacity:.35; } 50%{ opacity:1; } }",
+              ".dmt-refresh-overlay {",
+              "  position:absolute; inset:0; z-index:20;",
+              "  background:rgba(32,34,37,0.78); backdrop-filter:blur(3px);",
+              "  display:flex; flex-direction:column;",
+              "  align-items:center; justify-content:center; gap:8px;",
+              "  border-radius:0 0 4px 4px; pointer-events:none;",
+              "}",
+              ".dmt-refresh-overlay .dmt-ro-icon {",
+              "  font-size:30px; line-height:1;",
+              "  animation: dmt-spin 2s linear infinite;",
+              "  display:inline-block;",
+              "}",
+              ".dmt-refresh-overlay .dmt-ro-label {",
+              "  color:#b5bac1; font-size:12px; letter-spacing:.06em;",
+              "  animation: dmt-pulse 1.4s ease-in-out infinite;",
+              "}",
+              ".dmt-refresh-overlay .dmt-ro-counter {",
+              "  color:#72767d; font-size:11px;",
+              "}",
+            ].join("\n");
+            document.head.appendChild(s);
+          }
+
+          const panelContent =
+            refreshBtn.closest(".my-popover-menu")?.querySelector(".my-tab-content");
+          let overlay = null;
+          let counterEl = null;
+          if (panelContent) {
+            overlay   = document.createElement("div");
+            overlay.className = "dmt-refresh-overlay";
+            const iconEl    = document.createElement("span");
+            iconEl.className = "dmt-ro-icon";
+            iconEl.textContent = "🧊";
+            const labelEl   = document.createElement("span");
+            labelEl.className = "dmt-ro-label";
+            labelEl.textContent = t("em_refresh_loading");
+            counterEl = document.createElement("span");
+            counterEl.className = "dmt-ro-counter";
+            counterEl.textContent = `0 / ${expiredItems.length}`;
+            overlay.append(iconEl, labelEl, counterEl);
+            panelContent.appendChild(overlay);
+          }
 
           refreshBtn.style.opacity = "0.3";
           refreshBtn.style.pointerEvents = "none";
 
-          const clearCacheForUrl = async (url) => {
+          let refreshCount = 0;
+          let failCount    = 0;
+          let doneCount    = 0;
+
+          for (const item of expiredItems) {
+            const url = typeof item === "object" ? item.url || item.content : item;
+            if (!url || !url.startsWith("http")) { doneCount++; continue; }
+
             try {
-              const k = url.split("?")[0];
-              GM_deleteValue(GIF_CACHE_PREFIX + k);
-              await idbDelete(k).catch(() => {});
-            } catch (_) {}
-          };
+              const cacheKey = gifCacheKey(url);
+              try { GM_deleteValue(GIF_CACHE_PREFIX + cacheKey); } catch (_) {}
+              try { await idbDelete(cacheKey); } catch (_) {}
 
-          for (const item of currentItems) {
-            const url = typeof item === "object"
-              ? item.url || item.content
-              : item;
+              let freshUrl = null;
+              if (token) {
+                freshUrl = await new Promise((resolve) => {
+                  GM_xmlhttpRequest({
+                    method:  "POST",
+                    url:     "https://discord.com/api/v9/attachments/refresh-urls",
+                    headers: {
+                      "Content-Type":  "application/json",
+                      "Authorization": token,
+                    },
+                    data:    JSON.stringify({ attachment_urls: [url] }),
+                    timeout: 10000,
+                    onload(res) {
+                      if (res.status !== 200) { resolve(null); return; }
+                      try {
+                        const data = JSON.parse(res.responseText);
+                        resolve(data.refreshed_urls?.[0]?.refreshed || null);
+                      } catch (_) { resolve(null); }
+                    },
+                    onerror()  { resolve(null); },
+                    ontimeout(){ resolve(null); },
+                  });
+                });
+              }
 
-            if (url && url.startsWith("http")) {
-              try {
-                await clearCacheForUrl(url);
+              const downloadUrl = freshUrl || toFixcdnUrl(url);
 
-                const newDataUrl = await fetchAndCacheMedia(url);
-
-                if (newDataUrl) {
-                  refreshCount++;
-                } else {
-                  failCount++;
-                }
-              } catch (err) {
-                DEBUG && console.error("[GifRefresh] Cache error:", err);
+              const dataUrl = await fetchAndCacheMedia(downloadUrl);
+              if (dataUrl) {
+                if (freshUrl && typeof item === "object") item.url = freshUrl;
+                refreshCount++;
+              } else {
                 failCount++;
               }
+            } catch (err) {
+              DEBUG && console.error("[GifRefresh] Error:", err);
+              failCount++;
             }
+
+            doneCount++;
+            if (counterEl) counterEl.textContent = `${doneCount} / ${expiredItems.length}`;
           }
 
-          refreshBtn.style.opacity = "0.6";
+          overlay?.remove();
+
+          if (token && refreshCount > 0) saveCollections(type, cols);
+
+          refreshBtn.style.opacity       = "0.6";
           refreshBtn.style.pointerEvents = "auto";
 
           renderTabsView(input, type);
 
+          const track = token ? t("em_refresh_track_api") : t("em_refresh_track_cdn");
+          const failSuffix = failCount > 0 ? t("em_refresh_partial_fail", { f: failCount }) : "";
           const msg = refreshCount > 0
-            ? `✨ 已重新快取 ${refreshCount} 個 GIF${failCount > 0 ? `（${failCount} 個失敗）` : ""}`
+            ? t("em_refresh_ok", { n: refreshCount, fail: failSuffix, track })
             : failCount > 0
-            ? `⚠️ 無法刷新此分頁的 GIF`
-            : `ℹ️ 此分頁無有效的 GIF`;
+            ? t("em_refresh_fail")
+            : t("em_refresh_no_expired");
 
           showToast(msg);
         };
@@ -10432,63 +10619,43 @@
     function initChatInputButton() {
 
       const injectButton = (container) => {
-        if (!container.querySelector('div[class*="emojiButton"]')) return;
+        if (!container.closest('[class*="channelTextArea"], [class*="channelTextarea"]')) return;
 
-        const existingBtn = container.querySelector(
-          ".my-chat-input-folder-btn",
-        );
+        const hasInputBtns =
+          container.querySelector('[class*="emojiButton"], [class*="emoji_button"]') ||
+          container.querySelector(
+            'button[aria-label*="moji"], button[aria-label*="GIF"],' +
+            'button[aria-label*="ticker"], button[aria-label*="表情"],' +
+            'button[aria-label*="スタンプ"], button[aria-label*="스티커"]'
+          );
+        if (!hasInputBtns) return;
 
+        const existingBtn = container.querySelector(".my-chat-input-folder-btn");
         if (existingBtn) {
-          if (container.firstChild !== existingBtn) {
-            container.prepend(existingBtn);
-          }
+          if (container.firstChild !== existingBtn) container.prepend(existingBtn);
           return;
         }
 
         const btnContainer = document.createElement("div");
-        btnContainer.className =
-          "buttonContainer__74017 my-chat-input-folder-btn";
-        btnContainer.style.marginRight = "4px";
-        btnContainer.style.display = "flex";
-        btnContainer.style.alignItems = "center";
-        btnContainer.style.justifyContent = "center";
+        btnContainer.className = "my-chat-input-folder-btn";
 
         const btn = document.createElement("button");
-        btn.className = "button__74017 button__24af7";
+        btn.className = "dmt-folder-btn";
         btn.setAttribute("type", "button");
         btn.setAttribute("aria-label", "開啟蒐藏庫");
-        btn.style.width = "24px";
-        btn.style.height = "24px";
-
-        const iconWrapper = document.createElement("div");
-        iconWrapper.className = "buttonWrapper__24af7";
-        iconWrapper.style.opacity = "1";
-        iconWrapper.innerHTML = `
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--interactive-normal); transition: color 0.2s;">
-                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-                </svg>
-            `;
-
-        btn.onmouseenter = () =>
-          (iconWrapper.querySelector("svg").style.color =
-            "var(--interactive-hover)");
-        btn.onmouseleave = () =>
-          (iconWrapper.querySelector("svg").style.color =
-            "var(--interactive-normal)");
+        btn.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`;
 
         btn.onclick = (e) => {
           e.stopPropagation();
           closeAllMenus();
           const channelTextArea = container.closest(
-            '[class*="channelTextArea"]',
+            '[class*="channelTextArea"], [class*="channelTextarea"]',
           );
           const input = channelTextArea?.querySelector('div[role="textbox"]');
           showQuickTypeMenu(btn, input);
         };
 
-        btn.appendChild(iconWrapper);
         btnContainer.appendChild(btn);
-
         container.prepend(btnContainer);
       };
 
@@ -10540,6 +10707,7 @@
         activeTrigger = triggerBtn;
       };
 
+      const DMT_BTN_SEL = 'div[class*="buttons__"], div[class*="buttonsInner_"]';
       let _inputBtnDebounce = null;
 
       const observer = new MutationObserver(() => {
@@ -10547,14 +10715,7 @@
 
         clearTimeout(_inputBtnDebounce);
         _inputBtnDebounce = setTimeout(() => {
-          const targets = document.querySelectorAll(
-            'div[class*="buttons__"]:not(.dmt-injected)',
-          );
-
-          targets.forEach((node) => {
-            node.classList.add("dmt-injected");
-            injectButton(node);
-          });
+          document.querySelectorAll(DMT_BTN_SEL).forEach(injectButton);
         }, 100);
       });
 
@@ -10563,7 +10724,7 @@
       let _scanRetry = 0;
       const MAX_SCAN_RETRY = 5;
       const _initialScan = () => {
-        const found = document.querySelectorAll('div[class*="buttons__"]');
+        const found = document.querySelectorAll(DMT_BTN_SEL);
         if (found.length > 0) {
           found.forEach(injectButton);
         } else if (_scanRetry < MAX_SCAN_RETRY) {
