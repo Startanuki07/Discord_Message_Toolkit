@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      1.7.0
+// @version      1.7.1
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -51,7 +51,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "1.8.3";
+  const SCRIPT_VERSION = "1.8.4";
 
   const GMStore = {
     
@@ -706,6 +706,9 @@
       to_vxreddit: "🛠️ to vxreddit",
       to_instagram: "📷 to instagram.com",
       to_kkinstagram: "🔁 to kkinstagram",
+      to_vxinstagram: "🔁 to vxinstagram",
+      to_ddinstagram: "🔁 to ddinstagram",
+      to_uuinstagram: "🔁 to uuinstagram",
       to_facebed: "🔁 to facebed.com",
       to_tiktok: "🎵 to tiktok.com",
       to_vxtiktok: "🔁 to vxtiktok",
@@ -1051,6 +1054,9 @@
       to_vxreddit: "🛠️ 轉為 vxreddit",
       to_instagram: "📷 轉為 instagram.com",
       to_kkinstagram: "🔁 轉為 kkinstagram",
+      to_vxinstagram: "🔁 轉為 vxinstagram",
+      to_ddinstagram: "🔁 轉為 ddinstagram",
+      to_uuinstagram: "🔁 轉為 uuinstagram",
       to_facebed: "🔁 轉為 facebed.com",
       to_tiktok: "🎵 轉為 tiktok.com",
       to_vxtiktok: "🔁 轉為 vxtiktok",
@@ -1385,6 +1391,9 @@
       to_vxreddit: "🛠️ 转为 vxreddit",
       to_instagram: "📷 转为 instagram.com",
       to_kkinstagram: "🔁 转为 kkinstagram",
+      to_vxinstagram: "🔁 转为 vxinstagram",
+      to_ddinstagram: "🔁 转为 ddinstagram",
+      to_uuinstagram: "🔁 转为 uuinstagram",
       to_facebed: "🔁 转为 facebed.com",
       to_tiktok: "🎵 转为 tiktok.com",
       to_vxtiktok: "🔁 转为 vxtiktok",
@@ -1721,6 +1730,9 @@
       to_vxreddit: "🛠️ vxreddit へ",
       to_instagram: "📷 instagram.com へ",
       to_kkinstagram: "🔁 kkinstagram へ",
+      to_vxinstagram: "🔁 vxinstagram へ",
+      to_ddinstagram: "🔁 ddinstagram へ",
+      to_uuinstagram: "🔁 uuinstagram へ",
       to_facebed: "🔁 facebed.com へ",
       to_tiktok: "🎵 tiktok.com へ",
       to_vxtiktok: "🔁 vxtiktok へ",
@@ -2063,6 +2075,9 @@
       to_vxreddit: "🛠️ vxreddit으로",
       to_instagram: "📷 instagram.com으로",
       to_kkinstagram: "🔁 kkinstagram으로",
+      to_vxinstagram: "🔁 vxinstagram으로",
+      to_ddinstagram: "🔁 ddinstagram으로",
+      to_uuinstagram: "🔁 uuinstagram으로",
       to_facebed: "🔁 facebed.com으로",
       to_tiktok: "🎵 tiktok.com으로",
       to_vxtiktok: "🔁 vxtiktok으로",
@@ -2396,6 +2411,9 @@
       to_vxreddit: "🛠️ vxreddit",
       to_instagram: "📷 instagram.com",
       to_kkinstagram: "🔁 kkinstagram",
+      to_vxinstagram: "🔁 to vxinstagram",
+      to_ddinstagram: "🔁 to ddinstagram",
+      to_uuinstagram: "🔁 to uuinstagram",
       to_facebed: "🔁 facebed.com",
       to_tiktok: "🎵 tiktok.com",
       to_vxtiktok: "🔁 vxtiktok",
@@ -2715,6 +2733,9 @@
       to_vxreddit: "🛠️ vxreddit",
       to_instagram: "📷 instagram.com",
       to_kkinstagram: "🔁 kkinstagram",
+      to_vxinstagram: "🔁 to vxinstagram",
+      to_ddinstagram: "🔁 to ddinstagram",
+      to_uuinstagram: "🔁 to uuinstagram",
       to_facebed: "🔁 facebed.com",
       to_tiktok: "🎵 tiktok.com",
       to_vxtiktok: "🔁 vxtiktok",
@@ -3034,6 +3055,9 @@
       to_vxreddit: "🛠️ vxreddit",
       to_instagram: "📷 instagram.com",
       to_kkinstagram: "🔁 kkinstagram",
+      to_vxinstagram: "🔁 to vxinstagram",
+      to_ddinstagram: "🔁 to ddinstagram",
+      to_uuinstagram: "🔁 to uuinstagram",
       to_facebed: "🔁 facebed.com",
       to_tiktok: "🎵 tiktok.com",
       to_vxtiktok: "🔁 vxtiktok",
@@ -3357,6 +3381,9 @@
       to_vxreddit: "🛠️ vxreddit",
       to_instagram: "📷 instagram.com",
       to_kkinstagram: "🔁 kkinstagram",
+      to_vxinstagram: "🔁 to vxinstagram",
+      to_ddinstagram: "🔁 to ddinstagram",
+      to_uuinstagram: "🔁 to uuinstagram",
       to_facebed: "🔁 facebed.com",
       to_tiktok: "🎵 tiktok.com",
       to_vxtiktok: "🔁 vxtiktok",
@@ -3612,7 +3639,6 @@
             .my-sub-btn:hover { background: rgba(255,255,255,0.2); color: #fff; opacity: 1; }
             .my-sub-btn.is-active { background: #248046 !important; color: #fff !important; opacity: 1; box-shadow: 0 0 5px rgba(36, 128, 70, 0.6); }
 
-            
             .btn-user-zone { background-color: transparent !important; color: #949BA4 !important; border: 1px solid rgba(148, 155, 164, 0.2) !important; width: 28px; padding: 0 !important; }
             .btn-user-zone:hover { background-color: rgba(148, 155, 164, 0.1) !important; color: #dbdee1 !important; border-color: rgba(148, 155, 164, 0.5) !important; }
             .btn-user-zone.has-items { color: #dbdee1 !important; border-color: rgba(148, 155, 164, 0.5) !important; }
@@ -3620,7 +3646,6 @@
             .btn-star-item { background-color: rgba(240, 178, 50, 0.05) !important; color: #ffc44f !important; border: 1px solid rgba(240, 178, 50, 0.2) !important; }
             .btn-history-group { background-color: rgba(88, 101, 242, 0.1) !important; color: #dee0fc !important; border: 1px solid rgba(88, 101, 242, 0.2) !important; }
 
-            
             .btn-toggle-mode { background: transparent !important; color: #b5bac1 !important; padding: 4px !important; width: 28px; }
             .btn-toggle-mode:hover { color: #fff !important; background: rgba(255,255,255,0.1) !important; }
             .btn-help { background: transparent !important; color: #b5bac1 !important; padding: 0 6px !important; min-width: 24px; margin-left: 2px; }
@@ -3628,7 +3653,6 @@
             .btn-add { background: transparent !important; color: #2dc770 !important; border: 1px dashed rgba(45, 199, 112, 0.4) !important; opacity: 0.7; }
             .btn-add:hover { opacity: 1; background: rgba(45, 199, 112, 0.1) !important; }
 
-            
             .my-dropdown-menu { position: absolute; top: 100%; left: 0; background: #2b2d31; border: 1px solid #1e1f22; border-radius: 4px; box-shadow: 0 8px 16px rgba(0,0,0,0.4); padding: 4px; display: none; flex-direction: column; gap: 2px; z-index: 999;
             min-width: 320px; max-height: 500px; overflow-y: auto; }
 
@@ -3637,7 +3661,6 @@
             .dropdown-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 8px; color: #dbdee1; font-size: 13px; cursor: pointer; border-radius: 2px; transition: background 0.1s; max-width: 100%; }
             .dropdown-item:hover { background: #404249; color: #fff; }
 
-            
             .my-list-star-btn { background: transparent; border: none; cursor: pointer; color: #4e5058; padding: 4px; margin-right: 4px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.2s; }
             .my-list-star-btn:hover { transform: scale(1.1); color: #dbdee1; background: rgba(255,255,255,0.05); }
             .my-list-star-btn.is-active { color: #f0b232; }
@@ -3648,10 +3671,8 @@
             .my-target-row { background-color: rgba(255, 255, 255, 0.03) !important; box-shadow: inset 2px 0 0 rgba(255, 255, 255, 0.2); }
             .my-user-tagged::before { content: "👤"; color: #949BA4; margin-right: 4px; font-weight: normal; }
 
-            
             .my-ellipsis { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
-            
             .my-help-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(2px); animation: fadeIn 0.2s; }
             .my-help-modal { background: #313338; width: 500px; max-width: 90%; max-height: 80vh; border-radius: 8px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #1e1f22; color: #dbdee1; font-size: 14px; line-height: 1.5; animation: slideUp 0.2s; }
             .my-help-header { padding: 16px; border-bottom: 1px solid #1e1f22; display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 16px; background: #2b2d31; }
@@ -3665,13 +3686,11 @@
             @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
             @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-
             .my-wormhole-creator-btn { color: #b5bac1; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin: 0 4px; transition: color 0.2s; }
             .my-wormhole-creator-btn:hover { color: #5865F2; }
 
             .my-wormhole-container { display: flex; align-items: center; gap: 4px; margin-left: 8px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 8px; }
 
-            
             .my-wormhole-chip {
                 background: rgba(30, 31, 34, 0.6);
                 border: 1px solid rgba(88, 101, 242, 0.3);
@@ -3687,10 +3706,8 @@
             .my-wormhole-chip:active { transform: translateY(0); }
             .my-wormhole-chip.editing { border-color: #ed4245; animation: my-shake-anim 0.3s ease-in-out infinite; }
 
-            
             .my-wormhole-icon { font-size: 10px; opacity: 0.7; display: flex; align-items: center; }
 
-            
             .my-wormhole-chip.vip {
                 background: transparent;      
                 border: none;                 
@@ -3709,7 +3726,6 @@
                 display: none;
             }
 
-            
             .my-wormhole-group-chip {
                 background: rgba(43, 45, 49, 0.8);
                 border: 1px dashed rgba(255,255,255,0.2);
@@ -3720,7 +3736,6 @@
             }
             .my-wormhole-group-chip:hover { border-color: #dbdee1; color: #fff; }
 
-            
             .my-wormhole-dropdown {
                 position: absolute; top: 100%; left: 0;
                 background: #1e1f22; border: 1px solid #000;
@@ -5039,11 +5054,7 @@
     }
 
     GM_addStyle(`
-    /* ── DMT Design Tokens (v1.7.1) ─────────────────────────────────────────────
-       方向B：token 值優先引用 Discord 自身 CSS 變數，自動跟隨深色/淺色主題；
-               無法取得時 fallback 至腳本內建的 Discord 深色預設值。
-       方向A：所有靜態 CSS 區塊（模組B/C/D）的高頻硬編碼改為 var(--dmt-*) 引用。
-       ── */
+    
     :root {
       
       --dmt-bg-primary:   var(--background-secondary,      #2b2d31);
@@ -5051,16 +5062,13 @@
       --dmt-bg-deep:      var(--background-tertiary,       #1e1f22);
       --dmt-bg-overlay:   var(--background-secondary-alt,  #313338);
 
-      
       --dmt-accent:       var(--brand-experiment,          #5865f2);
 
-      
       --dmt-text-primary: var(--text-normal,               #dcddde);
       --dmt-text-bright:  var(--header-primary,            #dbdee1);
       --dmt-text-muted:   var(--text-muted,                #72767d);
       --dmt-text-subtle:  var(--text-secondary,            #b5bac1);
 
-      
       --dmt-danger:       var(--button-danger-background,  #ed4245);
       --dmt-success:      var(--button-positive-background, #3ba55c);
       --dmt-gold:         #ffd700;  
@@ -5200,7 +5208,6 @@
         flex-shrink: 0;
     }
 
-    
     .msg-copy-edit-btn {
         position: absolute;
         right: 8px;
@@ -5219,7 +5226,6 @@
         border-radius: 3px;
     }
 
-    
     .msg-copy-item-group {
         padding: 6px 12px;
         cursor: pointer;
@@ -5236,7 +5242,6 @@
         color: var(--dmt-text-primary);
     }
 
-    
     .msg-copy-portal-menu {
         position: fixed;
         background: var(--dmt-bg-surface);
@@ -5266,7 +5271,6 @@
         background: rgba(255, 255, 255, 0.1);
     }
 
-    
     .msg-copy-manage {
         font-size: 13px;
         color: var(--dmt-text-muted);
@@ -5298,8 +5302,6 @@
         background: rgba(255, 255, 255, 0.2);
     }
 
-    /* .msg-copy-toast は dmtShowToast に統合済み（v1.7.0）
-       後方互換のためクラス定義は残すが、実体は #dmt-toast-singleton */
     .msg-copy-toast {
         display: none !important;
     }
@@ -7773,10 +7775,19 @@
           },
           {
             type: "instagram",
-            domains: ["instagram.com", "kkinstagram.com"],
+            domains: [
+              "instagram.com",
+              "kkinstagram.com",
+              "vxinstagram.com",
+              "ddinstagram.com",
+              "uuinstagram.com",
+            ],
             labels: {
-              "instagram.com": "to_instagram",
+              "instagram.com":   "to_instagram",
               "kkinstagram.com": "to_kkinstagram",
+              "vxinstagram.com": "to_vxinstagram",
+              "ddinstagram.com": "to_ddinstagram",
+              "uuinstagram.com": "to_uuinstagram",
             },
           },
           {
@@ -8495,23 +8506,19 @@
             .my-tool-btn.target-mode:hover { color: var(--dmt-danger); }
             .my-tool-btn.batch-active { color: var(--dmt-success) !important; background: rgba(67, 181, 129, 0.2); }
 
-            
             .my-gif-overlay-bar { position: absolute; top: 4px; right: 36px; display: none; gap: 4px; padding: 2px; z-index: 100; background: rgba(0,0,0,0.6); border-radius: 4px; pointer-events: auto; }
             .my-gif-card:hover > .my-gif-overlay-bar { display: flex !important; }
             .my-overlay-btn { width: 22px; height: 22px; color: var(--dmt-text-bright); border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
             .my-overlay-btn:hover { background: var(--dmt-accent); }
 
-            
             .my-popover-menu { position: fixed; background: var(--dmt-bg-primary); border: 1px solid var(--dmt-bg-deep); border-radius: 4px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); padding: 0; display: none; flex-direction: column; z-index: 2147483647; min-width: 340px; max-width: 620px; max-height: 550px; overflow: hidden; }
             .my-popover-menu.show { display: flex; }
 
-            
             .my-menu-item { padding: 6px 10px; color: var(--dmt-text-primary); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.03); }
             .my-menu-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
             .my-emoji-preview-box { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
             .my-emoji-icon-preview { width: 100%; height: 100%; border-radius: 3px; object-fit: contain; background: rgba(0,0,0,0.2); }
 
-            
             .my-emoji-icon-placeholder {
                 width: 100%; height: 100%; border-radius: 4px;
                 background: linear-gradient(135deg, var(--dmt-accent) 0%, #4752C4 100%);
@@ -8533,7 +8540,6 @@
             .my-emoji-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
             .my-emoji-btn.delete:hover { background: var(--dmt-danger); color: #fff; }
 
-            
             .my-tabs-header { display: flex; align-items: center; background: var(--dmt-bg-deep); border-bottom: 1px solid #111214; padding: 0 4px; width: 100%; box-sizing: border-box; }
             .my-tab-scroll-area { display: flex; align-items: center; overflow-x: auto; flex: 1; scrollbar-width: none; }
             .my-tab-scroll-area::-webkit-scrollbar { display: none; }
@@ -8546,7 +8552,6 @@
             .my-tab-add { padding: 8px; color: var(--dmt-success); cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; }
             .my-tab-add:hover { color: #fff; background: var(--dmt-success); }
 
-            
             .my-mode-switch {
                 position: relative;
                 padding: 4px 10px; font-size: 11px; border-radius: 12px;
@@ -8583,16 +8588,13 @@
                 100% { opacity: 0; transform: scale(0.5) rotate(30deg); }
             }
 
-            
             .my-tab-content { padding: 8px; overflow-y: auto; max-height: 400px; min-height: 180px; background: var(--dmt-bg-surface); position: relative; }
 
-            
             .my-col-grid { display: grid; gap: 8px; width: 100%; box-sizing: border-box; }
             .my-col-grid.emoji { grid-template-columns: repeat(auto-fill, 58px); gap: 4px; justify-content: start; }
             .my-col-grid.sticker { grid-template-columns: repeat(auto-fill, 100px); justify-content: center; }
             .my-col-grid.gif { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
 
-            
             .my-col-img-wrapper { position: relative; background: var(--dmt-bg-primary); border-radius: 4px; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
             .my-col-grid.emoji .my-col-img-wrapper { width: 58px; height: 58px; background: transparent; border-radius: 2px; box-shadow: none; }
             .my-col-grid.emoji .my-col-img-wrapper:hover { background: rgba(255,255,255,0.08); }
@@ -8603,13 +8605,11 @@
             .my-col-img-wrapper:hover .my-col-img { transform: scale(1.1); }
             .my-col-text { font-size: 32px; user-select: none; }
 
-            
             .my-col-del-btn { position: absolute; top: 0; right: 0; width: 20px; height: 20px; background: rgba(0,0,0,0.6); color: var(--dmt-danger); display: flex; align-items: center; justify-content: center; border-bottom-left-radius: 6px; z-index: 999; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.1s; pointer-events: auto; }
             .my-col-del-btn > * { pointer-events: none; }
             .my-col-img-wrapper:hover .my-col-del-btn, .my-col-del-btn:hover { opacity: 1; }
             .my-col-del-btn:hover { background: var(--dmt-danger); color: #fff; }
 
-            
             .my-save-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--dmt-bg-overlay); border: 1px solid var(--dmt-bg-deep); box-shadow: 0 0 0 100vw rgba(0,0,0,0.7); border-radius: 8px; z-index: 2147483649; width: 250px; overflow: hidden; animation: myPop 0.2s ease-out; }
             .my-save-header { background: var(--dmt-bg-primary); padding: 10px; font-size: 14px; font-weight: bold; color: #fff; text-align: center; border-bottom: 1px solid var(--dmt-bg-deep); }
             .my-save-list { max-height: 300px; overflow-y: auto; }
@@ -8622,7 +8622,6 @@
             .my-picker-tip { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: var(--dmt-accent); color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 2147483648; pointer-events: none; }
             .my-picker-frame { position: fixed; pointer-events: none; z-index: 2147483648; box-shadow: 0 0 0 2px var(--dmt-accent), 0 0 20px rgba(88, 101, 242, 0.5); border-radius: 4px; }
 
-            
             @keyframes my-eat-shine {
                 0% { transform: scale(1); filter: none; color: var(--interactive-normal); }
                 
@@ -8638,12 +8637,10 @@
             
             .my-eat-anim { animation: my-eat-shine 0.8s cubic-bezier(0.25, 1.5, 0.5, 1); }
 
-            
             @keyframes my-gentle-shake {
                 0% { transform: rotate(0deg); } 25% { transform: rotate(-10deg); } 75% { transform: rotate(10deg); } 100% { transform: rotate(0deg); }
             }
 
-            
             .my-chat-input-folder-btn {
                 display: flex;
                 align-items: center;
@@ -8714,7 +8711,6 @@
                 box-shadow: none;
             }
 
-            
             .my-idle-darkness {
                 position: fixed;
                 top: 0; left: 0; width: 100vw; height: 100vh;
@@ -8729,7 +8725,6 @@
                 pointer-events: auto;
             }
 
-            
             .my-tool-btn.spotlight-active {
                 position: fixed !important; 
                 z-index: 2147483646 !important; 
@@ -8742,7 +8737,6 @@
                 transition: all 0.5s ease;
             }
 
-            
             @keyframes fadeUp {
                 0%   { opacity: 0; transform: translate(-50%, 0);     }
                 10%  { opacity: 1; transform: translate(-50%, -10px); }
@@ -11544,7 +11538,6 @@
             100% { transform: scale(1); }
         }
 
-        
         .header-mod-global-tooltip {
             position: fixed; background: #111214; border: 1px solid #2b2d31;
             box-shadow: 0 8px 16px rgba(0,0,0,0.6); border-radius: 8px;
@@ -15304,8 +15297,7 @@ unsafeWindow.fetch = function(...args) {
             #wh-input-dock .my-wormhole-container.focus-mode .my-wormhole-vip-chip { width: var(--wh-focus-vip, 22px); height: var(--wh-focus-vip, 22px); max-width: var(--wh-focus-vip, 22px); }
             .my-wormhole-container { display: flex; flex-direction: row; align-items: center; flex-shrink: 0; margin-left: 8px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 8px; transition: all 0.3s ease; position: relative; }
             .wh-row-1 { display: flex; align-items: center; gap: 0; flex-wrap: nowrap; flex-shrink: 0; }
-            /* 第二列以後：平常隱藏，hover 整個容器時淡入
-               top: 100% + padding-top 代替 gap，確保滑鼠移動時 hover 不中斷 */
+            
             .wh-row-2 {
                 position: absolute;
                 top: 100%;           
@@ -15328,7 +15320,6 @@ unsafeWindow.fetch = function(...args) {
             }
             .my-wormhole-container:hover .wh-row-2:not(:empty) { opacity: 1; pointer-events: auto; transform: translateY(0); }
 
-            
             .wh-row-2 .my-wormhole-chip,
             .wh-row-2 .my-wormhole-vip-chip {
                 flex-direction: row;
@@ -15363,7 +15354,6 @@ unsafeWindow.fetch = function(...args) {
                 box-shadow: 0 4px 12px rgba(255,215,0,0.25);
             }
 
-            
             .wh-row-2 .my-wormhole-chip img.my-wormhole-icon,
             .wh-row-2 .my-wormhole-vip-chip img {
                 width: 22px !important;
@@ -15376,15 +15366,11 @@ unsafeWindow.fetch = function(...args) {
                 line-height: 1;
             }
 
-            
             .wh-row-2 .my-wormhole-chip .item-name,
             .wh-row-2 .my-wormhole-vip-chip .vip-text {
                 display: none !important;
             }
 
-            
-
-            
             .my-wormhole-container.focus-mode { position: relative; padding-top: 0; align-items: center; }
             .my-wormhole-container.focus-mode .my-wormhole-vip-chip,
             .my-wormhole-container.focus-mode .my-wormhole-chip {
@@ -15459,7 +15445,6 @@ unsafeWindow.fetch = function(...args) {
                 font-size: 28px;
             }
 
-            
             .my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-vip-chip::after,
             .my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-chip::after {
                 content: attr(data-wormhole-name);
@@ -15486,7 +15471,6 @@ unsafeWindow.fetch = function(...args) {
                 transform: translateX(-50%) scale(1);
             }
 
-            
             .my-wormhole-vip-chip.dragging,
             .my-wormhole-chip.dragging {
                 opacity: 0.5 !important;
@@ -15509,7 +15493,6 @@ unsafeWindow.fetch = function(...args) {
                 75% { transform: translateX(2px); }
             }
 
-            
             .my-wormhole-container.focus-mode .my-wormhole-vip-chip.dragging,
             .my-wormhole-container.focus-mode .my-wormhole-chip.dragging {
                 opacity: 0.5 !important;
@@ -15527,7 +15510,6 @@ unsafeWindow.fetch = function(...args) {
                 z-index: 10;
             }
 
-            
             .my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-vip-chip.dragging::after,
             .my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-chip.dragging::after {
                 display: none;
