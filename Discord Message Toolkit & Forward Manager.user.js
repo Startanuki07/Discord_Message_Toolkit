@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      1.8.0
+// @version      1.8.3
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -51,7 +51,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "1.9.1";
+  const SCRIPT_VERSION = "1.8.3";
 
   const GMStore = {
     
@@ -86,8 +86,8 @@
   };
 
   const NEW_FEATURES = {
-    "mod_webhook":    "1.9.0",
-    "mod_urlchecker": "1.9.0",
+    "mod_webhook":    "1.6.0",
+    "mod_urlchecker": "1.8.0",
   };
 
   function isFeatureNew(featureKey) {
@@ -15744,6 +15744,22 @@ unsafeWindow.fetch = function(...args) {
       return IGNORED_URL_PREFIXES.some(prefix => url.startsWith(prefix));
     }
 
+    const DOMAIN_CANONICAL_MAP = {
+      "x.com":            "twitter.com",
+      "vxtwitter.com":    "twitter.com",
+      "c.vxtwitter.com":  "twitter.com",
+      "fixupx.com":       "twitter.com",
+      "fxtwitter.com":    "twitter.com",
+      "cunnyx.com":       "twitter.com",
+      "kkinstagram.com":  "instagram.com",
+      "vxinstagram.com":  "instagram.com",
+      "ddinstagram.com":  "instagram.com",
+      "uuinstagram.com":  "instagram.com",
+      "fxbilibili.com":   "bilibili.com",
+      "vxbilibili.com":   "bilibili.com",
+      "phixiv.net":       "pixiv.net",
+    };
+
     function normalizeURL(raw) {
       try {
         let str = raw.trim();
@@ -15751,7 +15767,9 @@ unsafeWindow.fetch = function(...args) {
         if (ytShort) str = `https://www.youtube.com/watch?v=${ytShort[1]}`;
 
         const u = new URL(str);
-        let host = u.hostname.replace(/^www\./, "");
+        let host = u.hostname.replace(/^www\./, "").toLowerCase();
+        host = DOMAIN_CANONICAL_MAP[host] ?? host;
+
         UTM_PARAMS.forEach(k => u.searchParams.delete(k));
         const path = u.pathname.replace(/\/+$/, "") || "/";
         const params = [...u.searchParams.entries()]
@@ -15817,21 +15835,39 @@ unsafeWindow.fetch = function(...args) {
       s.textContent = `
         #dmt-uc-banner {
           display: flex;
-          align-items: center;
-          gap: 10px;
-          padding: 8px 14px;
+          flex-direction: column;
+          gap: 0;
+          padding: 0;
           margin: 0 4px 4px;
           border-radius: 8px;
           font-size: 13px;
           font-family: sans-serif;
           line-height: 1.4;
           box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+          overflow: hidden;
           animation: dmt-uc-slide 0.18s cubic-bezier(.19,1,.22,1);
           pointer-events: auto;
         }
+        
         @keyframes dmt-uc-slide {
           from { opacity: 0; transform: translateY(6px); }
           to   { opacity: 1; transform: none; }
+        }
+        
+        @keyframes dmt-uc-exit {
+          from { opacity: 1; transform: translateY(0);   max-height: 80px; }
+          to   { opacity: 0; transform: translateY(4px); max-height: 0;    margin-bottom: 0; }
+        }
+        #dmt-uc-banner.uc-exiting {
+          animation: dmt-uc-exit 0.32s cubic-bezier(.4,0,1,1) forwards;
+          pointer-events: none;
+        }
+        
+        #dmt-uc-banner .uc-body {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 8px 14px;
         }
         #dmt-uc-banner.uc-warn {
           background: #2b1d1d;
@@ -15850,9 +15886,35 @@ unsafeWindow.fetch = function(...args) {
           padding: 0 2px; line-height: 1; flex-shrink: 0;
         }
         #dmt-uc-banner .uc-dismiss:hover { opacity: 1; }
+        
+        #dmt-uc-banner .uc-progress {
+          height: 3px;
+          width: 100%;
+          background: rgba(255,255,255,0.10);
+          border-radius: 0 0 8px 8px;
+          overflow: hidden;
+        }
+        #dmt-uc-banner .uc-progress-fill {
+          height: 100%;
+          width: 100%;
+          background: var(--dmt-danger, #ed4245);
+          transform-origin: left center;
+          animation: dmt-uc-progress linear forwards;
+        }
+        @keyframes dmt-uc-progress {
+          from { transform: scaleX(1); }
+          to   { transform: scaleX(0); }
+        }
+        
+        #dmt-uc-banner:hover .uc-progress-fill {
+          animation-play-state: paused;
+        }
       `;
       document.head.appendChild(s);
     }
+
+    const UC_WARN_DURATION = 6000;
+    let _autoDismissTimer = null;
 
     function showBanner(type, message) {
       const editor = document.querySelector('div[data-slate-editor="true"]');
@@ -15868,6 +15930,9 @@ unsafeWindow.fetch = function(...args) {
       banner.id = BANNER_ID;
       banner.className = `uc-${type}`;
 
+      const body = document.createElement("div");
+      body.className = "uc-body";
+
       const msg = document.createElement("span");
       msg.className = "uc-msg";
       msg.textContent = message;
@@ -15875,14 +15940,39 @@ unsafeWindow.fetch = function(...args) {
       const dismissBtn = document.createElement("button");
       dismissBtn.className = "uc-dismiss";
       dismissBtn.textContent = t("uc_dismiss");
-      dismissBtn.onclick = removeBanner;
+      dismissBtn.onclick = () => dismissBanner();
 
-      banner.appendChild(msg);
-      banner.appendChild(dismissBtn);
+      body.appendChild(msg);
+      body.appendChild(dismissBtn);
+      banner.appendChild(body);
+
+      if (type === "warn") {
+        const progress = document.createElement("div");
+        progress.className = "uc-progress";
+        const fill = document.createElement("div");
+        fill.className = "uc-progress-fill";
+        fill.style.animationDuration = `${UC_WARN_DURATION}ms`;
+        progress.appendChild(fill);
+        banner.appendChild(progress);
+
+        _autoDismissTimer = setTimeout(() => dismissBanner(), UC_WARN_DURATION);
+      }
+
       anchor.insertBefore(banner, slateContainer);
     }
 
+    function dismissBanner() {
+      clearTimeout(_autoDismissTimer);
+      _autoDismissTimer = null;
+      const banner = document.getElementById(BANNER_ID);
+      if (!banner) return;
+      banner.classList.add("uc-exiting");
+      banner.addEventListener("animationend", () => banner.remove(), { once: true });
+    }
+
     function removeBanner() {
+      clearTimeout(_autoDismissTimer);
+      _autoDismissTimer = null;
       document.getElementById(BANNER_ID)?.remove();
     }
 
