@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      1.7.3
+// @version      1.8.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -51,7 +51,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "1.8.4";
+  const SCRIPT_VERSION = "1.9.1";
 
   const GMStore = {
     
@@ -84,6 +84,43 @@
       }
     },
   };
+
+  const NEW_FEATURES = {
+    "mod_webhook":    "1.9.0",
+    "mod_urlchecker": "1.9.0",
+  };
+
+  function isFeatureNew(featureKey) {
+    if (!(featureKey in NEW_FEATURES)) return false;
+    const seen = GMStore.get("newFeatureSeen_" + featureKey, null);
+    return seen !== NEW_FEATURES[featureKey];
+  }
+
+  function markFeatureSeen(featureKey) {
+    if (!(featureKey in NEW_FEATURES)) return;
+    GMStore.set("newFeatureSeen_" + featureKey, NEW_FEATURES[featureKey]);
+  }
+
+  function renderNewBadge(featureKey) {
+    if (!isFeatureNew(featureKey)) return null;
+    const badge = document.createElement("span");
+    badge.className = "dmt-new-badge";
+    badge.textContent = "New";
+    badge.style.cssText = [
+      "display:inline-block",
+      "margin-left:6px",
+      "padding:1px 5px",
+      "border-radius:3px",
+      "background:#23a55a",
+      "color:#fff",
+      "font-size:10px",
+      "font-weight:700",
+      "vertical-align:middle",
+      "line-height:1.5",
+      "pointer-events:none",
+    ].join(";");
+    return badge;
+  }
 
   const ConfigManager = {
     _cache: null,
@@ -162,6 +199,7 @@
         modEmoji: "mod_emoji",
         modHeader: "mod_header",
         modWormhole: "mod_wormhole",
+        modUrlChecker: "mod_urlchecker",
       };
       return keyMap[prop] || prop;
     },
@@ -240,6 +278,19 @@
         "zh-CN": "Webhook 管理",
         ja: "Webhook 管理",
         ko: "Webhook 관리",
+      },
+    },
+    {
+      key: "modUrlChecker",
+      storageKey: "mod_urlchecker",
+      icon: "🔍",
+      defaultEnabled: true,
+      label: {
+        "en-US": "Duplicate URL Checker",
+        "zh-TW": "重複網址偵測",
+        "zh-CN": "重复网址检测",
+        ja: "URL重複チェッカー",
+        ko: "중복 URL 검사기",
       },
     },
   ];
@@ -958,6 +1009,15 @@
       wh_btn_cancel: "Cancel",
       wh_keep_source: "📎 Include source link",
       wh_keep_source_tip: "When checked, the original message link is appended to the sent content.",
+
+      uc_duplicate_found: "⚠️ This URL was already posted ({n} match found in last {limit} messages)",
+      uc_duplicate_found_plural: "⚠️ This URL was already posted ({n} matches found in last {limit} messages)",
+      uc_no_token: "🔍 Duplicate URL Check requires Wormhole API Mode — enable it in the Wormhole settings (hold ＋ for 1s)",
+      uc_token_waiting: "⏳ Waiting for API Token… switch to any channel once to capture it",
+      uc_fetching: "🔄 Checking for duplicate URLs…",
+      uc_dismiss: "✕",
+      uc_limit_label: "Scan range:",
+      uc_limit_suffix: "messages",
     },
 
     "zh-TW": {
@@ -1297,6 +1357,15 @@
       wh_btn_cancel: "取消",
       wh_keep_source: "📎 附上來源連結",
       wh_keep_source_tip: "勾選後，傳送內容末尾會附上該訊息的原始連結。",
+
+      uc_duplicate_found: "⚠️ 此網址已在最近 {limit} 則訊息中出現過（找到 {n} 筆相符）",
+      uc_duplicate_found_plural: "⚠️ 此網址已在最近 {limit} 則訊息中出現過（找到 {n} 筆相符）",
+      uc_no_token: "🔍 重複網址偵測需要蟲洞 API 模式 — 請長按蟲洞 ＋ 鍵 1 秒開啟設定",
+      uc_token_waiting: "⏳ 等待 API Token 就緒… 請切換至任意頻道一次以自動捕捉",
+      uc_fetching: "🔄 正在掃描重複網址…",
+      uc_dismiss: "✕",
+      uc_limit_label: "掃描範圍：",
+      uc_limit_suffix: "則訊息",
     },    "zh-CN": {
       name: "简体中文",
       fm_pinned_channels: "★ 收藏频道",
@@ -1635,6 +1704,15 @@
       wh_btn_cancel: "取消",
       wh_keep_source: "📎 附上来源链接",
       wh_keep_source_tip: "勾选后，发送内容末尾会附上该消息的原始链接。",
+
+      uc_duplicate_found: "⚠️ 此网址已在最近 {limit} 条消息中出现过（找到 {n} 条匹配）",
+      uc_duplicate_found_plural: "⚠️ 此网址已在最近 {limit} 条消息中出现过（找到 {n} 条匹配）",
+      uc_no_token: "🔍 重复网址检测需要虫洞 API 模式 — 请长按虫洞 ＋ 键 1 秒打开设置",
+      uc_token_waiting: "⏳ 等待 API Token 就绪… 请切换到任意频道一次以自动捕捉",
+      uc_fetching: "🔄 正在扫描重复网址…",
+      uc_dismiss: "✕",
+      uc_limit_label: "扫描范围：",
+      uc_limit_suffix: "条消息",
     },
 
     ja: {
@@ -1982,6 +2060,15 @@
       wh_btn_cancel: "キャンセル",
       wh_keep_source: "📎 ソースリンクを含める",
       wh_keep_source_tip: "チェックすると、送信内容の末尾に元のメッセージリンクを追加します。",
+
+      uc_duplicate_found: "⚠️ この URL は直近 {limit} 件のメッセージにすでに投稿されています（{n} 件一致）",
+      uc_duplicate_found_plural: "⚠️ この URL は直近 {limit} 件のメッセージにすでに投稿されています（{n} 件一致）",
+      uc_no_token: "🔍 URL重複チェックにはワームホール API モードが必要です — ＋ を1秒長押しして設定を開いてください",
+      uc_token_waiting: "⏳ API Token を待機中… 任意のチャンネルに一度切り替えると自動取得されます",
+      uc_fetching: "🔄 重複 URL をスキャン中…",
+      uc_dismiss: "✕",
+      uc_limit_label: "スキャン範囲：",
+      uc_limit_suffix: "件",
     },
 
     ko: {
@@ -2327,6 +2414,15 @@
       wh_btn_cancel: "취소",
       wh_keep_source: "📎 출처 링크 포함",
       wh_keep_source_tip: "체크 시 전송 내용 끝에 원본 메시지 링크가 추가됩니다.",
+
+      uc_duplicate_found: "⚠️ 이 URL은 최근 {limit}개 메시지에 이미 게시되었습니다（{n}건 일치）",
+      uc_duplicate_found_plural: "⚠️ 이 URL은 최근 {limit}개 메시지에 이미 게시되었습니다（{n}건 일치）",
+      uc_no_token: "🔍 중복 URL 검사는 웜홀 API 모드가 필요합니다 — ＋ 버튼을 1초 길게 눌러 설정을 여세요",
+      uc_token_waiting: "⏳ API Token 대기 중… 임의 채널로 한 번 전환하면 자동으로 캡처됩니다",
+      uc_fetching: "🔄 중복 URL 스캔 중…",
+      uc_dismiss: "✕",
+      uc_limit_label: "스캔 범위：",
+      uc_limit_suffix: "개 메시지",
     },
     es: {
       name: "Español",
@@ -5224,6 +5320,29 @@
         text-shadow: 0 0 5px rgba(59, 165, 92, 0.5);
     }
 
+    .dmt-gear-wrap {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .dmt-gear-dot {
+        position: absolute;
+        top: -3px;
+        right: -4px;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #f23f43;
+        border: 1.5px solid var(--dmt-bg-primary, #2b2d31);
+        pointer-events: none;
+        animation: dmt-dot-pulse 2s ease-in-out infinite;
+    }
+    @keyframes dmt-dot-pulse {
+        0%, 100% { opacity: 1;   transform: scale(1);    }
+        50%       { opacity: 0.6; transform: scale(0.85); }
+    }
+
     .msg-copy-divider {
         height: 1px;
         background: rgba(255, 255, 255, 0.1);
@@ -6723,6 +6842,10 @@
     }
 
     function showModuleSettingsPanel(anchorEl) {
+      const gearWrap = anchorEl?.closest(".dmt-gear-wrap") || anchorEl?.parentElement;
+      const dot = gearWrap?.querySelector(".dmt-gear-dot");
+      if (dot) dot.remove();
+
       const existing = document.getElementById("mod-settings-panel");
       if (existing) {
         existing.remove();
@@ -6730,8 +6853,13 @@
       }
 
       const lang = getConfig().lang || navigator.language || "en-US";
-      const getLang = (labels) =>
-        labels[lang] || labels["zh-TW"] || labels["en-US"];
+      const getLang = (labels) => {
+        if (labels[lang]) return labels[lang];
+        const prefix = lang.split("-")[0];
+        const prefixKey = Object.keys(labels).find(k => k.split("-")[0] === prefix);
+        if (prefixKey) return labels[prefixKey];
+        return labels["en-US"] || labels["zh-TW"];
+      };
 
       const panel = document.createElement("div");
       panel.id = "mod-settings-panel";
@@ -6776,6 +6904,9 @@
         const label = document.createElement("span");
         label.style.cssText = "display:flex; align-items:center; gap:7px;";
         label.innerHTML = `<span style="font-size:15px;">${mod.icon}</span><span>${getLang(mod.label)}</span>`;
+
+        const newBadge = renderNewBadge(mod.storageKey);
+        if (newBadge) label.appendChild(newBadge);
 
         const enabled = isModEnabled(mod.storageKey);
         const toggle = document.createElement("div");
@@ -6869,6 +7000,9 @@
           setModEnabled(mod.storageKey, next);
           updateToggle(next);
 
+          markFeatureSeen(mod.storageKey);
+          const existingBadge = label.querySelector(".dmt-new-badge");
+          if (existingBadge) existingBadge.remove();
           const hint = document.createElement("div");
           hint.style.cssText = `
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
@@ -7112,6 +7246,9 @@
         showLanguageSelector();
       };
       rightContainer.appendChild(langIcon);
+      const gearWrap = document.createElement("span");
+      gearWrap.className = "dmt-gear-wrap";
+
       const gearIcon = document.createElement("span");
       gearIcon.className = "msg-copy-header-icon";
       gearIcon.innerText = "⚙️";
@@ -7121,7 +7258,17 @@
         cancelCloseGlobalMenu();
         showModuleSettingsPanel(gearIcon);
       };
-      rightContainer.appendChild(gearIcon);
+
+      gearWrap.appendChild(gearIcon);
+
+      const hasAnyNew = Object.keys(NEW_FEATURES).some(k => isFeatureNew(k));
+      if (hasAnyNew) {
+        const dot = document.createElement("span");
+        dot.className = "dmt-gear-dot";
+        gearWrap.appendChild(dot);
+      }
+
+      rightContainer.appendChild(gearWrap);
 
       header.appendChild(leftSpan);
       header.appendChild(rightContainer);
@@ -15562,12 +15709,281 @@ unsafeWindow.fetch = function(...args) {
     }
   }
 
+  function initURLChecker() {
+
+    const SCAN_LIMIT_KEY = "uc_scan_limit";
+    function getScanLimit() {
+      const v = parseInt(GMStore.get(SCAN_LIMIT_KEY, 200), 10);
+      return Number.isFinite(v) && v >= 50 && v <= 1000 ? v : 200;
+    }
+
+    const UTM_PARAMS = new Set([
+      "utm_source","utm_medium","utm_campaign","utm_term","utm_content",
+      "fbclid","gclid","mc_eid","ref","source","si",
+    ]);
+
+    const IGNORED_URL_PREFIXES = [
+      "https://cdn.discordapp.com/emojis/",
+      "https://media.discordapp.net/stickers/",
+      "https://cdn.discordapp.com/attachments/",
+      "https://media.discordapp.net/attachments/",
+      "https://images-ext-",
+      "https://discord.gg/",
+      "https://discord.com/invite/",
+      "https://tenor.com/",
+      "https://www.tenor.com/",
+      "https://media.tenor.com/",
+      "https://klipy.com/gifs/",
+      "https://giphy.com/",
+      "https://media.giphy.com/",
+      "https://i.giphy.com/",
+    ];
+
+    function isIgnoredURL(raw) {
+      const url = raw.trim();
+      return IGNORED_URL_PREFIXES.some(prefix => url.startsWith(prefix));
+    }
+
+    function normalizeURL(raw) {
+      try {
+        let str = raw.trim();
+        const ytShort = str.match(/^https?:\/\/(?:www\.)?youtu\.be\/([A-Za-z0-9_-]{11})/);
+        if (ytShort) str = `https://www.youtube.com/watch?v=${ytShort[1]}`;
+
+        const u = new URL(str);
+        let host = u.hostname.replace(/^www\./, "");
+        UTM_PARAMS.forEach(k => u.searchParams.delete(k));
+        const path = u.pathname.replace(/\/+$/, "") || "/";
+        const params = [...u.searchParams.entries()]
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([k, v]) => `${k}=${v}`)
+          .join("&");
+        return `${host}${path}${params ? "?" + params : ""}`.toLowerCase();
+      } catch {
+        return raw.trim().toLowerCase();
+      }
+    }
+
+    const URL_RE = /https?:\/\/[^\s<>"')\]]+/g;
+    function extractURLs(text) {
+      return (text.match(URL_RE) || [])
+        .filter(u => !isIgnoredURL(u))
+        .map(normalizeURL);
+    }
+
+    async function fetchMessages(channelId, token, limit) {
+      const all = [];
+      let before = null;
+      const pageSize = 100;
+
+      while (all.length < limit) {
+        const count = Math.min(pageSize, limit - all.length);
+        let url = `https://discord.com/api/v10/channels/${channelId}/messages?limit=${count}`;
+        if (before) url += `&before=${before}`;
+
+        const res = await new Promise((resolve, reject) => {
+          GM_xmlhttpRequest({
+            method: "GET",
+            url,
+            headers: { Authorization: token, "Content-Type": "application/json" },
+            onload: resolve,
+            onerror: reject,
+            ontimeout: reject,
+          });
+        });
+
+        if (res.status !== 200) break;
+        let batch;
+        try { batch = JSON.parse(res.responseText); } catch { break; }
+        if (!Array.isArray(batch) || batch.length === 0) break;
+
+        all.push(...batch);
+        before = batch[batch.length - 1].id;
+        if (batch.length < count) break;
+      }
+      return all;
+    }
+
+    function getCurrentChannelId() {
+      const m = location.pathname.match(/\/channels\/\d+\/(\d+)/);
+      return m ? m[1] : null;
+    }
+
+    const BANNER_ID = "dmt-uc-banner";
+
+    if (!document.getElementById("dmt-uc-style")) {
+      const s = document.createElement("style");
+      s.id = "dmt-uc-style";
+      s.textContent = `
+        #dmt-uc-banner {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 8px 14px;
+          margin: 0 4px 4px;
+          border-radius: 8px;
+          font-size: 13px;
+          font-family: sans-serif;
+          line-height: 1.4;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+          animation: dmt-uc-slide 0.18s cubic-bezier(.19,1,.22,1);
+          pointer-events: auto;
+        }
+        @keyframes dmt-uc-slide {
+          from { opacity: 0; transform: translateY(6px); }
+          to   { opacity: 1; transform: none; }
+        }
+        #dmt-uc-banner.uc-warn {
+          background: #2b1d1d;
+          border: 1px solid var(--dmt-danger, #ed4245);
+          color: #f2a0a2;
+        }
+        #dmt-uc-banner.uc-info {
+          background: var(--dmt-bg-primary, #2b2d31);
+          border: 1px solid rgba(255,255,255,0.12);
+          color: var(--dmt-text-muted, #72767d);
+        }
+        #dmt-uc-banner .uc-msg { flex: 1; }
+        #dmt-uc-banner .uc-dismiss {
+          background: none; border: none; cursor: pointer;
+          color: inherit; opacity: 0.6; font-size: 14px;
+          padding: 0 2px; line-height: 1; flex-shrink: 0;
+        }
+        #dmt-uc-banner .uc-dismiss:hover { opacity: 1; }
+      `;
+      document.head.appendChild(s);
+    }
+
+    function showBanner(type, message) {
+      const editor = document.querySelector('div[data-slate-editor="true"]');
+      if (!editor) return;
+      const slateContainer = editor.closest('[class*="scrollableContainer_"]')
+        || editor.parentElement?.parentElement?.parentElement;
+      if (!slateContainer) return;
+      const anchor = slateContainer.parentElement;
+      if (!anchor) return;
+
+      removeBanner();
+      const banner = document.createElement("div");
+      banner.id = BANNER_ID;
+      banner.className = `uc-${type}`;
+
+      const msg = document.createElement("span");
+      msg.className = "uc-msg";
+      msg.textContent = message;
+
+      const dismissBtn = document.createElement("button");
+      dismissBtn.className = "uc-dismiss";
+      dismissBtn.textContent = t("uc_dismiss");
+      dismissBtn.onclick = removeBanner;
+
+      banner.appendChild(msg);
+      banner.appendChild(dismissBtn);
+      anchor.insertBefore(banner, slateContainer);
+    }
+
+    function removeBanner() {
+      document.getElementById(BANNER_ID)?.remove();
+    }
+
+    let _debounceTimer = null;
+
+    async function onPaste(e) {
+      const text = (e.clipboardData || window.clipboardData)?.getData("text") || "";
+      const pastedURLs = text.match(URL_RE);
+      if (!pastedURLs || pastedURLs.length === 0) return;
+
+      const filteredURLs = pastedURLs.filter(u => !isIgnoredURL(u));
+      if (filteredURLs.length === 0) return;
+
+      const normalizedPasted = filteredURLs.map(normalizeURL);
+
+      clearTimeout(_debounceTimer);
+      _debounceTimer = setTimeout(async () => {
+
+        const wh = window.wormholeModule;
+        const apiMode = localStorage.getItem("wh_api_mode") === "true";
+
+        if (!apiMode || !isModEnabled("mod_wormhole")) {
+          showBanner("info", t("uc_no_token"));
+          return;
+        }
+
+        const token = wh?._cachedToken || null;
+        if (!token) {
+          showBanner("info", t("uc_token_waiting"));
+          return;
+        }
+
+        const channelId = getCurrentChannelId();
+        if (!channelId) return;
+
+        showBanner("info", t("uc_fetching"));
+
+        try {
+          const limit = getScanLimit();
+          const messages = await fetchMessages(channelId, token, limit);
+
+          const historicURLs = new Set();
+          for (const msg of messages) {
+            extractURLs(msg.content || "").forEach(u => historicURLs.add(u));
+            (msg.embeds || []).forEach(em => {
+              if (em.url) historicURLs.add(normalizeURL(em.url));
+            });
+          }
+
+          const hits = normalizedPasted.filter(u => historicURLs.has(u));
+
+          if (hits.length > 0) {
+            const key = hits.length === 1 ? "uc_duplicate_found" : "uc_duplicate_found_plural";
+            showBanner("warn", t(key)
+              .replace("{n}", String(hits.length))
+              .replace("{limit}", String(messages.length)));
+          } else {
+            removeBanner();
+          }
+        } catch (err) {
+          DEBUG && console.warn("[URLChecker] fetchMessages failed:", err);
+          removeBanner();
+        }
+
+      }, 800);
+    }
+
+    function globalPasteHandler(e) {
+      if (e.target.closest('div[role="textbox"][data-slate-editor="true"]')) {
+        onPaste(e);
+      }
+    }
+    document.addEventListener("paste", globalPasteHandler, true);
+
+    const _ucObserver = new MutationObserver(() => {
+      if (!document.getElementById(BANNER_ID)) return;
+      const channelId = getCurrentChannelId();
+      if (channelId !== _ucObserver._lastChannelId) {
+        removeBanner();
+        _ucObserver._lastChannelId = channelId;
+      }
+    });
+    _ucObserver._lastChannelId = getCurrentChannelId();
+    _ucObserver.observe(document.body, { childList: true, subtree: true });
+
+    CleanupRegistry.add(() => {
+      _ucObserver.disconnect();
+      document.removeEventListener("paste", globalPasteHandler, true);
+      clearTimeout(_debounceTimer);
+      removeBanner();
+    });
+
+    DEBUG && console.log("[URLChecker] Module G initialized, scan limit:", getScanLimit());
+  }
   const initModules = [
     { name: "Forwarding", fn: initForwardingManager, key: "mod_forwarding" },
     { name: "Message", fn: initMessageUtility, key: "mod_message" },
     { name: "Emoji", fn: initEmojiSearchHelper, key: "mod_emoji" },
     { name: "Header", fn: initHeaderMods, key: "mod_header" },
     { name: "Webhook", fn: initWebhookManager, key: "mod_webhook" },
+    { name: "URLChecker", fn: initURLChecker, key: "mod_urlchecker" },
   ];
 
   initModules.forEach(({ name, fn, key }) => {
@@ -15620,8 +16036,13 @@ unsafeWindow.fetch = function(...args) {
         return;
       }
       const lang = getConfig().lang || navigator.language || "en-US";
-      const getLang = (labels) =>
-        labels[lang] || labels["zh-TW"] || labels["en-US"];
+      const getLang = (labels) => {
+        if (labels[lang]) return labels[lang];
+        const prefix = lang.split("-")[0];
+        const prefixKey = Object.keys(labels).find(k => k.split("-")[0] === prefix);
+        if (prefixKey) return labels[prefixKey];
+        return labels["en-US"] || labels["zh-TW"];
+      };
       const overlay = document.createElement("div");
       overlay.id = "mod-settings-panel-rescue";
       Object.assign(overlay.style, {
