@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      1.7.1
+// @version      1.7.2
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -6989,15 +6989,39 @@
       head.innerHTML = `<span>📖 ${t("tip_manual")}</span><span style="cursor:pointer;font-size:18px;color:#72767d;" id="mod-manual-close">✕</span>`;
 
       const body = document.createElement("div");
-      body.style.cssText = "overflow-y: auto; padding: 16px 18px; flex: 1;";
+      body.style.cssText = "overflow-y: auto; padding: 16px 18px; flex: 1; display:flex; flex-direction:column; gap:14px;";
       body.innerHTML = t("manual_content_sections");
+
+      const mmStyle = document.createElement("style");
+      mmStyle.textContent = `
+        #mod-manual-modal .mm-section{border-radius:7px;padding:11px 14px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.025)}
+        #mod-manual-modal .mm-section.accent-blue{background:rgba(88,101,242,.07);border-color:rgba(88,101,242,.22)}
+        #mod-manual-modal .mm-section.accent-green{background:rgba(35,165,90,.06);border-color:rgba(35,165,90,.22)}
+        #mod-manual-modal .mm-section.accent-yellow{background:rgba(240,178,50,.06);border-color:rgba(240,178,50,.22)}
+        #mod-manual-modal .mm-section.accent-wormhole{background:rgba(88,101,242,.06);border-color:rgba(88,101,242,.2)}
+        #mod-manual-modal .mm-sec-title{font-size:12px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+        #mod-manual-modal .mm-sec-title.c-blue{color:#8891f7}
+        #mod-manual-modal .mm-sec-title.c-green{color:#2dc770}
+        #mod-manual-modal .mm-sec-title.c-yellow{color:#f0b232}
+        #mod-manual-modal .mm-sec-title.c-worm{color:#a5b4fc}
+        #mod-manual-modal .mm-sec-title.c-default{color:#b5bac1}
+        #mod-manual-modal .mm-content{font-size:13px;color:#dbdee1;line-height:1.75}
+        #mod-manual-modal .mm-content b{color:#fff}
+        #mod-manual-modal .mm-key{background:#1e1f22;padding:1px 6px;border-radius:4px;font-family:monospace;color:#eee;font-size:11px;border:1px solid #3f4147}
+        #mod-manual-modal .mm-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px}
+        #mod-manual-modal .mm-row{display:flex;gap:6px;align-items:baseline}
+        #mod-manual-modal .mm-tag{background:rgba(88,101,242,.25);color:#a5b4fc;border-radius:3px;padding:0 5px;font-size:10px;font-weight:700;flex-shrink:0}
+        #mod-manual-modal .mm-tag.g{background:rgba(35,165,90,.25);color:#57f287}
+        #mod-manual-modal .mm-tag.y{background:rgba(240,178,50,.25);color:#f0b232}
+      `;
+      document.head.appendChild(mmStyle);
 
       box.appendChild(head);
       box.appendChild(body);
       overlay.appendChild(box);
       document.body.appendChild(overlay);
 
-      const close = () => overlay.remove();
+      const close = () => { overlay.remove(); mmStyle.remove(); };
       overlay.addEventListener("click", (e) => {
         if (e.target === overlay) close();
       });
