@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      1.7.2
+// @version      1.7.3
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -416,10 +416,10 @@
       toast.classList.remove("dmt-toast-show");
       setTimeout(() => toast.remove(), 230);
     };
-    const timer = setTimeout(dismiss, duration);
+    let dismissTimer = setTimeout(dismiss, duration);
 
-    toast.addEventListener("mouseenter", () => clearTimeout(timer));
-    toast.addEventListener("mouseleave", () => setTimeout(dismiss, 800));
+    toast.addEventListener("mouseenter", () => clearTimeout(dismissTimer));
+    toast.addEventListener("mouseleave", () => { dismissTimer = setTimeout(dismiss, 800); });
   }
 
   function dmtConfirm(message, opts = {}) {
@@ -591,10 +591,20 @@
     const cached = TranslationCache.get(cacheKey);
     if (cached !== null) return cached;
 
-    let text =
-      (lang === "custom"
-        ? _customLangData?.[key] || TRANSLATIONS["en"][key]
-        : TRANSLATIONS[lang]?.[key] || TRANSLATIONS["en"][key]) || key;
+    let text;
+    if (lang === "custom") {
+      text = _customLangData?.[key] ?? TRANSLATIONS["en"]?.[key];
+    } else {
+      const inLang = TRANSLATIONS[lang]?.[key];
+      if (inLang === undefined && lang !== "en") {
+        DEBUG && console.warn(`[t] key="${key}" missing in lang="${lang}", falling back to en`);
+      }
+      text = inLang ?? TRANSLATIONS["en"]?.[key];
+    }
+    if (text === undefined) {
+      DEBUG && console.warn(`[t] key="${key}" not found in any language — returning key as-is`);
+      text = key;
+    }
 
     for (const [k, v] of Object.entries(params)) {
       text = text.replace(new RegExp(`\\{${k}\\}`, "g"), v);
@@ -760,6 +770,8 @@
       mod_msg_warn_confirm: "Disable anyway",
       mod_msg_warn_cancel: "Cancel",
       mod_msg_enable_menu: "Enable ⠿ Message Utility",
+      rescue_reload_msg: "Settings updated. Reload page to apply changes?",
+      rescue_close_btn: "Close",
       grp_copy: "📝 Copy >",
       grp_convert: "🔄 Convert >",
       grp_download: "⬇️ Download >",
@@ -790,12 +802,6 @@
       wm_created: "Wormhole created!",
       wm_deleted: "Wormhole closed.",
       wm_nav_fail: "Navigation failed, please check the URL.",
-      wm_alert_invalid_url:
-        "Invalid URL! Please copy a valid Discord channel URL (containing /channels/).",
-      wm_default_channel_name: "Channel",
-      wm_refresh_confirm:
-        "Interface cannot update immediately due to Discord lock.\nRefresh page now to view?",
-      wm_root_group: "Uncategorized",
 
       wm_menu_edit: "✎ Edit Name",
       wm_menu_del: "🗑️ Close Wormhole",
@@ -1108,6 +1114,8 @@
       mod_msg_warn_confirm: "仍要停用",
       mod_msg_warn_cancel: "取消",
       mod_msg_enable_menu: "啟用 ⠿ 訊息工具",
+      rescue_reload_msg: "設定已更新。需要重新整理頁面才能生效。是否立即重新整理？",
+      rescue_close_btn: "關閉",
       grp_copy: "📝 複製相關 >",
       grp_convert: "🔄 轉換相關 >",
       grp_download: "⬇️ 下載相關 >",
@@ -1445,6 +1453,8 @@
       mod_msg_warn_confirm: "仍要停用",
       mod_msg_warn_cancel: "取消",
       mod_msg_enable_menu: "启用 ⠿ 消息工具",
+      rescue_reload_msg: "设置已更新。需要刷新页面才能生效。是否立即刷新？",
+      rescue_close_btn: "关闭",
       grp_copy: "📝 复制相关 >",
       grp_convert: "🔄 转换相关 >",
       grp_download: "⬇️ 下载相关 >",
@@ -1785,6 +1795,8 @@
       mod_msg_warn_confirm: "無効にする",
       mod_msg_warn_cancel: "キャンセル",
       mod_msg_enable_menu: "⠿ メッセージユーティリティを有効にする",
+      rescue_reload_msg: "設定を更新しました。ページをリロードして有効にします。今すぐリロードしますか？",
+      rescue_close_btn: "閉じる",
       grp_copy: "📝 コピー >",
       grp_convert: "🔄 変換 >",
       grp_download: "⬇️ ダウンロード >",
@@ -2129,6 +2141,8 @@
       mod_msg_warn_confirm: "비활성화",
       mod_msg_warn_cancel: "취소",
       mod_msg_enable_menu: "⠿ 메시지 유틸리티 활성화",
+      rescue_reload_msg: "설정을 업데이트했습니다. 페이지를 새로고침해야 적용됩니다. 지금 새로고침하시겠습니까?",
+      rescue_close_btn: "닫기",
       grp_copy: "📝 복사 >",
       grp_convert: "🔄 변환 >",
       grp_download: "⬇️ 다운로드 >",
@@ -2466,6 +2480,8 @@
       mod_msg_warn_confirm: "Deshabilitar",
       mod_msg_warn_cancel: "Cancelar",
       mod_msg_enable_menu: "Habilitar ⠿ Utilidad de Mensajes",
+      rescue_reload_msg: "Configuración actualizada. ¿Recargar página para aplicar cambios?",
+      rescue_close_btn: "Cerrar",
       grp_copy: "📝 Copiar >",
       grp_convert: "🔄 Convertir >",
       grp_download: "⬇️ Descargar >",
@@ -2788,6 +2804,8 @@
       mod_msg_warn_confirm: "Desativar",
       mod_msg_warn_cancel: "Cancelar",
       mod_msg_enable_menu: "Ativar ⠿ Utilitário de Mensagens",
+      rescue_reload_msg: "Configurações atualizadas. Recarregar página para aplicar?",
+      rescue_close_btn: "Fechar",
       grp_copy: "📝 Copiar >",
       grp_convert: "🔄 Converter >",
       grp_download: "⬇️ Baixar >",
@@ -3110,6 +3128,8 @@
       mod_msg_warn_confirm: "Désactiver",
       mod_msg_warn_cancel: "Annuler",
       mod_msg_enable_menu: "Activer ⠿ Utilitaire de Messages",
+      rescue_reload_msg: "Paramètres mis à jour. Recharger la page pour appliquer ?",
+      rescue_close_btn: "Fermer",
       grp_copy: "📝 Copier >",
       grp_convert: "🔄 Convertir >",
       grp_download: "⬇️ Télécharger >",
@@ -3436,6 +3456,8 @@
       mod_msg_warn_confirm: "Отключить",
       mod_msg_warn_cancel: "Отмена",
       mod_msg_enable_menu: "Включить ⠿ утилиту сообщений",
+      rescue_reload_msg: "Настройки обновлены. Перезагрузить страницу для применения?",
+      rescue_close_btn: "Закрыть",
       grp_copy: "📝 Копировать >",
       grp_convert: "🔄 Конвертировать >",
       grp_download: "⬇️ Скачать >",
@@ -3746,22 +3768,22 @@
             }
         `;
     const styleEl = document.createElement("style");
-    styleEl.innerHTML = STYLES;
+    styleEl.textContent = STYLES;
     document.head.appendChild(styleEl);
 
     const STORAGE_KEY = "discord_forward_v8";
     const PREF_KEY = "discord_forward_pref";
     function loadData() {
-      return GM_getValue(STORAGE_KEY, []);
+      return GMStore.get(STORAGE_KEY, []);
     }
     function saveData(data) {
-      GM_setValue(STORAGE_KEY, data);
+      GMStore.set(STORAGE_KEY, data);
     }
     function loadDropdownMode() {
-      return GM_getValue(PREF_KEY, true);
+      return GMStore.get(PREF_KEY, true);
     }
     function saveDropdownMode(isDropdown) {
-      GM_setValue(PREF_KEY, isDropdown);
+      GMStore.set(PREF_KEY, isDropdown);
     }
 
     function getRowType(row) {
@@ -5061,6 +5083,7 @@
       --dmt-bg-surface:   var(--background-floating,       #2f3136);
       --dmt-bg-deep:      var(--background-tertiary,       #1e1f22);
       --dmt-bg-overlay:   var(--background-secondary-alt,  #313338);
+      --dmt-bg-muted:     var(--interactive-muted,         #4f545c);
 
       --dmt-accent:       var(--brand-experiment,          #5865f2);
 
@@ -5392,7 +5415,7 @@
     }
 
     function exportSettings() {
-      const forwardingData = GM_getValue("discord_forward_v8", []);
+      const forwardingData = GMStore.get("discord_forward_v8", []);
 
       const configData = {
         lang: localStorage.getItem("copyMenuLanguage"),
@@ -5406,31 +5429,16 @@
       };
 
       const moduleCData = {
-        discord_emoji_favorites: JSON.parse(
-          GM_getValue("discord_emoji_favorites", "[]"),
-        ),
-        discord_gif_favorites: JSON.parse(
-          GM_getValue("discord_gif_favorites", "[]"),
-        ),
-        discord_sticker_favorites: JSON.parse(
-          GM_getValue("discord_sticker_favorites", "[]"),
-        ),
-        discord_emoji_collections: JSON.parse(
-          GM_getValue("discord_emoji_collections", "{}"),
-        ),
-        discord_gif_collections: JSON.parse(
-          GM_getValue("discord_gif_collections", "{}"),
-        ),
-        discord_sticker_collections: JSON.parse(
-          GM_getValue("discord_sticker_collections", "{}"),
-        ),
-        discord_emoji_native_mode: GM_getValue(
-          "discord_emoji_native_mode",
-          true,
-        ),
+        discord_emoji_favorites:    GMStore.get("discord_emoji_favorites",    [], true),
+        discord_gif_favorites:      GMStore.get("discord_gif_favorites",      [], true),
+        discord_sticker_favorites:  GMStore.get("discord_sticker_favorites",  [], true),
+        discord_emoji_collections:  GMStore.get("discord_emoji_collections",  {}, true),
+        discord_gif_collections:    GMStore.get("discord_gif_collections",    {}, true),
+        discord_sticker_collections:GMStore.get("discord_sticker_collections",{}, true),
+        discord_emoji_native_mode:  GMStore.get("discord_emoji_native_mode", true),
       };
 
-      const moduleDData = GM_getValue("discord_wormholes_v2", null);
+      const moduleDData = GMStore.get("discord_wormholes_v2", null);
 
       const wormholePrefs = {
         wh_api_mode: localStorage.getItem("wh_api_mode"),
@@ -5456,9 +5464,9 @@
         mod_webhook: localStorage.getItem("mod_webhook"),
       };
 
-      const webhookList = JSON.parse(GM_getValue("discord_webhook_list", "[]"));
+      const webhookList = GMStore.get("discord_webhook_list", [], true);
 
-      const forwardingPref = GM_getValue("discord_forward_pref", true);
+      const forwardingPref = GMStore.get("discord_forward_pref", true);
 
       const data = {
         ver: "EX2",
@@ -5528,51 +5536,30 @@
         }
 
         if (data.forwardingData) {
-          GM_setValue("discord_forward_v8", data.forwardingData);
+          GMStore.set("discord_forward_v8", data.forwardingData);
         }
         if (data.forwardingPref != null) {
-          GM_setValue("discord_forward_pref", data.forwardingPref);
+          GMStore.set("discord_forward_pref", data.forwardingPref);
         }
 
         if (data.discord_emoji_favorites)
-          GM_setValue(
-            "discord_emoji_favorites",
-            JSON.stringify(data.discord_emoji_favorites),
-          );
+          GMStore.set("discord_emoji_favorites",   data.discord_emoji_favorites,   true);
         if (data.discord_gif_favorites)
-          GM_setValue(
-            "discord_gif_favorites",
-            JSON.stringify(data.discord_gif_favorites),
-          );
+          GMStore.set("discord_gif_favorites",     data.discord_gif_favorites,     true);
         if (data.discord_sticker_favorites)
-          GM_setValue(
-            "discord_sticker_favorites",
-            JSON.stringify(data.discord_sticker_favorites),
-          );
+          GMStore.set("discord_sticker_favorites", data.discord_sticker_favorites, true);
         if (data.discord_emoji_collections)
-          GM_setValue(
-            "discord_emoji_collections",
-            JSON.stringify(data.discord_emoji_collections),
-          );
+          GMStore.set("discord_emoji_collections", data.discord_emoji_collections, true);
         if (data.discord_gif_collections)
-          GM_setValue(
-            "discord_gif_collections",
-            JSON.stringify(data.discord_gif_collections),
-          );
+          GMStore.set("discord_gif_collections",   data.discord_gif_collections,   true);
         if (data.discord_sticker_collections)
-          GM_setValue(
-            "discord_sticker_collections",
-            JSON.stringify(data.discord_sticker_collections),
-          );
+          GMStore.set("discord_sticker_collections", data.discord_sticker_collections, true);
         if (data.discord_emoji_native_mode != null)
-          GM_setValue(
-            "discord_emoji_native_mode",
-            data.discord_emoji_native_mode,
-          );
+          GMStore.set("discord_emoji_native_mode", data.discord_emoji_native_mode);
 
         if (data.wormholes) {
           if (data.wormholes.groups || data.wormholes.wormholes) {
-            GM_setValue("discord_wormholes_v2", data.wormholes);
+            GMStore.set("discord_wormholes_v2", data.wormholes);
           }
         }
 
@@ -5595,7 +5582,7 @@
         }
 
         if (Array.isArray(data.webhookList) && data.webhookList.length > 0) {
-          GM_setValue("discord_webhook_list", JSON.stringify(data.webhookList));
+          GMStore.set("discord_webhook_list", data.webhookList, true);
         }
 
         if (data.headerModPrefs) {
@@ -8038,7 +8025,7 @@
             const list = window.webhookModule.getWebhooks().map((w) =>
               w.id === id ? { ...w, keepSource: val } : w
             );
-            GM_setValue("discord_webhook_list", JSON.stringify(list));
+            GMStore.set("discord_webhook_list", list, true);
           };
 
           const makeWebhookParent = (label, onSelect) => {
@@ -8506,10 +8493,10 @@
 
     const NATIVE_MODE_KEY = "discord_emoji_native_mode";
     function getNativeMode() {
-      return GM_getValue(NATIVE_MODE_KEY, true);
+      return GMStore.get(NATIVE_MODE_KEY, true);
     }
     function setNativeMode(val) {
-      GM_setValue(NATIVE_MODE_KEY, val);
+      GMStore.set(NATIVE_MODE_KEY, val);
     }
 
     const activeLocalObservers = new WeakMap();
@@ -8798,7 +8785,7 @@
             : type === TYPES.STICKER
               ? "discord_sticker_favorites"
               : "discord_emoji_favorites";
-        const raw = JSON.parse(GM_getValue(key, "[]"));
+        const raw = GMStore.get(key, [], true);
         if (Array.isArray(raw) && raw.length > 0 && typeof raw[0] === "string")
           return raw.map((k) => ({ key: k, note: "", icon: "" }));
         return cleanData(raw);
@@ -8813,7 +8800,7 @@
           : type === TYPES.STICKER
             ? "discord_sticker_favorites"
             : "discord_emoji_favorites";
-      GM_setValue(key, JSON.stringify(data));
+      GMStore.set(key, data, true);
     }
     function getCollectionKey(type) {
       if (type === TYPES.GIF) return "discord_gif_collections";
@@ -8823,7 +8810,7 @@
     function getCollections(type) {
       try {
         const key = getCollectionKey(type);
-        let data = JSON.parse(GM_getValue(key, "{}"));
+        let data = GMStore.get(key, {}, true);
         if (typeof data !== "object" || Array.isArray(data)) data = {};
         if (Object.keys(data).length === 0) {
           data = { General: [] };
@@ -8835,7 +8822,7 @@
       }
     }
     function saveCollections(type, data) {
-      GM_setValue(getCollectionKey(type), JSON.stringify(data));
+      GMStore.set(getCollectionKey(type), data, true);
     }
     function reorderCollections(type, oldIndex, newIndex) {
       const cols = getCollections(type);
@@ -8986,7 +8973,7 @@
       const k = gifCacheKey(url);
       const gmKey = GIF_CACHE_PREFIX + k;
       try {
-        const val = GM_getValue(gmKey, null);
+        const val = GMStore.get(gmKey, null);
         if (val) return val;
       } catch (_) {}
       try {
@@ -9001,22 +8988,22 @@
       const byteLen = Math.round(dataUrl.length * 0.75);
       try {
         if (byteLen <= GIF_MAX_BYTES) {
-          GM_setValue(GIF_CACHE_PREFIX + k, dataUrl);
+          GMStore.set(GIF_CACHE_PREFIX + k, dataUrl);
         } else {
           await idbPut(k, dataUrl);
         }
         try {
-          const idx = JSON.parse(GM_getValue(GIF_CACHE_INDEX, "[]"));
+          const idx = GMStore.get(GIF_CACHE_INDEX, [], true);
           if (!idx.includes(k)) {
             idx.push(k);
           }
           while (idx.length > GIF_CACHE_MAX_COUNT) {
             const evictKey = idx.shift();
-            try { GM_deleteValue(GIF_CACHE_PREFIX + evictKey); } catch (_) {}
+            try { GMStore.del(GIF_CACHE_PREFIX + evictKey); } catch (_) {}
             try { await idbDelete(evictKey); } catch (_) {}
             DEBUG && console.log("[GifCache] FIFO evict:", evictKey);
           }
-          GM_setValue(GIF_CACHE_INDEX, JSON.stringify(idx));
+          GMStore.set(GIF_CACHE_INDEX, idx, true);
         } catch (_) {}
       } catch (e) {
         console.warn("[GifCache] write failed:", e);
@@ -10010,7 +9997,7 @@
 
             try {
               const cacheKey = gifCacheKey(url);
-              try { GM_deleteValue(GIF_CACHE_PREFIX + cacheKey); } catch (_) {}
+              try { GMStore.del(GIF_CACHE_PREFIX + cacheKey); } catch (_) {}
               try { await idbDelete(cacheKey); } catch (_) {}
 
               let freshUrl = null;
@@ -11066,11 +11053,10 @@
     }
 
     function getData() {
-      try { return JSON.parse(GM_getValue(STORAGE_KEY, "[]")) || []; }
-      catch (_) { return []; }
+      return GMStore.get(STORAGE_KEY, [], true) || [];
     }
     function saveData(list) {
-      GM_setValue(STORAGE_KEY, JSON.stringify(list));
+      GMStore.set(STORAGE_KEY, list, true);
     }
 
     function _fetchWebhookMeta(webhookUrl) {
@@ -11585,7 +11571,7 @@
         .header-mod-def-status { font-weight: bold; color: #f0b232; }
     `;
     const styleEl = document.createElement("style");
-    styleEl.innerHTML = HEADER_MOD_STYLES;
+    styleEl.textContent = HEADER_MOD_STYLES;
     document.head.appendChild(styleEl);
 
     let globalTooltip = document.querySelector(".header-mod-global-tooltip");
@@ -15608,8 +15594,8 @@ unsafeWindow.fetch = function(...args) {
       width: "36px",
       height: "36px",
       borderRadius: "50%",
-      background: "#5865f2",
-      color: "#fff",
+      background: "var(--dmt-accent, #5865f2)",
+      color: "var(--dmt-text-bright, #dbdee1)",
       fontSize: "18px",
       display: "flex",
       alignItems: "center",
@@ -15649,12 +15635,12 @@ unsafeWindow.fetch = function(...args) {
       });
       const box = document.createElement("div");
       Object.assign(box.style, {
-        background: "#2b2d31",
+        background: "var(--dmt-bg-primary, #2b2d31)",
         borderRadius: "12px",
         padding: "20px 24px",
         minWidth: "280px",
         maxWidth: "360px",
-        color: "#dcddde",
+        color: "var(--dmt-text-primary, #dcddde)",
         fontSize: "13px",
         boxShadow: "0 12px 40px rgba(0,0,0,0.6)",
       });
@@ -15662,7 +15648,7 @@ unsafeWindow.fetch = function(...args) {
       Object.assign(title.style, {
         fontSize: "15px",
         fontWeight: "700",
-        color: "#fff",
+        color: "var(--dmt-text-bright, #dbdee1)",
         marginBottom: "14px",
       });
       title.textContent = "⚙️ Discord Message Toolkit";
@@ -15684,7 +15670,7 @@ unsafeWindow.fetch = function(...args) {
           width: "34px",
           height: "18px",
           borderRadius: "9px",
-          background: enabled ? "#5865f2" : "#4f545c",
+          background: enabled ? "var(--dmt-accent, #5865f2)" : "var(--dmt-bg-muted, #4f545c)",
           position: "relative",
           cursor: "pointer",
           transition: "background 0.2s",
@@ -15706,35 +15692,28 @@ unsafeWindow.fetch = function(...args) {
           const nowOn = isModEnabled(mod.storageKey);
           const next = !nowOn;
           setModEnabled(mod.storageKey, next);
-          toggleEl.style.background = next ? "#5865f2" : "#4f545c";
+          toggleEl.style.background = next
+            ? "var(--dmt-accent, #5865f2)"
+            : "var(--dmt-bg-muted, #4f545c)";
           thumb.style.left = next ? "18px" : "2px";
 
-          const lang = getConfig().lang || navigator.language || "en-US";
-          const reloadMsg = {
-            "zh-TW": "設定已更新。需要重新整理頁面才能生效。是否立即重新整理？",
-            "zh-CN": "设置已更新。需要刷新页面才能生效。是否立即刷新？",
-            ja: "設定を更新しました。ページをリロードして有効にします。今すぐリロードしますか？",
-            ko: "설정을 업데이트했습니다. 페이지를 새로고침해야 적용됩니다. 지금 새로고침하시겠습니까?",
-          }[lang] || "Settings updated. Reload page to apply changes?";
-
-          dmtConfirm(reloadMsg).then((ok) => { if (ok) setTimeout(() => location.reload(), 300); });
+          dmtConfirm(t("rescue_reload_msg")).then((ok) => {
+            if (ok) setTimeout(() => location.reload(), 300);
+          });
         };
         row.appendChild(nameSpan);
         row.appendChild(toggleEl);
         box.appendChild(row);
       });
       const closeBtn = document.createElement("button");
-      closeBtn.textContent =
-        "✕ " +
-        ({ "zh-TW": "關閉", "zh-CN": "关闭", ja: "閉じる", ko: "닫기" }[lang] ||
-          "Close");
+      closeBtn.textContent = "✕ " + t("rescue_close_btn");
       Object.assign(closeBtn.style, {
         marginTop: "14px",
         width: "100%",
         padding: "7px",
         border: "none",
         borderRadius: "6px",
-        background: "#4f545c",
+        background: "var(--dmt-bg-muted, #4f545c)",
         color: "#fff",
         cursor: "pointer",
         fontSize: "13px",
@@ -15756,8 +15735,8 @@ unsafeWindow.fetch = function(...args) {
   GM_registerMenuCommand(
     `🐛 Toggle Debug Mode (${DEBUG ? "ON" : "OFF"})`,
     () => {
-      const current = GM_getValue("debugModeEnabled", false);
-      GM_setValue("debugModeEnabled", !current);
+      const current = GMStore.get("debugModeEnabled", false);
+      GMStore.set("debugModeEnabled", !current);
       const msg = !current
         ? "[Discord Utilities] Debug mode enabled. Please reload the page."
         : "[Discord Utilities] Debug mode disabled. Please reload the page.";
