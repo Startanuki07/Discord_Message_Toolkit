@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      1.8.4
+// @version      1.8.5
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -51,7 +51,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "1.8.4";
+  const SCRIPT_VERSION = "1.8.5";
 
   const GMStore = {
     
@@ -8707,8 +8707,6 @@
             .my-tab:hover { color: var(--dmt-text-primary); background: rgba(255,255,255,0.05); }
             .my-tab.active { color: #fff; border-bottom-color: var(--dmt-accent); }
             .my-tab.dragging { opacity: 0.5; background: rgba(255,255,255,0.1); }
-            .my-tab-add { padding: 8px; color: var(--dmt-success); cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; }
-            .my-tab-add:hover { color: #fff; background: var(--dmt-success); }
 
             .my-popover-menu.collection-mode { flex-direction: row; align-items: stretch; min-width: 420px; max-width: 720px; }
             .my-col-main { display: flex; flex-direction: column; flex: 1; min-width: 0; overflow: hidden; }
@@ -8729,6 +8727,29 @@
             .my-tab-add-ctrl:hover { color: #fff; background: var(--dmt-success); }
 
             .my-type-sidebar { display: flex; flex-direction: column; align-items: stretch; background: #1e1f22; width: 54px; flex-shrink: 0; padding: 10px 0; gap: 4px; border-right: 1px solid rgba(0,0,0,0.45); }
+
+            .my-sidebar-mode-spacer { flex: 1; }  
+            .my-sidebar-mode-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 4px 8px; }
+            .my-sidebar-mode-btn {
+                position: relative; display: flex; flex-direction: column;
+                align-items: center; justify-content: center; gap: 2px;
+                padding: 8px 4px; cursor: pointer; user-select: none;
+                color: #72767d; transition: color 0.15s, background 0.15s;
+                border-radius: 0;
+            }
+            .my-sidebar-mode-btn:hover { color: #b5bac1; background: rgba(255,255,255,0.07); }
+            
+            .my-sidebar-mode-btn::before {
+                content: ''; position: absolute; left: 4px; top: 50%; transform: translateY(-50%);
+                width: 3px; height: 50%; border-radius: 2px;
+                background: transparent; transition: background 0.2s;
+            }
+            .my-sidebar-mode-btn.native { color: #d4af37; }
+            .my-sidebar-mode-btn.native::before { background: #d4af37; }
+            .my-sidebar-mode-btn.link { color: #5865f2; }
+            .my-sidebar-mode-btn.link::before { background: #5865f2; }
+            .my-sidebar-mode-icon { font-size: 13px; line-height: 1; }
+            .my-sidebar-mode-label { font-size: 7px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; text-align: center; }
             .my-type-tab {
                 position: relative; display: flex; flex-direction: column;
                 align-items: center; justify-content: center; gap: 3px;
@@ -8791,7 +8812,7 @@
 
             .my-col-grid { display: grid; gap: 8px; width: 100%; box-sizing: border-box; }
             .my-col-grid.emoji { grid-template-columns: repeat(auto-fill, 58px); gap: 4px; justify-content: start; }
-            .my-col-grid.sticker { grid-template-columns: repeat(auto-fill, 100px); justify-content: center; }
+            .my-col-grid.sticker { grid-template-columns: repeat(auto-fill, 100px); justify-content: start; }
             .my-col-grid.gif { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
 
             .my-col-img-wrapper { position: relative; background: var(--dmt-bg-primary); border-radius: 4px; cursor: pointer; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
@@ -8876,64 +8897,21 @@
                 box-shadow: 0 -4px 12px rgba(0,0,0,0.5);
             }
             
-            @keyframes target-sparkle {
-                0% { transform: scale(1); filter: drop-shadow(0 0 0 transparent); color: #b5bac1; }
-                50% { transform: scale(1.15); filter: drop-shadow(0 0 5px #f0b232); color: #fff; }
-                100% { transform: scale(1); filter: drop-shadow(0 0 0 transparent); color: #b5bac1; }
-            }
-            .my-tool-btn.target-mode.animating {
-                animation: target-sparkle 3s ease-in-out infinite; 
-            }
-            
-            .my-tool-btn.target-mode.animating:hover {
-                animation-play-state: paused;
-                color: #f23f43 !important; 
-                filter: none;
-                transform: scale(1.1);
-            }
-
             @keyframes super-pulse {
-                0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(240, 178, 50, 0.7); color: #b5bac1; }
-                50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(240, 178, 50, 0); color: #fff; filter: drop-shadow(0 0 8px #ffd700); }
-                100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(240, 178, 50, 0); color: #b5bac1; }
+                0%   { transform: scale(1);    filter: drop-shadow(0 0 0px transparent); opacity: 0.7; }
+                50%  { transform: scale(1.12); filter: drop-shadow(0 0 6px #ffd700);     opacity: 1;   }
+                100% { transform: scale(1);    filter: drop-shadow(0 0 0px transparent); opacity: 0.7; }
             }
-
             .my-tool-btn.target-mode.animating {
-                animation: super-pulse 1.5s infinite;
+                animation: super-pulse 1.5s ease-in-out infinite;
+                will-change: transform, filter, opacity; 
             }
-
             .my-tool-btn.target-mode.animating:hover {
                 animation-play-state: paused;
                 color: #f23f43 !important;
                 filter: none;
                 transform: scale(1.1);
                 box-shadow: none;
-            }
-
-            .my-idle-darkness {
-                position: fixed;
-                top: 0; left: 0; width: 100vw; height: 100vh;
-                background: rgba(0, 0, 0, 0.85);
-                z-index: 2147483640;
-                pointer-events: none;
-                opacity: 0;
-                transition: opacity 2s ease-in-out;
-            }
-            .my-idle-darkness.active {
-                opacity: 1;
-                pointer-events: auto;
-            }
-
-            .my-tool-btn.spotlight-active {
-                position: fixed !important; 
-                z-index: 2147483646 !important; 
-                color: #ffd700 !important;
-                background: transparent !important;
-                filter: drop-shadow(0 0 15px #ffd700) !important;
-                animation: none !important;
-                transform: scale(1.5) !important; 
-                pointer-events: none; 
-                transition: all 0.5s ease;
             }
 
             @keyframes fadeUp {
@@ -9563,25 +9541,36 @@
     let currentViewType = TYPES.EMOJI;
     let itemDragSrcIdx = null;
 
+    function repositionDropdown(center = false) {
+      const dropdown = document.querySelector(".my-popover-menu.show");
+      if (!dropdown || !activeTrigger) return;
+      const rect = dropdown.getBoundingClientRect();
+      let left;
+      if (center) {
+        const container =
+          activeTrigger.closest('div[class*="header"], div[class*="container"]') ||
+          document.body;
+        const containerRect = container.getBoundingClientRect();
+        left = containerRect.left + containerRect.width / 2 - rect.width / 2;
+      } else {
+        left = parseFloat(dropdown.style.left) || rect.left;
+      }
+      if (left < 10) left = 10;
+      if (left + rect.width > window.innerWidth - 10)
+        left = window.innerWidth - rect.width - 10;
+      dropdown.style.left = `${left}px`;
+    }
+
     function showDropdown(triggerBtn) {
       const dropdown = document.querySelector(".my-popover-menu");
       dropdown.style.visibility = "hidden";
       dropdown.classList.add("show");
-      const rect = dropdown.getBoundingClientRect();
-      const container =
-        triggerBtn.closest('div[class*="header"], div[class*="container"]') ||
-        document.body;
-      const containerRect = container.getBoundingClientRect();
-      let left = containerRect.left + containerRect.width / 2 - rect.width / 2;
-      if (left < 10) left = 10;
-      if (left + rect.width > window.innerWidth - 10)
-        left = window.innerWidth - rect.width - 10;
       const btnRect = triggerBtn.getBoundingClientRect();
       dropdown.style.top = `${btnRect.bottom + 8}px`;
-      dropdown.style.left = `${left}px`;
-      dropdown.style.visibility = "visible";
       activeDropdown = dropdown;
       activeTrigger = triggerBtn;
+      repositionDropdown(true);
+      dropdown.style.visibility = "visible";
     }
 
     function closeAllMenus() {
@@ -9999,6 +9988,29 @@
         typeSidebar.appendChild(typeTab);
       });
 
+      if (type === TYPES.EMOJI) {
+        const isNative = getNativeMode();
+        const spacer = document.createElement("div");
+        spacer.className = "my-sidebar-mode-spacer";
+        const divider = document.createElement("div");
+        divider.className = "my-sidebar-mode-divider";
+        const modeBtn = document.createElement("div");
+        modeBtn.className = `my-sidebar-mode-btn ${isNative ? "native" : "link"}`;
+        modeBtn.innerHTML = isNative
+          ? `<span class="my-sidebar-mode-icon">✦</span><span class="my-sidebar-mode-label">NATIVE</span>`
+          : `<span class="my-sidebar-mode-icon">🔗</span><span class="my-sidebar-mode-label">LINK</span>`;
+        modeBtn.title = MODE_TOOLTIP;
+        modeBtn.addEventListener("mousedown", (e) => e.stopPropagation());
+        modeBtn.onclick = (e) => {
+          e.stopPropagation();
+          setNativeMode(!isNative);
+          renderTabsView(input, type);
+        };
+        typeSidebar.appendChild(spacer);
+        typeSidebar.appendChild(divider);
+        typeSidebar.appendChild(modeBtn);
+      }
+
       const colMain = document.createElement("div");
       colMain.className = "my-col-main";
 
@@ -10304,20 +10316,6 @@
         controls.appendChild(refreshBtn);
       }
 
-      if (type === TYPES.EMOJI) {
-        const modeSwitch = document.createElement("div");
-        const isNative = getNativeMode();
-        modeSwitch.className = `my-mode-switch ${isNative ? "active" : ""}`;
-        modeSwitch.innerHTML = isNative ? "✦ NATIVE" : "🔗 LINK";
-        modeSwitch.title = MODE_TOOLTIP;
-        modeSwitch.addEventListener("mousedown", (e) => e.stopPropagation());
-        modeSwitch.onclick = (e) => {
-          e.stopPropagation();
-          setNativeMode(!isNative);
-          renderTabsView(input, type);
-        };
-        controls.appendChild(modeSwitch);
-      }
       header.appendChild(controls);
       colMain.appendChild(header);
 
@@ -10478,6 +10476,7 @@
       colMain.appendChild(content);
       dropdown.appendChild(typeSidebar);
       dropdown.appendChild(colMain);
+      repositionDropdown();
     }
 
     const processedNodes = new WeakSet();
@@ -10531,7 +10530,6 @@
         if (existingContainer._boundInput === input && input.isConnected)
           return;
         else {
-          if (existingContainer._cleanupIdle) existingContainer._cleanupIdle();
           existingContainer.remove();
           processedNodes.delete(headerContainer);
         }
@@ -10562,84 +10560,6 @@
       targetBtn.className = "my-tool-btn target-mode animating";
       targetBtn.innerHTML = ICON_TARGET;
       targetBtn.title = t("em_btn_target_title");
-
-      let idleTimer = null;
-      let overlayEl = null;
-      let cloneBtn = null;
-
-      const clearDarkness = () => {
-        if (overlayEl) {
-          overlayEl.classList.remove("active");
-          setTimeout(() => {
-            if (overlayEl) overlayEl.remove();
-            overlayEl = null;
-          }, 500);
-        }
-        if (cloneBtn) {
-          cloneBtn.remove();
-          cloneBtn = null;
-        }
-        targetBtn.style.opacity = "1";
-      };
-
-      const triggerDarkness = () => {
-        if (!document.body.contains(targetBtn)) {
-          cleanupIdle();
-          return;
-        }
-        if (document.querySelector(".my-popover-menu.show")) return;
-
-        if (!overlayEl) {
-          overlayEl = document.createElement("div");
-          overlayEl.className = "my-idle-darkness";
-          document.body.appendChild(overlayEl);
-        }
-
-        if (!cloneBtn) {
-          const rect = targetBtn.getBoundingClientRect();
-          if (rect.top < 0 || rect.top > window.innerHeight) return;
-
-          cloneBtn = document.createElement("div");
-          cloneBtn.className = "my-tool-btn target-mode spotlight-active";
-          cloneBtn.innerHTML = ICON_TARGET;
-
-          cloneBtn.style.left = `${rect.left}px`;
-          cloneBtn.style.top = `${rect.top}px`;
-          cloneBtn.style.width = `${rect.width}px`;
-          cloneBtn.style.height = `${rect.height}px`;
-
-          document.body.appendChild(cloneBtn);
-
-          targetBtn.style.opacity = "0";
-        }
-
-        requestAnimationFrame(() => {
-          if (overlayEl) overlayEl.classList.add("active");
-        });
-      };
-
-      const resetIdleTimer = () => {
-        clearTimeout(idleTimer);
-        if (overlayEl || cloneBtn) {
-          clearDarkness();
-        }
-        idleTimer = setTimeout(triggerDarkness, 30000);
-      };
-
-      document.addEventListener("mousemove", resetIdleTimer, { passive: true });
-      document.addEventListener("keydown", resetIdleTimer);
-
-      const cleanupIdle = () => {
-        clearTimeout(idleTimer);
-        clearDarkness();
-        document.removeEventListener("mousemove", resetIdleTimer, {
-          passive: true,
-        });
-        document.removeEventListener("keydown", resetIdleTimer);
-      };
-      btnContainer._cleanupIdle = cleanupIdle;
-
-      resetIdleTimer();
 
       targetBtn.onclick = (e) => {
         e.stopPropagation();
