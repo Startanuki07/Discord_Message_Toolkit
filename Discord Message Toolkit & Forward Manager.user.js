@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      1.8.3
+// @version      1.8.4
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -51,7 +51,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "1.8.3";
+  const SCRIPT_VERSION = "1.8.4";
 
   const GMStore = {
     
@@ -8710,6 +8710,47 @@
             .my-tab-add { padding: 8px; color: var(--dmt-success); cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; }
             .my-tab-add:hover { color: #fff; background: var(--dmt-success); }
 
+            .my-popover-menu.collection-mode { flex-direction: row; align-items: stretch; min-width: 420px; max-width: 720px; }
+            .my-col-main { display: flex; flex-direction: column; flex: 1; min-width: 0; overflow: hidden; }
+            
+            .my-tab-controls { flex-shrink: 0 !important; }
+
+            .my-tab-scroll-area { min-width: 0; }
+            .my-tab { flex-shrink: 0; }
+
+            .my-col-img-wrapper[draggable="true"] { cursor: grab; }
+            .my-col-img-wrapper[draggable="true"]:active { cursor: grabbing; }
+            .my-col-img-wrapper.item-dragging { opacity: 0.35; outline: 2px dashed var(--dmt-accent, #5865f2); outline-offset: -2px; }
+            .my-col-img-wrapper.item-drag-over { outline: 2px solid var(--dmt-accent, #5865f2); outline-offset: -2px; background: rgba(88,101,242,0.12); }
+
+            .my-tab.drag-over { background: rgba(88,101,242,0.18); border-bottom-color: var(--dmt-accent); color: #fff; }
+
+            .my-tab-add-ctrl { padding: 5px 8px; color: var(--dmt-success); cursor: pointer; font-weight: bold; font-size: 16px; line-height: 1; display: flex; align-items: center; justify-content: center; border-radius: 4px; flex-shrink: 0; transition: background 0.15s, color 0.15s; }
+            .my-tab-add-ctrl:hover { color: #fff; background: var(--dmt-success); }
+
+            .my-type-sidebar { display: flex; flex-direction: column; align-items: stretch; background: #1e1f22; width: 54px; flex-shrink: 0; padding: 10px 0; gap: 4px; border-right: 1px solid rgba(0,0,0,0.45); }
+            .my-type-tab {
+                position: relative; display: flex; flex-direction: column;
+                align-items: center; justify-content: center; gap: 3px;
+                padding: 10px 4px 10px 8px; cursor: pointer;
+                color: #72767d; transition: background 0.15s, color 0.15s;
+                user-select: none;
+                
+                clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
+                background: transparent;
+            }
+            .my-type-tab:hover { color: #b5bac1; background: rgba(255,255,255,0.07); }
+            .my-type-tab.active {
+                color: #fff;
+                background: var(--dmt-bg-primary, #2b2d31);
+                box-shadow: inset 3px 0 0 var(--dmt-accent, #5865f2);
+                margin-right: -1px; 
+                padding-right: 5px;
+                z-index: 2;
+            }
+            .my-type-icon { font-size: 16px; line-height: 1.3; }
+            .my-type-label { font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; text-align: center; }
+
             .my-mode-switch {
                 position: relative;
                 padding: 4px 10px; font-size: 11px; border-radius: 12px;
@@ -9519,6 +9560,8 @@
     let activeBatchCollection = null;
     let activeBatchType = null;
     let dragSrcIndex = null;
+    let currentViewType = TYPES.EMOJI;
+    let itemDragSrcIdx = null;
 
     function showDropdown(triggerBtn) {
       const dropdown = document.querySelector(".my-popover-menu");
@@ -9544,7 +9587,10 @@
     function closeAllMenus() {
       document
         .querySelectorAll(".my-popover-menu.show")
-        .forEach((m) => m.classList.remove("show"));
+        .forEach((m) => {
+          m.classList.remove("show");
+          m.classList.remove("collection-mode");
+        });
       const modal = document.querySelector(".my-save-modal");
       if (modal) modal.remove();
       activeDropdown = null;
@@ -9921,15 +9967,40 @@
     }
 
     function renderTabsView(input, type) {
+      currentViewType = type;
       const dropdown = document.querySelector(".my-popover-menu");
       if (!dropdown) return;
       dropdown.innerHTML = "";
+      dropdown.classList.remove("input-mode");
+      dropdown.classList.add("collection-mode");
 
       const cols = getCollections(type);
       let tabNames = Object.keys(cols);
       tabNames = ["General", ...tabNames.filter((n) => n !== "General")];
       if (!tabNames.includes(currentActiveTab) && tabNames.length > 0)
         currentActiveTab = tabNames[0];
+
+      const typeSidebar = document.createElement("div");
+      typeSidebar.className = "my-type-sidebar";
+      [
+        { id: TYPES.EMOJI,   icon: "😃", label: t("em_menu_emoji")   },
+        { id: TYPES.STICKER, icon: "🖼️", label: t("em_menu_sticker") },
+        { id: TYPES.GIF,     icon: "🎞️", label: t("em_menu_gif")     },
+      ].forEach(({ id, icon, label }) => {
+        const typeTab = document.createElement("div");
+        typeTab.className = `my-type-tab${id === type ? " active" : ""}`;
+        typeTab.innerHTML = `<span class="my-type-icon">${icon}</span><span class="my-type-label">${label}</span>`;
+        typeTab.addEventListener("mousedown", (e) => e.stopPropagation());
+        typeTab.onclick = (e) => {
+          e.stopPropagation();
+          currentActiveTab = "General";
+          renderTabsView(input, id);
+        };
+        typeSidebar.appendChild(typeTab);
+      });
+
+      const colMain = document.createElement("div");
+      colMain.className = "my-col-main";
 
       const header = document.createElement("div");
       header.className = "my-tabs-header";
@@ -9941,7 +10012,7 @@
         const tab = document.createElement("div");
         tab.className = `my-tab ${name === currentActiveTab ? "active" : ""}`;
         tab.innerText = name;
-        tab.draggable = true;
+        tab.draggable = name !== "General";
 
         tab.addEventListener("contextmenu", (ev) => {
           ev.preventDefault();
@@ -9958,18 +10029,32 @@
           dragSrcIndex = index;
           tab.classList.add("dragging");
           ev.dataTransfer.effectAllowed = "move";
+          ev.dataTransfer.setData("text/plain", String(index));
         });
         tab.addEventListener("dragend", () => {
+          dragSrcIndex = null;
           tab.classList.remove("dragging");
+          document.querySelectorAll(".my-tab.drag-over").forEach((t) => t.classList.remove("drag-over"));
+        });
+        tab.addEventListener("dragenter", (ev) => {
+          ev.preventDefault();
+          if (dragSrcIndex !== null && dragSrcIndex !== index)
+            tab.classList.add("drag-over");
+        });
+        tab.addEventListener("dragleave", () => {
+          tab.classList.remove("drag-over");
         });
         tab.addEventListener("dragover", (ev) => {
           ev.preventDefault();
+          ev.dataTransfer.dropEffect = "move";
           return false;
         });
         tab.addEventListener("drop", (ev) => {
           ev.stopPropagation();
+          tab.classList.remove("drag-over");
           if (dragSrcIndex !== null && dragSrcIndex !== index) {
             reorderCollections(type, dragSrcIndex, index);
+            dragSrcIndex = null;
             renderTabsView(input, type);
           }
           return false;
@@ -9984,9 +10069,20 @@
         scrollArea.appendChild(tab);
       });
 
+      header.appendChild(scrollArea);
+
+      const controls = document.createElement("div");
+      controls.className = "my-tab-controls";
+      Object.assign(controls.style, {
+        display: "flex",
+        alignItems: "center",
+        gap: "4px",
+      });
+
       const addTabBtn = document.createElement("div");
-      addTabBtn.className = "my-tab-add";
+      addTabBtn.className = "my-tab-add-ctrl";
       addTabBtn.innerText = "+";
+      addTabBtn.title = t("em_col_tab_new");
       addTabBtn.addEventListener("mousedown", (ev) => ev.stopPropagation());
       addTabBtn.onclick = (ev) => {
         ev.stopPropagation();
@@ -10001,16 +10097,7 @@
           }
         }
       };
-      scrollArea.appendChild(addTabBtn);
-      header.appendChild(scrollArea);
-
-      const controls = document.createElement("div");
-      controls.className = "my-tab-controls";
-      Object.assign(controls.style, {
-        display: "flex",
-        alignItems: "center",
-        gap: "4px",
-      });
+      controls.appendChild(addTabBtn);
 
       if (type === TYPES.GIF) {
         const refreshBtn = document.createElement("div");
@@ -10232,7 +10319,7 @@
         controls.appendChild(modeSwitch);
       }
       header.appendChild(controls);
-      dropdown.appendChild(header);
+      colMain.appendChild(header);
 
       const content = document.createElement("div");
       content.className = "my-tab-content";
@@ -10249,9 +10336,48 @@
       if (currentItems.length === 0) {
         content.innerHTML = `<div style="padding:20px; color:#72767d; font-size:12px; text-align:center;">${t("em_col_empty_tab")}</div>`;
       } else {
-        currentItems.forEach((url) => {
+        currentItems.forEach((url, itemIndex) => {
           const wrap = document.createElement("div");
           wrap.className = "my-col-img-wrapper";
+          wrap.draggable = true;
+
+          wrap.addEventListener("dragstart", (ev) => {
+            itemDragSrcIdx = itemIndex;
+            wrap.classList.add("item-dragging");
+            ev.dataTransfer.effectAllowed = "move";
+            ev.dataTransfer.setData("text/plain", String(itemIndex));
+            ev.stopPropagation();
+          });
+          wrap.addEventListener("dragend", () => {
+            itemDragSrcIdx = null;
+            wrap.classList.remove("item-dragging");
+            grid.querySelectorAll(".item-drag-over").forEach((el) => el.classList.remove("item-drag-over"));
+          });
+          wrap.addEventListener("dragenter", (ev) => {
+            ev.preventDefault();
+            if (itemDragSrcIdx !== null && itemDragSrcIdx !== itemIndex)
+              wrap.classList.add("item-drag-over");
+          });
+          wrap.addEventListener("dragleave", () => {
+            wrap.classList.remove("item-drag-over");
+          });
+          wrap.addEventListener("dragover", (ev) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            ev.dataTransfer.dropEffect = "move";
+          });
+          wrap.addEventListener("drop", (ev) => {
+            ev.stopPropagation();
+            wrap.classList.remove("item-drag-over");
+            if (itemDragSrcIdx !== null && itemDragSrcIdx !== itemIndex) {
+              const arr = cols[currentActiveTab];
+              const [moved] = arr.splice(itemDragSrcIdx, 1);
+              arr.splice(itemIndex, 0, moved);
+              itemDragSrcIdx = null;
+              saveCollections(type, cols);
+              renderTabsView(input, type);
+            }
+          });
 
           const media = createMediaElement(url, true, type);
           if (media) wrap.appendChild(media);
@@ -10349,7 +10475,9 @@
         });
         content.appendChild(grid);
       }
-      dropdown.appendChild(content);
+      colMain.appendChild(content);
+      dropdown.appendChild(typeSidebar);
+      dropdown.appendChild(colMain);
     }
 
     const processedNodes = new WeakSet();
