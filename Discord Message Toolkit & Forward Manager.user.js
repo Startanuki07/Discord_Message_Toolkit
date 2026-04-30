@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      1.8.5
+// @version      1.9.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -51,7 +51,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "1.8.5";
+  const SCRIPT_VERSION = "1.9.0";
 
   const GMStore = {
     
@@ -1010,8 +1010,9 @@
       wh_keep_source: "📎 Include source link",
       wh_keep_source_tip: "When checked, the original message link is appended to the sent content.",
 
-      uc_duplicate_found: "⚠️ This URL was already posted ({n} match found in last {limit} messages)",
-      uc_duplicate_found_plural: "⚠️ This URL was already posted ({n} matches found in last {limit} messages)",
+      uc_duplicate_found: "⚠️ This URL was already posted — appeared {count}× in the last {limit} messages",
+      uc_duplicate_found_plural: "⚠️ {n} duplicate URLs — up to {count}× in the last {limit} messages",
+      uc_dom_found: "⚠️ This URL was spotted {count}× in {limit} visible messages (DOM mode · no API needed)",
       uc_no_token: "🔍 Duplicate URL Check requires Wormhole API Mode — enable it in the Wormhole settings (hold ＋ for 1s)",
       uc_token_waiting: "⏳ Waiting for API Token… switch to any channel once to capture it",
       uc_fetching: "🔄 Checking for duplicate URLs…",
@@ -1358,8 +1359,9 @@
       wh_keep_source: "📎 附上來源連結",
       wh_keep_source_tip: "勾選後，傳送內容末尾會附上該訊息的原始連結。",
 
-      uc_duplicate_found: "⚠️ 此網址已在最近 {limit} 則訊息中出現過（找到 {n} 筆相符）",
-      uc_duplicate_found_plural: "⚠️ 此網址已在最近 {limit} 則訊息中出現過（找到 {n} 筆相符）",
+      uc_duplicate_found: "⚠️ 此網址已在最近 {limit} 則訊息中出現 {count} 次",
+      uc_duplicate_found_plural: "⚠️ {n} 個重複網址，最多出現 {count} 次（掃描最近 {limit} 則）",
+      uc_dom_found: "⚠️ 此網址在目前可見 {limit} 則訊息中出現 {count} 次（DOM 模式 · 不需 API）",
       uc_no_token: "🔍 重複網址偵測需要蟲洞 API 模式 — 請長按蟲洞 ＋ 鍵 1 秒開啟設定",
       uc_token_waiting: "⏳ 等待 API Token 就緒… 請切換至任意頻道一次以自動捕捉",
       uc_fetching: "🔄 正在掃描重複網址…",
@@ -1705,8 +1707,9 @@
       wh_keep_source: "📎 附上来源链接",
       wh_keep_source_tip: "勾选后，发送内容末尾会附上该消息的原始链接。",
 
-      uc_duplicate_found: "⚠️ 此网址已在最近 {limit} 条消息中出现过（找到 {n} 条匹配）",
-      uc_duplicate_found_plural: "⚠️ 此网址已在最近 {limit} 条消息中出现过（找到 {n} 条匹配）",
+      uc_duplicate_found: "⚠️ 此网址已在最近 {limit} 条消息中出现 {count} 次",
+      uc_duplicate_found_plural: "⚠️ {n} 个重复网址，最多出现 {count} 次（扫描最近 {limit} 条）",
+      uc_dom_found: "⚠️ 此网址在当前可见 {limit} 条消息中出现 {count} 次（DOM 模式 · 无需 API）",
       uc_no_token: "🔍 重复网址检测需要虫洞 API 模式 — 请长按虫洞 ＋ 键 1 秒打开设置",
       uc_token_waiting: "⏳ 等待 API Token 就绪… 请切换到任意频道一次以自动捕捉",
       uc_fetching: "🔄 正在扫描重复网址…",
@@ -2061,8 +2064,9 @@
       wh_keep_source: "📎 ソースリンクを含める",
       wh_keep_source_tip: "チェックすると、送信内容の末尾に元のメッセージリンクを追加します。",
 
-      uc_duplicate_found: "⚠️ この URL は直近 {limit} 件のメッセージにすでに投稿されています（{n} 件一致）",
-      uc_duplicate_found_plural: "⚠️ この URL は直近 {limit} 件のメッセージにすでに投稿されています（{n} 件一致）",
+      uc_duplicate_found: "⚠️ この URL は直近 {limit} 件のメッセージで {count} 回投稿されています",
+      uc_duplicate_found_plural: "⚠️ {n} 件の重複 URL（最大 {count} 回、直近 {limit} 件をスキャン）",
+      uc_dom_found: "⚠️ この URL は表示中の {limit} 件で {count} 回確認されました（DOM モード · API 不要）",
       uc_no_token: "🔍 URL重複チェックにはワームホール API モードが必要です — ＋ を1秒長押しして設定を開いてください",
       uc_token_waiting: "⏳ API Token を待機中… 任意のチャンネルに一度切り替えると自動取得されます",
       uc_fetching: "🔄 重複 URL をスキャン中…",
@@ -2415,8 +2419,9 @@
       wh_keep_source: "📎 출처 링크 포함",
       wh_keep_source_tip: "체크 시 전송 내용 끝에 원본 메시지 링크가 추가됩니다.",
 
-      uc_duplicate_found: "⚠️ 이 URL은 최근 {limit}개 메시지에 이미 게시되었습니다（{n}건 일치）",
-      uc_duplicate_found_plural: "⚠️ 이 URL은 최근 {limit}개 메시지에 이미 게시되었습니다（{n}건 일치）",
+      uc_duplicate_found: "⚠️ 이 URL은 최근 {limit}개 메시지에서 {count}번 게시되었습니다",
+      uc_duplicate_found_plural: "⚠️ {n}개 중복 URL（최대 {count}번, 최근 {limit}개 스캔）",
+      uc_dom_found: "⚠️ 이 URL이 표시된 {limit}개 메시지에서 {count}번 발견되었습니다（DOM 모드 · API 불필요）",
       uc_no_token: "🔍 중복 URL 검사는 웜홀 API 모드가 필요합니다 — ＋ 버튼을 1초 길게 눌러 설정을 여세요",
       uc_token_waiting: "⏳ API Token 대기 중… 임의 채널로 한 번 전환하면 자동으로 캡처됩니다",
       uc_fetching: "🔄 중복 URL 스캔 중…",
@@ -5506,7 +5511,84 @@
             opacity: 1;
         }
     }
-`);
+
+    .dmt-conv-gear {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 28px; flex-shrink: 0; cursor: pointer;
+        color: #72767d;
+        border-left: 1px solid rgba(255,255,255,0.07);
+        transition: color 0.15s, background 0.15s;
+    }
+    .dmt-conv-gear:hover { color: #fff; background: rgba(255,255,255,0.12); }
+    
+    .dmt-conv-gear.unseen { color: var(--dmt-accent, #5865f2); }
+
+    .dmt-conv-gear-badge {
+        position: absolute; top: -3px; right: -3px;
+        width: 7px; height: 7px; border-radius: 50%;
+        background: #ed4245;
+        box-shadow: 0 0 0 1.5px var(--dmt-bg-primary, #2b2d31);
+        animation: dmt-badge-pulse 2s ease-in-out infinite;
+    }
+    @keyframes dmt-badge-pulse {
+        0%, 100% { transform: scale(1);   opacity: 1; }
+        50%       { transform: scale(1.3); opacity: 0.7; }
+    }
+
+    #dmt-conv-pref-panel {
+        position: fixed; z-index: 2147483647;
+        background: var(--dmt-bg-primary, #2b2d31);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 8px; padding: 0; min-width: 220px; max-width: 280px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+        animation: dmt-panel-in 0.15s cubic-bezier(.19,1,.22,1);
+        font-family: sans-serif; font-size: 13px; color: var(--dmt-text-primary, #dbdee1);
+        overflow: hidden;
+    }
+    @keyframes dmt-panel-in {
+        from { opacity: 0; transform: scale(0.94) translateY(-4px); }
+        to   { opacity: 1; transform: none; }
+    }
+    #dmt-conv-pref-panel .dmt-cp-header {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 8px 12px 6px; border-bottom: 1px solid rgba(255,255,255,0.08);
+        font-weight: 700; font-size: 12px; text-transform: uppercase;
+        letter-spacing: 0.5px; color: var(--dmt-text-muted, #72767d);
+    }
+    #dmt-conv-pref-panel .dmt-cp-close {
+        cursor: pointer; opacity: 0.6; font-size: 14px; line-height: 1;
+        padding: 2px 4px; border-radius: 3px;
+        transition: opacity 0.15s, background 0.15s;
+    }
+    #dmt-conv-pref-panel .dmt-cp-close:hover { opacity: 1; background: rgba(255,255,255,0.1); }
+    #dmt-conv-pref-panel .dmt-cp-body { padding: 6px 0 8px; max-height: 320px; overflow-y: auto; }
+    #dmt-conv-pref-panel .dmt-cp-group-title {
+        padding: 6px 12px 3px; font-size: 10px; font-weight: 800;
+        text-transform: uppercase; letter-spacing: 0.6px;
+        color: var(--dmt-accent, #5865f2);
+    }
+    #dmt-conv-pref-panel .dmt-cp-row {
+        display: flex; align-items: center; gap: 8px;
+        padding: 4px 12px; cursor: pointer;
+        transition: background 0.12s;
+    }
+    #dmt-conv-pref-panel .dmt-cp-row:hover { background: rgba(255,255,255,0.06); }
+    #dmt-conv-pref-panel .dmt-cp-row input[type=checkbox] {
+        width: 14px; height: 14px; cursor: pointer; accent-color: var(--dmt-accent, #5865f2);
+        flex-shrink: 0;
+    }
+    #dmt-conv-pref-panel .dmt-cp-hint {
+        padding: 4px 12px 2px; font-size: 10px;
+        color: var(--dmt-text-muted, #72767d); border-top: 1px solid rgba(255,255,255,0.06);
+        margin-top: 4px; line-height: 1.5;
+    }
+    #dmt-conv-pref-panel .dmt-cp-reset {
+        display: block; width: calc(100% - 24px); margin: 6px 12px 2px;
+        padding: 4px 0; background: rgba(237,66,69,0.15); border: 1px solid rgba(237,66,69,0.3);
+        border-radius: 4px; color: #f2a0a2; font-size: 11px; font-weight: 700;
+        cursor: pointer; text-align: center; transition: background 0.15s;
+    }
+    #dmt-conv-pref-panel .dmt-cp-reset:hover { background: rgba(237,66,69,0.3); }`);
 
     function closeGlobalMenu() {
       if (globalActiveDropdown) {
@@ -7897,6 +7979,7 @@
         const DOMAIN_GROUPS = [
           {
             type: "twitter",
+            label: "Twitter / X",
             domains: [
               "twitter.com",
               "x.com",
@@ -7918,6 +8001,7 @@
           },
           {
             type: "reddit",
+            label: "Reddit",
             domains: [
               "reddit.com",
               "old.reddit.com",
@@ -7933,6 +8017,7 @@
           },
           {
             type: "instagram",
+            label: "Instagram",
             domains: [
               "instagram.com",
               "kkinstagram.com",
@@ -7950,6 +8035,7 @@
           },
           {
             type: "tiktok",
+            label: "TikTok",
             domains: ["tiktok.com", "vxtiktok.com", "tnktok.com"],
             labels: {
               "tiktok.com": "to_tiktok",
@@ -7959,6 +8045,7 @@
           },
           {
             type: "threads",
+            label: "Threads",
             domains: ["threads.com", "threads.net", "fixthreads.seria.moe"],
             labels: {
               "threads.com": "to_threads",
@@ -7968,6 +8055,7 @@
           },
           {
             type: "facebook",
+            label: "Facebook",
             domains: ["facebook.com", "facebed.com"],
             labels: {
               "facebook.com": "to_facebook",
@@ -7975,6 +8063,114 @@
             },
           },
         ];
+
+        const CONV_PREF_KEY  = (type) => `conv_pref_${type}`;
+        const CONV_SEEN_KEY  = "conv_pref_seen";
+        function getConvPrefs(type) {
+          const raw = GMStore.get(CONV_PREF_KEY(type), "");
+          return raw ? raw.split(",").filter(Boolean) : [];
+        }
+        function setConvPrefs(type, domains) {
+          GMStore.set(CONV_PREF_KEY(type), domains.join(","));
+        }
+        function isConvPrefSeen() {
+          return GMStore.get(CONV_SEEN_KEY, "") === "1";
+        }
+        function markConvPrefSeen() {
+          GMStore.set(CONV_SEEN_KEY, "1");
+        }
+
+        function openConvPrefPanel(anchorEl) {
+          markConvPrefSeen();
+          document.querySelectorAll(".dmt-conv-gear-badge").forEach(b => b.remove());
+
+          const existing = document.getElementById("dmt-conv-pref-panel");
+          if (existing) { existing.remove(); return; }
+
+          const panel = document.createElement("div");
+          panel.id = "dmt-conv-pref-panel";
+
+          const header = document.createElement("div");
+          header.className = "dmt-cp-header";
+          header.innerHTML = `<span>⚙ 轉換服務偏好</span>`;
+          const closeBtn = document.createElement("span");
+          closeBtn.className = "dmt-cp-close";
+          closeBtn.textContent = "✕";
+          closeBtn.onclick = () => panel.remove();
+          header.appendChild(closeBtn);
+          panel.appendChild(header);
+
+          const body = document.createElement("div");
+          body.className = "dmt-cp-body";
+
+          DOMAIN_GROUPS.forEach(group => {
+            const prefs = getConvPrefs(group.type);
+            const title = document.createElement("div");
+            title.className = "dmt-cp-group-title";
+            title.textContent = group.label;
+            body.appendChild(title);
+
+            const uniqueDomains = [...new Set(group.domains)];
+            uniqueDomains.forEach(domain => {
+              const row = document.createElement("label");
+              row.className = "dmt-cp-row";
+              const chk = document.createElement("input");
+              chk.type = "checkbox";
+              chk.checked = prefs.length === 0 || prefs.includes(domain);
+              chk.dataset.domain = domain;
+              chk.dataset.type   = group.type;
+              chk.addEventListener("change", () => {
+                const checked = [...panel.querySelectorAll(`input[data-type="${group.type}"]`)]
+                  .filter(c => c.checked)
+                  .map(c => c.dataset.domain);
+                const allDomains = [...new Set(group.domains)];
+                const newPrefs = checked.length === allDomains.length ? [] : checked;
+                setConvPrefs(group.type, newPrefs);
+              });
+              row.appendChild(chk);
+              const lbl = document.createElement("span");
+              lbl.textContent = domain;
+              row.appendChild(lbl);
+              body.appendChild(row);
+            });
+          });
+
+          panel.appendChild(body);
+
+          const hint = document.createElement("div");
+          hint.className = "dmt-cp-hint";
+          hint.textContent = "☑ 全勾 = 顯示全部（預設）\n✕ 取消勾選 = 隱藏該服務";
+          panel.appendChild(hint);
+
+          const resetBtn = document.createElement("button");
+          resetBtn.className = "dmt-cp-reset";
+          resetBtn.textContent = "↺ 重設所有偏好";
+          resetBtn.onclick = () => {
+            DOMAIN_GROUPS.forEach(g => setConvPrefs(g.type, []));
+            panel.remove();
+            showToast("✅ 已重設為顯示全部服務");
+          };
+          panel.appendChild(resetBtn);
+
+          document.body.appendChild(panel);
+          const rect = anchorEl.getBoundingClientRect();
+          const pw = panel.offsetWidth || 240;
+          const ph = panel.offsetHeight || 300;
+          let left = rect.right - pw;
+          if (left < 8) left = 8;
+          let top  = rect.bottom + 4;
+          if (top + ph > window.innerHeight - 8) top = rect.top - ph - 4;
+          panel.style.left = `${left}px`;
+          panel.style.top  = `${top}px`;
+
+          const onOutside = (e) => {
+            if (!panel.contains(e.target) && e.target !== anchorEl) {
+              panel.remove();
+              document.removeEventListener("mousedown", onOutside, true);
+            }
+          };
+          setTimeout(() => document.addEventListener("mousedown", onOutside, true), 0);
+        }
         const collectedLinks = {
           twitter: [],
           reddit: [],
@@ -8046,10 +8242,12 @@
         };
         DOMAIN_GROUPS.forEach((group) => {
           processGroup(group.type, (data, isBatch) => {
+            const prefs = getConvPrefs(group.type);
             if (isBatch) {
               const sourceDomains = new Set(data.map((d) => d.host));
               group.domains.forEach((domain) => {
                 if (sourceDomains.size === 1 && sourceDomains.has(domain)) return;
+                if (prefs.length > 0 && !prefs.includes(domain)) return;
                 const allConverted = data
                   .map((d) => `https://${domain}${d.path}`)
                   .join("\n");
@@ -8061,16 +8259,52 @@
               });
             } else {
               group.domains.forEach((domain) => {
-                if (domain !== data.host)
+                if (domain !== data.host) {
+                  if (prefs.length > 0 && !prefs.includes(domain)) return;
                   addItem(
                     "convert",
                     t(group.labels[domain]),
                     `https://${domain}${data.path}`,
                   );
+                }
               });
             }
           });
         });
+
+        if (sections.convert.length > 0) {
+          const origBtn = sections.convert[0];
+
+          const gearWrapper = document.createElement("div");
+          gearWrapper.style.cssText = "position:relative; display:flex; align-items:stretch;";
+          origBtn.style.flex = "1";
+          origBtn.style.minWidth = "0";
+          gearWrapper.appendChild(origBtn);
+
+          const gear = document.createElement("div");
+          gear.className = "dmt-conv-gear";
+          gear.title = "⚙ 轉換服務偏好設定";
+          gear.style.cssText = "position:static; transform:none; flex-shrink:0; opacity:1; width:28px; display:flex; align-items:center; justify-content:center; cursor:pointer; border-left:1px solid rgba(255,255,255,0.07);";
+          gear.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`;
+
+          if (!isConvPrefSeen()) {
+            gear.classList.add("unseen");
+            const badge = document.createElement("span");
+            badge.className = "dmt-conv-gear-badge";
+            badge.style.cssText = "position:absolute; top:4px; right:4px;";
+            gear.style.position = "relative";
+            gear.appendChild(badge);
+          }
+
+          gear.addEventListener("click", (e) => {
+            e.stopPropagation();
+            document.querySelectorAll(".dmt-conv-gear.unseen").forEach(g => g.classList.remove("unseen"));
+            openConvPrefPanel(gear);
+          });
+
+          gearWrapper.appendChild(gear);
+          sections.convert[0] = gearWrapper;
+        }
         if (collectedLinks.bilibili.length > 0) {
           if (collectedLinks.bilibili.length > 1) {
             const allVx = collectedLinks.bilibili
@@ -15935,6 +16169,15 @@ unsafeWindow.fetch = function(...args) {
         }
         #dmt-uc-banner .uc-dismiss:hover { opacity: 1; }
         
+        #dmt-uc-banner .uc-limit-btn {
+          background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+          border-radius: 4px; cursor: pointer; color: inherit;
+          opacity: 0.7; font-size: 11px; font-weight: 700;
+          padding: 2px 6px; line-height: 1.4; flex-shrink: 0;
+          transition: opacity 0.15s, background 0.15s;
+        }
+        #dmt-uc-banner .uc-limit-btn:hover { opacity: 1; background: rgba(255,255,255,0.15); }
+        
         #dmt-uc-banner .uc-progress {
           height: 3px;
           width: 100%;
@@ -15964,7 +16207,7 @@ unsafeWindow.fetch = function(...args) {
     const UC_WARN_DURATION = 6000;
     let _autoDismissTimer = null;
 
-    function showBanner(type, message) {
+    function showBanner(type, message, scanLimit = null) {
       const editor = document.querySelector('div[data-slate-editor="true"]');
       if (!editor) return;
       const slateContainer = editor.closest('[class*="scrollableContainer_"]')
@@ -15984,13 +16227,32 @@ unsafeWindow.fetch = function(...args) {
       const msg = document.createElement("span");
       msg.className = "uc-msg";
       msg.textContent = message;
+      body.appendChild(msg);
+
+if (type === "warn" && scanLimit !== null) {
+  const limitBtn = document.createElement("button");
+  limitBtn.className = "uc-limit-btn";
+  limitBtn.textContent = `⚙ ${scanLimit}`;
+  limitBtn.title = "Click to adjust scan limit (50–1000)";
+  limitBtn.onclick = () => {
+    const input = prompt(
+      `Adjust scan limit (current: ${scanLimit}, range: 50–1000):`,
+      String(scanLimit)
+    );
+    if (!input) return;
+    const v = parseInt(input, 10);
+    if (Number.isFinite(v) && v >= 50 && v <= 1000) {
+      GMStore.set(SCAN_LIMIT_KEY, String(v));
+      showToast(`✅ Scan limit updated to ${v}`);
+    }
+  };
+  body.appendChild(limitBtn);
+}
 
       const dismissBtn = document.createElement("button");
       dismissBtn.className = "uc-dismiss";
       dismissBtn.textContent = t("uc_dismiss");
       dismissBtn.onclick = () => dismissBanner();
-
-      body.appendChild(msg);
       body.appendChild(dismissBtn);
       banner.appendChild(body);
 
@@ -16024,6 +16286,19 @@ unsafeWindow.fetch = function(...args) {
       document.getElementById(BANNER_ID)?.remove();
     }
 
+    function scanDOMMessages() {
+      const msgEls = document.querySelectorAll(
+        '[class*="messageContent_"], [class*="markup_"][id*="message-content"]'
+      );
+      const urlMap = new Map();
+      msgEls.forEach(el => {
+        extractURLs(el.textContent || "").forEach(u => {
+          urlMap.set(u, (urlMap.get(u) || 0) + 1);
+        });
+      });
+      return { urlMap, count: msgEls.length };
+    }
+
     let _debounceTimer = null;
 
     async function onPaste(e) {
@@ -16041,47 +16316,59 @@ unsafeWindow.fetch = function(...args) {
 
         const wh = window.wormholeModule;
         const apiMode = localStorage.getItem("wh_api_mode") === "true";
-
-        if (!apiMode || !isModEnabled("mod_wormhole")) {
-          showBanner("info", t("uc_no_token"));
-          return;
-        }
-
-        const token = wh?._cachedToken || null;
-        if (!token) {
-          showBanner("info", t("uc_token_waiting"));
-          return;
-        }
-
+        const token = (apiMode && isModEnabled("mod_wormhole")) ? (wh?._cachedToken || null) : null;
         const channelId = getCurrentChannelId();
         if (!channelId) return;
 
-        showBanner("info", t("uc_fetching"));
+        if (token) {
+          showBanner("info", t("uc_fetching"));
+          try {
+            const limit = getScanLimit();
+            const messages = await fetchMessages(channelId, token, limit);
 
-        try {
-          const limit = getScanLimit();
-          const messages = await fetchMessages(channelId, token, limit);
+            const urlMap = new Map();
+            for (const msg of messages) {
+              extractURLs(msg.content || "").forEach(u => {
+                urlMap.set(u, (urlMap.get(u) || 0) + 1);
+              });
+              (msg.embeds || []).forEach(em => {
+                if (em.url) {
+                  const nu = normalizeURL(em.url);
+                  urlMap.set(nu, (urlMap.get(nu) || 0) + 1);
+                }
+              });
+            }
 
-          const historicURLs = new Set();
-          for (const msg of messages) {
-            extractURLs(msg.content || "").forEach(u => historicURLs.add(u));
-            (msg.embeds || []).forEach(em => {
-              if (em.url) historicURLs.add(normalizeURL(em.url));
-            });
-          }
-
-          const hits = normalizedPasted.filter(u => historicURLs.has(u));
-
-          if (hits.length > 0) {
-            const key = hits.length === 1 ? "uc_duplicate_found" : "uc_duplicate_found_plural";
-            showBanner("warn", t(key)
-              .replace("{n}", String(hits.length))
-              .replace("{limit}", String(messages.length)));
-          } else {
+            const hits = normalizedPasted.filter(u => urlMap.has(u));
+            if (hits.length > 0) {
+              const maxCount = Math.max(...hits.map(u => urlMap.get(u)));
+              const key = hits.length === 1 ? "uc_duplicate_found" : "uc_duplicate_found_plural";
+              showBanner("warn", t(key)
+                .replace("{n}",     String(hits.length))
+                .replace("{count}", String(maxCount))
+                .replace("{limit}", String(messages.length)),
+                getScanLimit()
+              );
+            } else {
+              removeBanner();
+            }
+          } catch (err) {
+            DEBUG && console.warn("[URLChecker] fetchMessages failed:", err);
             removeBanner();
           }
-        } catch (err) {
-          DEBUG && console.warn("[URLChecker] fetchMessages failed:", err);
+          return;
+        }
+
+        const { urlMap: domMap, count: domCount } = scanDOMMessages();
+        const domHits = normalizedPasted.filter(u => domMap.has(u));
+        if (domHits.length > 0) {
+          const maxCount = Math.max(...domHits.map(u => domMap.get(u)));
+          showBanner("warn", t("uc_dom_found")
+            .replace("{count}", String(maxCount))
+            .replace("{limit}", String(domCount)),
+            null
+          );
+        } else {
           removeBanner();
         }
 
