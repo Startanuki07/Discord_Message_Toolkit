@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      1.9.0
+// @version      2.0.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -51,7 +51,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "1.9.0";
+  const SCRIPT_VERSION = "1.9.1";
 
   const GMStore = {
     
@@ -987,6 +987,8 @@
       copy_media_prefixed: "✅ Copied {n} media link(s) with prefix",
       copy_media_urls: "✅ Copied {n} media link(s)",
       wormhole_reset_success: "✅ Data cleared, refreshing…",
+      em_save_success: "Saved: {k}",
+
       wh_panel_title: "🔗 Webhook Manager",
       wh_enable: "Enable Webhook",
       wh_tip: "Webhook Manager",
@@ -1368,6 +1370,8 @@
       uc_dismiss: "✕",
       uc_limit_label: "掃描範圍：",
       uc_limit_suffix: "則訊息",
+      welcome_title: "歡迎使用 {script}",
+      em_save_success: "已儲存：{k}",
     },    "zh-CN": {
       name: "简体中文",
       fm_pinned_channels: "★ 收藏频道",
@@ -1716,6 +1720,7 @@
       uc_dismiss: "✕",
       uc_limit_label: "扫描范围：",
       uc_limit_suffix: "条消息",
+      em_save_success: "已保存：{k}",
     },
 
     ja: {
@@ -2073,6 +2078,7 @@
       uc_dismiss: "✕",
       uc_limit_label: "スキャン範囲：",
       uc_limit_suffix: "件",
+      em_save_success: "{k} を保存しました",
     },
 
     ko: {
@@ -2428,6 +2434,7 @@
       uc_dismiss: "✕",
       uc_limit_label: "스캔 범위：",
       uc_limit_suffix: "개 메시지",
+      em_save_success: "저장됨: {k}",
     },
     es: {
       name: "Español",
@@ -2604,8 +2611,8 @@
       em_btn_save_this: "Añadir este elemento a la colección",
       em_no_favs: "Sin favoritos aún",
       em_del_confirm: "¿Eliminar «{k}»?",
-      em_keyword_prompt: "Introduce una palabra clave:",
-      em_keyword_exists: "«{k}» ya existe",
+      em_note_prompt: "Nota:",
+      em_set_cover_success: "¡Imagen de portada establecida!",
 
       wm_nav_fail: "Error de navegación. Comprueba la URL.",
       wm_alert_invalid_url:
@@ -2753,6 +2760,34 @@
       wh_btn_cancel: "Cancelar",
       wh_keep_source: "📎 Incluir enlace de origen",
       wh_keep_source_tip: "Al marcar, se añade el enlace original del mensaje al final del contenido enviado.",
+
+      em_col_refresh_tooltip: "Actualizar vista previa de GIF (recargar caché CDN expirado)",
+      em_refresh_no_expired:   "ℹ️ No hay GIFs expirados en esta pestaña",
+      em_refresh_consent:      "⚠️ Acerca de actualizar GIFs\n\nEsta función usará un proxy de terceros (fixcdn.hyonsu.com)\npara obtener credenciales frescas de adjuntos de Discord.\n\nNotas:\n• Las URLs de tus imágenes serán enviadas a fixcdn.hyonsu.com\n• Es un servicio de terceros, sin relación con Discord ni este script\n• Busca 'fixcdn hyonsu' para más información antes de continuar\n\n¿Continuar?",
+      em_refresh_cancel_tip:   "ℹ️ Cancelado. Pasos manuales:\n① Busca el GIF original en Discord\n② Añádelo de nuevo a tu colección",
+      em_refresh_loading:      "Actualizando...",
+      em_refresh_ok:           "✨ {n} GIF(s) actualizado(s){fail} {track}",
+      em_refresh_partial_fail: " ({f} fallaron)",
+      em_refresh_fail:         "⚠️ No se pudieron actualizar los GIFs de esta pestaña",
+      em_refresh_track_api:    "(Discord API)",
+      em_refresh_track_cdn:    "(fixcdn)",
+      em_save_success: "Guardado: {k}",
+
+      uc_duplicate_found: "⚠️ Esta URL ya fue publicada — apareció {count}× en los últimos {limit} mensajes",
+      uc_duplicate_found_plural: "⚠️ {n} URLs duplicadas — hasta {count}× en los últimos {limit} mensajes",
+      uc_dom_found: "⚠️ Esta URL apareció {count}× en {limit} mensajes visibles (modo DOM · sin API)",
+      uc_no_token: "🔍 La verificación de URL duplicada requiere el modo API de Wormhole — actívalo en los ajustes de Wormhole (mantén ＋ 1s)",
+      uc_token_waiting: "⏳ Esperando API Token… cambia a cualquier canal una vez para capturarlo",
+      uc_fetching: "🔄 Buscando URLs duplicadas…",
+      uc_dismiss: "✕",
+      uc_limit_label: "Rango de escaneo:",
+      uc_limit_suffix: "mensajes",
+
+      wm_url_prompt: "Introduce la URL completa del canal de Discord:",
+      wm_name_prompt: "Introduce el nombre del Wormhole (ej. General):",
+      wm_edit_title: "Editar Wormhole: {n}",
+      wm_created: "¡Wormhole creado!",
+      wm_deleted: "Wormhole cerrado.",
     },    "pt-BR": {
       name: "Português (Brasil)",
       fm_pinned_channels: "★ Canais fixados",
@@ -2927,8 +2962,8 @@
       em_btn_save_this: "Adicionar este item à coleção",
       em_no_favs: "Sem favoritos ainda",
       em_del_confirm: "Excluir «{k}»?",
-      em_keyword_prompt: "Digite uma palavra-chave:",
-      em_keyword_exists: "«{k}» já existe",
+      em_note_prompt: "Nota:",
+      em_set_cover_success: "Imagem de capa definida!",
 
       wm_nav_fail: "Falha na navegação. Verifique a URL.",
       wm_alert_invalid_url:
@@ -3067,13 +3102,42 @@
       wh_send_urls: "🔗 Enviar URLs ao Webhook ▶",
       wh_no_webhooks: "Nenhum Webhook cadastrado",
       wh_send_ok: "✅ Enviado para [{name}]",
-      wh_send_fwh_url_invalid: "⚠️ URL de Webhook inválida",
+      wh_send_fail: "❌ Falha ao enviar [{name}]",
       wh_btn_edit: "Editar",
       wh_btn_save: "Guardar",
       wh_btn_cancel: "Cancelar",
       wh_keep_source: "📎 Incluir link de origem",
-      wh_keep_source_tip: "Ao marcar, o link original da mensagem é adicionado ao final do conteúdo enviado.",o_urls: "⚠️ Nenhuma URL nesta mensagem",
+      wh_keep_source_tip: "Ao marcar, o link original da mensagem é adicionado ao final do conteúdo enviado.",
+      wh_no_urls: "⚠️ Nenhuma URL nesta mensagem",
       wh_url_invalid: "⚠️ URL de Webhook inválida",
+
+      em_col_refresh_tooltip: "Atualizar prévia de GIF (recarregar cache CDN expirado)",
+      em_refresh_no_expired:   "ℹ️ Nenhum GIF expirado nesta aba",
+      em_refresh_consent:      "⚠️ Sobre atualização de GIFs\n\nEste recurso usará um proxy de terceiros (fixcdn.hyonsu.com)\npara obter novas credenciais de anexos do Discord.\n\nObservações:\n• Suas URLs de imagens serão enviadas ao fixcdn.hyonsu.com\n• Este é um serviço de terceiros, sem relação com Discord ou este script\n• Pesquise 'fixcdn hyonsu' para mais informações antes de continuar\n\nContinuar?",
+      em_refresh_cancel_tip:   "ℹ️ Cancelado. Passos manuais:\n① Encontre o GIF original no Discord\n② Adicione-o novamente à sua coleção",
+      em_refresh_loading:      "Atualizando...",
+      em_refresh_ok:           "✨ {n} GIF(s) atualizado(s){fail} {track}",
+      em_refresh_partial_fail: " ({f} falha(s))",
+      em_refresh_fail:         "⚠️ Não foi possível atualizar os GIFs desta aba",
+      em_refresh_track_api:    "(Discord API)",
+      em_refresh_track_cdn:    "(fixcdn)",
+      em_save_success: "Salvo: {k}",
+
+      uc_duplicate_found: "⚠️ Esta URL já foi publicada — apareceu {count}× nas últimas {limit} mensagens",
+      uc_duplicate_found_plural: "⚠️ {n} URLs duplicadas — até {count}× nas últimas {limit} mensagens",
+      uc_dom_found: "⚠️ Esta URL apareceu {count}× em {limit} mensagens visíveis (modo DOM · sem API)",
+      uc_no_token: "🔍 A verificação de URL duplicada requer o modo API do Wormhole — ative-o nas configurações do Wormhole (segure ＋ por 1s)",
+      uc_token_waiting: "⏳ Aguardando API Token… mude para qualquer canal uma vez para capturá-lo",
+      uc_fetching: "🔄 Verificando URLs duplicadas…",
+      uc_dismiss: "✕",
+      uc_limit_label: "Intervalo de varredura:",
+      uc_limit_suffix: "mensagens",
+
+      wm_url_prompt: "Insira a URL completa do canal do Discord:",
+      wm_name_prompt: "Insira o nome do Wormhole (ex. Geral):",
+      wm_edit_title: "Editar Wormhole: {n}",
+      wm_created: "Wormhole criado!",
+      wm_deleted: "Wormhole fechado.",
     },
 
     fr: {
@@ -3253,8 +3317,8 @@
       em_btn_save_this: "Ajouter cet élément à la collection",
       em_no_favs: "Aucun favori pour l'instant",
       em_del_confirm: "Supprimer « {k} » ?",
-      em_keyword_prompt: "Entrez un mot-clé :",
-      em_keyword_exists: "« {k} » existe déjà",
+      em_note_prompt: "Note :",
+      em_set_cover_success: "Image de couverture définie !",
 
       wm_nav_fail: "Échec de la navigation. Vérifiez l'URL.",
       wm_alert_invalid_url:
@@ -3403,6 +3467,34 @@
       wh_btn_cancel: "Annuler",
       wh_keep_source: "📎 Inclure le lien source",
       wh_keep_source_tip: "Si coché, le lien original du message est ajouté à la fin du contenu envoyé.",
+
+      em_col_refresh_tooltip: "Actualiser l'aperçu GIF (recharger le cache CDN expiré)",
+      em_refresh_no_expired:   "ℹ️ Aucun GIF expiré dans cet onglet",
+      em_refresh_consent:      "⚠️ À propos de l'actualisation des GIFs\n\nCette fonctionnalité utilisera un proxy tiers (fixcdn.hyonsu.com)\npour obtenir de nouvelles informations d'identification Discord.\n\nRemarques :\n• Vos URLs d'images seront envoyées à fixcdn.hyonsu.com\n• Il s'agit d'un service tiers, sans lien avec Discord ou ce script\n• Recherchez 'fixcdn hyonsu' pour en savoir plus avant de continuer\n\nContinuer ?",
+      em_refresh_cancel_tip:   "ℹ️ Annulé. Étapes manuelles :\n① Trouvez le GIF original sur Discord\n② Ajoutez-le à nouveau à votre collection",
+      em_refresh_loading:      "Actualisation...",
+      em_refresh_ok:           "✨ {n} GIF(s) actualisé(s){fail} {track}",
+      em_refresh_partial_fail: " ({f} échec(s))",
+      em_refresh_fail:         "⚠️ Impossible d'actualiser les GIFs de cet onglet",
+      em_refresh_track_api:    "(Discord API)",
+      em_refresh_track_cdn:    "(fixcdn)",
+      em_save_success: "Enregistré : {k}",
+
+      uc_duplicate_found: "⚠️ Cette URL a déjà été publiée — apparue {count}× dans les {limit} derniers messages",
+      uc_duplicate_found_plural: "⚠️ {n} URLs dupliquées — jusqu'à {count}× dans les {limit} derniers messages",
+      uc_dom_found: "⚠️ Cette URL est apparue {count}× dans {limit} messages visibles (mode DOM · sans API)",
+      uc_no_token: "🔍 La vérification d'URL dupliquée nécessite le mode API Wormhole — activez-le dans les paramètres Wormhole (maintenez ＋ 1s)",
+      uc_token_waiting: "⏳ En attente du Token API… changez de salon une fois pour le capturer",
+      uc_fetching: "🔄 Recherche d'URLs dupliquées…",
+      uc_dismiss: "✕",
+      uc_limit_label: "Portée du scan :",
+      uc_limit_suffix: "messages",
+
+      wm_url_prompt: "Entrez l'URL complète du salon Discord :",
+      wm_name_prompt: "Entrez le nom du Wormhole (ex. Général) :",
+      wm_edit_title: "Modifier le Wormhole : {n}",
+      wm_created: "Wormhole créé !",
+      wm_deleted: "Wormhole fermé.",
     },
 
     ru: {
@@ -3579,8 +3671,8 @@
       em_btn_save_this: "Добавить этот элемент в коллекцию",
       em_no_favs: "Пока нет избранного",
       em_del_confirm: "Удалить «{k}»?",
-      em_keyword_prompt: "Введите ключевое слово:",
-      em_keyword_exists: "«{k}» уже существует",
+      em_note_prompt: "Заметка:",
+      em_set_cover_success: "Обложка установлена!",
 
       wm_nav_fail: "Навигация не удалась. Проверьте URL.",
       wm_alert_invalid_url:
@@ -3727,6 +3819,34 @@
       wh_btn_cancel: "Отмена",
       wh_keep_source: "📎 Включить ссылку на источник",
       wh_keep_source_tip: "При включении ссылка на исходное сообщение добавляется в конец отправляемого контента.",
+
+      em_col_refresh_tooltip: "Обновить превью GIF (сбросить устаревший CDN-кэш)",
+      em_refresh_no_expired:   "ℹ️ В этой вкладке нет устаревших GIF",
+      em_refresh_consent:      "⚠️ Об обновлении GIF\n\nЭта функция использует сторонний прокси (fixcdn.hyonsu.com)\nдля получения свежих ссылок на вложения Discord.\n\nПримечания:\n• Ваши URL изображений будут отправлены на fixcdn.hyonsu.com\n• Это сторонний сервис, не связанный с Discord или этим скриптом\n• Поищите 'fixcdn hyonsu' для получения дополнительной информации\n\nПродолжить?",
+      em_refresh_cancel_tip:   "ℹ️ Отменено. Ручные шаги:\n① Найдите оригинальный GIF в Discord\n② Добавьте его заново в коллекцию",
+      em_refresh_loading:      "Обновление...",
+      em_refresh_ok:           "✨ Обновлено {n} GIF(ов){fail} {track}",
+      em_refresh_partial_fail: " ({f} ошибок)",
+      em_refresh_fail:         "⚠️ Не удалось обновить GIF в этой вкладке",
+      em_refresh_track_api:    "(Discord API)",
+      em_refresh_track_cdn:    "(fixcdn)",
+      em_save_success: "Сохранено: {k}",
+
+      uc_duplicate_found: "⚠️ Этот URL уже публиковался — встретился {count}× за последние {limit} сообщений",
+      uc_duplicate_found_plural: "⚠️ {n} дублирующихся URL — до {count}× за последние {limit} сообщений",
+      uc_dom_found: "⚠️ Этот URL встречается {count}× в {limit} видимых сообщениях (режим DOM · без API)",
+      uc_no_token: "🔍 Проверка дублирующихся URL требует режима API Wormhole — включите его в настройках Wormhole (удерживайте ＋ 1с)",
+      uc_token_waiting: "⏳ Ожидание API Token… переключитесь на любой канал для его получения",
+      uc_fetching: "🔄 Поиск дублирующихся URL…",
+      uc_dismiss: "✕",
+      uc_limit_label: "Диапазон сканирования:",
+      uc_limit_suffix: "сообщений",
+
+      wm_url_prompt: "Введите полный URL канала Discord:",
+      wm_name_prompt: "Введите название Wormhole (например, Общий):",
+      wm_edit_title: "Редактировать Wormhole: {n}",
+      wm_created: "Wormhole создан!",
+      wm_deleted: "Wormhole закрыт.",
     },
   };
 
@@ -13979,7 +14099,7 @@ unsafeWindow.fetch = function(...args) {
           ? this.t("wm_api_enable_btn")
           : this.t("wm_api_disable_btn");
         if (!panelApiMode) {
-          detectStatus.textContent = "請先選擇方案 B";
+          detectStatus.textContent = this.t("wm_api_plan_b_first");
           applyBtn.disabled = false;
         } else if (!tok) {
           detectStatus.innerHTML = `<span style="color:#f0b232;font-weight:500;">${this.t("wm_api_detect_waiting")}</span>`;
@@ -14689,7 +14809,7 @@ unsafeWindow.fetch = function(...args) {
           });
         });
 
-      setStatus(hasFiles ? "📡 上傳圖片並傳送..." : "📡 傳送中...");
+      setStatus(hasFiles ? "📡 Uploading & sending..." : "📡 Sending...");
       let res = await doRequest();
 
       if (res.status === 429) {
@@ -14699,7 +14819,7 @@ unsafeWindow.fetch = function(...args) {
           retryAfterMs = Math.ceil((body.retry_after || 1) * 1000) + 100;
         } catch (_) {}
         console.warn(`[WH API] Rate limited. Waiting ${retryAfterMs}ms...`);
-        setStatus(`⏳ 速率限制，${Math.ceil(retryAfterMs / 1000)}s 後重試...`);
+        setStatus(`⏳ Rate limited, retrying in ${Math.ceil(retryAfterMs / 1000)}s...`);
         await new Promise((r) => setTimeout(r, retryAfterMs));
         res = await doRequest();
       }
@@ -14716,11 +14836,11 @@ unsafeWindow.fetch = function(...args) {
       try {
         const body = JSON.parse(res.responseText);
         const codeMap = {
-          10003: "頻道不存在",
-          50001: "沒有存取權限",
-          50013: "缺少傳送訊息的權限",
-          50035: "訊息內容不合規",
-          40002: "必須先驗證身分",
+          10003: "Unknown Channel",
+          50001: "Missing Access",
+          50013: "Missing Permissions",
+          50035: "Invalid Form Body",
+          40002: "Verification Required",
         };
         const code = body.code;
         detail = codeMap[code]
@@ -14731,7 +14851,7 @@ unsafeWindow.fetch = function(...args) {
         if (res._err) console.error("[WH API] Network error:", res._err);
       }
 
-      setStatus(`❌ 傳送失敗：${detail}`, "err");
+      setStatus(`❌ ${t("wh_send_fail", { name: detail })}`, "err");
       return false;
     }
 
