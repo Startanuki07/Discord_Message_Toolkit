@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      2.0.0
+// @version      2.1.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -12473,6 +12473,9 @@
       this.focusMode = this.getFocusMode();
       this._cachedToken = null;
       this._tokenWatcher = null;
+      this._monitorTimer = null;
+      this._monitorBadgeMap = new Map();
+      this._monitorVisHandler = null;
     }
 
     initialize() {
@@ -12505,6 +12508,19 @@
 
       this.setupObserver();
       this._setupModalWatcher();
+
+      if (this.getMonitorEnabled() && this.getApiMode()) {
+        const tryStart = (waited = 0) => {
+          if (this._cachedToken) {
+            this.startMonitor();
+          } else if (waited < 30000) {
+            setTimeout(() => tryStart(waited + 1000), 1000);
+          } else {
+            DEBUG && console.warn("[WH Monitor] Token not ready after 30s, monitor not started.");
+          }
+        };
+        tryStart();
+      }
     }
 
     async resetAllData() {
@@ -12674,14 +12690,75 @@
       focusBtn.innerHTML = this.focusMode
         ? this.ICONS.focusOn
         : this.ICONS.focusOff;
-      focusBtn.title = this.focusMode
-        ? this.t("wm_focus_on")
-        : this.t("wm_focus_off");
+      focusBtn.removeAttribute("title");
+
+      let _fbPressTimer = null;
+      let _fbIsLongPress = false;
+
+      focusBtn.onmousedown = (e) => {
+        if (e.button !== 0) return;
+        _fbIsLongPress = false;
+        _fbPressTimer = setTimeout(() => {
+          _fbIsLongPress = true;
+          this.openSettingsMenu(focusBtn);
+        }, 500);
+      };
+      const _fbClear = () => clearTimeout(_fbPressTimer);
+      focusBtn.onmouseup   = _fbClear;
+      focusBtn.onmouseleave = _fbClear;
 
       focusBtn.onclick = (e) => {
         e.stopPropagation();
+        if (_fbIsLongPress) { _fbIsLongPress = false; return; }
         this.toggleFocusMode();
       };
+
+      let _fbTipTimer = null;
+      const _fbTipId  = "wh-focus-btn-tip";
+
+      focusBtn.addEventListener("mouseenter", () => {
+        _fbTipTimer = setTimeout(() => {
+          if (document.getElementById(_fbTipId)) return;
+          const tip = document.createElement("div");
+          tip.id = _fbTipId;
+          tip.innerHTML = `
+            <div class="wh-fbtip-title">${this.focusMode ? "Focus mode: ON" : "Focus mode: OFF"}</div>
+            <div class="wh-fbtip-body">
+              <span class="wh-fbtip-key">Click</span> — toggle focus mode<br>
+              <span class="wh-fbtip-key">Long-press</span> — open focus settings<br>
+              <hr class="wh-fbtip-hr">
+              <span class="wh-fbtip-dim">Create wormhole:</span><br>
+              <span class="wh-fbtip-key">Click ＋</span> — create new wormhole<br>
+              <span class="wh-fbtip-key">Long-press ＋</span> — open wormhole settings
+            </div>`;
+          document.body.appendChild(tip);
+          if (!document.getElementById("wh-fbtip-styles")) {
+            const s = document.createElement("style");
+            s.id = "wh-fbtip-styles";
+            s.textContent = `
+              #wh-focus-btn-tip{position:fixed;z-index:2147483647;background:var(--dmt-bg-primary);border:1px solid rgba(255,255,255,.12);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.75);padding:10px 14px;min-width:210px;pointer-events:none;animation:wh-fbtip-in .15s ease}
+              @keyframes wh-fbtip-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+              .wh-fbtip-title{font-size:11px;font-weight:700;color:var(--dmt-accent);letter-spacing:.05em;text-transform:uppercase;margin-bottom:8px}
+              .wh-fbtip-body{font-size:12px;color:var(--dmt-text-muted);line-height:1.7}
+              .wh-fbtip-key{display:inline-block;background:rgba(88,101,242,.18);border:1px solid rgba(88,101,242,.35);color:var(--dmt-text-bright);font-size:11px;font-weight:600;padding:1px 6px;border-radius:4px;line-height:1.5}
+              .wh-fbtip-dim{color:var(--dmt-text-muted);font-size:11px}
+              .wh-fbtip-hr{border:none;border-top:1px solid rgba(255,255,255,.08);margin:6px 0}
+            `;
+            document.head.appendChild(s);
+          }
+          const rect = focusBtn.getBoundingClientRect();
+          const tw = 210;
+          let left = rect.left;
+          if (left + tw > window.innerWidth - 8) left = window.innerWidth - tw - 8;
+          tip.style.left = `${left}px`;
+          tip.style.top  = `${rect.bottom + 6}px`;
+        }, 400);
+      });
+
+      focusBtn.addEventListener("mouseleave", () => {
+        clearTimeout(_fbTipTimer);
+        document.getElementById(_fbTipId)?.remove();
+      });
 
       btnGroup.appendChild(createBtn);
       btnGroup.appendChild(focusBtn);
@@ -12910,6 +12987,8 @@
       if (this.getDockPosition() === "navbar") {
         this._bindNavbarRow2(container, row2);
       }
+
+      this._restoreBadges();
     }
 
     _bindNavbarRow2(container, row2) {
@@ -13189,6 +13268,7 @@
         }
 
         this.navigateToChannel(wormhole.url);
+        this._clearWormholeBadge(wormhole.id);
       });
 
       chip.addEventListener("contextmenu", (e) => {
@@ -13889,6 +13969,30 @@
             };
           menu.appendChild(sizeRow);
         });
+
+        const sep3 = document.createElement("div");
+        sep3.className = "wh-sm-sep";
+        menu.appendChild(sep3);
+
+        const labelHeader = document.createElement("div");
+        labelHeader.className = "wh-sm-section";
+        labelHeader.textContent = "Label";
+        menu.appendChild(labelHeader);
+
+        const showLabels = this.getFocusShowLabels();
+        const labelRow = document.createElement("div");
+        labelRow.className = "wh-sm-item wh-sm-pos" + (showLabels ? " wh-sm-active" : "");
+        labelRow.innerHTML = `
+          <span class="wh-sm-icon">🏷️</span>
+          <span class="wh-sm-pos-label">Show name below icon</span>
+          <span class="wh-sm-radio">${showLabels ? "●" : "○"}</span>`;
+        labelRow.onclick = () => {
+          const next = !this.getFocusShowLabels();
+          this.setFocusShowLabels(next);
+          this.applyFocusMode(true);
+          menu.remove();
+        };
+        menu.appendChild(labelRow);
       }
 
       if (!document.getElementById("wh-settings-menu-styles")) {
@@ -14016,6 +14120,31 @@ unsafeWindow.fetch = function(...args) {
             <div id="wh-api-detect-status">${hasToken ? "" : panelApiMode ? `<span style="color:#f0b232;font-weight:500;">${this.t("wm_api_detect_waiting")}</span>` : this.t("wm_api_plan_b_first")}</div>
           </div>
 
+          <div id="wh-monitor-section" class="${panelApiMode ? "" : "disabled"}">
+            <div id="wh-monitor-section-title">🔔 Wormhole message monitor</div>
+            <div id="wh-monitor-row-main">
+              <span id="wh-monitor-label">Detect new messages in wormhole channels</span>
+              <label class="wh-monitor-toggle-wrap" title="${panelApiMode ? "" : "Enable API Mode (Plan B) first"}">
+                <input type="checkbox" id="wh-monitor-toggle" ${this.getMonitorEnabled() && panelApiMode ? "checked" : ""} ${panelApiMode ? "" : "disabled"}>
+                <span class="wh-monitor-slider"></span>
+              </label>
+            </div>
+            <div id="wh-monitor-row-opts" class="${this.getMonitorEnabled() && panelApiMode ? "" : "hidden"}">
+              <span class="wh-monitor-opt-label">Poll interval</span>
+              <select id="wh-monitor-interval">
+                <option value="15" ${this.getMonitorInterval() === 15 ? "selected" : ""}>15 seconds</option>
+                <option value="30" ${this.getMonitorInterval() === 30 ? "selected" : ""}>30 seconds</option>
+                <option value="60" ${this.getMonitorInterval() === 60 ? "selected" : ""}>60 seconds</option>
+              </select>
+              <span class="wh-monitor-opt-label" style="margin-left:12px;">Badge style</span>
+              <select id="wh-monitor-badge-style">
+                <option value="dot" ${this.getMonitorBadgeStyle() === "dot" ? "selected" : ""}>Dot</option>
+                <option value="count" ${this.getMonitorBadgeStyle() === "count" ? "selected" : ""}>Count</option>
+              </select>
+            </div>
+            <div id="wh-monitor-desc">Requires API Mode (Plan B) and a valid token. Polls all wormhole channels in the background and shows a badge when new messages arrive. Clicking a wormhole clears its badge.</div>
+          </div>
+
           <div id="wh-api-footer">
             <button id="wh-api-reset-btn">${this.t("wm_api_reset_all")}</button>
             <div id="wh-api-footer-right">
@@ -14070,6 +14199,22 @@ unsafeWindow.fetch = function(...args) {
           #wh-api-apply-btn{padding:7px 18px;border-radius:6px;background:var(--dmt-accent);border:none;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s}
           #wh-api-apply-btn:hover:not(:disabled){filter:brightness(1.12)}
           #wh-api-apply-btn:disabled{background:#3c4270;color:var(--dmt-text-muted);cursor:not-allowed}
+          #wh-monitor-section{display:flex;flex-direction:column;gap:8px;padding:12px 14px;background:rgba(88,101,242,.05);border:1px solid rgba(88,101,242,.2);border-radius:8px;transition:opacity .2s}
+          #wh-monitor-section.disabled{opacity:.35;pointer-events:none}
+          #wh-monitor-section-title{font-size:12px;font-weight:700;color:var(--dmt-text-muted);letter-spacing:.04em;text-transform:uppercase}
+          #wh-monitor-row-main{display:flex;align-items:center;justify-content:space-between;gap:8px}
+          #wh-monitor-label{font-size:13px;color:var(--dmt-text-bright)}
+          .wh-monitor-toggle-wrap{position:relative;display:inline-block;width:36px;height:20px;flex-shrink:0}
+          .wh-monitor-toggle-wrap input{opacity:0;width:0;height:0;position:absolute}
+          .wh-monitor-slider{position:absolute;inset:0;background:rgba(255,255,255,.15);border-radius:20px;cursor:pointer;transition:background .2s}
+          .wh-monitor-slider::before{content:"";position:absolute;width:14px;height:14px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s}
+          .wh-monitor-toggle-wrap input:checked + .wh-monitor-slider{background:var(--dmt-accent)}
+          .wh-monitor-toggle-wrap input:checked + .wh-monitor-slider::before{transform:translateX(16px)}
+          #wh-monitor-row-opts{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:4px}
+          #wh-monitor-row-opts.hidden{display:none}
+          .wh-monitor-opt-label{font-size:12px;color:var(--dmt-text-muted)}
+          #wh-monitor-interval,#wh-monitor-badge-style{background:var(--dmt-bg-deep);border:1px solid rgba(255,255,255,.1);color:var(--dmt-text-bright);font-size:12px;padding:3px 8px;border-radius:5px;cursor:pointer}
+          #wh-monitor-desc{font-size:11px;color:var(--dmt-text-muted);line-height:1.5}
         `;
         document.head.appendChild(s);
       }
@@ -14166,9 +14311,55 @@ unsafeWindow.fetch = function(...args) {
         } else if (!panelApiMode) {
           this._stopTokenInterceptor();
           this._cachedToken = null;
+          this.stopMonitor();
         }
         closePanel();
       };
+
+      const monitorSection  = panel.querySelector("#wh-monitor-section");
+      const monitorToggle   = panel.querySelector("#wh-monitor-toggle");
+      const monitorRowOpts  = panel.querySelector("#wh-monitor-row-opts");
+      const monitorInterval = panel.querySelector("#wh-monitor-interval");
+      const monitorBadge    = panel.querySelector("#wh-monitor-badge-style");
+
+      const refreshMonitorSection = () => {
+        monitorSection.className = panelApiMode ? "" : "disabled";
+        if (!panelApiMode) {
+          monitorToggle.checked = false;
+          monitorRowOpts.classList.add("hidden");
+        }
+      };
+
+      const origRefreshTokenUI = refreshTokenUI;
+      panel.querySelectorAll('input[name="wh-mode"]').forEach((radio) => {
+        radio.addEventListener("change", () => {
+          refreshMonitorSection();
+        });
+      });
+
+      monitorToggle.addEventListener("change", () => {
+        const enabled = monitorToggle.checked;
+        this.setMonitorEnabled(enabled);
+        monitorRowOpts.classList.toggle("hidden", !enabled);
+        if (enabled && this._cachedToken) {
+          this.startMonitor();
+        } else {
+          this.stopMonitor();
+        }
+      });
+
+      monitorInterval.addEventListener("change", () => {
+        this.setMonitorInterval(parseInt(monitorInterval.value, 10));
+        if (this.getMonitorEnabled() && this._cachedToken) {
+          this.stopMonitor();
+          this.startMonitor();
+        }
+      });
+
+      monitorBadge.addEventListener("change", () => {
+        this.setMonitorBadgeStyle(monitorBadge.value);
+        this._restoreBadges();
+      });
 
       refreshTokenUI();
       if (panelApiMode && !this._cachedToken) {
@@ -15358,6 +15549,14 @@ unsafeWindow.fetch = function(...args) {
       localStorage.setItem("wormhole_focus_size", size);
     }
 
+    getFocusShowLabels() {
+      return localStorage.getItem("wormhole_focus_show_labels") === "true";
+    }
+
+    setFocusShowLabels(v) {
+      localStorage.setItem("wormhole_focus_show_labels", String(v));
+    }
+
     _focusSizePx(size) {
       return { s: 20, m: 28, l: 38 }[size] ?? 28;
     }
@@ -15501,6 +15700,12 @@ unsafeWindow.fetch = function(...args) {
         container.classList.add("focus-mode");
       } else {
         container.classList.remove("focus-mode");
+      }
+
+      if (enabled && this.getFocusShowLabels()) {
+        container.classList.add("focus-show-labels");
+      } else {
+        container.classList.remove("focus-show-labels");
       }
     }
 
@@ -15733,6 +15938,149 @@ unsafeWindow.fetch = function(...args) {
           console.warn("[Wormhole] Removing stray container from:", parent);
         c.remove();
       });
+    }
+
+    getMonitorEnabled() {
+      return localStorage.getItem("wh_monitor_enabled") === "true";
+    }
+    setMonitorEnabled(v) {
+      localStorage.setItem("wh_monitor_enabled", String(v));
+    }
+    getMonitorInterval() {
+      return parseInt(localStorage.getItem("wh_monitor_interval") || "30", 10);
+    }
+    setMonitorInterval(v) {
+      localStorage.setItem("wh_monitor_interval", String(v));
+    }
+    getMonitorBadgeStyle() {
+      return localStorage.getItem("wh_monitor_badge_style") || "dot";
+    }
+    setMonitorBadgeStyle(v) {
+      localStorage.setItem("wh_monitor_badge_style", v);
+    }
+
+    startMonitor() {
+      if (this._monitorTimer) return;
+      const intervalMs = this.getMonitorInterval() * 1000;
+
+      DEBUG && console.log(`[WH Monitor] Started. Interval: ${intervalMs / 1000}s`);
+
+      this._pollAllWormholes();
+
+      this._monitorTimer = setInterval(() => {
+        if (!document.hidden) this._pollAllWormholes();
+      }, intervalMs);
+
+      if (!this._monitorVisHandler) {
+        this._monitorVisHandler = () => {
+          if (!document.hidden && this._monitorTimer) this._pollAllWormholes();
+        };
+        document.addEventListener("visibilitychange", this._monitorVisHandler);
+      }
+    }
+
+    stopMonitor() {
+      if (this._monitorTimer) {
+        clearInterval(this._monitorTimer);
+        this._monitorTimer = null;
+        DEBUG && console.log("[WH Monitor] Stopped.");
+      }
+      if (this._monitorVisHandler) {
+        document.removeEventListener("visibilitychange", this._monitorVisHandler);
+        this._monitorVisHandler = null;
+      }
+    }
+
+    async _pollAllWormholes() {
+      if (!this._cachedToken) return;
+      const wormholes = this.getAllWormholes();
+      if (!wormholes.length) return;
+
+      for (const wh of wormholes) {
+        try {
+          const channelId = this._extractChannelId(wh.url);
+          if (!channelId) continue;
+
+          const res = await new Promise((resolve, reject) => {
+            GM_xmlhttpRequest({
+              method: "GET",
+              url: `https://discord.com/api/v10/channels/${channelId}/messages?limit=1`,
+              headers: { Authorization: this._cachedToken, "Content-Type": "application/json" },
+              onload: resolve,
+              onerror: reject,
+              ontimeout: reject,
+            });
+          });
+
+          if (res.status !== 200) continue;
+          let msgs;
+          try { msgs = JSON.parse(res.responseText); } catch { continue; }
+          if (!Array.isArray(msgs) || !msgs.length) continue;
+
+          const latestId = msgs[0].id;
+          const sessionKey = `wh_last_msg_${wh.id}`;
+          const knownId = sessionStorage.getItem(sessionKey);
+
+          if (!knownId) {
+            sessionStorage.setItem(sessionKey, latestId);
+          } else if (latestId !== knownId && BigInt(latestId) > BigInt(knownId)) {
+            const current = this._monitorBadgeMap.get(wh.id) || 0;
+            this._monitorBadgeMap.set(wh.id, current + 1);
+            this._setWormholeBadge(wh.id);
+            sessionStorage.setItem(sessionKey, latestId);
+          }
+        } catch (err) {
+          DEBUG && console.warn(`[WH Monitor] Poll failed for wormhole ${wh.id}:`, err);
+        }
+
+        await new Promise(r => setTimeout(r, 200));
+      }
+    }
+
+    _setWormholeBadge(wormholeId) {
+      const count = this._monitorBadgeMap.get(wormholeId) || 0;
+      if (count === 0) return;
+
+      const style = this.getMonitorBadgeStyle();
+      const chips = document.querySelectorAll(`[data-wormhole-id="${wormholeId}"]`);
+      chips.forEach(chip => {
+        const cs = getComputedStyle(chip);
+        if (cs.position === "static") chip.style.position = "relative";
+
+        chip.querySelector(".wh-monitor-badge")?.remove();
+
+        const badge = document.createElement("span");
+        badge.className = "wh-monitor-badge";
+        if (style === "count") {
+          badge.textContent = count > 99 ? "99+" : String(count);
+          badge.classList.add("wh-monitor-badge--count");
+        } else {
+          badge.classList.add("wh-monitor-badge--dot");
+        }
+        chip.appendChild(badge);
+      });
+    }
+
+    _clearWormholeBadge(wormholeId) {
+      this._monitorBadgeMap.delete(wormholeId);
+      document.querySelectorAll(`[data-wormhole-id="${wormholeId}"] .wh-monitor-badge`)
+        .forEach(b => b.remove());
+    }
+
+    _restoreBadges() {
+      if (!this._monitorBadgeMap.size) return;
+      this._monitorBadgeMap.forEach((count, wormholeId) => {
+        if (count > 0) this._setWormholeBadge(wormholeId);
+      });
+    }
+
+    _extractChannelId(url) {
+      try {
+        const m = new URL(url).pathname.match(/\/channels\/\d+\/(\d+)/);
+        return m ? m[1] : null;
+      } catch {
+        return null;
+      }
     }
 
     setupObserver() {
@@ -16072,6 +16420,78 @@ unsafeWindow.fetch = function(...args) {
             .my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-vip-chip.dragging::after,
             .my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-chip.dragging::after {
                 display: none;
+            }
+
+            .my-wormhole-container.focus-mode.focus-show-labels .my-wormhole-chip,
+            .my-wormhole-container.focus-mode.focus-show-labels .my-wormhole-vip-chip {
+                flex-direction: column;
+                width: auto !important;
+                max-width: 56px !important;
+                height: auto !important;
+                border-radius: 8px !important;
+                padding: 4px 4px 3px !important;
+                gap: 3px;
+                margin-right: 4px !important;
+                overflow: visible;
+            }
+            
+            .my-wormhole-container.focus-mode.focus-show-labels .vip-text,
+            .my-wormhole-container.focus-mode.focus-show-labels .item-name {
+                display: block !important;
+                font-size: 10px;
+                font-weight: 500;
+                color: var(--dmt-text-primary);
+                text-align: center;
+                max-width: 48px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                line-height: 1.2;
+            }
+            
+            .my-wormhole-container.focus-mode.focus-show-labels .my-wormhole-vip-chip .vip-text {
+                color: var(--dmt-gold, #ffd700);
+            }
+            
+            .my-wormhole-container.focus-mode.focus-show-labels .my-wormhole-chip:hover,
+            .my-wormhole-container.focus-mode.focus-show-labels .my-wormhole-vip-chip:hover {
+                transform: translateY(-2px) !important;
+                width: auto !important;
+                max-width: 56px !important;
+                height: auto !important;
+                margin-right: 4px !important;
+            }
+
+            .wh-monitor-badge {
+                position: absolute;
+                top: -4px;
+                right: -4px;
+                pointer-events: none;
+                z-index: 10;
+                line-height: 1;
+            }
+            .wh-monitor-badge--dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: #ed4245;
+                border: 1.5px solid rgba(0,0,0,0.5);
+                display: block;
+            }
+            .wh-monitor-badge--count {
+                min-width: 16px;
+                height: 16px;
+                padding: 0 4px;
+                border-radius: 8px;
+                background: #ed4245;
+                color: #fff;
+                font-size: 10px;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1.5px solid rgba(0,0,0,0.5);
+                box-sizing: border-box;
             }
         `;
       document.head.appendChild(style);
