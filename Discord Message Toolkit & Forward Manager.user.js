@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      2.1.0
+// @version      2.2.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -36,7 +36,10 @@
 // @grant       GM_xmlhttpRequest
 // @grant       GM_info
 // @grant       unsafeWindow
-// @connect     *
+// @connect     discord.com
+// @connect     cdn.discordapp.com
+// @connect     media.discordapp.net
+// @connect     fixcdn.hyonsu.com
 // ==/UserScript==
 
 (function () {
@@ -51,7 +54,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "1.9.1";
+  const SCRIPT_VERSION = "2.2.9";
 
   const GMStore = {
     
@@ -88,6 +91,8 @@
   const NEW_FEATURES = {
     "mod_webhook":    "1.6.0",
     "mod_urlchecker": "1.8.0",
+    "mod_scout":      "2.2.0",
+    "mod_blacklist":  "2.2.0",
   };
 
   function isFeatureNew(featureKey) {
@@ -200,6 +205,8 @@
         modHeader: "mod_header",
         modWormhole: "mod_wormhole",
         modUrlChecker: "mod_urlchecker",
+        modScout: "mod_scout",
+        modBlacklist: "mod_blacklist",
       };
       return keyMap[prop] || prop;
     },
@@ -211,6 +218,7 @@
       storageKey: "mod_message",
       icon: "⠿",
       warn: true,
+      tip: "mod_tip_message",
       label: {
         "en-US": "Message Utility (⠿)",
         "zh-TW": "訊息工具 (⠿)",
@@ -223,6 +231,7 @@
       key: "modForwarding",
       storageKey: "mod_forwarding",
       icon: "📋",
+      tip: "mod_tip_forwarding",
       label: {
         "en-US": "Forwarding Manager",
         "zh-TW": "轉發管理員",
@@ -235,6 +244,7 @@
       key: "modEmoji",
       storageKey: "mod_emoji",
       icon: "😀",
+      tip: "mod_tip_emoji",
       label: {
         "en-US": "Emoji Search Helper",
         "zh-TW": "表情搜尋輔助",
@@ -247,6 +257,7 @@
       key: "modHeader",
       storageKey: "mod_header",
       icon: "📌",
+      tip: "mod_tip_header",
       label: {
         "en-US": "Anti-Hijack & File Tools",
         "zh-TW": "右鍵解鎖",
@@ -259,6 +270,7 @@
       key: "modWormhole",
       storageKey: "mod_wormhole",
       icon: "🌀",
+      tip: "mod_tip_wormhole",
       label: {
         "en-US": "Wormhole",
         "zh-TW": "蟲洞",
@@ -272,6 +284,7 @@
       storageKey: "mod_webhook",
       icon: "🔗",
       defaultEnabled: false,
+      tip: "mod_tip_webhook",
       label: {
         "en-US": "Webhook Manager",
         "zh-TW": "Webhook 管理",
@@ -285,12 +298,41 @@
       storageKey: "mod_urlchecker",
       icon: "🔍",
       defaultEnabled: true,
+      tip: "mod_tip_urlchecker",
       label: {
         "en-US": "Duplicate URL Checker",
         "zh-TW": "重複網址偵測",
         "zh-CN": "重复网址检测",
         ja: "URL重複チェッカー",
         ko: "중복 URL 검사기",
+      },
+    },
+    {
+      key: "modScout",
+      storageKey: "mod_scout",
+      icon: "🔎",
+      defaultEnabled: true,
+      tip: "mod_tip_scout",
+      label: {
+        "en-US": "Channel Scout (Search)",
+        "zh-TW": "頻道搜尋 Channel Scout",
+        "zh-CN": "频道搜索 Channel Scout",
+        ja: "チャンネル検索 Channel Scout",
+        ko: "채널 검색 Channel Scout",
+      },
+    },
+    {
+      key: "modBlacklist",
+      storageKey: "mod_blacklist",
+      icon: "🌫️",
+      defaultEnabled: true,
+      tip: "mod_tip_blacklist",
+      label: {
+        "en-US": "Mute User Messages",
+        "zh-TW": "弱化使用者訊息",
+        "zh-CN": "弱化用户消息",
+        ja: "ユーザーメッセージを弱化",
+        ko: "사용자 메시지 약화",
       },
     },
   ];
@@ -658,7 +700,8 @@
     }
 
     for (const [k, v] of Object.entries(params)) {
-      text = text.replace(new RegExp(`\\{${k}\\}`, "g"), v);
+      const safeKey = k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      text = text.replace(new RegExp(`\\{${safeKey}\\}`, "g"), v);
     }
 
     TranslationCache.set(cacheKey, text);
@@ -734,7 +777,7 @@
         "URL conversion features (like vxtwitter, kkinstagram) rely on third-party services.\nDo not use them if you do not trust these services.\nUsers should have the ability to identify URL safety.",
       manual_content:
         "【Icons Guide】\n• ◫/≡ : Switch Menu Style (Flat / Group)\n• ⇄ : Click Logic Swap (Copy / Insert)\n• ␣ : Append Space at end\n• ↵ : Append Newline at end\n• ☆ : Custom Strings Panel\n• 🖱️ : Trigger Mode (Hover / Click)\n• 🌐 : Change Language\n\n【Actions】\n• **Click**: Copy (Default)\n• **Long Press (0.5s)**: Insert to Input\n• **Shift+Click**: Copy & Insert (Keep Menu Open)",
-      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Quick Start</div><div class='mm-content'>Hover over any Discord message → a copy button appears at the top-right corner.<br><b>Click</b> to copy text · <b>Long-press 0.5s</b> to insert into the input box · <b>Shift+Click</b> to copy AND insert (menu stays open).<br>Switch trigger to <span class='mm-key'>Click mode</span> via <span class='mm-key'>🖱️</span> if you prefer manual activation.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Copy Menu — Text & Links</div><div class='mm-content'>• <b>Copy Text</b>: copies the full message text content.<br>• <b>Copy Media URL</b>: copies the direct URL of an image/video in the message.<br>• <b>Copy First Link (Clean)</b>: extracts and sanitizes the first URL (removes trackers).<br>• <b>Copy All Links</b>: copies every URL found in the message, one per line.<br>• <b>Copy as Markdown</b>: formats the link as <span class='mm-key'>[text](URL)</span> for Markdown use.<br>• <b>Insert [<span class='mm-key'>{t}</span>](URL)</b>: inserts a Markdown link directly into Discord's input box.<br>• <b>Hidden Format</b>: wraps content in <span class='mm-key'>|| spoiler ||</span> tags.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ Download</div><div class='mm-content'>• <b>Download Images/Media</b>: downloads all images or videos in the message.<br>• <b>Download as ZIP</b>: bundles multiple files into a single ZIP archive.<br>• Retries automatically on failure, falls back to alternate URL if available.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 URL Conversion</div><div class='mm-content'><b>Twitter / X</b>: converts between twitter.com, x.com, vxtwitter, fixupx, fxtwitter, cunnyx.<br><b>Instagram</b>: converts between instagram.com ↔ kkinstagram.com for embed previews.<br><b>Bilibili</b>: converts to FX Bilibili or VX Bilibili for better embeds.<br><b>Pixiv</b>: converts between pixiv.net ↔ phixiv.net.<br><b>Batch convert</b>: <span class='mm-key'>⚡ Convert All (N)</span> processes every link of that type in the message at once.</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ Toolbar Icons</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> Switch menu style: Flat / Group</div><div><span class='mm-key'>⇄</span> Swap click logic: Copy ↔ Insert</div><div><span class='mm-key'>␣</span> Append space to inserted text</div><div><span class='mm-key'>↵</span> Append newline to inserted text</div><div><span class='mm-key'>☆</span> Custom string panel (saved snippets)</div><div><span class='mm-key'>🖱️</span> Toggle trigger: Hover / Click</div><div><span class='mm-key'>🌐</span> Switch interface language</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ Custom String Panel</div><div class='mm-content'>• Save frequently used text snippets (greetings, templates, code blocks).<br>• Click to copy · Long-press to insert into input box.<br>• <span class='mm-key'>Shift+Click</span> to delete entries continuously without confirmation.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Wormhole — Overview</div><div class='mm-content'>Wormholes are <b>one-click channel shortcuts</b> that live in the Discord sidebar. Click <span class='mm-key'>＋</span> and paste any Discord channel URL to create one.<br><b>Click</b> the <span class='mm-key'>＋</span> button → create a new wormhole · <b>Long-press 1s</b> → open the settings menu.</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ Navigation & Management</div><div class='mm-content'>• <b>Click</b> a wormhole → instantly jump to that channel.<br>• <b>Right-click</b> → menu: Rename · Delete · Set icon · Move to group · Toggle VIP.<br>• <b>VIP <span class='mm-key'>★</span></b>: pinned wormholes auto-float to the top.<br>• <b>Groups</b>: right-click → Move to Group to organize into folders.<br>• <b>Focus Mode</b>: icon-only compact view via the top-right panel button.<br>• <b>History</b> (purple badges): last visited channels saved, click to return.</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ Send Message</div><div class='mm-content'>• <b>Right-click</b> a wormhole → <b>Send Message Here</b> to open the overlay.<br>• <span class='mm-key'>Ctrl+V</span> to paste images directly — sent with text as one message.<br>• Bottom options (persisted): Auto-close · Go to channel · Show notification.<br>• A clickable 3-second toast appears after sending — click to fly to that channel.</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚡ Settings Menu & API Mode</div><div class='mm-content'>• <b>Long-press <span class='mm-key'>＋</span> for 1 second</b> to open the wormhole settings menu.<br>• Menu items: <span class='mm-key'>➕ Create New Wormhole</span> · <span class='mm-key'>✉️ Send Method & API Mode</span> · <span class='mm-key'>⚙️ More Settings</span> (expandable).<br>• <b>Send Method & API Mode</b> → opens the API panel:<br>&nbsp;&nbsp;— <b>Plan A (Navigate)</b>: switches channel, injects text, returns. No API token needed.<br>&nbsp;&nbsp;— <b>Plan B (Direct API)</b>: REST API send, no page switch, instant &amp; silent.<br>• Token is intercepted silently from Discord's own requests — <b>never stored to disk.</b><br>• After page refresh: interceptor auto-restarts when you open the send overlay.</div></div></div></div>`,
+      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Quick Start</div><div class='mm-content'>Hover over any Discord message → a copy button appears at the top-right corner.<br><b>Click</b> to copy text · <b>Long-press 0.5s</b> to insert into the input box · <b>Shift+Click</b> to copy AND insert (menu stays open).<br>Switch trigger to <span class='mm-key'>Click mode</span> via <span class='mm-key'>🖱️</span> if you prefer manual activation.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Copy Menu — Text & Links</div><div class='mm-content'>• <b>Copy Text</b>: copies the full message text content.<br>• <b>Copy Media URL</b>: copies the direct URL of an image/video in the message.<br>• <b>Copy First Link (Clean)</b>: extracts and sanitizes the first URL (removes trackers).<br>• <b>Copy All Links</b>: copies every URL found in the message, one per line.<br>• <b>Copy as Markdown</b>: formats the link as <span class='mm-key'>[text](URL)</span> for Markdown use.<br>• <b>Insert [<span class='mm-key'>{t}</span>](URL)</b>: inserts a Markdown link directly into Discord's input box.<br>• <b>Hidden Format</b>: wraps content in <span class='mm-key'>|| spoiler ||</span> tags.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ Download</div><div class='mm-content'>• <b>Download Images/Media</b>: downloads all images or videos in the message.<br>• <b>Download as ZIP</b>: bundles multiple files into a single ZIP archive.<br>• Retries automatically on failure, falls back to alternate URL if available.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 URL Conversion</div><div class='mm-content'><b>Twitter / X</b>: converts between twitter.com, x.com, vxtwitter, fixupx, fxtwitter, cunnyx.<br><b>Instagram</b>: converts between instagram.com ↔ kkinstagram.com for embed previews.<br><b>Bilibili</b>: converts to FX Bilibili or VX Bilibili for better embeds.<br><b>Pixiv</b>: converts between pixiv.net ↔ phixiv.net.<br><b>Batch convert</b>: <span class='mm-key'>⚡ Convert All (N)</span> processes every link of that type in the message at once.</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ Toolbar Icons</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> Switch menu style: Flat / Group</div><div><span class='mm-key'>⇄</span> Swap click logic: Copy ↔ Insert</div><div><span class='mm-key'>␣</span> Append space to inserted text</div><div><span class='mm-key'>↵</span> Append newline to inserted text</div><div><span class='mm-key'>☆</span> Custom string panel (saved snippets)</div><div><span class='mm-key'>🖱️</span> Toggle trigger: Hover / Click</div><div><span class='mm-key'>🌐</span> Switch interface language</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ Custom String Panel</div><div class='mm-content'>• Save frequently used text snippets (greetings, templates, code blocks).<br>• Click to copy · Long-press to insert into input box.<br>• <span class='mm-key'>Shift+Click</span> to delete entries continuously without confirmation.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Wormhole — Overview</div><div class='mm-content'>Wormholes are <b>one-click channel shortcuts</b> that live in the Discord sidebar. Click <span class='mm-key'>＋</span> and paste any Discord channel URL to create one.<br><b>Click</b> the <span class='mm-key'>＋</span> button → create a new wormhole · <b>Long-press 1s</b> → open the settings menu.</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ Navigation & Management</div><div class='mm-content'>• <b>Click</b> a wormhole → instantly jump to that channel.<br>• <b>Right-click</b> → menu: Rename · Delete · Set icon · Move to group · Toggle VIP.<br>• <b>VIP <span class='mm-key'>★</span></b>: pinned wormholes auto-float to the top.<br>• <b>Groups</b>: right-click → Move to Group to organize into folders.<br>• <b>Focus Mode</b>: icon-only compact view via the top-right panel button.<br>• <b>History</b> (purple badges): last visited channels saved, click to return.</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ Send Message</div><div class='mm-content'>• <b>Right-click</b> a wormhole → <b>Send Message Here</b> to open the overlay.<br>• <span class='mm-key'>Ctrl+V</span> to paste images directly — sent with text as one message.<br>• Bottom options (persisted): Auto-close · Go to channel · Show notification.<br>• A clickable 3-second toast appears after sending — click to fly to that channel.</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚡ Settings Menu & API Mode</div><div class='mm-content'>• <b>Long-press <span class='mm-key'>＋</span> for 1 second</b> to open the wormhole settings menu.<br>• Menu items: <span class='mm-key'>➕ Create New Wormhole</span> · <span class='mm-key'>✉️ Send Method & API Mode</span> · <span class='mm-key'>⚙️ More Settings</span> (expandable).<br>• <b>Send Method & API Mode</b> → opens the API panel:<br>&nbsp;&nbsp;— <b>Plan A (Navigate)</b>: switches channel, injects text, returns. No API token needed.<br>&nbsp;&nbsp;— <b>Plan B (Direct API)</b>: REST API send, no page switch, instant &amp; silent.<br>• Token is intercepted silently from Discord's own requests — <b>never stored to disk.</b><br>• After page refresh: interceptor auto-restarts when you open the send overlay.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔍 Duplicate URL Checker</div><div class='mm-content'>Automatically checks for duplicate links when you paste a URL into the chat box.<br>• <b>DOM mode</b> (default): scans all currently visible messages — no API token required.<br>• <b>API mode</b>: scans the last 200 messages via Discord API (requires Wormhole API mode enabled and token captured).<br>• A banner appears at the top of the chat if a duplicate is detected, showing how many times the link appeared.<br>• The banner auto-dismisses once you paste a different URL or switch channels.<br>• <b>No banner = no duplicate</b> — the checker runs silently in the background when no match is found.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔎 Channel Scout — Search</div><div class='mm-content'>Search the current channel's messages by keyword, directly from chat.<br>• <b>Open</b>: click the 🔎 floating button above the input box, or press <span class='mm-key'>F2</span> anywhere outside the input.<br>• <b>Instant search</b>: results update as you type (150 ms debounce). Keyword is highlighted in gold.<br>• <b>Quick tags</b>: save up to 5 custom keywords as one-click search buttons. Left-click to search · Right-click to delete.<br>• <b>Search history</b>: the 🕐 button shows your last 5 searches, click to re-run.<br>• <b>Jump to message</b>: click any result to scroll it into view with a blue highlight ring.<br>• <b>Paste button</b>: click 📋 to paste clipboard content directly into the search box.<br>• Close with <span class='mm-key'>ESC</span>, <span class='mm-key'>F2</span>, or click outside.<br>⚠ DOM mode only — searches messages currently rendered on screen. Scroll up to load older messages before searching.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌫️ Mute User Messages</div><div class='mm-content'>Softly dim messages from specific users so they fade into the background without disappearing.<br>• <b>Mute</b>: right-click any message → <b>🌫️ Mute messages: {name}</b> in the context menu (appears below Block).<br>• <b>Unmute</b>: right-click any message from the same user → <b>✅ Unmute: {name}</b>.<br>• <b>Manage panel</b>: press <span class='mm-key'>Alt+B</span> to open the mute list — shows all muted users with date added and an Unmute button.<br>• Dimmed messages show at <b>7% opacity</b>. Hover over them to temporarily preview at 42% opacity.<br>• Muting is <b>name-based</b> (display name, not user ID). Works across all channels.<br>• Applied automatically to new messages as they arrive, and re-applied after switching channels.<br>• Data is stored permanently in GM storage — survives page reloads.</div></div></div></div>`,
       reload_confirm: "Settings saved!\nReload page now to apply changes?",
       copy_text: "📋 Copy Text",
       copy_media_url: "🖼️ Copy Media URL",
@@ -1021,6 +1064,37 @@
       uc_dismiss: "✕",
       uc_limit_label: "Scan range:",
       uc_limit_suffix: "messages",
+
+      mod_tip_message:    "Right-click any message to copy, bookmark, or perform quick actions via the ⠿ button.",
+      mod_tip_forwarding: "Forward messages to starred channels or users. Adds a forwarding toolbar above the chat input.",
+      mod_tip_emoji:      "Browse and insert server emojis from a searchable popup when typing.",
+      mod_tip_header:     "Unlocks right-click on media, enables file download helpers and anti-content-hijack guard.",
+      mod_tip_wormhole:   "Quick-jump to pinned channels via chip shortcuts at the top of chat. Supports VIP, groups and focus mode.",
+      mod_tip_webhook:    "Send messages to registered Webhooks directly from any channel.",
+      mod_tip_urlchecker: "Warns you when a pasted URL has already been shared in recent messages. Works without API token (DOM mode).",
+      mod_tip_scout:      "Press the search button above the input box or use the keyboard shortcut to search current channel messages by keyword.",
+      mod_tip_blacklist:  "Dim messages from specific users so they fade into the background. Right-click any message to add the author.",
+
+      cs_panel_title:   "⌨ Channel Scout",
+      cs_placeholder:   "Type a keyword to search channel messages…",
+      cs_paste_tip:     "Paste from clipboard",
+      cs_history_tip:   "Recent searches",
+      cs_no_history:    "No search history yet",
+      cs_empty_hint:    "Type a keyword or click a tag to search",
+      cs_no_results:    "No matching messages found",
+      cs_dom_mode_note: "DOM mode · searches only visible messages",
+      cs_right_del_tip: "Right-click tag to delete",
+
+      mu_panel_title:   "🌫️ Mute User Messages",
+      mu_empty:         "No muted users\nRight-click a message to add",
+      mu_remove_btn:    "Unmute",
+      mu_footer_left:   "Right-click a message to mute · hover to preview",
+      mu_footer_right:  "Stored in GMStore",
+      mu_add_toast:     "🌫️ Muted: {name}",
+      mu_remove_toast:  "✅ Unmuted: {name}",
+      mu_ctx_mute:      "🌫️ Mute messages: {name}",
+      mu_ctx_unmute:    "✅ Unmute: {name}",
+      mu_shortcut:      "Alt+B to manage muted users",
     },
 
     "zh-TW": {
@@ -1090,7 +1164,7 @@
         "本腳本提供的「網址轉換」功能（如 vxtwitter, kkinstagram 等）皆依賴第三方開源服務。\n若您不信任這些第三方服務，請勿點擊轉換選項。\n請使用者自行具備辨識網址安全性的能力。",
       manual_content:
         "【圖示說明】\n• ◫/≡ : 切換選單風格 (平面 / 群組)\n• ⇄ : 點擊邏輯互換 (複製 / 填充)\n• ␣ : 尾部添加空格\n• ↵ : 尾部添加換行\n• ☆ : 自定義字串面板\n• 🖱️ : 切換觸發模式 (懸停 / 點擊)\n• 🌐 : 切換語言\n\n【操作方式】\n• **單擊**: 複製 (預設)\n• **長按 (0.5秒)**: 填充至輸入框\n• **Shift+單擊**: 同時複製並填充 (保持選單開啟)",
-      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ 快速開始</div><div class='mm-content'>將滑鼠懸停在任意 Discord 訊息上 → 右上角出現複製按鈕。<br><b>單擊</b>複製文字 · <b>長按 0.5秒</b>填充到輸入框 · <b>Shift+單擊</b>同時複製並填充（選單保持開啟）。<br>透過工具列的 <span class='mm-key'>🖱️</span> 可切換為<span class='mm-key'>點擊模式</span>，改為手動觸發。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 複製選單 — 文字與連結</div><div class='mm-content'>• <b>複製文字</b>：複製訊息的完整文字內容。<br>• <b>複製媒體網址</b>：複製訊息中圖片或影片的直接連結。<br>• <b>複製第一個連結（已淨化）</b>：提取並清除追蹤參數的第一個 URL。<br>• <b>複製所有連結</b>：將訊息中所有 URL 每行一個一次複製。<br>• <b>複製為 Markdown</b>：格式化為 <span class='mm-key'>[文字](URL)</span> 供 Markdown 使用。<br>• <b>插入 Markdown 連結</b>：直接將連結格式注入 Discord 的輸入框。<br>• <b>隱藏格式</b>：自動包裹為 <span class='mm-key'>|| 暴雷內容 ||</span> 格式。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ 下載</div><div class='mm-content'>• <b>下載圖片/媒體</b>：下載該則訊息中的所有圖片或影片。<br>• <b>下載為 ZIP</b>：多個檔案自動打包為單一 ZIP 壓縮檔。<br>• 下載失敗時自動重試，並備援切換至備用連結。</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 網址轉換</div><div class='mm-content'><b>Twitter / X</b>：在 twitter.com、x.com、vxtwitter、fixupx、fxtwitter、cunnyx 之間互轉，修復 Discord 預覽。<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com，讓嵌入預覽正常顯示。<br><b>Bilibili</b>：轉換為 FX Bilibili 或 VX Bilibili 取得更好的嵌入效果。<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net 互轉，在 Discord 直接顯示插圖預覽。<br><b>批次轉換</b>：<span class='mm-key'>⚡ 全部轉為 (N)</span> 一次處理訊息中同類型的所有連結。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ 工具列圖示說明</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> 切換選單風格：平面 / 群組</div><div><span class='mm-key'>⇄</span> 互換點擊邏輯：複製 ↔ 填充</div><div><span class='mm-key'>␣</span> 填充時在尾部附加空格</div><div><span class='mm-key'>↵</span> 填充時在尾部附加換行</div><div><span class='mm-key'>☆</span> 自定義字串面板（常用片段）</div><div><span class='mm-key'>🖱️</span> 切換觸發方式：懸停 / 點擊</div><div><span class='mm-key'>🌐</span> 切換介面語言</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ 自定義字串面板</div><div class='mm-content'>• 儲存常用的文字片段（問候語、模板、程式碼區塊等）。<br>• 單擊複製 · 長按填充到輸入框。<br>• <span class='mm-key'>Shift+單擊</span> 可連續刪除條目，無需逐一確認。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 蟲洞 — 總覽</div><div class='mm-content'>蟲洞是存在 Discord 側邊欄的<b>一鍵頻道捷徑</b>。點擊 <span class='mm-key'>＋</span> 並貼上 Discord 頻道網址即可建立。<br><b>單擊</b> <span class='mm-key'>＋</span> → 建立新蟲洞 · <b>長按 1 秒</b> → 開啟設定選單。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ 導航與管理</div><div class='mm-content'>• <b>單擊</b>蟲洞 → 立即跳轉至該頻道。<br>• <b>右鍵</b>蟲洞 → 選單：重新命名 · 刪除 · 設定圖示 · 移至群組 · 切換 VIP。<br>• <b>VIP <span class='mm-key'>★</span></b>：設為 VIP 的蟲洞自動置頂顯示。<br>• <b>分組</b>：右鍵 → 移動到分組，整理進資料夾。<br>• <b>聚焦模式</b>：圖示精簡視圖，蟲洞面板右上角按鈕切換。<br>• <b>歷史紀錄</b>（紫色標籤）：自動記錄最近造訪頻道，點擊即可返回。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ 傳送訊息</div><div class='mm-content'>• <b>右鍵</b>蟲洞 → <b>在此頻道傳送訊息</b> 開啟輸入欄。<br>• <span class='mm-key'>Ctrl+V</span> 直接貼上圖片，圖文合為一則訊息一起送出。<br>• 底部選項（跨次保留）：自動關閉 · 前往頻道 · 顯示通知。<br>• 傳送後彈出 3 秒可點擊通知，點擊即飛往目標頻道。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 設定選單與 API 模式</div><div class='mm-content'>• <b>長按 <span class='mm-key'>＋</span> 1 秒</b>即可開啟蟲洞設定選單。<br>• 選單項目：<span class='mm-key'>➕ 建立新蟲洞</span> · <span class='mm-key'>✉️ 傳訊方式與 API 模式</span> · <span class='mm-key'>⚙️ 更多設定</span>（可擴充）。<br>• 點擊「<b>傳訊方式與 API 模式</b>」→ 開啟 API 設定面板：<br>&nbsp;&nbsp;— <b>方案 A（跳頁）</b>：自動切換頻道，注入文字後返回，無需 Token。<br>&nbsp;&nbsp;— <b>方案 B（直接 API）</b>：REST API 直送，不切換頁面，即時且隱匿。<br>• Token 由背景靜默攔截 Discord 自身請求取得——<b>絕不寫入磁碟或外傳。</b><br>• 頁面重整後：開啟傳訊輸入欄時攔截器會自動重啟。</div></div></div></div>`,
+      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ 快速開始</div><div class='mm-content'>將滑鼠懸停在任意 Discord 訊息上 → 右上角出現複製按鈕。<br><b>單擊</b>複製文字 · <b>長按 0.5秒</b>填充到輸入框 · <b>Shift+單擊</b>同時複製並填充（選單保持開啟）。<br>透過工具列的 <span class='mm-key'>🖱️</span> 可切換為<span class='mm-key'>點擊模式</span>，改為手動觸發。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 複製選單 — 文字與連結</div><div class='mm-content'>• <b>複製文字</b>：複製訊息的完整文字內容。<br>• <b>複製媒體網址</b>：複製訊息中圖片或影片的直接連結。<br>• <b>複製第一個連結（已淨化）</b>：提取並清除追蹤參數的第一個 URL。<br>• <b>複製所有連結</b>：將訊息中所有 URL 每行一個一次複製。<br>• <b>複製為 Markdown</b>：格式化為 <span class='mm-key'>[文字](URL)</span> 供 Markdown 使用。<br>• <b>插入 Markdown 連結</b>：直接將連結格式注入 Discord 的輸入框。<br>• <b>隱藏格式</b>：自動包裹為 <span class='mm-key'>|| 暴雷內容 ||</span> 格式。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ 下載</div><div class='mm-content'>• <b>下載圖片/媒體</b>：下載該則訊息中的所有圖片或影片。<br>• <b>下載為 ZIP</b>：多個檔案自動打包為單一 ZIP 壓縮檔。<br>• 下載失敗時自動重試，並備援切換至備用連結。</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 網址轉換</div><div class='mm-content'><b>Twitter / X</b>：在 twitter.com、x.com、vxtwitter、fixupx、fxtwitter、cunnyx 之間互轉，修復 Discord 預覽。<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com，讓嵌入預覽正常顯示。<br><b>Bilibili</b>：轉換為 FX Bilibili 或 VX Bilibili 取得更好的嵌入效果。<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net 互轉，在 Discord 直接顯示插圖預覽。<br><b>批次轉換</b>：<span class='mm-key'>⚡ 全部轉為 (N)</span> 一次處理訊息中同類型的所有連結。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ 工具列圖示說明</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> 切換選單風格：平面 / 群組</div><div><span class='mm-key'>⇄</span> 互換點擊邏輯：複製 ↔ 填充</div><div><span class='mm-key'>␣</span> 填充時在尾部附加空格</div><div><span class='mm-key'>↵</span> 填充時在尾部附加換行</div><div><span class='mm-key'>☆</span> 自定義字串面板（常用片段）</div><div><span class='mm-key'>🖱️</span> 切換觸發方式：懸停 / 點擊</div><div><span class='mm-key'>🌐</span> 切換介面語言</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ 自定義字串面板</div><div class='mm-content'>• 儲存常用的文字片段（問候語、模板、程式碼區塊等）。<br>• 單擊複製 · 長按填充到輸入框。<br>• <span class='mm-key'>Shift+單擊</span> 可連續刪除條目，無需逐一確認。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 蟲洞 — 總覽</div><div class='mm-content'>蟲洞是存在 Discord 側邊欄的<b>一鍵頻道捷徑</b>。點擊 <span class='mm-key'>＋</span> 並貼上 Discord 頻道網址即可建立。<br><b>單擊</b> <span class='mm-key'>＋</span> → 建立新蟲洞 · <b>長按 1 秒</b> → 開啟設定選單。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ 導航與管理</div><div class='mm-content'>• <b>單擊</b>蟲洞 → 立即跳轉至該頻道。<br>• <b>右鍵</b>蟲洞 → 選單：重新命名 · 刪除 · 設定圖示 · 移至群組 · 切換 VIP。<br>• <b>VIP <span class='mm-key'>★</span></b>：設為 VIP 的蟲洞自動置頂顯示。<br>• <b>分組</b>：右鍵 → 移動到分組，整理進資料夾。<br>• <b>聚焦模式</b>：圖示精簡視圖，蟲洞面板右上角按鈕切換。<br>• <b>歷史紀錄</b>（紫色標籤）：自動記錄最近造訪頻道，點擊即可返回。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ 傳送訊息</div><div class='mm-content'>• <b>右鍵</b>蟲洞 → <b>在此頻道傳送訊息</b> 開啟輸入欄。<br>• <span class='mm-key'>Ctrl+V</span> 直接貼上圖片，圖文合為一則訊息一起送出。<br>• 底部選項（跨次保留）：自動關閉 · 前往頻道 · 顯示通知。<br>• 傳送後彈出 3 秒可點擊通知，點擊即飛往目標頻道。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 設定選單與 API 模式</div><div class='mm-content'>• <b>長按 <span class='mm-key'>＋</span> 1 秒</b>即可開啟蟲洞設定選單。<br>• 選單項目：<span class='mm-key'>➕ 建立新蟲洞</span> · <span class='mm-key'>✉️ 傳訊方式與 API 模式</span> · <span class='mm-key'>⚙️ 更多設定</span>（可擴充）。<br>• 點擊「<b>傳訊方式與 API 模式</b>」→ 開啟 API 設定面板：<br>&nbsp;&nbsp;— <b>方案 A（跳頁）</b>：自動切換頻道，注入文字後返回，無需 Token。<br>&nbsp;&nbsp;— <b>方案 B（直接 API）</b>：REST API 直送，不切換頁面，即時且隱匿。<br>• Token 由背景靜默攔截 Discord 自身請求取得——<b>絕不寫入磁碟或外傳。</b><br>• 頁面重整後：開啟傳訊輸入欄時攔截器會自動重啟。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔍 重複網址偵測</div><div class='mm-content'>在聊天框貼上網址時，自動掃描是否已有相同連結出現過。<br>• <b>DOM 模式</b>（預設）：掃描目前頁面可見的所有訊息，無需 API token。<br>• <b>API 模式</b>：透過 Discord API 掃描最近 200 則訊息（需啟用蟲洞 API 模式且已攔截到 token）。<br>• 偵測到重複時，聊天頂部出現 Banner 提示，顯示該連結出現的次數。<br>• 貼上不同連結或切換頻道後，Banner 自動消失。<br>• <b>沒有 Banner = 沒有重複</b>——未命中時偵測器靜默在背景運行。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔎 頻道搜尋 Channel Scout</div><div class='mm-content'>直接在聊天視窗以關鍵字搜尋目前頻道的訊息。<br>• <b>開啟</b>：點擊輸入框上方的 🔎 懸浮按鈕，或在輸入框外按 <span class='mm-key'>F2</span>。<br>• <b>即時搜尋</b>：輸入時結果即時更新（150ms 延遲），命中關鍵字以金色高亮標示。<br>• <b>快捷標籤</b>：最多儲存 5 個自定義關鍵字作為一鍵搜尋按鈕。左鍵搜尋 · 右鍵刪除。<br>• <b>搜尋歷史</b>：點擊 🕐 按鈕顯示最近 5 筆記錄，點擊即可重新搜尋。<br>• <b>跳至訊息</b>：點擊任一結果，頁面自動捲動並以藍紫框高亮標記目標訊息。<br>• <b>貼上按鈕</b>：點擊 📋 直接將剪貼簿內容填入搜尋框。<br>• 按 <span class='mm-key'>ESC</span>、<span class='mm-key'>F2</span> 或點擊面板外關閉。<br>⚠ 僅 DOM 模式——只能搜尋目前已渲染的訊息。需要搜尋更早的訊息時，請先向上捲動讓 Discord 載入歷史訊息。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌫️ 弱化使用者訊息</div><div class='mm-content'>將特定使用者的訊息柔和地弱化至背景，讓它們不再吸引注意，但不會消失。<br>• <b>加入弱化</b>：對任意訊息按右鍵 → 原生選單中「封鎖」下方出現 <b>🌫️ 弱化訊息：{名稱}</b>，點擊即可。<br>• <b>解除弱化</b>：再次對同一使用者的訊息按右鍵 → <b>✅ 解除弱化：{名稱}</b>。<br>• <b>管理面板</b>：按 <span class='mm-key'>Alt+B</span> 開啟弱化名單，顯示所有被弱化的使用者、加入時間及解除按鈕。<br>• 被弱化的訊息顯示為 <b>7% 不透明度</b>，滑鼠移入可暫時預覽至 42% 透明度。<br>• 以<b>顯示名稱</b>識別（非 User ID），跨所有頻道有效。<br>• 新訊息抵達時自動套用，切換頻道後也會自動重新套用。<br>• 資料永久儲存於 GM storage，頁面重整後仍然保留。</div></div></div></div>`,
       reload_confirm: "語言設定已儲存！\n是否立即重新整理頁面以套用變更？",
       copy_text: "📋 複製文字內容",
       copy_media_url: "🖼️ 複製媒體網址",
@@ -1372,6 +1446,37 @@
       uc_limit_suffix: "則訊息",
       welcome_title: "歡迎使用 {script}",
       em_save_success: "已儲存：{k}",
+
+      mod_tip_message:    "對任何訊息按右鍵，透過 ⠿ 按鈕快速複製、書籤或執行其他操作。",
+      mod_tip_forwarding: "將訊息轉發到收藏頻道或使用者，在聊天輸入框上方顯示轉發工具列。",
+      mod_tip_emoji:      "輸入時從可搜尋的彈出視窗瀏覽並插入伺服器表情符號。",
+      mod_tip_header:     "解鎖媒體右鍵、啟用檔案下載輔助及防內容劫持保護。",
+      mod_tip_wormhole:   "透過聊天頂部的快捷按鈕快速跳轉到已釘選頻道，支援 VIP、群組與聚焦模式。",
+      mod_tip_webhook:    "直接從任何頻道發送訊息到已登記的 Webhook。",
+      mod_tip_urlchecker: "當貼上的網址已在近期訊息中出現過時發出警告，不需 API token 即可運作（DOM 模式）。",
+      mod_tip_scout:      "點擊輸入框上方的搜尋按鈕，或使用快捷鍵，以關鍵字搜尋目前頻道的訊息。",
+      mod_tip_blacklist:  "將特定使用者的訊息弱化至背景，讓它們不再吸引注意。對任何訊息按右鍵即可新增。",
+
+      cs_panel_title:   "⌨ 頻道搜尋",
+      cs_placeholder:   "輸入關鍵字搜尋頻道訊息…",
+      cs_paste_tip:     "貼上剪貼簿內容",
+      cs_history_tip:   "最近搜尋記錄",
+      cs_no_history:    "尚無搜尋記錄",
+      cs_empty_hint:    "輸入關鍵字或點擊標籤搜尋",
+      cs_no_results:    "找不到符合的訊息",
+      cs_dom_mode_note: "DOM 模式 · 僅搜尋頁面已載入訊息",
+      cs_right_del_tip: "右鍵標籤可刪除",
+
+      mu_panel_title:   "🌫️ 弱化使用者訊息",
+      mu_empty:         "尚未弱化任何使用者\n對訊息按右鍵可加入",
+      mu_remove_btn:    "解除",
+      mu_footer_left:   "右鍵訊息加入 · hover 可預覽內容",
+      mu_footer_right:  "GMStore 永久儲存",
+      mu_add_toast:     "🌫️ 已弱化：{name}",
+      mu_remove_toast:  "✅ 已解除弱化：{name}",
+      mu_ctx_mute:      "🌫️ 弱化訊息：{name}",
+      mu_ctx_unmute:    "✅ 解除弱化：{name}",
+      mu_shortcut:      "Alt+B 開啟弱化管理面板",
     },    "zh-CN": {
       name: "简体中文",
       fm_pinned_channels: "★ 收藏频道",
@@ -1441,7 +1546,7 @@
         '本脚本提供的"网址转换"功能（如 vxtwitter, kkinstagram 等）皆依赖第三方开源服务。\n若您不信任这些第三方服务，请勿点击转换选项。\n请使用者自行具备辨识网址安全性的能力。',
       manual_content:
         "【图标说明】\n• ◫/≡ : 切换菜单风格 (平面 / 群组)\n• ⇄ : 点击逻辑互换 (复制 / 填充)\n• ␣ : 尾部添加空格\n• ↵ : 尾部添加换行\n• ☆ : 自定义字符串面板\n• 🖱️ : 切换触发模式 (悬停 / 点击)\n• 🌐 : 切换语言\n\n【操作方式】\n• **单击**: 复制 (默认)\n• **长按 (0.5秒)**: 填充至输入框\n• **Shift+单击**: 同时复制并填充 (保持菜单开启)",
-      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ 快速开始</div><div class='mm-content'>将鼠标悬停在任意 Discord 消息上 → 右上角出现复制按钮。<br><b>单击</b>复制文字 · <b>长按 0.5秒</b>填充到输入框 · <b>Shift+单击</b>同时复制并填充（菜单保持开启）。<br>通过工具栏的 <span class='mm-key'>🖱️</span> 可切换为<span class='mm-key'>点击模式</span>，改为手动触发。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 复制菜单 — 文字与链接</div><div class='mm-content'>• <b>复制文字</b>：复制消息的完整文字内容。<br>• <b>复制媒体网址</b>：复制消息中图片或视频的直接链接。<br>• <b>复制第一个链接（已净化）</b>：提取并清除追踪参数的第一个 URL。<br>• <b>复制所有链接</b>：将消息中所有 URL 每行一个一次复制。<br>• <b>复制为 Markdown</b>：格式化为 <span class='mm-key'>[文字](URL)</span> 供 Markdown 使用。<br>• <b>插入 Markdown 链接</b>：直接将链接格式注入 Discord 的输入框。<br>• <b>隐藏格式</b>：自动包裹为 <span class='mm-key'>|| 剧透内容 ||</span> 格式。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ 下载</div><div class='mm-content'>• <b>下载图片/媒体</b>：下载该条消息中的所有图片或视频。<br>• <b>下载为 ZIP</b>：多个文件自动打包为单一 ZIP 压缩包。<br>• 下载失败时自动重试，并备援切换至备用链接。</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 网址转换</div><div class='mm-content'><b>Twitter / X</b>：在 twitter.com、x.com、vxtwitter、fixupx、fxtwitter、cunnyx 之间互转，修复 Discord 预览。<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com，让嵌入预览正常显示。<br><b>Bilibili</b>：转换为 FX Bilibili 或 VX Bilibili 获得更好的嵌入效果。<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net 互转，在 Discord 直接显示插图预览。<br><b>批量转换</b>：<span class='mm-key'>⚡ 全部转为 (N)</span> 一次处理消息中同类型的所有链接。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ 工具栏图标说明</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> 切换菜单风格：平面 / 群组</div><div><span class='mm-key'>⇄</span> 互换点击逻辑：复制 ↔ 填充</div><div><span class='mm-key'>␣</span> 填充时在尾部附加空格</div><div><span class='mm-key'>↵</span> 填充时在尾部附加换行</div><div><span class='mm-key'>☆</span> 自定义字符串面板（常用片段）</div><div><span class='mm-key'>🖱️</span> 切换触发方式：悬停 / 点击</div><div><span class='mm-key'>🌐</span> 切换界面语言</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ 自定义字符串面板</div><div class='mm-content'>• 储存常用的文字片段（问候语、模板、代码块等）。<br>• 单击复制 · 长按填充到输入框。<br>• <span class='mm-key'>Shift+单击</span> 可连续删除条目，无需逐一确认。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 虫洞 — 总览</div><div class='mm-content'>虫洞是存在 Discord 侧边栏的<b>一键频道快捷方式</b>。点击 <span class='mm-key'>＋</span> 并粘贴 Discord 频道网址即可创建。<br><b>单击</b> <span class='mm-key'>＋</span> → 创建新虫洞 · <b>长按 1 秒</b> → 打开设置菜单。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ 导航与管理</div><div class='mm-content'>• <b>单击</b>虫洞 → 立即跳转至该频道。<br>• <b>右键</b>虫洞 → 菜单：重命名 · 删除 · 设置图标 · 移至群组 · 切换 VIP。<br>• <b>VIP <span class='mm-key'>★</span></b>：设为 VIP 的虫洞自动置顶显示。<br>• <b>分组</b>：右键 → 移动到分组，整理进文件夹。<br>• <b>聚焦模式</b>：图标精简视图，虫洞面板右上角按钮切换。<br>• <b>历史记录</b>（紫色标签）：自动记录最近访问频道，点击即可返回。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ 发送消息</div><div class='mm-content'>• <b>右键</b>虫洞 → <b>在此频道发送消息</b> 打开输入框。<br>• <span class='mm-key'>Ctrl+V</span> 直接粘贴图片，图文合为一条消息一起发送。<br>• 底部选项（跨次保留）：自动关闭 · 前往频道 · 显示通知。<br>• 发送后弹出 3 秒可点击通知，点击即跳转到目标频道。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 设置菜单与 API 模式</div><div class='mm-content'>• <b>长按 <span class='mm-key'>＋</span> 1 秒</b>即可打开虫洞设置菜单。<br>• 菜单项目：<span class='mm-key'>➕ 创建新虫洞</span> · <span class='mm-key'>✉️ 发送方式与 API 模式</span> · <span class='mm-key'>⚙️ 更多设置</span>（可扩展）。<br>• 点击「<b>发送方式与 API 模式</b>」→ 打开 API 设置面板：<br>&nbsp;&nbsp;— <b>方案 A（跳页）</b>：自动切换频道，注入文字后返回，无需 Token。<br>&nbsp;&nbsp;— <b>方案 B（直接 API）</b>：REST API 直发，不切换页面，即时且隐蔽。<br>• Token 由后台静默拦截 Discord 自身请求取得——<b>绝不写入磁盘或外传。</b><br>• 页面刷新后：打开发送输入框时拦截器会自动重启。</div></div></div></div>`,
+      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ 快速开始</div><div class='mm-content'>将鼠标悬停在任意 Discord 消息上 → 右上角出现复制按钮。<br><b>单击</b>复制文字 · <b>长按 0.5秒</b>填充到输入框 · <b>Shift+单击</b>同时复制并填充（菜单保持开启）。<br>通过工具栏的 <span class='mm-key'>🖱️</span> 可切换为<span class='mm-key'>点击模式</span>，改为手动触发。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 复制菜单 — 文字与链接</div><div class='mm-content'>• <b>复制文字</b>：复制消息的完整文字内容。<br>• <b>复制媒体网址</b>：复制消息中图片或视频的直接链接。<br>• <b>复制第一个链接（已净化）</b>：提取并清除追踪参数的第一个 URL。<br>• <b>复制所有链接</b>：将消息中所有 URL 每行一个一次复制。<br>• <b>复制为 Markdown</b>：格式化为 <span class='mm-key'>[文字](URL)</span> 供 Markdown 使用。<br>• <b>插入 Markdown 链接</b>：直接将链接格式注入 Discord 的输入框。<br>• <b>隐藏格式</b>：自动包裹为 <span class='mm-key'>|| 剧透内容 ||</span> 格式。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ 下载</div><div class='mm-content'>• <b>下载图片/媒体</b>：下载该条消息中的所有图片或视频。<br>• <b>下载为 ZIP</b>：多个文件自动打包为单一 ZIP 压缩包。<br>• 下载失败时自动重试，并备援切换至备用链接。</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 网址转换</div><div class='mm-content'><b>Twitter / X</b>：在 twitter.com、x.com、vxtwitter、fixupx、fxtwitter、cunnyx 之间互转，修复 Discord 预览。<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com，让嵌入预览正常显示。<br><b>Bilibili</b>：转换为 FX Bilibili 或 VX Bilibili 获得更好的嵌入效果。<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net 互转，在 Discord 直接显示插图预览。<br><b>批量转换</b>：<span class='mm-key'>⚡ 全部转为 (N)</span> 一次处理消息中同类型的所有链接。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ 工具栏图标说明</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> 切换菜单风格：平面 / 群组</div><div><span class='mm-key'>⇄</span> 互换点击逻辑：复制 ↔ 填充</div><div><span class='mm-key'>␣</span> 填充时在尾部附加空格</div><div><span class='mm-key'>↵</span> 填充时在尾部附加换行</div><div><span class='mm-key'>☆</span> 自定义字符串面板（常用片段）</div><div><span class='mm-key'>🖱️</span> 切换触发方式：悬停 / 点击</div><div><span class='mm-key'>🌐</span> 切换界面语言</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ 自定义字符串面板</div><div class='mm-content'>• 储存常用的文字片段（问候语、模板、代码块等）。<br>• 单击复制 · 长按填充到输入框。<br>• <span class='mm-key'>Shift+单击</span> 可连续删除条目，无需逐一确认。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 虫洞 — 总览</div><div class='mm-content'>虫洞是存在 Discord 侧边栏的<b>一键频道快捷方式</b>。点击 <span class='mm-key'>＋</span> 并粘贴 Discord 频道网址即可创建。<br><b>单击</b> <span class='mm-key'>＋</span> → 创建新虫洞 · <b>长按 1 秒</b> → 打开设置菜单。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ 导航与管理</div><div class='mm-content'>• <b>单击</b>虫洞 → 立即跳转至该频道。<br>• <b>右键</b>虫洞 → 菜单：重命名 · 删除 · 设置图标 · 移至群组 · 切换 VIP。<br>• <b>VIP <span class='mm-key'>★</span></b>：设为 VIP 的虫洞自动置顶显示。<br>• <b>分组</b>：右键 → 移动到分组，整理进文件夹。<br>• <b>聚焦模式</b>：图标精简视图，虫洞面板右上角按钮切换。<br>• <b>历史记录</b>（紫色标签）：自动记录最近访问频道，点击即可返回。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ 发送消息</div><div class='mm-content'>• <b>右键</b>虫洞 → <b>在此频道发送消息</b> 打开输入框。<br>• <span class='mm-key'>Ctrl+V</span> 直接粘贴图片，图文合为一条消息一起发送。<br>• 底部选项（跨次保留）：自动关闭 · 前往频道 · 显示通知。<br>• 发送后弹出 3 秒可点击通知，点击即跳转到目标频道。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 设置菜单与 API 模式</div><div class='mm-content'>• <b>长按 <span class='mm-key'>＋</span> 1 秒</b>即可打开虫洞设置菜单。<br>• 菜单项目：<span class='mm-key'>➕ 创建新虫洞</span> · <span class='mm-key'>✉️ 发送方式与 API 模式</span> · <span class='mm-key'>⚙️ 更多设置</span>（可扩展）。<br>• 点击「<b>发送方式与 API 模式</b>」→ 打开 API 设置面板：<br>&nbsp;&nbsp;— <b>方案 A（跳页）</b>：自动切换频道，注入文字后返回，无需 Token。<br>&nbsp;&nbsp;— <b>方案 B（直接 API）</b>：REST API 直发，不切换页面，即时且隐蔽。<br>• Token 由后台静默拦截 Discord 自身请求取得——<b>绝不写入磁盘或外传。</b><br>• 页面刷新后：打开发送输入框时拦截器会自动重启。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔍 重复链接检测</div><div class='mm-content'>在聊天框粘贴链接时，自动扫描是否已有相同链接出现过。<br>• <b>DOM 模式</b>（默认）：扫描当前页面可见的所有消息，无需 API token。<br>• <b>API 模式</b>：通过 Discord API 扫描最近 200 条消息（需启用虫洞 API 模式且已拦截到 token）。<br>• 检测到重复时，聊天顶部出现 Banner 提示，显示该链接出现的次数。<br>• 粘贴不同链接或切换频道后，Banner 自动消失。<br>• <b>没有 Banner = 没有重复</b>——未命中时检测器静默在后台运行。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔎 频道搜索 Channel Scout</div><div class='mm-content'>直接在聊天窗口以关键字搜索当前频道的消息。<br>• <b>打开</b>：点击输入框上方的 🔎 悬浮按钮，或在输入框外按 <span class='mm-key'>F2</span>。<br>• <b>即时搜索</b>：输入时结果即时更新（150ms 延迟），命中关键字以金色高亮标注。<br>• <b>快捷标签</b>：最多保存 5 个自定义关键字作为一键搜索按钮。左键搜索 · 右键删除。<br>• <b>搜索历史</b>：点击 🕐 按钮显示最近 5 条记录，点击可重新搜索。<br>• <b>跳至消息</b>：点击任一结果，页面自动滚动并以蓝紫框高亮标记目标消息。<br>• <b>粘贴按钮</b>：点击 📋 直接将剪贴板内容填入搜索框。<br>• 按 <span class='mm-key'>ESC</span>、<span class='mm-key'>F2</span> 或点击面板外关闭。<br>⚠ 仅 DOM 模式——只能搜索当前已渲染的消息。需要搜索更早消息时，请先向上滚动让 Discord 加载历史消息。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌫️ 弱化用户消息</div><div class='mm-content'>将特定用户的消息柔和地弱化至背景，让其不再引人注意，但不会消失。<br>• <b>加入弱化</b>：右键任意消息 → 原生菜单「封锁」下方出现 <b>🌫️ 弱化消息：{名称}</b>，点击即可。<br>• <b>解除弱化</b>：再次右键同一用户的消息 → <b>✅ 解除弱化：{名称}</b>。<br>• <b>管理面板</b>：按 <span class='mm-key'>Alt+B</span> 打开弱化名单，显示所有被弱化的用户、加入时间及解除按钮。<br>• 被弱化的消息显示为 <b>7% 不透明度</b>，鼠标移入可临时预览至 42% 透明度。<br>• 以<b>显示名称</b>识别（非 User ID），跨所有频道有效。<br>• 新消息到达时自动套用，切换频道后也会自动重新套用。<br>• 数据永久储存于 GM storage，页面刷新后仍然保留。</div></div></div></div>`,
       reload_confirm: "语言设置已保存！\n是否立即刷新页面以应用更改？",
       copy_text: "📋 复制文字内容",
       copy_media_url: "🖼️ 复制媒体网址",
@@ -1721,6 +1826,37 @@
       uc_limit_label: "扫描范围：",
       uc_limit_suffix: "条消息",
       em_save_success: "已保存：{k}",
+
+      mod_tip_message:    "右键任意消息，通过 ⠿ 按钮快速复制、书签或执行其他操作。",
+      mod_tip_forwarding: "将消息转发到收藏频道或用户，在聊天输入框上方显示转发工具栏。",
+      mod_tip_emoji:      "输入时从可搜索的弹出窗口浏览并插入服务器表情符号。",
+      mod_tip_header:     "解锁媒体右键、启用文件下载辅助及防内容劫持保护。",
+      mod_tip_wormhole:   "通过聊天顶部的快捷按钮快速跳转到已固定频道，支持 VIP、群组与焦点模式。",
+      mod_tip_webhook:    "直接从任何频道发送消息到已注册的 Webhook。",
+      mod_tip_urlchecker: "当粘贴的链接已在近期消息中出现过时发出警告，无需 API token（DOM 模式）。",
+      mod_tip_scout:      "点击输入框上方的搜索按钮，或使用快捷键，按关键字搜索当前频道的消息。",
+      mod_tip_blacklist:  "将特定用户的消息弱化至背景，让其不再引人注意。右键任意消息即可添加。",
+
+      cs_panel_title:   "⌨ 频道搜索",
+      cs_placeholder:   "输入关键字搜索频道消息…",
+      cs_paste_tip:     "粘贴剪贴板内容",
+      cs_history_tip:   "最近搜索记录",
+      cs_no_history:    "尚无搜索记录",
+      cs_empty_hint:    "输入关键字或点击标签搜索",
+      cs_no_results:    "找不到符合的消息",
+      cs_dom_mode_note: "DOM 模式 · 仅搜索页面已加载消息",
+      cs_right_del_tip: "右键标签可删除",
+
+      mu_panel_title:   "🌫️ 弱化用户消息",
+      mu_empty:         "尚未弱化任何用户\n右键消息可添加",
+      mu_remove_btn:    "解除",
+      mu_footer_left:   "右键消息添加 · hover 可预览内容",
+      mu_footer_right:  "GMStore 永久储存",
+      mu_add_toast:     "🌫️ 已弱化：{name}",
+      mu_remove_toast:  "✅ 已解除弱化：{name}",
+      mu_ctx_mute:      "🌫️ 弱化消息：{name}",
+      mu_ctx_unmute:    "✅ 解除弱化：{name}",
+      mu_shortcut:      "Alt+B 打开弱化管理面板",
     },
 
     ja: {
@@ -1792,7 +1928,7 @@
         "URL変換機能（vxtwitter、kkinstagramなど）はサードパーティのサービスに依存しています。\n信頼できない場合は使用しないでください。\nURLの安全性を識別できる方のみご利用ください。",
       manual_content:
         "【アイコン説明】\n• ◫/≡ : メニュースタイル (フラット / グループ)\n• ⇄ : クリック動作切替 (コピー / 挿入)\n• ␣ : 末尾にスペース追加\n• ↵ : 末尾に改行追加\n• ☆ : カスタム文字列パネル\n• 🖱️ : 起動モード (ホバー / クリック)\n• 🌐 : 言語切り替え\n\n【操作方法】\n• **クリック**: コピー (デフォルト)\n• **長押し (0.5秒)**: 入力欄に挿入\n• **Shift+クリック**: コピーして挿入 (メニュー維持)",
-      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ クイックスタート</div><div class='mm-content'>任意の Discord メッセージにマウスを合わせると → 右上にコピーボタンが表示されます。<br><b>クリック</b>でテキストコピー · <b>長押し 0.5秒</b>で入力欄に挿入 · <b>Shift+クリック</b>でコピーと挿入を同時実行（メニュー維持）。<br>ツールバーの <span class='mm-key'>🖱️</span> で<span class='mm-key'>クリックモード</span>に切替可能（手動トリガー）。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 コピーメニュー — テキスト・リンク</div><div class='mm-content'>• <b>テキストをコピー</b>：メッセージの全文テキストをコピーします。<br>• <b>メディアURLをコピー</b>：メッセージ内の画像・動画の直リンクをコピーします。<br>• <b>最初のリンクをコピー（浄化済）</b>：最初のURLからトラッキングパラメータを除去してコピー。<br>• <b>全リンクをコピー</b>：メッセージ内の全URLを1行ずつコピーします。<br>• <b>Markdownとしてコピー</b>：<span class='mm-key'>[テキスト](URL)</span> 形式に変換します。<br>• <b>Markdownリンクを挿入</b>：Discordの入力欄にMarkdown形式で直接挿入します。<br>• <b>隠しテキスト</b>：<span class='mm-key'>|| スポイラー ||</span> 形式で包みます。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ ダウンロード</div><div class='mm-content'>• <b>画像/メディアをダウンロード</b>：メッセージ内の全画像・動画をまとめてダウンロード。<br>• <b>ZIPとしてダウンロード</b>：複数ファイルを一つのZIPアーカイブにまとめます。<br>• 失敗時は自動リトライし、代替URLにフォールバックします。</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 URL変換</div><div class='mm-content'><b>Twitter / X</b>：twitter.com, x.com, vxtwitter, fixupx, fxtwitter, cunnyx の間で相互変換し Discord プレビューを修正。<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com に変換して埋め込みプレビューを有効化。<br><b>Bilibili</b>：FX Bilibili または VX Bilibili に変換してより良い埋め込みを実現。<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net の相互変換で Discord 内にイラストをプレビュー。<br><b>一括変換</b>：<span class='mm-key'>⚡ 全て変換 (N)</span> でメッセージ内の同種リンクをまとめて変換。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ ツールバーアイコン</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> メニュースタイル：フラット / グループ</div><div><span class='mm-key'>⇄</span> クリック動作切替：コピー ↔ 挿入</div><div><span class='mm-key'>␣</span> 挿入時に末尾スペースを追加</div><div><span class='mm-key'>↵</span> 挿入時に末尾改行を追加</div><div><span class='mm-key'>☆</span> カスタム文字列パネル</div><div><span class='mm-key'>🖱️</span> トリガー切替：ホバー / クリック</div><div><span class='mm-key'>🌐</span> 言語切り替え</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ カスタム文字列パネル</div><div class='mm-content'>• よく使うテキスト（挨拶文・テンプレート・コードブロック）を保存できます。<br>• クリックでコピー · 長押しで入力欄に挿入。<br>• <span class='mm-key'>Shift+クリック</span>で確認なしに連続削除可能。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 ワームホール — 概要</div><div class='mm-content'>ワームホールは Discord サイドバーの<b>ワンクリックチャンネルショートカット</b>です。<span class='mm-key'>＋</span> をクリックして Discord チャンネル URL を貼り付けると作成できます。<br><b>クリック</b> <span class='mm-key'>＋</span> → 新規作成 · <b>1秒長押し</b> → 設定メニューを開く。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ ナビゲーションと管理</div><div class='mm-content'>• <b>クリック</b>でそのチャンネルへ即ジャンプ。<br>• <b>右クリック</b> → メニュー：名前変更 · 削除 · アイコン設定 · グループ移動 · VIP 切替。<br>• <b>VIP <span class='mm-key'>★</span></b>：設定したワームホールは自動で最上部に固定。<br>• <b>グループ</b>：右クリック → グループに移動 でフォルダ整理。<br>• <b>フォーカスモード</b>：アイコンのみのコンパクト表示。パネル右上ボタンで切替。<br>• <b>履歴</b>（紫バッジ）：最近訪れたチャンネルを自動記録、クリックで即復帰。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ メッセージ送信</div><div class='mm-content'>• <b>右クリック</b> → <b>このチャンネルにメッセージを送る</b> でオーバーレイを開く。<br>• <span class='mm-key'>Ctrl+V</span> で画像を直接貼り付け — テキストと一緒に1通で送信。<br>• 下部オプション（セッション間保持）：送信後閉じる · チャンネルへ移動 · 通知を表示。<br>• 送信後3秒間トーストが表示され、クリックで即チャンネルに移動できます。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 設定メニューと API モード</div><div class='mm-content'>• <b><span class='mm-key'>＋</span> を1秒長押し</b>してワームホール設定メニューを開く。<br>• メニュー：<span class='mm-key'>➕ 新しいワームホールを作成</span> · <span class='mm-key'>✉️ 送信方式・API モード</span> · <span class='mm-key'>⚙️ その他の設定</span>（拡張予定）。<br>• 「<b>送信方式・API モード</b>」→ API 設定パネルを開く：<br>&nbsp;&nbsp;— <b>プラン A（ページ移動）</b>：自動移動→テキスト注入→復帰。Token 不要。<br>&nbsp;&nbsp;— <b>プラン B（直接 API）</b>：REST API 経由。ページ切替なし・即時・ステルス。<br>• Token は Discord 自身のリクエストからバックグラウンドで静かに傍受——<b>ディスク保存なし。</b><br>• ページ更新後：送信オーバーレイを開くとインターセプターが自動再起動。</div></div></div></div>`,
+      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ クイックスタート</div><div class='mm-content'>任意の Discord メッセージにマウスを合わせると → 右上にコピーボタンが表示されます。<br><b>クリック</b>でテキストコピー · <b>長押し 0.5秒</b>で入力欄に挿入 · <b>Shift+クリック</b>でコピーと挿入を同時実行（メニュー維持）。<br>ツールバーの <span class='mm-key'>🖱️</span> で<span class='mm-key'>クリックモード</span>に切替可能（手動トリガー）。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 コピーメニュー — テキスト・リンク</div><div class='mm-content'>• <b>テキストをコピー</b>：メッセージの全文テキストをコピーします。<br>• <b>メディアURLをコピー</b>：メッセージ内の画像・動画の直リンクをコピーします。<br>• <b>最初のリンクをコピー（浄化済）</b>：最初のURLからトラッキングパラメータを除去してコピー。<br>• <b>全リンクをコピー</b>：メッセージ内の全URLを1行ずつコピーします。<br>• <b>Markdownとしてコピー</b>：<span class='mm-key'>[テキスト](URL)</span> 形式に変換します。<br>• <b>Markdownリンクを挿入</b>：Discordの入力欄にMarkdown形式で直接挿入します。<br>• <b>隠しテキスト</b>：<span class='mm-key'>|| スポイラー ||</span> 形式で包みます。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ ダウンロード</div><div class='mm-content'>• <b>画像/メディアをダウンロード</b>：メッセージ内の全画像・動画をまとめてダウンロード。<br>• <b>ZIPとしてダウンロード</b>：複数ファイルを一つのZIPアーカイブにまとめます。<br>• 失敗時は自動リトライし、代替URLにフォールバックします。</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 URL変換</div><div class='mm-content'><b>Twitter / X</b>：twitter.com, x.com, vxtwitter, fixupx, fxtwitter, cunnyx の間で相互変換し Discord プレビューを修正。<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com に変換して埋め込みプレビューを有効化。<br><b>Bilibili</b>：FX Bilibili または VX Bilibili に変換してより良い埋め込みを実現。<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net の相互変換で Discord 内にイラストをプレビュー。<br><b>一括変換</b>：<span class='mm-key'>⚡ 全て変換 (N)</span> でメッセージ内の同種リンクをまとめて変換。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ ツールバーアイコン</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> メニュースタイル：フラット / グループ</div><div><span class='mm-key'>⇄</span> クリック動作切替：コピー ↔ 挿入</div><div><span class='mm-key'>␣</span> 挿入時に末尾スペースを追加</div><div><span class='mm-key'>↵</span> 挿入時に末尾改行を追加</div><div><span class='mm-key'>☆</span> カスタム文字列パネル</div><div><span class='mm-key'>🖱️</span> トリガー切替：ホバー / クリック</div><div><span class='mm-key'>🌐</span> 言語切り替え</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ カスタム文字列パネル</div><div class='mm-content'>• よく使うテキスト（挨拶文・テンプレート・コードブロック）を保存できます。<br>• クリックでコピー · 長押しで入力欄に挿入。<br>• <span class='mm-key'>Shift+クリック</span>で確認なしに連続削除可能。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 ワームホール — 概要</div><div class='mm-content'>ワームホールは Discord サイドバーの<b>ワンクリックチャンネルショートカット</b>です。<span class='mm-key'>＋</span> をクリックして Discord チャンネル URL を貼り付けると作成できます。<br><b>クリック</b> <span class='mm-key'>＋</span> → 新規作成 · <b>1秒長押し</b> → 設定メニューを開く。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ ナビゲーションと管理</div><div class='mm-content'>• <b>クリック</b>でそのチャンネルへ即ジャンプ。<br>• <b>右クリック</b> → メニュー：名前変更 · 削除 · アイコン設定 · グループ移動 · VIP 切替。<br>• <b>VIP <span class='mm-key'>★</span></b>：設定したワームホールは自動で最上部に固定。<br>• <b>グループ</b>：右クリック → グループに移動 でフォルダ整理。<br>• <b>フォーカスモード</b>：アイコンのみのコンパクト表示。パネル右上ボタンで切替。<br>• <b>履歴</b>（紫バッジ）：最近訪れたチャンネルを自動記録、クリックで即復帰。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ メッセージ送信</div><div class='mm-content'>• <b>右クリック</b> → <b>このチャンネルにメッセージを送る</b> でオーバーレイを開く。<br>• <span class='mm-key'>Ctrl+V</span> で画像を直接貼り付け — テキストと一緒に1通で送信。<br>• 下部オプション（セッション間保持）：送信後閉じる · チャンネルへ移動 · 通知を表示。<br>• 送信後3秒間トーストが表示され、クリックで即チャンネルに移動できます。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 設定メニューと API モード</div><div class='mm-content'>• <b><span class='mm-key'>＋</span> を1秒長押し</b>してワームホール設定メニューを開く。<br>• メニュー：<span class='mm-key'>➕ 新しいワームホールを作成</span> · <span class='mm-key'>✉️ 送信方式・API モード</span> · <span class='mm-key'>⚙️ その他の設定</span>（拡張予定）。<br>• 「<b>送信方式・API モード</b>」→ API 設定パネルを開く：<br>&nbsp;&nbsp;— <b>プラン A（ページ移動）</b>：自動移動→テキスト注入→復帰。Token 不要。<br>&nbsp;&nbsp;— <b>プラン B（直接 API）</b>：REST API 経由。ページ切替なし・即時・ステルス。<br>• Token は Discord 自身のリクエストからバックグラウンドで静かに傍受——<b>ディスク保存なし。</b><br>• ページ更新後：送信オーバーレイを開くとインターセプターが自動再起動。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔍 重複 URL チェッカー</div><div class='mm-content'>チャット欄に URL を貼り付けると、同じリンクが過去に投稿されていないか自動確認します。<br>• <b>DOM モード</b>（デフォルト）：現在表示中のメッセージを全件スキャン。API トークン不要。<br>• <b>API モード</b>：Discord API で最新 200 件をスキャン（ワームホール API モード有効+トークン取得済み が必要）。<br>• 重複検出時はチャット上部にバナー表示（出現回数も表示）。<br>• 別の URL を貼るかチャンネルを切り替えるとバナーは自動消去。<br>• <b>バナーなし = 重複なし</b>——ヒットしない場合は無音でバックグラウンド動作。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔎 チャンネル検索 Channel Scout</div><div class='mm-content'>チャット画面からキーワードで現在チャンネルのメッセージを検索します。<br>• <b>開く</b>：入力欄上の 🔎 フローティングボタンをクリック、または入力欄外で <span class='mm-key'>F2</span>。<br>• <b>即時検索</b>：入力と同時に結果更新（150ms 遅延）。ヒット箇所をゴールドでハイライト。<br>• <b>クイックタグ</b>：カスタムキーワードを最大 5 件保存。左クリックで検索・右クリックで削除。<br>• <b>検索履歴</b>：🕐 ボタンで直近 5 件を表示、クリックで再検索。<br>• <b>メッセージへジャンプ</b>：結果をクリックするとスクロールして青紫枠でハイライト。<br>• <b>貼り付けボタン</b>：📋 クリックでクリップボードを検索欄に直接入力。<br>• <span class='mm-key'>ESC</span>・<span class='mm-key'>F2</span>・パネル外クリックで閉じる。<br>⚠ DOM モードのみ——現在レンダリング済みのメッセージのみ対象。古いメッセージは先にスクロールして読み込んでください。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌫️ ユーザーメッセージ弱化</div><div class='mm-content'>特定ユーザーのメッセージを背景に溶け込ませ、邪魔にならないよう薄く表示します（非表示ではありません）。<br>• <b>弱化追加</b>：メッセージを右クリック → 「ブロック」の下に <b>🌫️ メッセージを弱化：{名前}</b> → クリック。<br>• <b>弱化解除</b>：同じユーザーのメッセージを右クリック → <b>✅ 弱化を解除：{名前}</b>。<br>• <b>管理パネル</b>：<span class='mm-key'>Alt+B</span> で弱化リストを開く。追加日時と解除ボタンを表示。<br>• 弱化メッセージは <b>不透明度 7%</b> で表示。ホバーで 42% まで一時プレビュー可能。<br>• <b>表示名</b>で識別（User ID 不使用）、全チャンネルで有効。<br>• 新着メッセージやチャンネル切り替え後も自動で再適用。<br>• データは GM storage に永続保存、ページ更新後も維持。</div></div></div></div>`,
       reload_confirm:
         "設定を保存しました！\nすぐにページを再読み込みしますか？",
       copy_text: "📋 テキストをコピー",
@@ -2079,6 +2215,37 @@
       uc_limit_label: "スキャン範囲：",
       uc_limit_suffix: "件",
       em_save_success: "{k} を保存しました",
+
+      mod_tip_message:    "任意のメッセージを右クリックして、⠿ボタンでコピー・ブックマーク・クイック操作。",
+      mod_tip_forwarding: "お気に入りチャンネルやユーザーにメッセージを転送。入力欄上部にツールバーを表示。",
+      mod_tip_emoji:      "入力中に検索可能なポップアップからサーバー絵文字を挿入。",
+      mod_tip_header:     "メディアの右クリックを解除、ファイルDLヘルパー有効化、コンテンツ乗っ取り防止。",
+      mod_tip_wormhole:   "チャット上部のチップでピン留めチャンネルへ即移動。VIP・グループ・フォーカス対応。",
+      mod_tip_webhook:    "任意のチャンネルから登録済みWebhookにメッセージを送信。",
+      mod_tip_urlchecker: "貼り付けたURLが最近の投稿に既に存在する場合に警告。APIトークン不要（DOMモード）。",
+      mod_tip_scout:      "入力欄上の検索ボタンまたはショートカットで現在のチャンネルをキーワード検索。",
+      mod_tip_blacklist:  "特定ユーザーのメッセージを薄く表示して目立たなくする。右クリックから追加可能。",
+
+      cs_panel_title:   "⌨ チャンネル検索",
+      cs_placeholder:   "キーワードでチャンネルメッセージを検索…",
+      cs_paste_tip:     "クリップボードから貼り付け",
+      cs_history_tip:   "最近の検索",
+      cs_no_history:    "検索履歴がありません",
+      cs_empty_hint:    "キーワードを入力するかタグをクリック",
+      cs_no_results:    "該当するメッセージが見つかりません",
+      cs_dom_mode_note: "DOMモード · 表示中のメッセージのみ検索",
+      cs_right_del_tip: "右クリックでタグ削除",
+
+      mu_panel_title:   "🌫️ ユーザーメッセージ弱化",
+      mu_empty:         "弱化中のユーザーなし\nメッセージを右クリックで追加",
+      mu_remove_btn:    "解除",
+      mu_footer_left:   "右クリックで追加 · ホバーでプレビュー",
+      mu_footer_right:  "GMStoreに永続保存",
+      mu_add_toast:     "🌫️ 弱化しました：{name}",
+      mu_remove_toast:  "✅ 解除しました：{name}",
+      mu_ctx_mute:      "🌫️ メッセージを弱化：{name}",
+      mu_ctx_unmute:    "✅ 弱化を解除：{name}",
+      mu_shortcut:      "Alt+B で弱化管理パネルを開く",
     },
 
     ko: {
@@ -2150,7 +2317,7 @@
         "URL 변환 기능(vxtwitter, kkinstagram 등)은 타사 서비스에 의존합니다.\n신뢰할 수 없는 경우 사용하지 마십시오.\n사용자는 URL 안전성을 식별할 능력이 있어야 합니다.",
       manual_content:
         "【아이콘 설명】\n• ◫/≡ : 메뉴 스타일 (평면 / 그룹)\n• ⇄ : 클릭 로직 전환 (복사 / 삽입)\n• ␣ : 끝에 공백 추가\n• ↵ : 끝에 줄바꿈 추가\n• ☆ : 사용자 정의 문자열 패널\n• 🖱️ : 트리거 모드 (호버 / 클릭)\n• 🌐 : 언어 변경\n\n【조작 방법】\n• **클릭**: 복사 (기본)\n• **길게 누르기 (0.5초)**: 입력창에 삽입\n• **Shift+클릭**: 복사 및 삽입 (메뉴 유지)",
-      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ 빠른 시작</div><div class='mm-content'>Discord 메시지에 마우스를 올리면 → 우측 상단에 복사 버튼이 나타납니다.<br><b>클릭</b>으로 텍스트 복사 · <b>길게 누르기 0.5초</b>로 입력창에 삽입 · <b>Shift+클릭</b>으로 복사와 삽입 동시 실행（메뉴 유지）。<br>툴바의 <span class='mm-key'>🖱️</span> 으로 <span class='mm-key'>클릭 모드</span>로 전환 가능（수동 트리거）。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 복사 메뉴 — 텍스트 & 링크</div><div class='mm-content'>• <b>텍스트 복사</b>：메시지의 전체 텍스트를 복사합니다.<br>• <b>미디어 URL 복사</b>：메시지 내 이미지/동영상의 직접 링크를 복사합니다.<br>• <b>첫 번째 링크 복사（정제됨）</b>：추적 파라미터를 제거한 첫 번째 URL을 복사.<br>• <b>모든 링크 복사</b>：메시지 내 모든 URL을 한 줄씩 복사합니다.<br>• <b>Markdown으로 복사</b>：<span class='mm-key'>[텍스트](URL)</span> 형식으로 변환합니다.<br>• <b>Markdown 링크 삽입</b>：Discord 입력창에 Markdown 형식으로 직접 삽입.<br>• <b>숨김 형식</b>：<span class='mm-key'>|| 스포일러 내용 ||</span> 형식으로 감쌉니다.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ 다운로드</div><div class='mm-content'>• <b>이미지/미디어 다운로드</b>：메시지의 모든 이미지·동영상을 한 번에 다운로드.<br>• <b>ZIP으로 다운로드</b>：여러 파일을 하나의 ZIP 아카이브로 묶어 저장.<br>• 실패 시 자동 재시도하며, 대체 URL로 폴백합니다.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 URL 변환</div><div class='mm-content'><b>Twitter / X</b>：twitter.com, x.com, vxtwitter, fixupx, fxtwitter, cunnyx 간 상호 변환으로 Discord 프리뷰 수정.<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com 변환으로 임베드 프리뷰 활성화.<br><b>Bilibili</b>：FX Bilibili 또는 VX Bilibili로 변환하여 더 나은 임베드 구현.<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net 상호 변환으로 Discord에서 일러스트 프리뷰.<br><b>일괄 변환</b>：<span class='mm-key'>⚡ 전체 변환 (N)</span> 으로 같은 종류의 링크를 한 번에 모두 변환.</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ 툴바 아이콘 설명</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> 메뉴 스타일：평면 / 그룹</div><div><span class='mm-key'>⇄</span> 클릭 동작 전환：복사 ↔ 삽입</div><div><span class='mm-key'>␣</span> 삽입 시 끝에 공백 추가</div><div><span class='mm-key'>↵</span> 삽입 시 끝에 줄바꿈 추가</div><div><span class='mm-key'>☆</span> 사용자 정의 문자열 패널</div><div><span class='mm-key'>🖱️</span> 트리거 전환：호버 / 클릭</div><div><span class='mm-key'>🌐</span> 언어 변경</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ 사용자 정의 문자열 패널</div><div class='mm-content'>• 자주 쓰는 텍스트（인사말·템플릿·코드 블록）를 저장할 수 있습니다.<br>• 클릭으로 복사 · 길게 눌러 입력창에 삽입.<br>• <span class='mm-key'>Shift+클릭</span>으로 확인 없이 연속 삭제 가능.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 웜홀 — 개요</div><div class='mm-content'>웜홀은 Discord 사이드바의 <b>원클릭 채널 단축키</b>입니다. <span class='mm-key'>＋</span> 를 클릭하고 Discord 채널 URL을 붙여넣으면 생성됩니다.<br><b>클릭</b> <span class='mm-key'>＋</span> → 새 웜홀 생성 · <b>1초 길게 누르기</b> → 설정 메뉴 열기.</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ 탐색 및 관리</div><div class='mm-content'>• <b>클릭</b>하면 해당 채널로 즉시 이동합니다.<br>• <b>우클릭</b> → 메뉴: 이름 변경 · 삭제 · 아이콘 설정 · 그룹 이동 · VIP 전환.<br>• <b>VIP <span class='mm-key'>★</span></b>：설정한 웜홀은 자동으로 맨 위에 고정됩니다.<br>• <b>그룹</b>：우클릭 → 그룹으로 이동 으로 폴더에 정리.<br>• <b>포커스 모드</b>：아이콘만 표시. 패널 우측 상단 버튼으로 전환.<br>• <b>기록</b>（보라색 배지）：최근 방문 채널 자동 저장, 클릭으로 즉시 복귀.</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ 메시지 전송</div><div class='mm-content'>• <b>우클릭</b> → <b>이 채널에 메시지 보내기</b> 로 오버레이 열기.<br>• <span class='mm-key'>Ctrl+V</span> 로 이미지 직접 붙여넣기 — 텍스트와 함께 하나의 메시지로 전송.<br>• 하단 옵션（세션 간 유지）：자동 닫기 · 채널로 이동 · 알림 표시.<br>• 전송 후 3초간 토스트 표시, 클릭하면 즉시 해당 채널로 이동합니다.</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 설정 메뉴 및 API 모드</div><div class='mm-content'>• <b><span class='mm-key'>＋</span> 를 1초 길게 누르면</b> 웜홀 설정 메뉴가 열립니다.<br>• 메뉴 항목：<span class='mm-key'>➕ 새 웜홀 생성</span> · <span class='mm-key'>✉️ 전송 방식 및 API 모드</span> · <span class='mm-key'>⚙️ 추가 설정</span>（확장 예정）。<br>• 「<b>전송 방식 및 API 모드</b>」→ API 설정 패널 열기：<br>&nbsp;&nbsp;— <b>플랜 A（페이지 이동）</b>：자동 이동→텍스트 주입→복귀. Token 불필요.<br>&nbsp;&nbsp;— <b>플랜 B（직접 API）</b>：REST API 전송. 페이지 전환 없이 즉시·스텔스.<br>• Token은 Discord 자체 요청에서 백그라운드로 조용히 가로챕니다——<b>디스크 저장 없음.</b><br>• 페이지 새로고침 후：전송 오버레이를 열면 인터셉터가 자동 재시작.</div></div></div></div>`,
+      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ 빠른 시작</div><div class='mm-content'>Discord 메시지에 마우스를 올리면 → 우측 상단에 복사 버튼이 나타납니다.<br><b>클릭</b>으로 텍스트 복사 · <b>길게 누르기 0.5초</b>로 입력창에 삽입 · <b>Shift+클릭</b>으로 복사와 삽입 동시 실행（메뉴 유지）。<br>툴바의 <span class='mm-key'>🖱️</span> 으로 <span class='mm-key'>클릭 모드</span>로 전환 가능（수동 트리거）。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 복사 메뉴 — 텍스트 & 링크</div><div class='mm-content'>• <b>텍스트 복사</b>：메시지의 전체 텍스트를 복사합니다.<br>• <b>미디어 URL 복사</b>：메시지 내 이미지/동영상의 직접 링크를 복사합니다.<br>• <b>첫 번째 링크 복사（정제됨）</b>：추적 파라미터를 제거한 첫 번째 URL을 복사.<br>• <b>모든 링크 복사</b>：메시지 내 모든 URL을 한 줄씩 복사합니다.<br>• <b>Markdown으로 복사</b>：<span class='mm-key'>[텍스트](URL)</span> 형식으로 변환합니다.<br>• <b>Markdown 링크 삽입</b>：Discord 입력창에 Markdown 형식으로 직접 삽입.<br>• <b>숨김 형식</b>：<span class='mm-key'>|| 스포일러 내용 ||</span> 형식으로 감쌉니다.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ 다운로드</div><div class='mm-content'>• <b>이미지/미디어 다운로드</b>：메시지의 모든 이미지·동영상을 한 번에 다운로드.<br>• <b>ZIP으로 다운로드</b>：여러 파일을 하나의 ZIP 아카이브로 묶어 저장.<br>• 실패 시 자동 재시도하며, 대체 URL로 폴백합니다.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 URL 변환</div><div class='mm-content'><b>Twitter / X</b>：twitter.com, x.com, vxtwitter, fixupx, fxtwitter, cunnyx 간 상호 변환으로 Discord 프리뷰 수정.<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com 변환으로 임베드 프리뷰 활성화.<br><b>Bilibili</b>：FX Bilibili 또는 VX Bilibili로 변환하여 더 나은 임베드 구현.<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net 상호 변환으로 Discord에서 일러스트 프리뷰.<br><b>일괄 변환</b>：<span class='mm-key'>⚡ 전체 변환 (N)</span> 으로 같은 종류의 링크를 한 번에 모두 변환.</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ 툴바 아이콘 설명</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> 메뉴 스타일：평면 / 그룹</div><div><span class='mm-key'>⇄</span> 클릭 동작 전환：복사 ↔ 삽입</div><div><span class='mm-key'>␣</span> 삽입 시 끝에 공백 추가</div><div><span class='mm-key'>↵</span> 삽입 시 끝에 줄바꿈 추가</div><div><span class='mm-key'>☆</span> 사용자 정의 문자열 패널</div><div><span class='mm-key'>🖱️</span> 트리거 전환：호버 / 클릭</div><div><span class='mm-key'>🌐</span> 언어 변경</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ 사용자 정의 문자열 패널</div><div class='mm-content'>• 자주 쓰는 텍스트（인사말·템플릿·코드 블록）를 저장할 수 있습니다.<br>• 클릭으로 복사 · 길게 눌러 입력창에 삽입.<br>• <span class='mm-key'>Shift+클릭</span>으로 확인 없이 연속 삭제 가능.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 웜홀 — 개요</div><div class='mm-content'>웜홀은 Discord 사이드바의 <b>원클릭 채널 단축키</b>입니다. <span class='mm-key'>＋</span> 를 클릭하고 Discord 채널 URL을 붙여넣으면 생성됩니다.<br><b>클릭</b> <span class='mm-key'>＋</span> → 새 웜홀 생성 · <b>1초 길게 누르기</b> → 설정 메뉴 열기.</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ 탐색 및 관리</div><div class='mm-content'>• <b>클릭</b>하면 해당 채널로 즉시 이동합니다.<br>• <b>우클릭</b> → 메뉴: 이름 변경 · 삭제 · 아이콘 설정 · 그룹 이동 · VIP 전환.<br>• <b>VIP <span class='mm-key'>★</span></b>：설정한 웜홀은 자동으로 맨 위에 고정됩니다.<br>• <b>그룹</b>：우클릭 → 그룹으로 이동 으로 폴더에 정리.<br>• <b>포커스 모드</b>：아이콘만 표시. 패널 우측 상단 버튼으로 전환.<br>• <b>기록</b>（보라색 배지）：최근 방문 채널 자동 저장, 클릭으로 즉시 복귀.</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ 메시지 전송</div><div class='mm-content'>• <b>우클릭</b> → <b>이 채널에 메시지 보내기</b> 로 오버레이 열기.<br>• <span class='mm-key'>Ctrl+V</span> 로 이미지 직접 붙여넣기 — 텍스트와 함께 하나의 메시지로 전송.<br>• 하단 옵션（세션 간 유지）：자동 닫기 · 채널로 이동 · 알림 표시.<br>• 전송 후 3초간 토스트 표시, 클릭하면 즉시 해당 채널로 이동합니다.</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 설정 메뉴 및 API 모드</div><div class='mm-content'>• <b><span class='mm-key'>＋</span> 를 1초 길게 누르면</b> 웜홀 설정 메뉴가 열립니다.<br>• 메뉴 항목：<span class='mm-key'>➕ 새 웜홀 생성</span> · <span class='mm-key'>✉️ 전송 방식 및 API 모드</span> · <span class='mm-key'>⚙️ 추가 설정</span>（확장 예정）。<br>• 「<b>전송 방식 및 API 모드</b>」→ API 설정 패널 열기：<br>&nbsp;&nbsp;— <b>플랜 A（페이지 이동）</b>：자동 이동→텍스트 주입→복귀. Token 불필요.<br>&nbsp;&nbsp;— <b>플랜 B（직접 API）</b>：REST API 전송. 페이지 전환 없이 즉시·스텔스.<br>• Token은 Discord 자체 요청에서 백그라운드로 조용히 가로챕니다——<b>디스크 저장 없음.</b><br>• 페이지 새로고침 후：전송 오버레이를 열면 인터셉터가 자동 재시작.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔍 중복 URL 검사기</div><div class='mm-content'>채팅창에 URL을 붙여넣으면 같은 링크가 이전에 공유된 적 있는지 자동으로 확인합니다.<br>• <b>DOM 모드</b>（기본）：현재 화면에 표시된 메시지 전체 스캔. API 토큰 불필요.<br>• <b>API 모드</b>：Discord API로 최근 200개 메시지 스캔（웜홀 API 모드 활성화 + 토큰 캡처 필요）.<br>• 중복 감지 시 채팅 상단에 배너 표시（해당 링크가 몇 번 등장했는지 표시）.<br>• 다른 URL을 붙여넣거나 채널을 전환하면 배너 자동 소거.<br>• <b>배너 없음 = 중복 없음</b>——일치하지 않을 때는 백그라운드에서 무음으로 동작.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔎 채널 검색 Channel Scout</div><div class='mm-content'>채팅 화면에서 키워드로 현재 채널 메시지를 검색합니다.<br>• <b>열기</b>：입력창 위의 🔎 플로팅 버튼 클릭, 또는 입력창 밖에서 <span class='mm-key'>F2</span>.<br>• <b>실시간 검색</b>：입력 즉시 결과 업데이트（150ms 딜레이）. 키워드 금색 하이라이트.<br>• <b>빠른 태그</b>：사용자 정의 키워드 최대 5개 저장. 좌클릭으로 검색·우클릭으로 삭제.<br>• <b>검색 기록</b>：🕐 버튼으로 최근 5건 표시, 클릭으로 재검색.<br>• <b>메시지로 이동</b>：결과 클릭 시 스크롤 이동 + 파란 테두리 하이라이트.<br>• <b>붙여넣기 버튼</b>：📋 클릭으로 클립보드를 검색창에 직접 입력.<br>• <span class='mm-key'>ESC</span>・<span class='mm-key'>F2</span>・패널 외부 클릭으로 닫기.<br>⚠ DOM 모드만 지원——현재 렌더링된 메시지만 검색 가능. 오래된 메시지는 먼저 스크롤하여 로드하세요.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌫️ 사용자 메시지 약화</div><div class='mm-content'>특정 사용자의 메시지를 배경에 녹아들도록 흐리게 표시합니다（숨기지 않고 약화）.<br>• <b>약화 추가</b>：메시지 우클릭 → 「차단」아래 <b>🌫️ 메시지 약화：{이름}</b> → 클릭.<br>• <b>약화 해제</b>：같은 사용자 메시지 우클릭 → <b>✅ 약화 해제：{이름}</b>.<br>• <b>관리 패널</b>：<span class='mm-key'>Alt+B</span> 로 약화 목록 열기. 추가일과 해제 버튼 표시.<br>• 약화된 메시지는 <b>불투명도 7%</b> 표시. 호버 시 42%로 일시 미리보기 가능.<br>• <b>표시 이름</b>으로 식별（User ID 미사용）, 모든 채널에서 유효.<br>• 새 메시지 수신 및 채널 전환 후 자동 재적용.<br>• 데이터는 GM storage에 영구 저장, 페이지 새로고침 후에도 유지.</div></div></div></div>`,
       reload_confirm:
         "설정이 저장되었습니다!\n지금 페이지를 새로 고치시겠습니까?",
       copy_text: "📋 텍스트 복사",
@@ -2435,6 +2602,20 @@
       uc_limit_label: "스캔 범위：",
       uc_limit_suffix: "개 메시지",
       em_save_success: "저장됨: {k}",
+
+      cs_panel_title:   "⌨ 채널 검색",
+      cs_placeholder:   "키워드로 채널 메시지 검색…",
+      cs_no_results:    "일치하는 메시지 없음",
+      cs_empty_hint:    "키워드를 입력하거나 태그를 클릭하세요",
+      cs_no_history:    "검색 기록 없음",
+      cs_dom_mode_note: "DOM 모드 · 현재 표시된 메시지만 검색",
+      mu_panel_title:   "🌫️ 사용자 메시지 약화",
+      mu_empty:         "약화된 사용자 없음\n메시지를 우클릭하여 추가",
+      mu_remove_btn:    "해제",
+      mu_add_toast:     "🌫️ 약화됨: {name}",
+      mu_remove_toast:  "✅ 해제됨: {name}",
+      mu_ctx_mute:      "🌫️ 메시지 약화: {name}",
+      mu_ctx_unmute:    "✅ 약화 해제: {name}",
     },
     es: {
       name: "Español",
@@ -2788,6 +2969,20 @@
       wm_edit_title: "Editar Wormhole: {n}",
       wm_created: "¡Wormhole creado!",
       wm_deleted: "Wormhole cerrado.",
+
+      cs_panel_title:   "⌨ Búsqueda de canal",
+      cs_placeholder:   "Escribe una palabra clave para buscar mensajes…",
+      cs_no_results:    "No se encontraron mensajes",
+      cs_empty_hint:    "Escribe una palabra clave o haz clic en una etiqueta",
+      cs_no_history:    "Sin historial de búsqueda",
+      cs_dom_mode_note: "Modo DOM · busca solo mensajes visibles",
+      mu_panel_title:   "🌫️ Atenuar mensajes de usuario",
+      mu_empty:         "Sin usuarios atenuados\nClic derecho en mensaje para añadir",
+      mu_remove_btn:    "Reactivar",
+      mu_add_toast:     "🌫️ Atenuado: {name}",
+      mu_remove_toast:  "✅ Reactivado: {name}",
+      mu_ctx_mute:      "🌫️ Atenuar mensajes: {name}",
+      mu_ctx_unmute:    "✅ Reactivar: {name}",
     },    "pt-BR": {
       name: "Português (Brasil)",
       fm_pinned_channels: "★ Canais fixados",
@@ -3138,6 +3333,20 @@
       wm_edit_title: "Editar Wormhole: {n}",
       wm_created: "Wormhole criado!",
       wm_deleted: "Wormhole fechado.",
+
+      cs_panel_title:   "⌨ Pesquisa de canal",
+      cs_placeholder:   "Digite uma palavra-chave para pesquisar mensagens…",
+      cs_no_results:    "Nenhuma mensagem encontrada",
+      cs_empty_hint:    "Digite uma palavra-chave ou clique em uma etiqueta",
+      cs_no_history:    "Sem histórico de pesquisa",
+      cs_dom_mode_note: "Modo DOM · pesquisa apenas mensagens visíveis",
+      mu_panel_title:   "🌫️ Silenciar mensagens de usuário",
+      mu_empty:         "Nenhum usuário silenciado\nClique com botão direito para adicionar",
+      mu_remove_btn:    "Reativar",
+      mu_add_toast:     "🌫️ Silenciado: {name}",
+      mu_remove_toast:  "✅ Reativado: {name}",
+      mu_ctx_mute:      "🌫️ Silenciar mensagens: {name}",
+      mu_ctx_unmute:    "✅ Reativar: {name}",
     },
 
     fr: {
@@ -3847,6 +4056,20 @@
       wm_edit_title: "Редактировать Wormhole: {n}",
       wm_created: "Wormhole создан!",
       wm_deleted: "Wormhole закрыт.",
+
+      cs_panel_title:   "⌨ Поиск по каналу",
+      cs_placeholder:   "Введите ключевое слово для поиска…",
+      cs_no_results:    "Сообщения не найдены",
+      cs_empty_hint:    "Введите ключевое слово или нажмите на тег",
+      cs_no_history:    "История поиска пуста",
+      cs_dom_mode_note: "Режим DOM · поиск только по видимым сообщениям",
+      mu_panel_title:   "🌫️ Приглушить сообщения пользователя",
+      mu_empty:         "Нет приглушённых пользователей\nПравый клик по сообщению для добавления",
+      mu_remove_btn:    "Восстановить",
+      mu_add_toast:     "🌫️ Приглушено: {name}",
+      mu_remove_toast:  "✅ Восстановлено: {name}",
+      mu_ctx_mute:      "🌫️ Приглушить: {name}",
+      mu_ctx_unmute:    "✅ Восстановить: {name}",
     },
   };
 
@@ -3948,6 +4171,30 @@
             .my-wormhole-chip:hover { background: rgba(88, 101, 242, 0.2); border-color: #5865F2; color: #fff; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
             .my-wormhole-chip:active { transform: translateY(0); }
             .my-wormhole-chip.editing { border-color: #ed4245; animation: my-shake-anim 0.3s ease-in-out infinite; }
+
+            .my-wormhole-chip.vip-dimmed {
+                opacity: 0.35;
+                filter: grayscale(60%);
+                border-color: rgba(88, 101, 242, 0.15);
+                color: #72767d;
+            }
+            .my-wormhole-chip.vip-dimmed:hover {
+                opacity: 0.7;
+                filter: grayscale(0%);
+                border-color: #5865F2;
+                color: #dbdee1;
+            }
+            
+            .my-wormhole-dropdown .dropdown-item.vip-dimmed {
+                opacity: 0.4;
+                filter: grayscale(50%);
+                color: #72767d;
+            }
+            .my-wormhole-dropdown .dropdown-item.vip-dimmed:hover {
+                opacity: 0.75;
+                filter: grayscale(0%);
+                color: #dbdee1;
+            }
 
             .my-wormhole-icon { font-size: 10px; opacity: 0.7; display: flex; align-items: center; }
 
@@ -4094,6 +4341,7 @@
     }
 
     const activeObservers = new WeakMap();
+    const _injectTimers = new WeakMap();
 
     async function handleForwardOpen() {
       DEBUG && console.log(
@@ -4126,11 +4374,11 @@
             if (m.addedNodes.length > 0) shouldInject = true;
           }
           if (shouldInject) {
-            if (modal.dataset.injectTimer)
-              clearTimeout(Number(modal.dataset.injectTimer));
-            modal.dataset.injectTimer = setTimeout(
-              () => injectListStars(modal),
-              120,
+            if (_injectTimers.has(modal))
+              clearTimeout(_injectTimers.get(modal));
+            _injectTimers.set(
+              modal,
+              setTimeout(() => injectListStars(modal), 120),
             );
           }
         });
@@ -4467,7 +4715,7 @@
 
       const mainBtn = document.createElement("button");
       mainBtn.className = `my-btn ${btnClass}`;
-      mainBtn.innerHTML = `<span>${title} (${list.length})</span> <span style="font-size:10px">▼</span>`;
+      mainBtn.innerHTML = `<span>${escHtml(title)} (${list.length})</span> <span style="font-size:10px">▼</span>`;
       mainBtn.onclick = (e) => {
         e.stopPropagation();
         document.querySelectorAll(".my-dropdown-menu").forEach((m) => {
@@ -7109,6 +7357,27 @@
 
         const newBadge = renderNewBadge(mod.storageKey);
         if (newBadge) label.appendChild(newBadge);
+
+        if (mod.tip) {
+          const tipBtn = document.createElement("span");
+          tipBtn.style.cssText = `
+            display:inline-flex; align-items:center; justify-content:center;
+            width:14px; height:14px; border-radius:50%;
+            color:rgba(185,187,190,0.45); cursor:help; flex-shrink:0;
+            font-size:11px; font-weight:700; line-height:1;
+            transition: color 0.15s;
+          `;
+          tipBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 17v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="12" cy="8" r="0.5" fill="currentColor" stroke="currentColor" stroke-width="1.5"/>
+          </svg>`;
+          tipBtn.title = t(mod.tip);
+          tipBtn.onmouseenter = () => tipBtn.style.color = "rgba(185,187,190,0.9)";
+          tipBtn.onmouseleave = () => tipBtn.style.color = "rgba(185,187,190,0.45)";
+          tipBtn.addEventListener("click", (e) => e.stopPropagation());
+          label.appendChild(tipBtn);
+        }
 
         const enabled = isModEnabled(mod.storageKey);
         const toggle = document.createElement("div");
@@ -12062,11 +12331,13 @@
     }
     CleanupRegistry.add(() => _btnObserver.disconnect());
 
-    window.webhookModule = {
-      getWebhooks: getData,
-      sendContent,
-      sendUrls,
-    };
+    if (DEBUG) {
+      window.webhookModule = {
+        getWebhooks: getData,
+        sendContent,
+        sendUrls,
+      };
+    }
 
     DEBUG && console.log("[WebhookManager] Ready. Webhooks:", getData().length);
   }
@@ -12447,7 +12718,10 @@
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
-    CleanupRegistry.add(() => concealHandler.restore());
+    CleanupRegistry.add(() => {
+      observer.disconnect();
+      concealHandler.restore();
+    });
 
     setTimeout(injectButtons, 2000);
   }
@@ -12972,7 +13246,11 @@
       });
 
       data.wormholes.forEach((w) => {
-        row1.appendChild(this.createWormholeChip({ ...w, isVIP: false }));
+        const chip = this.createWormholeChip({ ...w, isVIP: false });
+        if (data.vipWormholes.includes(w.id)) {
+          chip.classList.add("vip-dimmed");
+        }
+        row1.appendChild(chip);
       });
 
       container.appendChild(row1);
@@ -13488,7 +13766,7 @@
         group.wormholes.forEach((wormhole) => {
           const isPinned = data.vipWormholes.includes(wormhole.id);
           const item = document.createElement("div");
-          item.className = "dropdown-item disabled";
+          item.className = isPinned ? "dropdown-item disabled vip-dimmed" : "dropdown-item disabled";
 
           const iconHtml = wormhole.icon
             ? `<img src="${wormhole.icon}" style="width:16px;height:16px;border-radius:50%;object-fit:cover;margin-right:4px;">`
@@ -13623,7 +13901,7 @@
       const addItem = (label, icon, onClick, isDanger = false) => {
         const item = document.createElement("div");
         item.className = "my-menu-item";
-        item.innerHTML = label;
+        item.textContent = label;
         if (isDanger) item.style.color = "#ed4245";
         item.onclick = (e) => {
           e.stopPropagation();
@@ -13666,7 +13944,7 @@
         const item = document.createElement("div");
         item.className = "my-menu-item";
 
-        item.innerHTML = label;
+        item.textContent = label;
 
         if (isDanger) item.style.color = "#ed4245";
         item.onclick = (e) => {
@@ -15416,7 +15694,12 @@ unsafeWindow.fetch = function(...args) {
         emojis.forEach((url) => {
           const item = document.createElement("div");
           item.className = "picker-emoji-item";
-          item.innerHTML = `<img src="${url}" alt="emoji">`;
+          const img = document.createElement("img");
+          img.alt = "emoji";
+          if (typeof url === "string" && /^https?:\/\//i.test(url)) {
+            img.src = url;
+          }
+          item.appendChild(img);
           item.onclick = () => {
             const data = this.getData();
             if (!data.groupIcons) data.groupIcons = {};
@@ -16502,6 +16785,10 @@ unsafeWindow.fetch = function(...args) {
         this.observer.disconnect();
         this.observer = null;
       }
+      if (this._modalWatcher) {
+        this._modalWatcher.disconnect();
+        this._modalWatcher = null;
+      }
       clearTimeout(this.refreshTimer);
       clearTimeout(this.dropdownCloseTimer);
       this.closeAllDropdowns();
@@ -16529,6 +16816,908 @@ unsafeWindow.fetch = function(...args) {
     } catch (err) {
       console.error("[Wormhole] Initialization failed:", err);
     }
+  }
+
+  function initBlacklist() {
+    const BL_STORE_KEY  = "blacklist_users";
+    const BL_MUTED_CLS  = "dmt-bl-muted";
+    const BL_PANEL_ID   = "dmt-bl-panel";
+    const MSG_SEL       = '[data-list-item-id*="chat-messages-"]';
+    const AUTHOR_SEL    = '[class*="username_"]';
+    const _ghostTimers  = new WeakMap();
+
+    if (!document.getElementById("dmt-bl-style")) {
+      const s = document.createElement("style");
+      s.id = "dmt-bl-style";
+      s.textContent = `
+        
+        .dmt-bl-s1 {
+          height: 20px !important;
+          min-height: 0 !important;
+          max-height: 20px !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          position: relative !important;
+          overflow: hidden !important;
+          box-sizing: border-box !important;
+          display: flex !important;
+          align-items: center !important;
+          cursor: default !important;
+        }
+        
+        .dmt-bl-s1 [id^="message-content-"],
+        .dmt-bl-s1 [class*="repliedMessage_"],
+        .dmt-bl-s1 [id^="message-accessories-"],
+        .dmt-bl-s1 [class*="buttonContainer_"] {
+          display: none !important;
+        }
+        
+        .dmt-bl-s1 [class*="cozyMessage_"],
+        .dmt-bl-s1 [class*="compact_"] {
+          padding: 0 !important;
+          min-height: 0 !important;
+        }
+        
+        .dmt-bl-s1 [class*="contents_"] {
+          display: flex !important;
+          align-items: center !important;
+          gap: 4px !important;
+          padding: 0 8px !important;
+          min-height: 0 !important;
+          height: 20px !important;
+        }
+        
+        .dmt-bl-s1 [class*="contents_"]::before {
+          content: "👻";
+          font-size: 11px;
+          flex-shrink: 0;
+          line-height: 1;
+          pointer-events: none;
+        }
+        
+        .dmt-bl-s1 [class*="avatar_"] {
+          width:     16px !important;
+          height:    16px !important;
+          min-width: 16px !important;
+          border-radius: 50% !important;
+          margin: 0 !important;
+          flex-shrink: 0 !important;
+        }
+        
+        .dmt-bl-s1 [class*="header_"] {
+          display: flex !important;
+          align-items: baseline !important;
+          gap: 4px !important;
+          margin: 0 !important;
+        }
+        
+        .dmt-bl-s1 [class*="username_"] {
+          font-size: 10px !important;
+          line-height: 1 !important;
+          white-space: nowrap !important;
+        }
+        
+        .dmt-bl-s1 [class*="timestamp_"] {
+          font-size: 8px !important;
+          opacity: 0.4 !important;
+          white-space: nowrap !important;
+        }
+        
+        .dmt-bl-s1 [class*="chipletContainerInner_"],
+        .dmt-bl-s1 [class*="clanTagChiplet_"] {
+          transform: scale(0.65) !important;
+          transform-origin: left center !important;
+          display: inline-flex !important;
+        }
+        
+        .dmt-bl-s1 [class*="roleIcon_"] {
+          width:  10px !important;
+          height: 10px !important;
+        }
+        
+        @keyframes dmt-ghost-vanish {
+          0%   { opacity: 1;   transform: translate(0,    0);     filter: blur(0);    }
+          35%  { opacity: 0.7; transform: translate(10px, -4px);  filter: blur(0);    }
+          100% { opacity: 0;   transform: translate(28px, -10px); filter: blur(3px);  }
+        }
+        
+        .dmt-bl-s1.dmt-ghost-vanished {
+          animation: dmt-ghost-vanish 1.2s cubic-bezier(.25, 0, .75, 1) forwards !important;
+          pointer-events: none !important;
+        }
+
+        .dmt-bl-s2 {
+          height: 14px !important;
+          min-height: 0 !important;
+          max-height: 14px !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          position: relative !important;
+          cursor: pointer !important;
+          overflow: visible !important;
+          box-sizing: border-box !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+        }
+        
+        .dmt-bl-s2 > * {
+          display: none !important;
+          visibility: hidden !important;
+        }
+        
+        .dmt-bl-s2::before {
+          content: "muted";
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 7px;
+          font-family: "gg sans", "Noto Sans", sans-serif;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: rgba(237,66,69,0.6);
+          pointer-events: none;
+          white-space: nowrap;
+          z-index: 1;
+          background: #000;
+          padding: 0 8px;
+        }
+        
+        .dmt-bl-s2::after {
+          content: "";
+          position: absolute;
+          top: 50%;
+          left: 48px;
+          right: 48px;
+          height: 1px;
+          background: rgba(79,84,92,0.35);
+          pointer-events: none;
+          z-index: 0;
+        }
+        
+        .dmt-bl-s2:not(.dmt-bl-open):hover[data-dmt-author]::before {
+          content: attr(data-dmt-author) " · muted";
+          color: rgba(185,187,190,0.75);
+          text-transform: none;
+          letter-spacing: 0.04em;
+        }
+
+        .dmt-bl-s2-merged {
+          display: none !important;
+        }
+        
+        .dmt-bl-s2[data-dmt-count]::before {
+          content: "muted × " attr(data-dmt-count);
+        }
+        
+        .dmt-bl-s2[data-dmt-count]:not(.dmt-bl-open):hover[data-dmt-author]::before {
+          content: attr(data-dmt-author) " · " attr(data-dmt-count) " msgs";
+        }
+        
+        .dmt-bl-s2.dmt-bl-open {
+          height: auto !important;
+          min-height: revert !important;
+          max-height: none !important;
+          padding: revert !important;
+          display: revert !important;
+          overflow: visible !important;
+        }
+        .dmt-bl-s2.dmt-bl-open > * {
+          display: revert !important;
+          visibility: visible !important;
+        }
+        .dmt-bl-s2.dmt-bl-open::before,
+        .dmt-bl-s2.dmt-bl-open::after {
+          display: none !important;
+        }
+
+        .dmt-bl-s0 {
+          opacity: 0.04 !important;
+          filter: grayscale(100%) !important;
+          transition: opacity 0.2s, filter 0.2s;
+          padding-top: 1px !important;
+          padding-bottom: 1px !important;
+        }
+        .dmt-bl-s0 [class*="contents_"] {
+          padding-top: 1px !important;
+          padding-bottom: 1px !important;
+        }
+        
+        .dmt-bl-s0.dmt-bl-s0-peek {
+          opacity: 0.35 !important;
+          filter: grayscale(0%) !important;
+        }
+
+        @keyframes dmt-bl-picker-in {
+          from { opacity:0; transform:translateY(6px) scale(.96); }
+          to   { opacity:1; transform:none; }
+        }
+        
+        @keyframes dmt-bl-confirm-pulse {
+          0%   { box-shadow: 0 0 0 0 rgba(88,101,242,0.6); }
+          60%  { box-shadow: 0 0 0 6px rgba(88,101,242,0); }
+          100% { box-shadow: 0 0 0 0 rgba(88,101,242,0); }
+        }
+        #dmt-bl-picker {
+          position: fixed; z-index: 2147483648;
+          background: rgba(22,23,26,0.97);
+          border: 1px solid rgba(88,101,242,0.35);
+          border-radius: 12px;
+          box-shadow: 0 16px 48px rgba(0,0,0,0.75);
+          backdrop-filter: blur(16px);
+          padding: 12px;
+          width: 320px;
+          font-family: sans-serif;
+          animation: dmt-bl-picker-in 0.18s cubic-bezier(.19,1,.22,1) forwards;
+        }
+        #dmt-bl-picker .picker-title {
+          font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+          text-transform: uppercase; color: rgba(185,187,190,0.5);
+          margin-bottom: 10px;
+        }
+        #dmt-bl-picker .picker-cards { display: flex; gap: 8px; }
+        #dmt-bl-picker .picker-card {
+          flex: 1; border-radius: 8px; padding: 8px 6px;
+          background: rgba(255,255,255,0.04);
+          border: 1.5px solid rgba(255,255,255,0.08);
+          cursor: pointer; text-align: center;
+          transition: border-color 0.15s, background 0.15s;
+        }
+        #dmt-bl-picker .picker-card:hover {
+          border-color: rgba(88,101,242,0.55);
+          background: rgba(88,101,242,0.1);
+        }
+        #dmt-bl-picker .picker-card.selected {
+          border-color: rgba(88,101,242,0.8);
+          background: rgba(88,101,242,0.18);
+        }
+        #dmt-bl-picker .picker-icon { font-size: 18px; margin-bottom: 4px; }
+        #dmt-bl-picker .picker-name {
+          font-size: 10px; font-weight: 600;
+          color: rgba(219,222,225,0.8); margin-bottom: 2px;
+        }
+        #dmt-bl-picker .picker-desc {
+          font-size: 9px; color: rgba(185,187,190,0.45); line-height: 1.3;
+        }
+        
+        #dmt-bl-picker .picker-confirm {
+          margin-top: 10px; width: 100%;
+          background: rgba(88,101,242,0.25);
+          border: 1px solid rgba(88,101,242,0.3);
+          border-radius: 7px;
+          color: rgba(255,255,255,0.45); font-size: 12px; font-weight: 600;
+          padding: 7px 0; cursor: pointer;
+          transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        #dmt-bl-picker .picker-confirm.lit {
+          background: rgba(88,101,242,0.85);
+          border-color: rgba(88,101,242,0.9);
+          color: #fff;
+          animation: dmt-bl-confirm-pulse 0.5s ease-out;
+        }
+        #dmt-bl-picker .picker-confirm.lit:hover {
+          background: rgba(88,101,242,1);
+        }
+
+        @keyframes dmt-bl-in  { from { opacity:0; transform:translateY(8px) scale(.97); } to { opacity:1; transform:none; } }
+        @keyframes dmt-bl-out { from { opacity:1; transform:none; } to { opacity:0; transform:translateY(6px) scale(.97); } }
+        #${BL_PANEL_ID} {
+          position: fixed; z-index: 2147483601;
+          width: 360px; max-height: 480px;
+          display: flex; flex-direction: column;
+          background: rgba(24,25,28,0.96);
+          border: 1px solid rgba(88,101,242,0.28);
+          border-radius: 12px;
+          box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(88,101,242,0.08);
+          backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+          font-family: sans-serif;
+          animation: dmt-bl-in 0.2s cubic-bezier(.19,1,.22,1) forwards;
+          overflow: hidden;
+        }
+        #${BL_PANEL_ID}.dmt-bl-leaving {
+          animation: dmt-bl-out 0.18s cubic-bezier(.4,0,1,1) forwards !important;
+          pointer-events: none;
+        }
+        #${BL_PANEL_ID} .bl-header {
+          display: flex; align-items: center; gap: 8px;
+          padding: 12px 14px 8px;
+          border-bottom: 1px solid rgba(255,255,255,0.07);
+          flex-shrink: 0;
+        }
+        #${BL_PANEL_ID} .bl-title {
+          font-size: 12px; font-weight: 700;
+          color: rgba(185,187,190,0.7); letter-spacing: 0.06em;
+          text-transform: uppercase; flex: 1;
+        }
+        #${BL_PANEL_ID} .bl-close {
+          background:none; border:none; cursor:pointer;
+          color:rgba(185,187,190,0.6); font-size:16px; line-height:1;
+          padding:0 2px; transition:color .15s;
+        }
+        #${BL_PANEL_ID} .bl-close:hover { color:#fff; }
+        #${BL_PANEL_ID} .bl-list {
+          flex: 1; overflow-y: auto; padding: 6px 8px;
+          min-height: 0;
+        }
+        #${BL_PANEL_ID} .bl-list::-webkit-scrollbar { width: 4px; }
+        #${BL_PANEL_ID} .bl-list::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,0.1); border-radius: 2px;
+        }
+        #${BL_PANEL_ID} .bl-row {
+          display: flex; align-items: center; gap: 8px;
+          padding: 7px 8px; border-radius: 7px;
+          border-bottom: 1px solid rgba(255,255,255,0.04);
+          transition: background .12s;
+        }
+        #${BL_PANEL_ID} .bl-row:last-child { border-bottom: none; }
+        #${BL_PANEL_ID} .bl-row:hover { background: rgba(88,101,242,0.07); }
+        #${BL_PANEL_ID} .bl-name {
+          flex: 1; font-size: 13px; color: #dbdee1;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        #${BL_PANEL_ID} .bl-style-badge {
+          font-size: 9px; font-weight: 600; letter-spacing: 0.06em;
+          text-transform: uppercase; padding: 2px 6px; border-radius: 4px;
+          cursor: pointer; flex-shrink: 0; transition: background 0.15s;
+          background: rgba(88,101,242,0.15); border: 1px solid rgba(88,101,242,0.3);
+          color: #9ea6f5;
+        }
+        #${BL_PANEL_ID} .bl-style-badge:hover {
+          background: rgba(88,101,242,0.3);
+        }
+        #${BL_PANEL_ID} .bl-date {
+          font-size: 10px; color: rgba(185,187,190,0.4); flex-shrink: 0;
+        }
+        #${BL_PANEL_ID} .bl-remove {
+          background: rgba(237,66,69,0.1);
+          border: 1px solid rgba(237,66,69,0.25);
+          border-radius: 5px; color: #f57879;
+          font-size: 11px; padding: 2px 7px; cursor: pointer;
+          flex-shrink: 0; transition: background .15s;
+        }
+        #${BL_PANEL_ID} .bl-remove:hover { background: rgba(237,66,69,0.3); }
+        #${BL_PANEL_ID} .bl-empty {
+          text-align: center; padding: 28px 0;
+          color: rgba(185,187,190,0.4); font-size: 12px;
+        }
+        #${BL_PANEL_ID} .bl-footer {
+          display: flex; align-items: center; justify-content: space-between;
+          padding: 6px 14px;
+          border-top: 1px solid rgba(255,255,255,0.06);
+          font-size: 10px; color: rgba(185,187,190,0.35); flex-shrink: 0;
+        }
+      `;
+      document.head.appendChild(s);
+    }
+
+    const BL_STYLES = {
+      1: { cls: "dmt-bl-s1", icon: "👻", name: "Ghost" },
+      2: { cls: "dmt-bl-s2", icon: "━",  name: "Collapse" },
+      0: { cls: "dmt-bl-s0", icon: "🌫", name: "Dim" },
+    };
+    const BL_ALL_CLS = Object.values(BL_STYLES).map(s => s.cls);
+
+    function blLoad() {
+      return GMStore.get(BL_STORE_KEY, [], true) || [];
+    }
+    function blSave(arr) {
+      GMStore.set(BL_STORE_KEY, arr, true);
+    }
+    function blAdd(name, style = 2) {
+      const list = blLoad();
+      if (list.some(u => u.name === name)) return false;
+      list.push({ name, addedAt: new Date().toISOString(), style });
+      blSave(list);
+      return true;
+    }
+    function blRemove(name) {
+      blSave(blLoad().filter(u => u.name !== name));
+    }
+    function blHas(name) {
+      return blLoad().some(u => u.name === name);
+    }
+    function blGetStyle(name) {
+      return blLoad().find(u => u.name === name)?.style ?? 2;
+    }
+    function blSetStyle(name, style) {
+      const list = blLoad();
+      const entry = list.find(u => u.name === name);
+      if (entry) { entry.style = style; blSave(list); }
+    }
+
+    function _getOwnAuthor(container) {
+      const replyBlock = container.querySelector('[class*="repliedMessage_"]');
+      const candidates = container.querySelectorAll(AUTHOR_SEL);
+      for (const el of candidates) {
+        if (replyBlock && replyBlock.contains(el)) continue;
+        const name = el.textContent.trim();
+        if (name) return name;
+      }
+      return null;
+    }
+
+    function _resolveAuthor(container) {
+      const own = _getOwnAuthor(container);
+      if (own) return own;
+      let li = container.closest("li");
+      if (!li) return null;
+      let prevLi = li.previousElementSibling;
+      while (prevLi) {
+        const prevContainer = prevLi.querySelector(MSG_SEL);
+        if (prevContainer) {
+          const a = _getOwnAuthor(prevContainer);
+          if (a) return a;
+        }
+        prevLi = prevLi.previousElementSibling;
+      }
+      return null;
+    }
+
+    function _applyStyle(container, styleId, authorName = "") {
+      if (_ghostTimers.has(container)) {
+        clearTimeout(_ghostTimers.get(container));
+        _ghostTimers.delete(container);
+      }
+      BL_ALL_CLS.forEach(c => container.classList.remove(c));
+      container.classList.remove("dmt-bl-open", "dmt-ghost-vanished");
+      if (authorName) {
+        container.dataset.dmtAuthor = authorName;
+      } else {
+        delete container.dataset.dmtAuthor;
+      }
+      const def = BL_STYLES[styleId];
+      if (def) container.classList.add(def.cls);
+      if (styleId === 1) {
+        _ghostTimers.set(container, setTimeout(() => {
+          container.classList.add("dmt-ghost-vanished");
+          _ghostTimers.delete(container);
+        }, 4000));
+      }
+    }
+
+    function blApplyAll() {
+      const list = blLoad();
+      const nameMap = new Map(list.map(u => [u.name, u.style ?? 2]));
+      document.querySelectorAll(MSG_SEL).forEach(container => {
+        const name = _resolveAuthor(container);
+        if (!name) return;
+        if (nameMap.has(name)) {
+          _applyStyle(container, nameMap.get(name), name);
+        } else {
+          BL_ALL_CLS.forEach(c => container.classList.remove(c));
+          container.classList.remove("dmt-bl-open");
+          delete container.dataset.dmtAuthor;
+        }
+      });
+      _mergeCollapseGroups();
+    }
+
+    function blApplyNode(container) {
+      const list = blLoad();
+      const nameMap = new Map(list.map(u => [u.name, u.style ?? 2]));
+      const name = _resolveAuthor(container);
+      if (!name) return;
+      if (nameMap.has(name)) {
+        _applyStyle(container, nameMap.get(name), name);
+      } else {
+        BL_ALL_CLS.forEach(c => container.classList.remove(c));
+        container.classList.remove("dmt-bl-open");
+        delete container.dataset.dmtAuthor;
+      }
+      _mergeCollapseGroups();
+    }
+
+    const _blGetChannel = () => {
+      const m = location.pathname.match(/\/channels\/\d+\/(\d+)/);
+      return m ? m[1] : location.pathname;
+    };
+    let _blLastChannelId = _blGetChannel();
+    const _blObserver = new MutationObserver((mutations) => {
+      const currentChannel = _blGetChannel();
+      if (currentChannel !== _blLastChannelId) {
+        _blLastChannelId = currentChannel;
+        setTimeout(blApplyAll, 400);
+        setTimeout(blApplyAll, 1200);
+        setTimeout(blApplyAll, 2500);
+        return;
+      }
+      for (const mut of mutations) {
+        for (const node of mut.addedNodes) {
+          if (!(node instanceof Element)) continue;
+          if (node.matches(MSG_SEL)) {
+            blApplyNode(node);
+          }
+          node.querySelectorAll?.(MSG_SEL).forEach(blApplyNode);
+        }
+      }
+    });
+    _blObserver.observe(document.body, { childList: true, subtree: true });
+
+    function _mergeCollapseGroups() {
+      const lists = new Set();
+      document.querySelectorAll(MSG_SEL + ".dmt-bl-s2").forEach(c => {
+        const ol = c.closest("ol");
+        if (ol) lists.add(ol);
+      });
+
+      lists.forEach(ol => {
+        ol.querySelectorAll(".dmt-bl-s2-merged").forEach(c => {
+          c.classList.remove("dmt-bl-s2-merged");
+        });
+        ol.querySelectorAll(MSG_SEL + "[data-dmt-count]").forEach(c => {
+          delete c.dataset.dmtCount;
+        });
+
+        const lis = Array.from(ol.children);
+        let group = [];
+
+        const flushGroup = () => {
+          if (group.length <= 1) { group = []; return; }
+          const count = group.length;
+          for (let i = 0; i < count - 1; i++) {
+            group[i].classList.add("dmt-bl-s2-merged");
+            delete group[i].dataset.dmtCount;
+          }
+          const rep = group[count - 1];
+          rep.classList.remove("dmt-bl-s2-merged");
+          rep.dataset.dmtCount = String(count);
+          group = [];
+        };
+
+        lis.forEach(li => {
+          const container = li.querySelector(MSG_SEL);
+          if (container && container.classList.contains("dmt-bl-s2")
+              && !container.classList.contains("dmt-bl-open")) {
+            group.push(container);
+          } else {
+            flushGroup();
+          }
+        });
+        flushGroup();
+      });
+    }
+
+    document.addEventListener("click", (e) => {
+      const container = e.target.closest(MSG_SEL);
+      if (!container) return;
+      if (!container.classList.contains("dmt-bl-s2")) return;
+      if (e.target.closest("button, a, [role='button']")) return;
+      if (container.classList.contains("dmt-bl-open")) {
+        _applyStyle(container, 2, container.dataset.dmtAuthor || "");
+        _mergeCollapseGroups();
+      } else {
+        const ol = container.closest("ol");
+        if (ol) {
+          const author = container.dataset.dmtAuthor || "";
+          let li = container.closest("li")?.previousElementSibling;
+          while (li) {
+            const c = li.querySelector(MSG_SEL);
+            if (c && c.classList.contains("dmt-bl-s2-merged")
+                && (c.dataset.dmtAuthor || "") === author) {
+              c.classList.remove("dmt-bl-s2-merged");
+              c.classList.add("dmt-bl-open");
+              li = li.previousElementSibling;
+            } else break;
+          }
+        }
+        container.classList.add("dmt-bl-open");
+        delete container.dataset.dmtCount;
+      }
+    }, true);
+
+    blApplyAll();
+    setTimeout(blApplyAll, 400);
+    setTimeout(blApplyAll, 1200);
+    setTimeout(blApplyAll, 2500);
+
+    function openBlPanel() {
+      if (document.getElementById(BL_PANEL_ID)) {
+        closeBlPanel(); return;
+      }
+      const panel = document.createElement("div");
+      panel.id = BL_PANEL_ID;
+      panel.style.right  = "20px";
+      panel.style.bottom = "80px";
+
+      const header = document.createElement("div");
+      header.className = "bl-header";
+      const title = document.createElement("div");
+      title.className = "bl-title";
+      title.textContent = t("mu_panel_title");
+      const closeBtn = document.createElement("button");
+      closeBtn.className = "bl-close";
+      closeBtn.textContent = "×";
+      closeBtn.onclick = () => closeBlPanel();
+      header.appendChild(title);
+      header.appendChild(closeBtn);
+
+      const list = document.createElement("div");
+      list.className = "bl-list";
+
+      function renderList() {
+        list.innerHTML = "";
+        const entries = blLoad();
+        if (entries.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "bl-empty";
+          empty.textContent = t("mu_empty");
+          list.appendChild(empty);
+          return;
+        }
+        entries.forEach(({ name, addedAt, style = 2 }) => {
+          const row = document.createElement("div");
+          row.className = "bl-row";
+
+          const nameEl = document.createElement("div");
+          nameEl.className = "bl-name";
+          nameEl.textContent = name;
+
+          const styleDef = BL_STYLES[style] || BL_STYLES[2];
+          const badge = document.createElement("div");
+          badge.className = "bl-style-badge";
+          badge.title = "Click to change style";
+          badge.textContent = `${styleDef.icon} ${styleDef.name}`;
+          badge.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const order = [2, 1, 0];
+            const nextStyle = order[(order.indexOf(style) + 1) % order.length];
+            blSetStyle(name, nextStyle);
+            blApplyAll();
+            renderList();
+          });
+
+          const dateEl = document.createElement("div");
+          dateEl.className = "bl-date";
+          dateEl.textContent = addedAt ? new Date(addedAt).toLocaleDateString() : "";
+
+          const removeBtn = document.createElement("button");
+          removeBtn.className = "bl-remove";
+          removeBtn.textContent = t("mu_remove_btn");
+          removeBtn.onclick = () => {
+            blRemove(name);
+            blApplyAll();
+            renderList();
+          };
+
+          row.appendChild(nameEl);
+          row.appendChild(badge);
+          row.appendChild(dateEl);
+          row.appendChild(removeBtn);
+          list.appendChild(row);
+        });
+      }
+      renderList();
+
+      const footer = document.createElement("div");
+      footer.className = "bl-footer";
+      footer.innerHTML = `<span>${t("mu_footer_left")}</span><span>${t("mu_footer_right")}</span>`;
+
+      panel.appendChild(header);
+      panel.appendChild(list);
+      panel.appendChild(footer);
+      document.body.appendChild(panel);
+
+      const _outside = (e) => {
+        if (!panel.contains(e.target)) {
+          closeBlPanel();
+          document.removeEventListener("mousedown", _outside, true);
+        }
+      };
+      document.addEventListener("mousedown", _outside, true);
+    }
+
+    function closeBlPanel(instant = false) {
+      const panel = document.getElementById(BL_PANEL_ID);
+      if (!panel) return;
+      if (instant) { panel.remove(); return; }
+      panel.classList.add("dmt-bl-leaving");
+      setTimeout(() => panel.remove(), 200);
+    }
+
+    function _openStylePicker(name, onConfirm) {
+      document.getElementById("dmt-bl-picker")?.remove();
+
+      let selectedStyle = 2;
+
+      const picker = document.createElement("div");
+      picker.id = "dmt-bl-picker";
+      picker.style.cssText = `left:50%; top:30%; transform:translate(-50%,-50%);`;
+
+      const titleEl = document.createElement("div");
+      titleEl.className = "picker-title";
+      titleEl.textContent = `Mute style for ${name}`;
+
+      const cards = document.createElement("div");
+      cards.className = "picker-cards";
+
+      const STYLE_ORDER = [
+        { id: 2, icon: "━",  name: "Collapse",  desc: "Thin line · click to expand" },
+        { id: 1, icon: "👻", name: "Ghost",     desc: "Avatar only · vanishes after 4s" },
+        { id: 0, icon: "🌫", name: "Dim",       desc: "Dark & compact · hover to reveal" },
+      ];
+
+      STYLE_ORDER.forEach(({ id, icon, name: sName, desc }) => {
+        const card = document.createElement("div");
+        card.className = "picker-card" + (id === selectedStyle ? " selected" : "");
+        card.dataset.style = id;
+        card.innerHTML = `
+          <div class="picker-icon">${icon}</div>
+          <div class="picker-name">${sName}</div>
+          <div class="picker-desc">${desc}</div>`;
+        card.addEventListener("click", () => {
+          cards.querySelectorAll(".picker-card").forEach(c => c.classList.remove("selected"));
+          card.classList.add("selected");
+          selectedStyle = id;
+          confirmBtn.classList.add("lit");
+        });
+        cards.appendChild(card);
+      });
+
+      const confirmBtn = document.createElement("button");
+      confirmBtn.className = "picker-confirm";
+      confirmBtn.textContent = "Mute";
+      confirmBtn.addEventListener("click", () => {
+        picker.remove();
+        onConfirm(selectedStyle);
+      });
+
+      picker.appendChild(titleEl);
+      picker.appendChild(cards);
+      picker.appendChild(confirmBtn);
+      document.body.appendChild(picker);
+
+      setTimeout(() => {
+        const dismiss = (e) => {
+          if (!picker.contains(e.target)) {
+            picker.remove();
+            document.removeEventListener("mousedown", dismiss, true);
+          }
+        };
+        document.addEventListener("mousedown", dismiss, true);
+      }, 0);
+    }
+
+    let _blCtxContainer = null;
+
+    function _onContextMenu(e) {
+      _blCtxContainer = e.target.closest(MSG_SEL) || null;
+    }
+
+    const _blMenuObserver = new MutationObserver((mutations) => {
+      for (const mut of mutations) {
+        for (const node of mut.addedNodes) {
+          if (!(node instanceof Element)) continue;
+          const menu = node.id === "user-context"
+            ? node
+            : node.querySelector?.("#user-context");
+          if (!menu) continue;
+
+          if (!_blCtxContainer) continue;
+          const name = _resolveAuthor(_blCtxContainer);
+          if (!name) continue;
+
+          if (menu.querySelector("#dmt-bl-inject")) continue;
+
+          const blockItem = menu.querySelector("#user-context-block");
+          if (!blockItem) continue;
+
+          const getIsBlocked = () => blHas(name);
+
+          const injectItem = document.createElement("div");
+          injectItem.id = "dmt-bl-inject";
+          injectItem.className = blockItem.className;
+          injectItem.setAttribute("role", "menuitem");
+          injectItem.setAttribute("tabindex", "-1");
+          injectItem.setAttribute("data-menu-item", "true");
+
+          const labelEl = blockItem.querySelector('[class*="label_"]');
+          const label = document.createElement("div");
+          label.className = labelEl?.className || "";
+
+          const renderLabel = () => {
+            const blocked = getIsBlocked();
+            label.style.color = blocked ? "#9ea6f5" : "#f57879";
+            label.textContent = blocked
+              ? t("mu_ctx_unmute").replace("{name}", name)
+              : t("mu_ctx_mute").replace("{name}", name);
+          };
+          renderLabel();
+          injectItem.appendChild(label);
+
+          injectItem.addEventListener("mouseenter", () => {
+            injectItem.style.background = getIsBlocked()
+              ? "rgba(88,101,242,0.18)" : "rgba(237,66,69,0.18)";
+          });
+          injectItem.addEventListener("mouseleave", () => {
+            injectItem.style.background = "";
+          });
+          injectItem.addEventListener("click", () => {
+            document.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+            setTimeout(() => {
+              if (getIsBlocked()) {
+                blRemove(name);
+                blApplyAll();
+                dmtShowToast(t("mu_remove_toast").replace("{name}", name));
+              } else {
+                _openStylePicker(name, (chosenStyle) => {
+                  blAdd(name, chosenStyle);
+                  blApplyAll();
+                  dmtShowToast(t("mu_add_toast").replace("{name}", name));
+                });
+              }
+              renderLabel();
+            }, 80);
+          });
+
+          blockItem.insertAdjacentElement("afterend", injectItem);
+        }
+      }
+    });
+    _blMenuObserver.observe(document.body, { childList: true, subtree: true });
+
+    document.addEventListener("contextmenu", _onContextMenu, true);
+
+    function _onBlKeydown(e) {
+      if (e.altKey && e.key === "b") {
+        e.preventDefault();
+        openBlPanel();
+      }
+    }
+    document.addEventListener("keydown", _onBlKeydown, true);
+
+    const DIM_PEEK_X = 200;
+    let _dimLastPeek = null;
+    function _onDimMousemove(e) {
+      const container = e.target.closest(".dmt-bl-s0");
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        const inZone = (e.clientX - rect.left) <= DIM_PEEK_X;
+        if (inZone) {
+          if (_dimLastPeek !== container) {
+            _dimLastPeek?.classList.remove("dmt-bl-s0-peek");
+            _dimLastPeek = container;
+            container.classList.add("dmt-bl-s0-peek");
+          }
+        } else {
+          if (_dimLastPeek === container) {
+            container.classList.remove("dmt-bl-s0-peek");
+            _dimLastPeek = null;
+          }
+        }
+      } else {
+        if (_dimLastPeek) {
+          _dimLastPeek.classList.remove("dmt-bl-s0-peek");
+          _dimLastPeek = null;
+        }
+      }
+    }
+    document.addEventListener("mousemove", _onDimMousemove, { passive: true });
+
+    CleanupRegistry.add(() => {
+      _blObserver.disconnect();
+      _blMenuObserver.disconnect();
+      document.removeEventListener("contextmenu", _onContextMenu, true);
+      document.removeEventListener("keydown",     _onBlKeydown,   true);
+      document.removeEventListener("mousemove",   _onDimMousemove);
+      _dimLastPeek?.classList.remove("dmt-bl-s0-peek");
+      _dimLastPeek = null;
+      closeBlPanel(true);
+      document.getElementById("dmt-bl-picker")?.remove();
+      document.getElementById("dmt-bl-inject")?.remove();
+      document.getElementById("dmt-bl-style")?.remove();
+      document.querySelectorAll(BL_ALL_CLS.map(c => `.${c}`).join(","))
+        .forEach(el => BL_ALL_CLS.forEach(c => el.classList.remove(c)));
+      document.querySelectorAll(".dmt-bl-s2-merged").forEach(el => {
+        el.classList.remove("dmt-bl-s2-merged");
+      });
+      document.querySelectorAll("[data-dmt-count]").forEach(el => {
+        delete el.dataset.dmtCount;
+      });
+    });
+
+    DEBUG && console.log("[Blacklist] Module H initialized, entries:", blLoad().length);
   }
 
   function initURLChecker() {
@@ -16740,6 +17929,342 @@ unsafeWindow.fetch = function(...args) {
         #dmt-uc-banner:hover .uc-progress-fill {
           animation-play-state: paused;
         }
+
+        @keyframes dmt-f2-float {
+          0%,100% { transform: translateY(0px);  }
+          50%      { transform: translateY(-3px); }
+        }
+        @keyframes dmt-f2-in {
+          from { opacity: 0; transform: translateY(8px) scale(0.82); }
+          to   { opacity: 1; transform: translateY(0px) scale(1);    }
+        }
+        @keyframes dmt-f2-out {
+          from { opacity: 1; transform: translateY(0px) scale(1);    }
+          to   { opacity: 0; transform: translateY(5px) scale(0.82); }
+        }
+        
+        #dmt-f2-hint {
+          position: fixed;
+          z-index: 2147483600;
+          display: inline-flex;
+          align-items: center;
+          gap: 0;
+          cursor: pointer;
+          user-select: none;
+          pointer-events: auto;
+          animation: dmt-f2-in 0.2s cubic-bezier(.19,1,.22,1) forwards,
+                     dmt-f2-float 2.8s ease-in-out 0.2s infinite;
+          white-space: nowrap;
+        }
+        #dmt-f2-hint.dmt-f2-leaving {
+          animation: dmt-f2-out 0.25s cubic-bezier(.4,0,1,1) forwards !important;
+          pointer-events: none;
+        }
+        
+        #dmt-f2-hint:hover {
+          animation-play-state: paused, paused;
+        }
+        #dmt-f2-hint.dmt-f2-leaving {
+          animation: dmt-f2-out 0.25s cubic-bezier(.4,0,1,1) forwards !important;
+        }
+        
+        #dmt-f2-hint .dmt-f2-cap {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 28px;
+          height: 28px;
+          border-radius: 50%;
+          
+          background: rgba(48, 50, 58, 0.88);
+          border: 1.5px solid rgba(88, 101, 242, 0.35);
+          box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.10),
+            0 2px 10px rgba(0,0,0,0.45),
+            0 0 8px rgba(88,101,242,0.18);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          color: #9ea6f5;
+          transition: background 0.15s, box-shadow 0.15s, color 0.15s, border-color 0.15s;
+          flex-shrink: 0;
+          position: relative;
+          z-index: 1;
+        }
+        #dmt-f2-hint:hover .dmt-f2-cap {
+          background: rgba(88, 101, 242, 0.52);
+          border-color: rgba(88, 101, 242, 0.75);
+          box-shadow:
+            inset 0 1px 0 rgba(255,255,255,0.18),
+            0 3px 14px rgba(88,101,242,0.45),
+            0 0 0 1px rgba(88,101,242,0.3);
+          color: #fff;
+        }
+        
+        #dmt-f2-hint .dmt-f2-label {
+          max-width: 0;
+          overflow: hidden;
+          opacity: 0;
+          font-size: 11px;
+          font-family: sans-serif;
+          font-weight: 500;
+          color: #c5c8d6;
+          background: rgba(30, 31, 36, 0.78);
+          border: 1px solid rgba(88, 101, 242, 0.3);
+          border-left: none;
+          border-radius: 0 14px 14px 0;
+          padding: 0;
+          height: 26px;
+          line-height: 26px;
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          transition:
+            max-width 0.22s cubic-bezier(.19,1,.22,1),
+            opacity   0.18s ease,
+            padding   0.22s cubic-bezier(.19,1,.22,1);
+          white-space: nowrap;
+          pointer-events: none;
+        }
+        #dmt-f2-hint:hover .dmt-f2-label {
+          max-width: 120px;
+          opacity: 1;
+          padding: 0 10px 0 8px;
+          pointer-events: auto;
+        }
+
+        @keyframes dmt-cs-in {
+          from { opacity: 0; transform: translateY(10px) scale(0.97); }
+          to   { opacity: 1; transform: none; }
+        }
+        @keyframes dmt-cs-out {
+          from { opacity: 1; transform: none; }
+          to   { opacity: 0; transform: translateY(6px) scale(0.97); }
+        }
+        #dmt-cs-panel {
+          position: fixed;
+          z-index: 2147483601;
+          width: 420px;
+          max-height: 480px;
+          display: flex;
+          flex-direction: column;
+          background: rgba(24, 25, 28, 0.96);
+          border: 1px solid rgba(88, 101, 242, 0.35);
+          border-radius: 12px;
+          box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(88,101,242,0.1);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          font-family: sans-serif;
+          animation: dmt-cs-in 0.2s cubic-bezier(.19,1,.22,1) forwards;
+          overflow: hidden;
+        }
+        #dmt-cs-panel.dmt-cs-leaving {
+          animation: dmt-cs-out 0.18s cubic-bezier(.4,0,1,1) forwards !important;
+          pointer-events: none;
+        }
+        
+        #dmt-cs-panel .cs-header {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 12px 14px 8px;
+          border-bottom: 1px solid rgba(255,255,255,0.07);
+          flex-shrink: 0;
+        }
+        #dmt-cs-panel .cs-title {
+          font-size: 12px;
+          font-weight: 700;
+          color: rgba(88, 101, 242, 0.9);
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          flex: 1;
+        }
+        #dmt-cs-panel .cs-close {
+          background: none; border: none; cursor: pointer;
+          color: rgba(185,187,190,0.6); font-size: 16px; line-height: 1;
+          padding: 0 2px; transition: color 0.15s;
+        }
+        #dmt-cs-panel .cs-close:hover { color: #fff; }
+        
+        #dmt-cs-panel .cs-search-row {
+          display: flex;
+          align-items: center;
+          padding: 8px 12px;
+          gap: 8px;
+          flex-shrink: 0;
+        }
+        #dmt-cs-panel .cs-input {
+          flex: 1;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.12);
+          border-radius: 8px;
+          color: #e3e5e8;
+          font-size: 13px;
+          padding: 7px 10px;
+          outline: none;
+          transition: border-color 0.15s;
+          font-family: sans-serif;
+        }
+        #dmt-cs-panel .cs-input:focus {
+          border-color: rgba(88, 101, 242, 0.6);
+        }
+        #dmt-cs-panel .cs-input::placeholder { color: rgba(185,187,190,0.45); }
+        
+        #dmt-cs-panel .cs-input-btn {
+          display: inline-flex; align-items: center; justify-content: center;
+          width: 30px; height: 30px; flex-shrink: 0;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.10);
+          border-radius: 7px; cursor: pointer; color: rgba(185,187,190,0.65);
+          transition: background .15s, border-color .15s, color .15s;
+        }
+        #dmt-cs-panel .cs-input-btn:hover {
+          background: rgba(88,101,242,0.22);
+          border-color: rgba(88,101,242,0.5);
+          color: #c5caff;
+        }
+        
+        #dmt-cs-hist-dropdown {
+          position: absolute; z-index: 10;
+          top: calc(100% + 4px); right: 0;
+          min-width: 200px; max-width: 340px;
+          background: rgba(24,25,28,0.98);
+          border: 1px solid rgba(88,101,242,0.35);
+          border-radius: 8px;
+          box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+          backdrop-filter: blur(12px);
+          overflow: hidden;
+          font-family: sans-serif;
+        }
+        #dmt-cs-hist-dropdown .cs-hist-item {
+          padding: 7px 12px; font-size: 12px;
+          color: rgba(219,222,225,0.85); cursor: pointer;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+          transition: background .12s;
+          border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        #dmt-cs-hist-dropdown .cs-hist-item:last-child { border-bottom: none; }
+        #dmt-cs-hist-dropdown .cs-hist-item:hover {
+          background: rgba(88,101,242,0.15); color: #fff;
+        }
+        #dmt-cs-hist-dropdown .cs-hist-empty {
+          padding: 10px 12px; font-size: 11px;
+          color: rgba(185,187,190,0.4); text-align: center;
+        }
+        
+        #dmt-cs-panel .cs-search-row { position: relative; }
+        
+        #dmt-cs-panel .cs-tags {
+          display: flex;
+          gap: 5px;
+          padding: 0 12px 8px;
+          flex-wrap: wrap;
+          flex-shrink: 0;
+        }
+        #dmt-cs-panel .cs-tag {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          padding: 3px 8px;
+          border-radius: 6px;
+          background: rgba(88, 101, 242, 0.15);
+          border: 1px solid rgba(88, 101, 242, 0.3);
+          color: #9ea6f5;
+          font-size: 11px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background 0.15s, border-color 0.15s, color 0.15s;
+          user-select: none;
+          white-space: nowrap;
+        }
+        #dmt-cs-panel .cs-tag:hover {
+          background: rgba(88, 101, 242, 0.32);
+          border-color: rgba(88, 101, 242, 0.6);
+          color: #c5caff;
+        }
+        #dmt-cs-panel .cs-tag.cs-tag-edit {
+          background: rgba(255,255,255,0.05);
+          border-color: rgba(255,255,255,0.15);
+          color: rgba(185,187,190,0.6);
+        }
+        #dmt-cs-panel .cs-tag.cs-tag-edit:hover {
+          background: rgba(255,255,255,0.1);
+          color: #fff;
+        }
+        
+        #dmt-cs-panel .cs-results {
+          flex: 1;
+          overflow-y: auto;
+          padding: 4px 6px 8px;
+          min-height: 0;
+        }
+        #dmt-cs-panel .cs-results::-webkit-scrollbar { width: 4px; }
+        #dmt-cs-panel .cs-results::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,0.1); border-radius: 2px;
+        }
+        #dmt-cs-panel .cs-result-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+          padding: 7px 8px;
+          border-radius: 7px;
+          cursor: pointer;
+          transition: background 0.12s;
+          border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        #dmt-cs-panel .cs-result-item:last-child { border-bottom: none; }
+        #dmt-cs-panel .cs-result-item:hover { background: rgba(88, 101, 242, 0.12); }
+        #dmt-cs-panel .cs-result-meta {
+          font-size: 10px;
+          color: rgba(185,187,190,0.5);
+          white-space: nowrap;
+          flex-shrink: 0;
+          padding-top: 2px;
+          min-width: 52px;
+          text-align: right;
+        }
+        #dmt-cs-panel .cs-result-body {
+          flex: 1;
+          min-width: 0;
+        }
+        #dmt-cs-panel .cs-result-author {
+          font-size: 11px;
+          font-weight: 700;
+          color: #a0aaf5;
+          margin-bottom: 2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        #dmt-cs-panel .cs-result-text {
+          font-size: 12px;
+          color: rgba(219, 222, 225, 0.8);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        #dmt-cs-panel .cs-result-text mark {
+          background: rgba(255, 215, 0, 0.25);
+          color: #ffd700;
+          border-radius: 2px;
+          padding: 0 1px;
+        }
+        
+        #dmt-cs-panel .cs-empty {
+          text-align: center;
+          padding: 24px 0;
+          color: rgba(185,187,190,0.4);
+          font-size: 12px;
+        }
+        
+        #dmt-cs-panel .cs-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 6px 14px;
+          border-top: 1px solid rgba(255,255,255,0.06);
+          font-size: 10px;
+          color: rgba(185,187,190,0.35);
+          flex-shrink: 0;
+        }
       `;
       document.head.appendChild(s);
     }
@@ -16912,7 +18437,7 @@ if (type === "warn" && scanLimit !== null) {
           removeBanner();
         }
 
-      }, 800);
+      }, 120);
     }
 
     function globalPasteHandler(e) {
@@ -16933,12 +18458,471 @@ if (type === "warn" && scanLimit !== null) {
     _ucObserver._lastChannelId = getCurrentChannelId();
     _ucObserver.observe(document.body, { childList: true, subtree: true });
 
+    const _scoutEnabled = isModEnabled("mod_scout");
+
+    if (_scoutEnabled) {
+    const CS_PANEL_ID    = "dmt-cs-panel";
+    const CS_TAGS_KEY    = "cs_custom_tags";
+    const CS_MAX_RESULTS = 30;
+    const CS_PREVIEW_LEN = 90;
+
+    function _csGetTags() {
+      return GMStore.get(CS_TAGS_KEY, [], true) || [];
+    }
+    function _csSetTags(arr) {
+      GMStore.set(CS_TAGS_KEY, arr.slice(0, 5), true);
+    }
+
+    function _csScanDOM() {
+      const results = [];
+      const containers = document.querySelectorAll('[data-list-item-id*="chat-messages-"]');
+      containers.forEach(container => {
+        const authorEl = container.querySelector('[class*="username_"], [class*="clickableUsername_"], [class*="headerText_"] [class*="username"]');
+        const author   = authorEl?.textContent?.trim() || "";
+
+        const contentEl = container.querySelector('[id^="message-content-"]')
+          || container.querySelector('[class*="messageContent_"]');
+        const text = contentEl?.textContent?.trim() || "";
+        if (!text) return;
+
+        const listId  = container.getAttribute("data-list-item-id") || "";
+        const idMatch = listId.match(/chat-messages-\d+-(\d+)$/);
+        const msgId   = idMatch ? idMatch[1] : null;
+
+        results.push({ el: container, author, text, msgId });
+      });
+      return results;
+    }
+
+    function _csSearch(keyword) {
+      if (!keyword.trim()) return [];
+      const kw    = keyword.trim().toLowerCase();
+      const msgs  = _csScanDOM();
+      const hits  = [];
+      for (const m of msgs) {
+        const idx = m.text.toLowerCase().indexOf(kw);
+        if (idx !== -1) hits.push({ ...m, matchIndex: idx });
+        if (hits.length >= CS_MAX_RESULTS) break;
+      }
+      return hits;
+    }
+
+    function _csHighlight(text, keyword) {
+      const preview = text.length > CS_PREVIEW_LEN
+        ? text.slice(0, CS_PREVIEW_LEN) + "…"
+        : text;
+      if (!keyword.trim()) return escHtml(preview);
+      const kw = keyword.trim();
+      return escHtml(preview).replace(
+        new RegExp(escHtml(kw).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "gi"),
+        m => `<mark>${m}</mark>`
+      );
+    }
+
+    function _csClose(instant = false) {
+      const panel = document.getElementById(CS_PANEL_ID);
+      if (!panel) return;
+      if (instant) { panel.remove(); return; }
+      panel.classList.add("dmt-cs-leaving");
+      setTimeout(() => panel.remove(), 200);
+    }
+
+    function _csJumpTo(item) {
+      _csClose(true);
+      if (item.el) {
+        item.el.scrollIntoView({ behavior: "smooth", block: "center" });
+        const prev = item.el.style.outline;
+        item.el.style.outline = "2px solid rgba(88,101,242,0.7)";
+        item.el.style.borderRadius = "4px";
+        setTimeout(() => {
+          item.el.style.outline = prev;
+          item.el.style.borderRadius = "";
+        }, 1800);
+      }
+    }
+
+    function _csRenderResults(container, hits, keyword) {
+      container.innerHTML = "";
+      if (hits.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "cs-empty";
+        empty.textContent = keyword.trim() ? t("cs_no_results") : t("cs_empty_hint");
+        container.appendChild(empty);
+        return;
+      }
+      hits.forEach(item => {
+        const row = document.createElement("div");
+        row.className = "cs-result-item";
+
+        const meta = document.createElement("div");
+        meta.className = "cs-result-meta";
+        meta.textContent = `#${(item.msgId || "").slice(-4) || "——"}`;
+
+        const body = document.createElement("div");
+        body.className = "cs-result-body";
+
+        if (item.author) {
+          const authorEl = document.createElement("div");
+          authorEl.className = "cs-result-author";
+          authorEl.textContent = item.author;
+          body.appendChild(authorEl);
+        }
+
+        const textEl = document.createElement("div");
+        textEl.className = "cs-result-text";
+        textEl.innerHTML = _csHighlight(item.text, keyword);
+        body.appendChild(textEl);
+
+        row.appendChild(meta);
+        row.appendChild(body);
+        row.addEventListener("click", () => _csJumpTo(item));
+        container.appendChild(row);
+      });
+    }
+
+    function openSearchPanel(initialQuery = "") {
+      if (document.getElementById(CS_PANEL_ID)) {
+        document.querySelector("#dmt-cs-panel .cs-input")?.focus();
+        return;
+      }
+
+      const anchor = _getEditorAnchor();
+      const posRect = anchor?.getBoundingClientRect();
+
+      const panel = document.createElement("div");
+      panel.id = CS_PANEL_ID;
+
+      if (posRect) {
+        const panelW = 420;
+        let left = posRect.left + F2_OFFSET_X;
+        if (left + panelW > window.innerWidth - 10) {
+          left = window.innerWidth - panelW - 10;
+        }
+        panel.style.left = left + "px";
+        panel.style.bottom = (window.innerHeight - posRect.top + 8) + "px";
+      } else {
+        panel.style.left  = "50%";
+        panel.style.bottom = "120px";
+        panel.style.transform = "translateX(-50%)";
+      }
+
+      const header = document.createElement("div");
+      header.className = "cs-header";
+      const title = document.createElement("div");
+      title.className = "cs-title";
+      title.textContent = t("cs_panel_title");
+      const closeBtn = document.createElement("button");
+      closeBtn.className = "cs-close";
+      closeBtn.textContent = "×";
+      closeBtn.onclick = () => _csClose();
+      header.appendChild(title);
+      header.appendChild(closeBtn);
+
+      const CS_HIST_KEY = "cs_search_history";
+      const CS_HIST_MAX = 5;
+      function _csHistLoad() { return GMStore.get(CS_HIST_KEY, [], true) || []; }
+      function _csHistPush(kw) {
+        if (!kw.trim()) return;
+        let hist = _csHistLoad().filter(h => h !== kw.trim());
+        hist.unshift(kw.trim());
+        GMStore.set(CS_HIST_KEY, hist.slice(0, CS_HIST_MAX), true);
+      }
+
+      const searchRow = document.createElement("div");
+      searchRow.className = "cs-search-row";
+
+      const input = document.createElement("input");
+      input.className = "cs-input";
+      input.placeholder = t("cs_placeholder");
+      input.value = initialQuery;
+      input.type = "text";
+
+      const pasteBtn = document.createElement("div");
+      pasteBtn.className = "cs-input-btn";
+      pasteBtn.title = t("cs_paste_tip");
+      pasteBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="2" width="8" height="4" rx="1.5" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M7 4H5a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>`;
+      pasteBtn.addEventListener("mousedown", async (e) => {
+        e.preventDefault();
+        try {
+          const text = await navigator.clipboard.readText();
+          if (text.trim()) {
+            input.value = text.trim();
+            input.dispatchEvent(new Event("input"));
+            input.focus();
+          }
+        } catch {
+          input.focus();
+          document.execCommand?.("paste");
+        }
+      });
+
+      const histBtn = document.createElement("div");
+      histBtn.className = "cs-input-btn";
+      histBtn.title = t("cs_history_tip");
+      histBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`;
+
+      let _histDropdown = null;
+      function _closeHistDropdown() {
+        _histDropdown?.remove();
+        _histDropdown = null;
+      }
+      histBtn.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (_histDropdown) { _closeHistDropdown(); return; }
+
+        const dropdown = document.createElement("div");
+        dropdown.id = "dmt-cs-hist-dropdown";
+        _histDropdown = dropdown;
+
+        const hist = _csHistLoad();
+        if (hist.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "cs-hist-empty";
+          empty.textContent = t("cs_no_history");
+          dropdown.appendChild(empty);
+        } else {
+          hist.forEach(kw => {
+            const item = document.createElement("div");
+            item.className = "cs-hist-item";
+            item.textContent = kw;
+            item.addEventListener("mousedown", (ev) => {
+              ev.preventDefault();
+              input.value = kw;
+              input.dispatchEvent(new Event("input"));
+              input.focus();
+              _closeHistDropdown();
+            });
+            dropdown.appendChild(item);
+          });
+        }
+        searchRow.appendChild(dropdown);
+
+        setTimeout(() => {
+          const _hDismiss = (ev) => {
+            if (!dropdown.contains(ev.target) && ev.target !== histBtn) {
+              _closeHistDropdown();
+              document.removeEventListener("mousedown", _hDismiss, true);
+            }
+          };
+          document.addEventListener("mousedown", _hDismiss, true);
+        }, 0);
+      });
+
+      searchRow.appendChild(input);
+      searchRow.appendChild(pasteBtn);
+      searchRow.appendChild(histBtn);
+
+      const tagsRow = document.createElement("div");
+      tagsRow.className = "cs-tags";
+
+      function _renderTags(currentKeyword) {
+        tagsRow.innerHTML = "";
+        const tags = _csGetTags();
+        tags.forEach((tag, i) => {
+          const t = document.createElement("div");
+          t.className = "cs-tag";
+          t.textContent = tag;
+          t.addEventListener("click", () => {
+            input.value = tag;
+            input.dispatchEvent(new Event("input"));
+          });
+          t.addEventListener("contextmenu", (e) => {
+            e.preventDefault();
+            const arr = _csGetTags();
+            arr.splice(i, 1);
+            _csSetTags(arr);
+            _renderTags(input.value);
+          });
+          tagsRow.appendChild(t);
+        });
+        if (tags.length < 5) {
+          const addBtn = document.createElement("div");
+          addBtn.className = "cs-tag cs-tag-edit";
+          addBtn.textContent = "+ 新增標籤";
+          addBtn.onclick = () => {
+            const val = prompt("輸入新標籤（右鍵標籤可刪除）：", "");
+            if (val?.trim()) {
+              const arr = _csGetTags();
+              arr.push(val.trim());
+              _csSetTags(arr);
+              _renderTags(input.value);
+            }
+          };
+          tagsRow.appendChild(addBtn);
+        }
+      }
+      _renderTags(initialQuery);
+
+      const results = document.createElement("div");
+      results.className = "cs-results";
+
+      const initHits = initialQuery.trim() ? _csSearch(initialQuery) : [];
+      _csRenderResults(results, initHits, initialQuery);
+
+      let _searchTimer = null;
+      input.addEventListener("input", () => {
+        clearTimeout(_searchTimer);
+        _searchTimer = setTimeout(() => {
+          const kw   = input.value;
+          const hits = _csSearch(kw);
+          _csRenderResults(results, hits, kw);
+          if (kw.trim().length >= 2) _csHistPush(kw);
+        }, 150);
+      });
+
+      const footer = document.createElement("div");
+      footer.className = "cs-footer";
+      footer.innerHTML = `<span>${t("cs_dom_mode_note")}</span><span>${t("cs_right_del_tip")}</span>`;
+
+      panel.appendChild(header);
+      panel.appendChild(searchRow);
+      panel.appendChild(tagsRow);
+      panel.appendChild(results);
+      panel.appendChild(footer);
+      document.body.appendChild(panel);
+
+      requestAnimationFrame(() => input.focus());
+
+      const _outsideClick = (e) => {
+        if (!panel.contains(e.target) && e.target.id !== F2_HINT_ID) {
+          _csClose();
+          document.removeEventListener("mousedown", _outsideClick, true);
+        }
+      };
+      document.addEventListener("mousedown", _outsideClick, true);
+
+      const _escClose = (e) => {
+        if (e.key === "Escape") {
+          _csClose();
+          document.removeEventListener("keydown", _escClose, true);
+        }
+      };
+      document.addEventListener("keydown", _escClose, true);
+    }
+
+    const F2_HINT_ID  = "dmt-f2-hint";
+    const F2_SHOW_MS  = 2500;
+    const F2_OFFSET_X = 200;
+    const F2_OFFSET_Y = -28;
+    let _f2HintTimer    = null;
+    let _editorFocused  = false;
+
+    function _getEditorAnchor() {
+      const editor = document.querySelector('div[data-slate-editor="true"]');
+      if (!editor) return null;
+      return editor.closest('[class*="scrollableContainer_"]')
+          || editor.closest('[class*="channelTextArea_"]')
+          || editor.parentElement?.parentElement?.parentElement
+          || null;
+    }
+
+    function _removeF2Hint(instant = false) {
+      clearTimeout(_f2HintTimer);
+      _f2HintTimer = null;
+      const el = document.getElementById(F2_HINT_ID);
+      if (!el) return;
+      if (instant) { el.remove(); return; }
+      el.classList.add("dmt-f2-leaving");
+      setTimeout(() => el.remove(), 300);
+    }
+
+    function _showF2Hint() {
+      if (!_editorFocused) return;
+
+      if (document.getElementById(F2_HINT_ID)) {
+        clearTimeout(_f2HintTimer);
+        _f2HintTimer = setTimeout(() => _removeF2Hint(), F2_SHOW_MS);
+        return;
+      }
+
+      const anchor = _getEditorAnchor();
+      if (!anchor) return;
+      const rect = anchor.getBoundingClientRect();
+      if (!rect.width) return;
+
+      const btn = document.createElement("div");
+      btn.id = F2_HINT_ID;
+      btn.innerHTML = `
+        <span class="dmt-f2-cap" title="頻道搜尋 (F2)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+            <path d="M15.5 15.5L20 20" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        <span class="dmt-f2-label">頻道搜尋</span>`;
+
+      btn.style.left = (rect.left + F2_OFFSET_X) + "px";
+      btn.style.top  = (rect.top  + F2_OFFSET_Y) + "px";
+
+      btn.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        _removeF2Hint(true);
+        openSearchPanel();
+      });
+
+      document.body.appendChild(btn);
+      _f2HintTimer = setTimeout(() => _removeF2Hint(), F2_SHOW_MS);
+    }
+
+    function _onF2FocusIn(e) {
+      if (e.target.closest('div[role="textbox"][data-slate-editor="true"]')) {
+        _editorFocused = true;
+        _showF2Hint();
+      }
+    }
+    function _onF2FocusOut(e) {
+      if (e.target.closest('div[role="textbox"][data-slate-editor="true"]')) {
+        _editorFocused = false;
+        _removeF2Hint();
+      }
+    }
+
+    function _onF2Keydown(e) {
+      if (e.key !== "F2") return;
+      if (e.target.closest('div[role="textbox"][data-slate-editor="true"]')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (document.getElementById(CS_PANEL_ID)) {
+        _csClose();
+      } else {
+        openSearchPanel();
+      }
+    }
+
+    document.addEventListener("focusin",  _onF2FocusIn,  true);
+    document.addEventListener("focusout", _onF2FocusOut, true);
+    document.addEventListener("keydown",  _onF2Keydown,  true);
+
     CleanupRegistry.add(() => {
       _ucObserver.disconnect();
-      document.removeEventListener("paste", globalPasteHandler, true);
+      document.removeEventListener("paste",    globalPasteHandler, true);
+      document.removeEventListener("focusin",  _onF2FocusIn,  true);
+      document.removeEventListener("focusout", _onF2FocusOut, true);
+      document.removeEventListener("keydown",  _onF2Keydown,  true);
       clearTimeout(_debounceTimer);
+      clearTimeout(_f2HintTimer);
+      _removeF2Hint(true);
+      _csClose(true);
       removeBanner();
     });
+
+    } else {
+      CleanupRegistry.add(() => {
+        _ucObserver.disconnect();
+        document.removeEventListener("paste", globalPasteHandler, true);
+        clearTimeout(_debounceTimer);
+        removeBanner();
+      });
+    }
 
     DEBUG && console.log("[URLChecker] Module G initialized, scan limit:", getScanLimit());
   }
@@ -16949,6 +18933,7 @@ if (type === "warn" && scanLimit !== null) {
     { name: "Header", fn: initHeaderMods, key: "mod_header" },
     { name: "Webhook", fn: initWebhookManager, key: "mod_webhook" },
     { name: "URLChecker", fn: initURLChecker, key: "mod_urlchecker" },
+    { name: "Blacklist",  fn: initBlacklist,  key: "mod_blacklist"  },
   ];
 
   initModules.forEach(({ name, fn, key }) => {
