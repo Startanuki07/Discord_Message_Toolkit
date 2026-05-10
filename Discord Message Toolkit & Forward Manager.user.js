@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      2.3.3
+// @version      2.4.0
 // @license      MIT
 // @author       Star-tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -1106,6 +1106,12 @@
       mu_temp_confirm:  "⏳ Mute temporarily",
       mu_temp_expired_toast: "⏰ Temp mute expired: {name}",
       mu_temp_badge_label: "⏳",
+      mu_settings_tab_list:    "Mute List",
+      mu_settings_tab_style:   "Style Settings",
+      mu_settings_clear_all:   "Clear All",
+      mu_settings_clear_confirm: "Remove all muted users?",
+      mu_settings_ghost_delay: "Ghost vanish delay (seconds)",
+      mu_settings_title:       "Settings",
     },
 
     "zh-TW": {
@@ -1499,6 +1505,12 @@
       mu_temp_confirm:  "⏳ 臨時靜音",
       mu_temp_expired_toast: "⏰ 臨時靜音已到期：{name}",
       mu_temp_badge_label: "⏳",
+      mu_settings_tab_list:    "靜音名單",
+      mu_settings_tab_style:   "樣式設定",
+      mu_settings_clear_all:   "全部清除",
+      mu_settings_clear_confirm: "確認移除所有靜音對象？",
+      mu_settings_ghost_delay: "Ghost 飄走延遲（秒）",
+      mu_settings_title:       "設定",
     },    "zh-CN": {
       name: "简体中文",
       fm_pinned_channels: "★ 收藏频道",
@@ -1890,6 +1902,12 @@
       mu_temp_confirm:  "⏳ 临时静音",
       mu_temp_expired_toast: "⏰ 临时静音已到期：{name}",
       mu_temp_badge_label: "⏳",
+      mu_settings_tab_list:    "静音名单",
+      mu_settings_tab_style:   "样式设置",
+      mu_settings_clear_all:   "全部清除",
+      mu_settings_clear_confirm: "确认移除所有静音对象？",
+      mu_settings_ghost_delay: "Ghost 飘走延迟（秒）",
+      mu_settings_title:       "设置",
     },
 
     ja: {
@@ -2290,6 +2308,12 @@
       mu_temp_confirm:  "⏳ 一時的にミュート",
       mu_temp_expired_toast: "⏰ 一時ミュートが終了しました：{name}",
       mu_temp_badge_label: "⏳",
+      mu_settings_tab_list:    "ミュートリスト",
+      mu_settings_tab_style:   "スタイル設定",
+      mu_settings_clear_all:   "すべて削除",
+      mu_settings_clear_confirm: "ミュートユーザーをすべて削除しますか？",
+      mu_settings_ghost_delay: "Ghost 消去ディレイ（秒）",
+      mu_settings_title:       "設定",
     },
 
     ko: {
@@ -2674,6 +2698,12 @@
       mu_temp_confirm:  "⏳ 임시 음소거",
       mu_temp_expired_toast: "⏰ 임시 음소거 만료: {name}",
       mu_temp_badge_label: "⏳",
+      mu_settings_tab_list:    "음소거 목록",
+      mu_settings_tab_style:   "스타일 설정",
+      mu_settings_clear_all:   "전체 삭제",
+      mu_settings_clear_confirm: "모든 음소거 대상을 제거할까요?",
+      mu_settings_ghost_delay: "Ghost 사라짐 지연 (초)",
+      mu_settings_title:       "설정",
     },
     es: {
       name: "Español",
@@ -17416,6 +17446,120 @@ unsafeWindow.fetch = function(...args) {
         }
         #dmt-bl-picker .picker-time-parsed.err { color: rgba(237,66,69,0.7); }
 
+        #dmt-bl-picker .picker-header {
+          display: flex; align-items: center; justify-content: space-between;
+          margin-bottom: 10px;
+        }
+        #dmt-bl-picker .picker-gear-btn {
+          width: 28px; height: 28px; border-radius: 6px;
+          background: transparent; border: none;
+          color: rgba(185,187,190,0.45); cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+          transition: background 0.15s, color 0.15s, transform 0.3s;
+        }
+        #dmt-bl-picker .picker-gear-btn:hover {
+          background: rgba(88,101,242,0.15); color: #a5adfa;
+        }
+        #dmt-bl-picker .picker-gear-btn.active {
+          background: rgba(88,101,242,0.22); color: #a5adfa;
+          transform: rotate(90deg);
+        }
+
+        #dmt-bl-picker .picker-settings {
+          display: none; flex-direction: column; gap: 0;
+          animation: dmt-bl-picker-in 0.15s ease both;
+        }
+        #dmt-bl-picker .picker-settings.open { display: flex; }
+
+        #dmt-bl-picker .pset-tabs {
+          display: flex; gap: 2px;
+          background: rgba(255,255,255,0.04); border-radius: 7px;
+          padding: 3px; margin-bottom: 10px;
+        }
+        #dmt-bl-picker .pset-tab {
+          flex: 1; padding: 4px 0; font-size: 11px; font-weight: 600;
+          text-align: center; border-radius: 5px; cursor: pointer;
+          color: rgba(185,187,190,0.5);
+          transition: background 0.15s, color 0.15s;
+        }
+        #dmt-bl-picker .pset-tab.active {
+          background: rgba(88,101,242,0.35); color: #c0c5f7;
+        }
+        #dmt-bl-picker .pset-tab:not(.active):hover {
+          background: rgba(255,255,255,0.07); color: rgba(219,222,225,0.8);
+        }
+
+        #dmt-bl-picker .pset-page { display: none; flex-direction: column; gap: 6px; }
+        #dmt-bl-picker .pset-page.active { display: flex; }
+
+        #dmt-bl-picker .pset-list {
+          max-height: 180px; overflow-y: auto;
+          display: flex; flex-direction: column; gap: 2px;
+        }
+        #dmt-bl-picker .pset-list::-webkit-scrollbar { width: 4px; }
+        #dmt-bl-picker .pset-list::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,0.12); border-radius: 2px;
+        }
+        #dmt-bl-picker .pset-row {
+          display: flex; align-items: center; gap: 6px;
+          padding: 5px 6px; border-radius: 5px;
+          background: rgba(255,255,255,0.03);
+        }
+        #dmt-bl-picker .pset-row:hover { background: rgba(255,255,255,0.07); }
+        #dmt-bl-picker .pset-row-name {
+          flex: 1; font-size: 12px; color: #dbdee1;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        #dmt-bl-picker .pset-row-badge {
+          font-size: 10px; color: rgba(185,187,190,0.55); flex-shrink: 0;
+        }
+        #dmt-bl-picker .pset-row-del {
+          width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0;
+          background: rgba(237,66,69,0.12); border: 1px solid rgba(237,66,69,0.25);
+          color: rgba(237,66,69,0.7); cursor: pointer; font-size: 12px;
+          display: flex; align-items: center; justify-content: center;
+          transition: background 0.12s, color 0.12s;
+        }
+        #dmt-bl-picker .pset-row-del:hover {
+          background: rgba(237,66,69,0.3); color: #fff;
+        }
+        #dmt-bl-picker .pset-empty {
+          font-size: 11px; color: rgba(185,187,190,0.4);
+          text-align: center; padding: 16px 0;
+        }
+        #dmt-bl-picker .pset-clear-btn {
+          align-self: flex-end; font-size: 10px; font-weight: 600;
+          padding: 3px 10px; border-radius: 5px;
+          background: rgba(237,66,69,0.1); border: 1px solid rgba(237,66,69,0.25);
+          color: rgba(237,66,69,0.7); cursor: pointer;
+          transition: background 0.12s, color 0.12s;
+        }
+        #dmt-bl-picker .pset-clear-btn:hover {
+          background: rgba(237,66,69,0.28); color: #fff;
+        }
+
+        #dmt-bl-picker .pset-setting-row {
+          display: flex; align-items: center; gap: 8px;
+          padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        #dmt-bl-picker .pset-setting-row:last-child { border-bottom: none; }
+        #dmt-bl-picker .pset-setting-label {
+          flex: 1; font-size: 11px; color: rgba(185,187,190,0.75);
+        }
+        #dmt-bl-picker .pset-setting-input {
+          width: 52px; text-align: center;
+          background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14);
+          border-radius: 5px; padding: 3px 5px; font-size: 12px;
+          color: rgba(219,222,225,0.9); outline: none;
+        }
+        #dmt-bl-picker .pset-setting-input:focus {
+          border-color: rgba(88,101,242,0.6); background: rgba(88,101,242,0.08);
+        }
+        #dmt-bl-picker .pset-setting-unit {
+          font-size: 10px; color: rgba(185,187,190,0.4); flex-shrink: 0;
+        }
+
         @keyframes dmt-bl-in  { from { opacity:0; transform:translateY(8px) scale(.97); } to { opacity:1; transform:none; } }
         @keyframes dmt-bl-out { from { opacity:1; transform:none; } to { opacity:0; transform:translateY(6px) scale(.97); } }
         #${BL_PANEL_ID} {
@@ -17595,10 +17739,11 @@ unsafeWindow.fetch = function(...args) {
       const def = BL_STYLES[styleId === BL_TEMP_STYLE_ID ? 2 : styleId];
       if (def) container.classList.add(def.cls);
       if (styleId === 1) {
+        const delayMs = Math.min(10, Math.max(1, GMStore.get("bl_ghost_delay", 4))) * 1000;
         _ghostTimers.set(container, setTimeout(() => {
           container.classList.add("dmt-ghost-vanished");
           _ghostTimers.delete(container);
-        }, 4000));
+        }, delayMs));
       }
     }
 
@@ -17923,9 +18068,20 @@ unsafeWindow.fetch = function(...args) {
       picker.id = "dmt-bl-picker";
       picker.style.cssText = `left:50%; top:30%; transform:translate(-50%,-50%);`;
 
+      const headerEl = document.createElement("div");
+      headerEl.className = "picker-header";
+
       const titleEl = document.createElement("div");
       titleEl.className = "picker-title";
       titleEl.textContent = `Mute style for ${name}`;
+
+      const gearBtn = document.createElement("button");
+      gearBtn.className = "picker-gear-btn";
+      gearBtn.title = t("mu_settings_title") || "Settings";
+      gearBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="pointer-events:none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`;
+
+      headerEl.appendChild(titleEl);
+      headerEl.appendChild(gearBtn);
 
       const cardsEl = document.createElement("div");
       cardsEl.className = "picker-cards";
@@ -18097,10 +18253,144 @@ unsafeWindow.fetch = function(...args) {
         }
       });
 
-      picker.appendChild(titleEl);
+      picker.appendChild(headerEl);
       picker.appendChild(cardsEl);
       picker.appendChild(tempSection);
       picker.appendChild(confirmBtn);
+
+      const settingsEl = document.createElement("div");
+      settingsEl.className = "picker-settings";
+
+      const tabsEl = document.createElement("div");
+      tabsEl.className = "pset-tabs";
+      const tabList  = document.createElement("div");
+      tabList.className  = "pset-tab active";
+      tabList.textContent = t("mu_settings_tab_list")  || "Mute List";
+      const tabStyle = document.createElement("div");
+      tabStyle.className = "pset-tab";
+      tabStyle.textContent = t("mu_settings_tab_style") || "Style Settings";
+      tabsEl.appendChild(tabList);
+      tabsEl.appendChild(tabStyle);
+
+      const pageList = document.createElement("div");
+      pageList.className = "pset-page active";
+
+      function _renderSettingsList() {
+        pageList.innerHTML = "";
+        const entries = blLoad();
+        if (!entries.length) {
+          const empty = document.createElement("div");
+          empty.className = "pset-empty";
+          empty.textContent = "—";
+          pageList.appendChild(empty);
+          return;
+        }
+        const listEl = document.createElement("div");
+        listEl.className = "pset-list";
+        const STYLE_ICONS = { 0: "🌫", 1: "👻", 2: "━", [BL_TEMP_STYLE_ID]: "⏳" };
+        entries.forEach(entry => {
+          const row = document.createElement("div");
+          row.className = "pset-row";
+          const nameEl = document.createElement("div");
+          nameEl.className = "pset-row-name";
+          nameEl.textContent = entry.name;
+          const badgeEl = document.createElement("div");
+          badgeEl.className = "pset-row-badge";
+          badgeEl.textContent = STYLE_ICONS[entry.style] ?? "•";
+          const delBtn = document.createElement("button");
+          delBtn.className = "pset-row-del";
+          delBtn.textContent = "✕";
+          delBtn.title = "Remove";
+          delBtn.addEventListener("click", () => {
+            const arr = blLoad().filter(e => e.name !== entry.name);
+            blSave(arr);
+            blApplyAll();
+            _renderSettingsList();
+          });
+          row.appendChild(nameEl);
+          row.appendChild(badgeEl);
+          row.appendChild(delBtn);
+          listEl.appendChild(row);
+        });
+        pageList.appendChild(listEl);
+
+        const clearBtn = document.createElement("button");
+        clearBtn.className = "pset-clear-btn";
+        clearBtn.textContent = t("mu_settings_clear_all") || "Clear All";
+        clearBtn.addEventListener("click", () => {
+          if (confirm(t("mu_settings_clear_confirm") || "Remove all muted users?")) {
+            blSave([]);
+            blApplyAll();
+            _renderSettingsList();
+          }
+        });
+        pageList.appendChild(clearBtn);
+      }
+      _renderSettingsList();
+
+      const pageStyle = document.createElement("div");
+      pageStyle.className = "pset-page";
+
+      const ghostRow = document.createElement("div");
+      ghostRow.className = "pset-setting-row";
+      const ghostLabel = document.createElement("div");
+      ghostLabel.className = "pset-setting-label";
+      ghostLabel.textContent = t("mu_settings_ghost_delay") || "Ghost vanish delay (seconds)";
+      const ghostInput = document.createElement("input");
+      ghostInput.type  = "number";
+      ghostInput.min   = "1";
+      ghostInput.max   = "10";
+      ghostInput.step  = "0.5";
+      ghostInput.className = "pset-setting-input";
+      ghostInput.value = String(GMStore.get("bl_ghost_delay", 4));
+      const ghostUnit = document.createElement("span");
+      ghostUnit.className = "pset-setting-unit";
+      ghostUnit.textContent = "s";
+      ghostInput.addEventListener("change", () => {
+        const v = Math.min(10, Math.max(1, parseFloat(ghostInput.value) || 4));
+        ghostInput.value = v;
+        GMStore.set("bl_ghost_delay", v);
+      });
+      ghostRow.appendChild(ghostLabel);
+      ghostRow.appendChild(ghostInput);
+      ghostRow.appendChild(ghostUnit);
+      pageStyle.appendChild(ghostRow);
+
+      tabList.addEventListener("click", () => {
+        tabList.classList.add("active");
+        tabStyle.classList.remove("active");
+        pageList.classList.add("active");
+        pageStyle.classList.remove("active");
+      });
+      tabStyle.addEventListener("click", () => {
+        tabStyle.classList.add("active");
+        tabList.classList.remove("active");
+        pageStyle.classList.add("active");
+        pageList.classList.remove("active");
+      });
+
+      settingsEl.appendChild(tabsEl);
+      settingsEl.appendChild(pageList);
+      settingsEl.appendChild(pageStyle);
+      picker.appendChild(settingsEl);
+
+      const mainEls = [cardsEl, tempSection, confirmBtn];
+      gearBtn.addEventListener("click", () => {
+        const isOpen = settingsEl.classList.contains("open");
+        if (isOpen) {
+          settingsEl.classList.remove("open");
+          gearBtn.classList.remove("active");
+          mainEls.forEach(el => { el.style.display = ""; });
+          titleEl.textContent = `Mute style for ${name}`;
+        } else {
+          settingsEl.classList.add("open");
+          gearBtn.classList.add("active");
+          mainEls.forEach(el => { el.style.display = "none"; });
+          titleEl.textContent = t("mu_settings_title") || "Settings";
+          _renderSettingsList();
+        }
+      });
+
       document.body.appendChild(picker);
 
       setTimeout(() => {
@@ -18329,11 +18619,20 @@ unsafeWindow.fetch = function(...args) {
       "https://giphy.com/",
       "https://media.giphy.com/",
       "https://i.giphy.com/",
+      "https://video.twimg.com/",
+      "https://pbs.twimg.com/",
+      "https://ton.twimg.com/",
     ];
+
+    const DIRECT_MEDIA_EXT_RE = /\.(?:mp4|webm|mov|avi|mkv|m4v|mp3|ogg|wav|flac|aac|m4a|ts|m3u8|png|jpe?g|gif|webp|avif|svg)(?:[?#]|$)/i;
+    const CDN_SEGMENT_RE = /\/(?:seg-\d+|chunk-\w+|index\d*\.m3u8|.*\.ts)(?:[?#]|$)/i;
 
     function isIgnoredURL(raw) {
       const url = raw.trim();
-      return IGNORED_URL_PREFIXES.some(prefix => url.startsWith(prefix));
+      if (IGNORED_URL_PREFIXES.some(prefix => url.startsWith(prefix))) return true;
+      if (DIRECT_MEDIA_EXT_RE.test(url)) return true;
+      if (CDN_SEGMENT_RE.test(url)) return true;
+      return false;
     }
 
     const DOMAIN_CANONICAL_MAP = {
