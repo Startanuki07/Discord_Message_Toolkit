@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      2.2.0
+// @version      2.3.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -54,7 +54,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "2.2.9";
+  const SCRIPT_VERSION = "2.3.1";
 
   const GMStore = {
     
@@ -91,8 +91,8 @@
   const NEW_FEATURES = {
     "mod_webhook":    "1.6.0",
     "mod_urlchecker": "1.8.0",
-    "mod_scout":      "2.2.0",
-    "mod_blacklist":  "2.2.0",
+    "mod_scout":      "2.2.9",
+    "mod_blacklist":  "2.2.9",
   };
 
   function isFeatureNew(featureKey) {
@@ -1084,6 +1084,8 @@
       cs_no_results:    "No matching messages found",
       cs_dom_mode_note: "DOM mode · searches only visible messages",
       cs_right_del_tip: "Right-click tag to delete",
+      cs_float_title:   "Channel Scout (F2)",
+      cs_float_label:   "Channel Scout",
 
       mu_panel_title:   "🌫️ Mute User Messages",
       mu_empty:         "No muted users\nRight-click a message to add",
@@ -1095,6 +1097,13 @@
       mu_ctx_mute:      "🌫️ Mute messages: {name}",
       mu_ctx_unmute:    "✅ Unmute: {name}",
       mu_shortcut:      "Alt+B to manage muted users",
+      mu_temp_card_name: "Temp",
+      mu_temp_card_desc: "Auto-unmute after timer",
+      mu_temp_quick:    "Quick select",
+      mu_temp_placeholder: "e.g. 3H, 1D 6H, 27H 20M",
+      mu_temp_confirm:  "⏳ Mute temporarily",
+      mu_temp_expired_toast: "⏰ Temp mute expired: {name}",
+      mu_temp_badge_label: "⏳",
     },
 
     "zh-TW": {
@@ -1466,6 +1475,8 @@
       cs_no_results:    "找不到符合的訊息",
       cs_dom_mode_note: "DOM 模式 · 僅搜尋頁面已載入訊息",
       cs_right_del_tip: "右鍵標籤可刪除",
+      cs_float_title:   "頻道搜尋 (F2)",
+      cs_float_label:   "頻道搜尋",
 
       mu_panel_title:   "🌫️ 弱化使用者訊息",
       mu_empty:         "尚未弱化任何使用者\n對訊息按右鍵可加入",
@@ -1477,6 +1488,13 @@
       mu_ctx_mute:      "🌫️ 弱化訊息：{name}",
       mu_ctx_unmute:    "✅ 解除弱化：{name}",
       mu_shortcut:      "Alt+B 開啟弱化管理面板",
+      mu_temp_card_name: "臨時",
+      mu_temp_card_desc: "計時結束自動解除",
+      mu_temp_quick:    "快速選擇",
+      mu_temp_placeholder: "例：3H、1D 6H、27H 20M",
+      mu_temp_confirm:  "⏳ 臨時靜音",
+      mu_temp_expired_toast: "⏰ 臨時靜音已到期：{name}",
+      mu_temp_badge_label: "⏳",
     },    "zh-CN": {
       name: "简体中文",
       fm_pinned_channels: "★ 收藏频道",
@@ -1846,6 +1864,8 @@
       cs_no_results:    "找不到符合的消息",
       cs_dom_mode_note: "DOM 模式 · 仅搜索页面已加载消息",
       cs_right_del_tip: "右键标签可删除",
+      cs_float_title:   "频道搜索 (F2)",
+      cs_float_label:   "频道搜索",
 
       mu_panel_title:   "🌫️ 弱化用户消息",
       mu_empty:         "尚未弱化任何用户\n右键消息可添加",
@@ -1857,6 +1877,13 @@
       mu_ctx_mute:      "🌫️ 弱化消息：{name}",
       mu_ctx_unmute:    "✅ 解除弱化：{name}",
       mu_shortcut:      "Alt+B 打开弱化管理面板",
+      mu_temp_card_name: "临时",
+      mu_temp_card_desc: "计时结束自动解除",
+      mu_temp_quick:    "快速选择",
+      mu_temp_placeholder: "例：3H、1D 6H、27H 20M",
+      mu_temp_confirm:  "⏳ 临时静音",
+      mu_temp_expired_toast: "⏰ 临时静音已到期：{name}",
+      mu_temp_badge_label: "⏳",
     },
 
     ja: {
@@ -2235,6 +2262,8 @@
       cs_no_results:    "該当するメッセージが見つかりません",
       cs_dom_mode_note: "DOMモード · 表示中のメッセージのみ検索",
       cs_right_del_tip: "右クリックでタグ削除",
+      cs_float_title:   "チャンネル検索 (F2)",
+      cs_float_label:   "チャンネル検索",
 
       mu_panel_title:   "🌫️ ユーザーメッセージ弱化",
       mu_empty:         "弱化中のユーザーなし\nメッセージを右クリックで追加",
@@ -2246,6 +2275,13 @@
       mu_ctx_mute:      "🌫️ メッセージを弱化：{name}",
       mu_ctx_unmute:    "✅ 弱化を解除：{name}",
       mu_shortcut:      "Alt+B で弱化管理パネルを開く",
+      mu_temp_card_name: "一時",
+      mu_temp_card_desc: "タイマー終了後に自動解除",
+      mu_temp_quick:    "クイック選択",
+      mu_temp_placeholder: "例：3H、1D 6H、27H 20M",
+      mu_temp_confirm:  "⏳ 一時的にミュート",
+      mu_temp_expired_toast: "⏰ 一時ミュートが終了しました：{name}",
+      mu_temp_badge_label: "⏳",
     },
 
     ko: {
@@ -2609,6 +2645,8 @@
       cs_empty_hint:    "키워드를 입력하거나 태그를 클릭하세요",
       cs_no_history:    "검색 기록 없음",
       cs_dom_mode_note: "DOM 모드 · 현재 표시된 메시지만 검색",
+      cs_float_title:   "채널 검색 (F2)",
+      cs_float_label:   "채널 검색",
       mu_panel_title:   "🌫️ 사용자 메시지 약화",
       mu_empty:         "약화된 사용자 없음\n메시지를 우클릭하여 추가",
       mu_remove_btn:    "해제",
@@ -2616,6 +2654,13 @@
       mu_remove_toast:  "✅ 해제됨: {name}",
       mu_ctx_mute:      "🌫️ 메시지 약화: {name}",
       mu_ctx_unmute:    "✅ 약화 해제: {name}",
+      mu_temp_card_name: "임시",
+      mu_temp_card_desc: "타이머 종료 후 자동 해제",
+      mu_temp_quick:    "빠른 선택",
+      mu_temp_placeholder: "예: 3H, 1D 6H, 27H 20M",
+      mu_temp_confirm:  "⏳ 임시 음소거",
+      mu_temp_expired_toast: "⏰ 임시 음소거 만료: {name}",
+      mu_temp_badge_label: "⏳",
     },
     es: {
       name: "Español",
@@ -2983,6 +3028,13 @@
       mu_remove_toast:  "✅ Reactivado: {name}",
       mu_ctx_mute:      "🌫️ Atenuar mensajes: {name}",
       mu_ctx_unmute:    "✅ Reactivar: {name}",
+      mu_temp_card_name: "Temporal",
+      mu_temp_card_desc: "Se desactiva al terminar",
+      mu_temp_quick:    "Selección rápida",
+      mu_temp_placeholder: "ej: 3H, 1D 6H, 27H 20M",
+      mu_temp_confirm:  "⏳ Silenciar temporalmente",
+      mu_temp_expired_toast: "⏰ Silencio temporal expirado: {name}",
+      mu_temp_badge_label: "⏳",
     },    "pt-BR": {
       name: "Português (Brasil)",
       fm_pinned_channels: "★ Canais fixados",
@@ -3347,6 +3399,13 @@
       mu_remove_toast:  "✅ Reativado: {name}",
       mu_ctx_mute:      "🌫️ Silenciar mensagens: {name}",
       mu_ctx_unmute:    "✅ Reativar: {name}",
+      mu_temp_card_name: "Temporário",
+      mu_temp_card_desc: "Desmuta ao terminar o timer",
+      mu_temp_quick:    "Seleção rápida",
+      mu_temp_placeholder: "ex: 3H, 1D 6H, 27H 20M",
+      mu_temp_confirm:  "⏳ Silenciar temporariamente",
+      mu_temp_expired_toast: "⏰ Silêncio temporário expirado: {name}",
+      mu_temp_badge_label: "⏳",
     },
 
     fr: {
@@ -3704,6 +3763,13 @@
       wm_edit_title: "Modifier le Wormhole : {n}",
       wm_created: "Wormhole créé !",
       wm_deleted: "Wormhole fermé.",
+      mu_temp_card_name: "Temporaire",
+      mu_temp_card_desc: "Démute après le minuteur",
+      mu_temp_quick:    "Sélection rapide",
+      mu_temp_placeholder: "ex : 3H, 1D 6H, 27H 20M",
+      mu_temp_confirm:  "⏳ Muet temporaire",
+      mu_temp_expired_toast: "⏰ Muet temporaire expiré : {name}",
+      mu_temp_badge_label: "⏳",
     },
 
     ru: {
@@ -4070,6 +4136,13 @@
       mu_remove_toast:  "✅ Восстановлено: {name}",
       mu_ctx_mute:      "🌫️ Приглушить: {name}",
       mu_ctx_unmute:    "✅ Восстановить: {name}",
+      mu_temp_card_name: "Временно",
+      mu_temp_card_desc: "Авто-отключение по таймеру",
+      mu_temp_quick:    "Быстрый выбор",
+      mu_temp_placeholder: "напр.: 3H, 1D 6H, 27H 20M",
+      mu_temp_confirm:  "⏳ Временно заглушить",
+      mu_temp_expired_toast: "⏰ Временное заглушение истекло: {name}",
+      mu_temp_badge_label: "⏳",
     },
   };
 
@@ -17047,7 +17120,7 @@ unsafeWindow.fetch = function(...args) {
           box-shadow: 0 16px 48px rgba(0,0,0,0.75);
           backdrop-filter: blur(16px);
           padding: 12px;
-          width: 320px;
+          width: 340px;
           font-family: sans-serif;
           animation: dmt-bl-picker-in 0.18s cubic-bezier(.19,1,.22,1) forwards;
         }
@@ -17056,11 +17129,43 @@ unsafeWindow.fetch = function(...args) {
           text-transform: uppercase; color: rgba(185,187,190,0.5);
           margin-bottom: 10px;
         }
-        #dmt-bl-picker .picker-cards { display: flex; gap: 8px; }
+        
+        @keyframes dmt-bl-or-shake {
+          0%   { transform: scale(1)    rotate(0deg);  }
+          15%  { transform: scale(1.18) rotate(-4deg); }
+          30%  { transform: scale(1.22) rotate(3deg);  }
+          45%  { transform: scale(1.20) rotate(-3deg); }
+          60%  { transform: scale(1.15) rotate(2deg);  }
+          75%  { transform: scale(1.10) rotate(-1deg); }
+          100% { transform: scale(1.08) rotate(0deg);  }
+        }
+        
+        #dmt-bl-picker .picker-cards { display: flex; align-items: stretch; gap: 0; }
+        
+        #dmt-bl-picker .picker-group {
+          display: flex; gap: 5px; flex: 3;
+          border: 1.5px solid rgba(255,255,255,0.10);
+          border-radius: 9px; padding: 5px;
+          background: rgba(255,255,255,0.02);
+        }
+        
+        #dmt-bl-picker .picker-or {
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0; width: 28px;
+          font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+          text-transform: uppercase; color: rgba(185,187,190,0.3);
+          transition: color 0.25s;
+          transform-origin: center;
+        }
+        #dmt-bl-picker .picker-or.active {
+          color: rgba(185,187,190,0.8);
+          animation: dmt-bl-or-shake 0.55s cubic-bezier(.19,1,.22,1) forwards;
+        }
+        
         #dmt-bl-picker .picker-card {
-          flex: 1; border-radius: 8px; padding: 8px 6px;
-          background: rgba(255,255,255,0.04);
-          border: 1.5px solid rgba(255,255,255,0.08);
+          flex: 1; border-radius: 6px; padding: 7px 4px;
+          background: transparent;
+          border: 1px solid transparent;
           cursor: pointer; text-align: center;
           transition: border-color 0.15s, background 0.15s;
         }
@@ -17072,7 +17177,27 @@ unsafeWindow.fetch = function(...args) {
           border-color: rgba(88,101,242,0.8);
           background: rgba(88,101,242,0.18);
         }
-        #dmt-bl-picker .picker-icon { font-size: 18px; margin-bottom: 4px; }
+        
+        #dmt-bl-picker .picker-card-temp {
+          flex: 1; border-radius: 6px; padding: 7px 4px;
+          background: rgba(255,255,255,0.02);
+          border: 1.5px solid rgba(255,255,255,0.07);
+          cursor: default; text-align: center;
+          opacity: 0.38; pointer-events: none;
+          transition: border-color 0.2s, background 0.2s, opacity 0.2s;
+        }
+        #dmt-bl-picker .picker-card-temp.enabled {
+          opacity: 1; cursor: pointer; pointer-events: auto;
+        }
+        #dmt-bl-picker .picker-card-temp.enabled:hover {
+          border-color: rgba(242,153,74,0.6);
+          background: rgba(242,153,74,0.1);
+        }
+        #dmt-bl-picker .picker-card-temp.selected {
+          border-color: rgba(242,153,74,0.85);
+          background: rgba(242,153,74,0.18);
+        }
+        #dmt-bl-picker .picker-icon { font-size: 16px; margin-bottom: 3px; }
         #dmt-bl-picker .picker-name {
           font-size: 10px; font-weight: 600;
           color: rgba(219,222,225,0.8); margin-bottom: 2px;
@@ -17100,6 +17225,54 @@ unsafeWindow.fetch = function(...args) {
         #dmt-bl-picker .picker-confirm.lit:hover {
           background: rgba(88,101,242,1);
         }
+        
+        #dmt-bl-picker .picker-temp-section {
+          overflow: hidden; max-height: 0;
+          transition: max-height 0.25s ease, opacity 0.2s ease;
+          opacity: 0;
+        }
+        #dmt-bl-picker .picker-temp-section.open {
+          max-height: 160px; opacity: 1;
+        }
+        #dmt-bl-picker .picker-temp-divider {
+          border: none; border-top: 1px solid rgba(255,255,255,0.07);
+          margin: 9px 0 7px;
+        }
+        #dmt-bl-picker .picker-temp-label {
+          font-size: 9px; color: rgba(185,187,190,0.4);
+          letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px;
+        }
+        #dmt-bl-picker .picker-chips {
+          display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px;
+        }
+        #dmt-bl-picker .picker-chip {
+          padding: 3px 9px; border-radius: 12px; font-size: 10px; font-weight: 600;
+          background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+          color: rgba(219,222,225,0.75); cursor: pointer;
+          transition: background 0.12s, border-color 0.12s, color 0.12s;
+        }
+        #dmt-bl-picker .picker-chip:hover {
+          background: rgba(88,101,242,0.22); border-color: rgba(88,101,242,0.6);
+          color: #c0c5f7;
+        }
+        #dmt-bl-picker .picker-chip.active {
+          background: rgba(88,101,242,0.35); border-color: rgba(88,101,242,0.8);
+          color: #c0c5f7;
+        }
+        #dmt-bl-picker .picker-time-input {
+          width: 100%; background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.14); border-radius: 6px;
+          padding: 5px 8px; font-size: 11px; color: rgba(219,222,225,0.9);
+          outline: none; box-sizing: border-box;
+        }
+        #dmt-bl-picker .picker-time-input::placeholder { color: rgba(185,187,190,0.35); }
+        #dmt-bl-picker .picker-time-input:focus {
+          border-color: rgba(88,101,242,0.6); background: rgba(88,101,242,0.08);
+        }
+        #dmt-bl-picker .picker-time-parsed {
+          font-size: 9px; color: rgba(88,101,242,0.75); margin-top: 4px; min-height: 12px;
+        }
+        #dmt-bl-picker .picker-time-parsed.err { color: rgba(237,66,69,0.7); }
 
         @keyframes dmt-bl-in  { from { opacity:0; transform:translateY(8px) scale(.97); } to { opacity:1; transform:none; } }
         @keyframes dmt-bl-out { from { opacity:1; transform:none; } to { opacity:0; transform:translateY(6px) scale(.97); } }
@@ -17167,6 +17340,10 @@ unsafeWindow.fetch = function(...args) {
         #${BL_PANEL_ID} .bl-style-badge:hover {
           background: rgba(88,101,242,0.3);
         }
+        #${BL_PANEL_ID} .bl-temp-badge {
+          background: rgba(242,153,74,0.15); border-color: rgba(242,153,74,0.4);
+          color: #f4a04a; cursor: default; letter-spacing: 0.03em; text-transform: none;
+        }
         #${BL_PANEL_ID} .bl-date {
           font-size: 10px; color: rgba(185,187,190,0.4); flex-shrink: 0;
         }
@@ -17197,6 +17374,7 @@ unsafeWindow.fetch = function(...args) {
       2: { cls: "dmt-bl-s2", icon: "━",  name: "Collapse" },
       0: { cls: "dmt-bl-s0", icon: "🌫", name: "Dim" },
     };
+    const BL_TEMP_STYLE_ID = 99;
     const BL_ALL_CLS = Object.values(BL_STYLES).map(s => s.cls);
 
     function blLoad() {
@@ -17205,10 +17383,12 @@ unsafeWindow.fetch = function(...args) {
     function blSave(arr) {
       GMStore.set(BL_STORE_KEY, arr, true);
     }
-    function blAdd(name, style = 2) {
+    function blAdd(name, style = 2, expiresAt = null) {
       const list = blLoad();
       if (list.some(u => u.name === name)) return false;
-      list.push({ name, addedAt: new Date().toISOString(), style });
+      const entry = { name, addedAt: new Date().toISOString(), style };
+      if (expiresAt) entry.expiresAt = expiresAt;
+      list.push(entry);
       blSave(list);
       return true;
     }
@@ -17220,6 +17400,9 @@ unsafeWindow.fetch = function(...args) {
     }
     function blGetStyle(name) {
       return blLoad().find(u => u.name === name)?.style ?? 2;
+    }
+    function blGetExpiresAt(name) {
+      return blLoad().find(u => u.name === name)?.expiresAt ?? null;
     }
     function blSetStyle(name, style) {
       const list = blLoad();
@@ -17267,7 +17450,7 @@ unsafeWindow.fetch = function(...args) {
       } else {
         delete container.dataset.dmtAuthor;
       }
-      const def = BL_STYLES[styleId];
+      const def = BL_STYLES[styleId === BL_TEMP_STYLE_ID ? 2 : styleId];
       if (def) container.classList.add(def.cls);
       if (styleId === 1) {
         _ghostTimers.set(container, setTimeout(() => {
@@ -17412,6 +17595,24 @@ unsafeWindow.fetch = function(...args) {
     setTimeout(blApplyAll, 1200);
     setTimeout(blApplyAll, 2500);
 
+    const _blTempInterval = setInterval(() => {
+      const now = Date.now();
+      const expired = blLoad().filter(u => u.expiresAt && now >= new Date(u.expiresAt).getTime());
+      if (expired.length === 0) return;
+      expired.forEach(u => {
+        blRemove(u.name);
+        dmtShowToast(t("mu_temp_expired_toast").replace("{name}", u.name));
+      });
+      blApplyAll();
+      if (document.getElementById(BL_PANEL_ID)) {
+        openBlPanel();
+      }
+    }, 30000);
+
+    if (typeof CleanupRegistry !== "undefined" && CleanupRegistry?.register) {
+      CleanupRegistry.register(() => clearInterval(_blTempInterval));
+    }
+
     function openBlPanel() {
       if (document.getElementById(BL_PANEL_ID)) {
         closeBlPanel(); return;
@@ -17446,7 +17647,7 @@ unsafeWindow.fetch = function(...args) {
           list.appendChild(empty);
           return;
         }
-        entries.forEach(({ name, addedAt, style = 2 }) => {
+        entries.forEach(({ name, addedAt, style = 2, expiresAt }) => {
           const row = document.createElement("div");
           row.className = "bl-row";
 
@@ -17454,19 +17655,35 @@ unsafeWindow.fetch = function(...args) {
           nameEl.className = "bl-name";
           nameEl.textContent = name;
 
-          const styleDef = BL_STYLES[style] || BL_STYLES[2];
+          const isTemp = !!expiresAt;
+
+          const styleDef = BL_STYLES[style === BL_TEMP_STYLE_ID ? 2 : style] || BL_STYLES[2];
           const badge = document.createElement("div");
-          badge.className = "bl-style-badge";
-          badge.title = "Click to change style";
-          badge.textContent = `${styleDef.icon} ${styleDef.name}`;
-          badge.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const order = [2, 1, 0];
-            const nextStyle = order[(order.indexOf(style) + 1) % order.length];
-            blSetStyle(name, nextStyle);
-            blApplyAll();
-            renderList();
-          });
+          badge.className = "bl-style-badge" + (isTemp ? " bl-temp-badge" : "");
+          if (isTemp) {
+            const msLeft = expiresAt ? Math.max(0, new Date(expiresAt).getTime() - Date.now()) : 0;
+            const minsLeft = Math.ceil(msLeft / 60000);
+            const dLeft = Math.floor(minsLeft / 1440);
+            const hLeft = Math.floor((minsLeft % 1440) / 60);
+            const mLeft = minsLeft % 60;
+            let remain = "";
+            if (dLeft) remain += dLeft + "d ";
+            if (hLeft) remain += hLeft + "h ";
+            if (mLeft || !remain) remain += mLeft + "m";
+            badge.textContent = `${styleDef.icon} ⏳ ${remain.trim()}`;
+            badge.title = `${styleDef.name} (Temp) — expires ${expiresAt ? new Date(expiresAt).toLocaleString() : ""}`;
+          } else {
+            badge.title = "Click to change style";
+            badge.textContent = `${styleDef.icon} ${styleDef.name}`;
+            badge.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const order = [2, 1, 0];
+              const nextStyle = order[(order.indexOf(style) + 1) % order.length];
+              blSetStyle(name, nextStyle);
+              blApplyAll();
+              renderList();
+            });
+          }
 
           const dateEl = document.createElement("div");
           dateEl.className = "bl-date";
@@ -17517,9 +17734,32 @@ unsafeWindow.fetch = function(...args) {
     }
 
     function _openStylePicker(name, onConfirm) {
-      document.getElementById("dmt-bl-picker")?.remove();
+        document.getElementById("dmt-bl-picker")?.remove();
 
-      let selectedStyle = 2;
+        let selectedStyle = 2;
+        let isTempMode    = false;
+        let tempMinutes   = 0;
+
+      function _parseTimeStr(str) {
+        str = str.trim().toUpperCase();
+        let total = 0;
+        const d = str.match(/(\d+)\s*D/); if (d) total += parseInt(d[1]) * 1440;
+        const h = str.match(/(\d+)\s*H/); if (h) total += parseInt(h[1]) * 60;
+        const m = str.match(/(\d+)\s*M/); if (m) total += parseInt(m[1]);
+        if (!total && /^\d+$/.test(str)) total = parseInt(str);
+        return total > 0 ? total : 0;
+      }
+      function _formatMins(mins) {
+        if (!mins) return "";
+        const dv = Math.floor(mins / 1440);
+        const hv = Math.floor((mins % 1440) / 60);
+        const mv = mins % 60;
+        const parts = [];
+        if (dv) parts.push(dv + " day" + (dv > 1 ? "s" : ""));
+        if (hv) parts.push(hv + " hour" + (hv > 1 ? "s" : ""));
+        if (mv) parts.push(mv + " min" + (mv > 1 ? "s" : ""));
+        return parts.length ? "\u2248 " + parts.join(" ") : "";
+      }
 
       const picker = document.createElement("div");
       picker.id = "dmt-bl-picker";
@@ -17529,16 +17769,129 @@ unsafeWindow.fetch = function(...args) {
       titleEl.className = "picker-title";
       titleEl.textContent = `Mute style for ${name}`;
 
-      const cards = document.createElement("div");
-      cards.className = "picker-cards";
+      const cardsEl = document.createElement("div");
+      cardsEl.className = "picker-cards";
 
       const STYLE_ORDER = [
-        { id: 2, icon: "━",  name: "Collapse",  desc: "Thin line · click to expand" },
-        { id: 1, icon: "👻", name: "Ghost",     desc: "Avatar only · vanishes after 4s" },
-        { id: 0, icon: "🌫", name: "Dim",       desc: "Dark & compact · hover to reveal" },
+        { id: 2,                   icon: "━",  name: "Collapse",                              desc: "Thin line · click to expand"      },
+        { id: 1,                   icon: "👻", name: "Ghost",                                 desc: "Avatar only · vanishes after 4s"  },
+        { id: 0,                   icon: "🌫", name: "Dim",                                   desc: "Dark & compact · hover to reveal" },
+        { id: BL_TEMP_STYLE_ID,    icon: "⏳", name: t("mu_temp_card_name") || "Temp",         desc: t("mu_temp_card_desc") || "Auto-unmute after timer" },
       ];
 
-      STYLE_ORDER.forEach(({ id, icon, name: sName, desc }) => {
+      const confirmBtn = document.createElement("button");
+      confirmBtn.className = "picker-confirm";
+      confirmBtn.textContent = "Mute";
+
+      const tempSection = document.createElement("div");
+      tempSection.className = "picker-temp-section";
+
+      const divider = document.createElement("hr");
+      divider.className = "picker-temp-divider";
+
+      const chipsLabel = document.createElement("div");
+      chipsLabel.className = "picker-temp-label";
+      chipsLabel.textContent = t("mu_temp_quick") || "Quick select";
+
+      const chipsContainer = document.createElement("div");
+      chipsContainer.className = "picker-chips";
+
+      const QUICK_CHIPS = [
+        { label: "30M",  mins: 30    },
+        { label: "1H",   mins: 60    },
+        { label: "3H",   mins: 180   },
+        { label: "6H",   mins: 360   },
+        { label: "12H",  mins: 720   },
+        { label: "1D",   mins: 1440  },
+        { label: "3D",   mins: 4320  },
+        { label: "7D",   mins: 10080 },
+      ];
+
+      const timeInput = document.createElement("input");
+      timeInput.type = "text";
+      timeInput.className = "picker-time-input";
+      timeInput.placeholder = t("mu_temp_placeholder") || "e.g. 3H, 1D 6H, 27H 20M";
+
+      const parsedEl = document.createElement("div");
+      parsedEl.className = "picker-time-parsed";
+
+      function _updateTempUI() {
+        const mins = _parseTimeStr(timeInput.value);
+        tempMinutes = mins;
+        if (timeInput.value.trim() === "") {
+          parsedEl.textContent = "";
+          parsedEl.classList.remove("err");
+        } else if (mins > 0) {
+          parsedEl.textContent = _formatMins(mins);
+          parsedEl.classList.remove("err");
+        } else {
+          parsedEl.textContent = "⚠ unrecognized format";
+          parsedEl.classList.add("err");
+        }
+        if (isTempMode) {
+          if (mins > 0) {
+            confirmBtn.textContent = t("mu_temp_confirm") || "⏳ Mute temporarily";
+            confirmBtn.classList.add("lit");
+          } else {
+            confirmBtn.textContent = t("mu_temp_confirm") || "⏳ Mute temporarily";
+            confirmBtn.classList.remove("lit");
+          }
+        }
+      }
+
+      QUICK_CHIPS.forEach(({ label, mins }) => {
+        const chip = document.createElement("div");
+        chip.className = "picker-chip";
+        chip.textContent = label;
+        chip.addEventListener("click", () => {
+          chipsContainer.querySelectorAll(".picker-chip").forEach(c => c.classList.remove("active"));
+          chip.classList.add("active");
+          const h = Math.floor(mins / 60), m = mins % 60;
+          timeInput.value = (h ? h + "H" : "") + (m ? (h ? " " : "") + m + "M" : "");
+          _updateTempUI();
+        });
+        chipsContainer.appendChild(chip);
+      });
+
+      timeInput.addEventListener("input", () => {
+        chipsContainer.querySelectorAll(".picker-chip").forEach(c => c.classList.remove("active"));
+        _updateTempUI();
+      });
+
+      tempSection.appendChild(divider);
+      tempSection.appendChild(chipsLabel);
+      tempSection.appendChild(chipsContainer);
+      tempSection.appendChild(timeInput);
+      tempSection.appendChild(parsedEl);
+
+      const PERM_STYLES = [
+        { id: 2, icon: "━",  name: "Collapse", desc: "Thin line · click to expand"      },
+        { id: 1, icon: "👻", name: "Ghost",    desc: "Avatar only · vanishes after 4s"  },
+        { id: 0, icon: "🌫", name: "Dim",      desc: "Dark & compact · hover to reveal" },
+      ];
+      const TEMP_DEF = {
+        id: BL_TEMP_STYLE_ID,
+        icon: "⏳",
+        name: t("mu_temp_card_name") || "Temp",
+        desc: t("mu_temp_card_desc") || "Auto-unmute after timer",
+      };
+
+      const groupEl = document.createElement("div");
+      groupEl.className = "picker-group";
+
+      const orEl = document.createElement("div");
+      orEl.className = "picker-or";
+      orEl.textContent = "or";
+
+      const tempCard = document.createElement("div");
+      tempCard.className = "picker-card-temp";
+      tempCard.dataset.style = BL_TEMP_STYLE_ID;
+      tempCard.innerHTML = `
+        <div class="picker-icon">${TEMP_DEF.icon}</div>
+        <div class="picker-name">${TEMP_DEF.name}</div>
+        <div class="picker-desc">${TEMP_DEF.desc}</div>`;
+
+      PERM_STYLES.forEach(({ id, icon, name: sName, desc }) => {
         const card = document.createElement("div");
         card.className = "picker-card" + (id === selectedStyle ? " selected" : "");
         card.dataset.style = id;
@@ -17547,24 +17900,55 @@ unsafeWindow.fetch = function(...args) {
           <div class="picker-name">${sName}</div>
           <div class="picker-desc">${desc}</div>`;
         card.addEventListener("click", () => {
-          cards.querySelectorAll(".picker-card").forEach(c => c.classList.remove("selected"));
+          groupEl.querySelectorAll(".picker-card").forEach(c => c.classList.remove("selected"));
           card.classList.add("selected");
           selectedStyle = id;
-          confirmBtn.classList.add("lit");
+
+          if (!isTempMode) {
+            tempCard.classList.add("enabled");
+            orEl.classList.add("active");
+            orEl.addEventListener("animationend", () => orEl.classList.remove("active"), { once: true });
+            confirmBtn.textContent = "Mute";
+            confirmBtn.classList.add("lit");
+          }
         });
-        cards.appendChild(card);
+        groupEl.appendChild(card);
       });
 
-      const confirmBtn = document.createElement("button");
-      confirmBtn.className = "picker-confirm";
-      confirmBtn.textContent = "Mute";
+      tempCard.addEventListener("click", () => {
+        if (!tempCard.classList.contains("enabled")) return;
+        isTempMode = !isTempMode;
+        if (isTempMode) {
+          tempCard.classList.add("selected");
+          tempSection.classList.add("open");
+          _updateTempUI();
+        } else {
+          tempCard.classList.remove("selected");
+          tempSection.classList.remove("open");
+          confirmBtn.textContent = "Mute";
+          confirmBtn.classList.add("lit");
+        }
+      });
+
+      cardsEl.appendChild(groupEl);
+      cardsEl.appendChild(orEl);
+      cardsEl.appendChild(tempCard);
+
       confirmBtn.addEventListener("click", () => {
-        picker.remove();
-        onConfirm(selectedStyle);
+        if (isTempMode) {
+          if (tempMinutes <= 0) return;
+          const expiresAt = new Date(Date.now() + tempMinutes * 60000).toISOString();
+          picker.remove();
+          onConfirm(selectedStyle, expiresAt);
+        } else {
+          picker.remove();
+          onConfirm(selectedStyle, null);
+        }
       });
 
       picker.appendChild(titleEl);
-      picker.appendChild(cards);
+      picker.appendChild(cardsEl);
+      picker.appendChild(tempSection);
       picker.appendChild(confirmBtn);
       document.body.appendChild(picker);
 
@@ -17641,8 +18025,8 @@ unsafeWindow.fetch = function(...args) {
                 blApplyAll();
                 dmtShowToast(t("mu_remove_toast").replace("{name}", name));
               } else {
-                _openStylePicker(name, (chosenStyle) => {
-                  blAdd(name, chosenStyle);
+                _openStylePicker(name, (chosenStyle, expiresAt) => {
+                  blAdd(name, chosenStyle, expiresAt);
                   blApplyAll();
                   dmtShowToast(t("mu_add_toast").replace("{name}", name));
                 });
@@ -18851,13 +19235,13 @@ if (type === "warn" && scanLimit !== null) {
       const btn = document.createElement("div");
       btn.id = F2_HINT_ID;
       btn.innerHTML = `
-        <span class="dmt-f2-cap" title="頻道搜尋 (F2)">
+        <span class="dmt-f2-cap" title="${t("cs_float_title") || "Channel Scout (F2)"}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
             <path d="M15.5 15.5L20 20" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
           </svg>
         </span>
-        <span class="dmt-f2-label">頻道搜尋</span>`;
+        <span class="dmt-f2-label">${t("cs_float_label") || "Channel Scout"}</span>`;
 
       btn.style.left = (rect.left + F2_OFFSET_X) + "px";
       btn.style.top  = (rect.top  + F2_OFFSET_Y) + "px";
