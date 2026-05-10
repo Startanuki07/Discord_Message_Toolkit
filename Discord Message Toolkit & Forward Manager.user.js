@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      2.3.2
+// @version      2.3.3
 // @license      MIT
 // @author       Star-tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -1084,6 +1084,8 @@
       cs_no_results:    "No matching messages found",
       cs_dom_mode_note: "DOM mode · searches only visible messages",
       cs_right_del_tip: "Right-click tag to delete",
+      cs_add_tag:        "+ New Tag",
+      cs_add_tag_prompt: "Enter new tag (right-click to delete):",
       cs_float_title:   "Channel Scout (F2)",
       cs_float_label:   "Channel Scout",
 
@@ -1475,6 +1477,8 @@
       cs_no_results:    "找不到符合的訊息",
       cs_dom_mode_note: "DOM 模式 · 僅搜尋頁面已載入訊息",
       cs_right_del_tip: "右鍵標籤可刪除",
+      cs_add_tag:        "+ 新增標籤",
+      cs_add_tag_prompt: "輸入新標籤（右鍵標籤可刪除）：",
       cs_float_title:   "頻道搜尋 (F2)",
       cs_float_label:   "頻道搜尋",
 
@@ -1864,6 +1868,8 @@
       cs_no_results:    "找不到符合的消息",
       cs_dom_mode_note: "DOM 模式 · 仅搜索页面已加载消息",
       cs_right_del_tip: "右键标签可删除",
+      cs_add_tag:        "+ 添加标签",
+      cs_add_tag_prompt: "输入新标签（右键标签可删除）：",
       cs_float_title:   "频道搜索 (F2)",
       cs_float_label:   "频道搜索",
 
@@ -2262,6 +2268,8 @@
       cs_no_results:    "該当するメッセージが見つかりません",
       cs_dom_mode_note: "DOMモード · 表示中のメッセージのみ検索",
       cs_right_del_tip: "右クリックでタグ削除",
+      cs_add_tag:        "+ タグ追加",
+      cs_add_tag_prompt: "新しいタグを入力（右クリックで削除）：",
       cs_float_title:   "チャンネル検索 (F2)",
       cs_float_label:   "チャンネル検索",
 
@@ -2639,14 +2647,19 @@
       uc_limit_suffix: "개 메시지",
       em_save_success: "저장됨: {k}",
 
-      cs_panel_title:   "⌨ 채널 검색",
-      cs_placeholder:   "키워드로 채널 메시지 검색…",
-      cs_no_results:    "일치하는 메시지 없음",
-      cs_empty_hint:    "키워드를 입력하거나 태그를 클릭하세요",
-      cs_no_history:    "검색 기록 없음",
-      cs_dom_mode_note: "DOM 모드 · 현재 표시된 메시지만 검색",
-      cs_float_title:   "채널 검색 (F2)",
-      cs_float_label:   "채널 검색",
+      cs_panel_title:    "⌨ 채널 검색",
+      cs_placeholder:    "키워드로 채널 메시지 검색…",
+      cs_paste_tip:      "클립보드에서 붙여넣기",
+      cs_history_tip:    "최근 검색",
+      cs_no_history:     "검색 기록 없음",
+      cs_no_results:     "일치하는 메시지 없음",
+      cs_empty_hint:     "키워드를 입력하거나 태그를 클릭하세요",
+      cs_dom_mode_note:  "DOM 모드 · 현재 표시된 메시지만 검색",
+      cs_right_del_tip:  "태그를 우클릭하면 삭제",
+      cs_add_tag:        "+ 태그 추가",
+      cs_add_tag_prompt: "새 태그 입력 (우클릭으로 삭제):",
+      cs_float_title:    "채널 검색 (F2)",
+      cs_float_label:    "채널 검색",
       mu_panel_title:   "🌫️ 사용자 메시지 약화",
       mu_empty:         "약화된 사용자 없음\n메시지를 우클릭하여 추가",
       mu_remove_btn:    "해제",
@@ -5647,21 +5660,80 @@
         color: rgba(255, 255, 255, 0.6);
         font-size: 14px;
         padding: 2px 6px;
-        border: none;
+        border: 0.5px solid transparent;
         border-radius: 4px;
         cursor: pointer;
         z-index: 10000;
         opacity: 0;
-        transition: opacity 0.2s;
-        text-shadow: 0 0 2px black;
+        transition: opacity 0.2s, background 0.15s, border-color 0.15s, color 0.15s;
         pointer-events: auto !important;
         user-select: none;
         isolation: isolate;
+        
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        overflow: visible;
     }
 
     .msg-copy-btn:hover {
         background: rgba(255, 255, 255, 0.1);
     }
+
+    .msg-copy-btn.dmt-active {
+        background: rgba(88, 101, 242, 0.2);
+        border-color: rgba(88, 101, 242, 0.45);
+        color: #a5adfa;
+        opacity: 1 !important;
+    }
+
+    @keyframes dmt-ripple {
+        0%   { transform: scale(0.5); opacity: 0.4; }
+        70%  { opacity: 0.15; }
+        100% { transform: scale(3.5); opacity: 0; }
+    }
+    .dmt-ripple {
+        position: absolute;
+        inset: 0;
+        border-radius: 4px;
+        background: rgba(88, 101, 242, 0.55);
+        pointer-events: none;
+        animation: dmt-ripple 0.42s cubic-bezier(0.25, 0, 0.55, 1) forwards;
+    }
+
+    @keyframes dmt-menu-in {
+        0%   { opacity: 0; transform: scale(0.88) translateY(-6px); }
+        65%  { opacity: 1; transform: scale(1.018) translateY(0);   }
+        100% { opacity: 1; transform: scale(1)    translateY(0);    }
+    }
+    @keyframes dmt-menu-out {
+        0%   { opacity: 1; transform: scale(1)   translateY(0); }
+        100% { opacity: 0; transform: scale(0.9) translateY(-5px); }
+    }
+    .msg-copy-dropdown.dmt-entering {
+        animation: dmt-menu-in 0.22s cubic-bezier(0.34, 1.15, 0.64, 1) forwards;
+        transform-origin: top right;
+    }
+    .msg-copy-dropdown.dmt-leaving {
+        animation: dmt-menu-out 0.14s ease-in forwards;
+        transform-origin: top right;
+        pointer-events: none;
+    }
+
+    @keyframes dmt-item-in {
+        from { opacity: 0; transform: translateY(-4px); }
+        to   { opacity: 1; transform: translateY(0);    }
+    }
+    .msg-copy-dropdown.dmt-entering > *:not(.msg-copy-header) {
+        opacity: 0;
+        animation: dmt-item-in 0.16s ease both;
+    }
+    .msg-copy-dropdown.dmt-entering > *:nth-child(2)  { animation-delay: 0.03s; }
+    .msg-copy-dropdown.dmt-entering > *:nth-child(3)  { animation-delay: 0.06s; }
+    .msg-copy-dropdown.dmt-entering > *:nth-child(4)  { animation-delay: 0.09s; }
+    .msg-copy-dropdown.dmt-entering > *:nth-child(5)  { animation-delay: 0.12s; }
+    .msg-copy-dropdown.dmt-entering > *:nth-child(6)  { animation-delay: 0.15s; }
+    .msg-copy-dropdown.dmt-entering > *:nth-child(n+7){ animation-delay: 0.17s; }
 
     .msg-copy-container:hover .msg-copy-btn {
         opacity: 1;
@@ -6033,11 +6105,22 @@
 
     function closeGlobalMenu() {
       if (globalActiveDropdown) {
-        globalActiveDropdown.remove();
+        const dd = globalActiveDropdown;
         globalActiveDropdown = null;
-        document
-          .querySelectorAll(".msg-copy-portal-menu")
-          .forEach((el) => el.remove());
+
+        document.querySelectorAll(".msg-copy-btn.dmt-active")
+          .forEach((b) => b.classList.remove("dmt-active"));
+
+        dd.classList.remove("dmt-entering");
+        dd.classList.add("dmt-leaving");
+        dd.addEventListener("animationend", () => {
+          dd.remove();
+          document
+            .querySelectorAll(".msg-copy-portal-menu")
+            .forEach((el) => el.remove());
+        }, { once: true });
+
+        setTimeout(() => { if (dd.isConnected) dd.remove(); }, 200);
       }
     }
 
@@ -7878,9 +7961,16 @@
             row.dataset.absIdx = absIdx;
 
             const handle = document.createElement("span");
-            handle.textContent = "⠿";
+            handle.innerHTML = `<svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor" aria-hidden="true" style="display:block;pointer-events:none">
+              <circle cx="2.5" cy="2.5"  r="1.5"/>
+              <circle cx="7.5" cy="2.5"  r="1.5"/>
+              <circle cx="2.5" cy="7"    r="1.5"/>
+              <circle cx="7.5" cy="7"    r="1.5"/>
+              <circle cx="2.5" cy="11.5" r="1.5"/>
+              <circle cx="7.5" cy="11.5" r="1.5"/>
+            </svg>`;
             handle.style.cssText =
-              "color:#555; margin-right:6px; font-size:14px; cursor:grab; user-select:none; flex-shrink:0;";
+              "color:#555; margin-right:6px; cursor:grab; user-select:none; flex-shrink:0; display:inline-flex; align-items:center;";
             handle.draggable = true;
 
             handle.addEventListener("dragstart", (e) => {
@@ -9083,7 +9173,14 @@
 
       const btn = document.createElement("button");
       btn.className = "msg-copy-btn";
-      btn.textContent = "⠿";
+      btn.innerHTML = `<svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor" aria-hidden="true" style="display:block;pointer-events:none">
+        <circle cx="2.5" cy="2.5"  r="1.5"/>
+        <circle cx="7.5" cy="2.5"  r="1.5"/>
+        <circle cx="2.5" cy="7"    r="1.5"/>
+        <circle cx="7.5" cy="7"    r="1.5"/>
+        <circle cx="2.5" cy="11.5" r="1.5"/>
+        <circle cx="7.5" cy="11.5" r="1.5"/>
+      </svg>`;
 
       let _isMenuRendered = false;
 
@@ -9163,6 +9260,19 @@
         globalActiveDropdown = dropdown;
         dropdown.style.display = "flex";
         _calcDropdownPos(btn, dropdown);
+
+        const ripple = document.createElement("div");
+        ripple.className = "dmt-ripple";
+        btn.appendChild(ripple);
+        ripple.addEventListener("animationend", () => ripple.remove(), { once: true });
+
+        btn.classList.add("dmt-active");
+
+        dropdown.classList.remove("dmt-leaving");
+        dropdown.classList.add("dmt-entering");
+        dropdown.addEventListener("animationend", (e) => {
+          if (e.target === dropdown) dropdown.classList.remove("dmt-entering");
+        }, { once: true });
       };
 
       const discordBtnContainer = (() => {
@@ -17115,7 +17225,7 @@ unsafeWindow.fetch = function(...args) {
         .dmt-bl-s0 {
           opacity: 0.04 !important;
           filter: grayscale(100%) !important;
-          transition: opacity 0.2s, filter 0.2s;
+          transition: opacity 0.5s, filter 0.5s;
           padding-top: 1px !important;
           padding-bottom: 1px !important;
         }
@@ -17123,9 +17233,14 @@ unsafeWindow.fetch = function(...args) {
           padding-top: 1px !important;
           padding-bottom: 1px !important;
         }
-        
+
         .dmt-bl-s0.dmt-bl-s0-peek {
           opacity: 0.35 !important;
+          filter: grayscale(0%) !important;
+        }
+        
+        .dmt-bl-s0.dmt-bl-s0-reveal {
+          opacity: 1 !important;
           filter: grayscale(0%) !important;
         }
 
@@ -18087,22 +18202,62 @@ unsafeWindow.fetch = function(...args) {
     }
     document.addEventListener("keydown", _onBlKeydown, true);
 
-    const DIM_PEEK_X = 200;
-    let _dimLastPeek = null;
+    const DIM_PEEK_X   = 200;
+    const DIM_DWELL_MS = 1300;
+    let _dimLastPeek   = null;
+    let _dimLastReveal = null;
+    let _dimDwellTimer = null;
+
+    function _clearDwell() {
+      if (_dimDwellTimer) {
+        clearTimeout(_dimDwellTimer);
+        _dimDwellTimer = null;
+      }
+    }
+
+    function _clearReveal(container) {
+      if (container) container.classList.remove("dmt-bl-s0-reveal");
+      if (_dimLastReveal === container) _dimLastReveal = null;
+    }
+
     function _onDimMousemove(e) {
       const container = e.target.closest(".dmt-bl-s0");
       if (container) {
-        const rect = container.getBoundingClientRect();
-        const inZone = (e.clientX - rect.left) <= DIM_PEEK_X;
-        if (inZone) {
+        const rect    = container.getBoundingClientRect();
+        const xOffset = e.clientX - rect.left;
+        const inPeek  = xOffset <= DIM_PEEK_X;
+        const inAvatar = !!e.target.closest(
+          '[class*="avatar_"],[class*="username_"],[class*="headerText_"],[class*="timestamp_"]'
+        );
+
+        if (inPeek) {
           if (_dimLastPeek !== container) {
             _dimLastPeek?.classList.remove("dmt-bl-s0-peek");
+            _clearDwell();
+            _clearReveal(_dimLastReveal);
             _dimLastPeek = container;
             container.classList.add("dmt-bl-s0-peek");
+          }
+
+          if (inAvatar) {
+            if (!container.classList.contains("dmt-bl-s0-reveal") && !_dimDwellTimer) {
+              _dimDwellTimer = setTimeout(() => {
+                _dimDwellTimer = null;
+                if (_dimLastPeek === container) {
+                  _clearReveal(_dimLastReveal);
+                  container.classList.add("dmt-bl-s0-reveal");
+                  _dimLastReveal = container;
+                }
+              }, DIM_DWELL_MS);
+            }
+          } else {
+            _clearDwell();
           }
         } else {
           if (_dimLastPeek === container) {
             container.classList.remove("dmt-bl-s0-peek");
+            _clearReveal(container);
+            _clearDwell();
             _dimLastPeek = null;
           }
         }
@@ -18111,6 +18266,8 @@ unsafeWindow.fetch = function(...args) {
           _dimLastPeek.classList.remove("dmt-bl-s0-peek");
           _dimLastPeek = null;
         }
+        _clearReveal(_dimLastReveal);
+        _clearDwell();
       }
     }
     document.addEventListener("mousemove", _onDimMousemove, { passive: true });
@@ -18123,6 +18280,10 @@ unsafeWindow.fetch = function(...args) {
       document.removeEventListener("mousemove",   _onDimMousemove);
       _dimLastPeek?.classList.remove("dmt-bl-s0-peek");
       _dimLastPeek = null;
+      _clearReveal(_dimLastReveal);
+      _clearDwell();
+      document.querySelectorAll(".dmt-bl-s0-reveal")
+        .forEach(el => el.classList.remove("dmt-bl-s0-reveal"));
       closeBlPanel(true);
       document.getElementById("dmt-bl-picker")?.remove();
       document.getElementById("dmt-bl-inject")?.remove();
@@ -19166,9 +19327,9 @@ if (type === "warn" && scanLimit !== null) {
         if (tags.length < 5) {
           const addBtn = document.createElement("div");
           addBtn.className = "cs-tag cs-tag-edit";
-          addBtn.textContent = "+ 新增標籤";
+          addBtn.textContent = t("cs_add_tag") || "+ New Tag";
           addBtn.onclick = () => {
-            const val = prompt("輸入新標籤（右鍵標籤可刪除）：", "");
+            const val = prompt(t("cs_add_tag_prompt") || "Enter new tag (right-click to delete):", "");
             if (val?.trim()) {
               const arr = _csGetTags();
               arr.push(val.trim());
