@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      2.4.1
+// @version      2.5.0.0
 // @license      MIT
 // @author       Star-tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -54,7 +54,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "2.3.1";
+  const SCRIPT_VERSION = "2.5.0.0";
 
   const GMStore = {
     
@@ -6223,9 +6223,9 @@
       const wormholePrefs = {
         wh_api_mode: localStorage.getItem("wh_api_mode"),
         wh_dock_position: localStorage.getItem("wh_dock_position"),
-        wh_send_autoclose: localStorage.getItem("wh_send_autoclose"),
-        wh_send_goto: localStorage.getItem("wh_send_goto"),
-        wh_send_show_toast: localStorage.getItem("wh_send_show_toast"),
+        wh_send_autoclose: GMStore.get("wh_send_autoclose", "true"),
+        wh_send_goto: GMStore.get("wh_send_goto", "false"),
+        wh_send_show_toast: GMStore.get("wh_send_show_toast", "true"),
         wormhole_focus_mode: localStorage.getItem("wormhole_focus_mode"),
         wormhole_focus_size: localStorage.getItem("wormhole_focus_size"),
       };
@@ -6362,11 +6362,11 @@
           if (wp.wh_dock_position != null)
             localStorage.setItem("wh_dock_position", wp.wh_dock_position);
           if (wp.wh_send_autoclose != null)
-            localStorage.setItem("wh_send_autoclose", wp.wh_send_autoclose);
+            GMStore.set("wh_send_autoclose", wp.wh_send_autoclose);
           if (wp.wh_send_goto != null)
-            localStorage.setItem("wh_send_goto", wp.wh_send_goto);
+            GMStore.set("wh_send_goto", wp.wh_send_goto);
           if (wp.wh_send_show_toast != null)
-            localStorage.setItem("wh_send_show_toast", wp.wh_send_show_toast);
+            GMStore.set("wh_send_show_toast", wp.wh_send_show_toast);
           if (wp.wormhole_focus_mode != null)
             localStorage.setItem("wormhole_focus_mode", wp.wormhole_focus_mode);
           if (wp.wormhole_focus_size != null)
@@ -13476,6 +13476,7 @@
 
     renderWormholes(container) {
       if (!container) return;
+      document.querySelectorAll(".wh-chat-btn").forEach(btn => btn.remove());
       container.innerHTML = "";
       const data = this.getData();
 
@@ -15108,15 +15109,15 @@ unsafeWindow.fetch = function(...args) {
           <div id="wh-send-bottom-row">
             <div id="wh-send-checkboxes">
               <label id="wh-send-autoclose-label">
-                <input type="checkbox" id="wh-send-autoclose" ${localStorage.getItem("wh_send_autoclose") !== "false" ? "checked" : ""}>
+                <input type="checkbox" id="wh-send-autoclose" ${GMStore.get("wh_send_autoclose", "true") !== "false" ? "checked" : ""}>
                 <span>${this.t("wm_send_autoclose")}</span>
               </label>
-              <label id="wh-send-goto-label" class="${localStorage.getItem("wh_send_autoclose") !== "false" ? "cb-disabled" : ""}">
-                <input type="checkbox" id="wh-send-goto" ${localStorage.getItem("wh_send_goto") === "true" ? "checked" : ""} ${localStorage.getItem("wh_send_autoclose") !== "false" ? "disabled" : ""}>
+              <label id="wh-send-goto-label" class="${GMStore.get("wh_send_autoclose", "true") !== "false" ? "cb-disabled" : ""}">
+                <input type="checkbox" id="wh-send-goto" ${GMStore.get("wh_send_goto", "false") === "true" ? "checked" : ""} ${GMStore.get("wh_send_autoclose", "true") !== "false" ? "disabled" : ""}>
                 <span>${this.t("wm_send_goto_channel")}</span>
               </label>
               <label id="wh-send-show-toast-label">
-                <input type="checkbox" id="wh-send-show-toast" ${localStorage.getItem("wh_send_show_toast") !== "false" ? "checked" : ""}>
+                <input type="checkbox" id="wh-send-show-toast" ${GMStore.get("wh_send_show_toast", "true") !== "false" ? "checked" : ""}>
                 <span>${this.t("wm_send_show_toast")}</span>
               </label>
             </div>
@@ -15361,9 +15362,9 @@ unsafeWindow.fetch = function(...args) {
         gotoEl.disabled = ac;
         if (ac) gotoEl.checked = false;
       };
-      autocloseEl.addEventListener("change", () => { localStorage.setItem("wh_send_autoclose", autocloseEl.checked); syncMutex(); });
-      gotoEl.addEventListener("change",      () => { localStorage.setItem("wh_send_goto",       gotoEl.checked); });
-      showToastEl.addEventListener("change", () => { localStorage.setItem("wh_send_show_toast", showToastEl.checked); });
+      autocloseEl.addEventListener("change", () => { GMStore.set("wh_send_autoclose", String(autocloseEl.checked)); syncMutex(); });
+      gotoEl.addEventListener("change",      () => { GMStore.set("wh_send_goto",       String(gotoEl.checked)); });
+      showToastEl.addEventListener("change", () => { GMStore.set("wh_send_show_toast", String(showToastEl.checked)); });
 
       submitBtn.onclick = async () => {
         const texts = [...fieldsEl.querySelectorAll(".wh-field-textarea")]
@@ -17673,11 +17674,21 @@ unsafeWindow.fetch = function(...args) {
         }
 
         #dmt-bl-picker .pset-page { display: none; flex-direction: column; gap: 6px; }
-        #dmt-bl-picker .pset-page.active { display: flex; }
+        #dmt-bl-picker .pset-page.active {
+          display: flex;
+          min-height: 120px;
+          max-height: 260px;
+          overflow-y: auto;
+          overflow-x: visible;
+        }
+        #dmt-bl-picker .pset-page.active::-webkit-scrollbar { width: 4px; }
+        #dmt-bl-picker .pset-page.active::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,0.12); border-radius: 2px;
+        }
 
         #dmt-bl-picker .pset-list {
-          max-height: 180px; overflow-y: auto;
           display: flex; flex-direction: column; gap: 2px;
+          overflow: visible;
         }
         #dmt-bl-picker .pset-list::-webkit-scrollbar { width: 4px; }
         #dmt-bl-picker .pset-list::-webkit-scrollbar-thumb {
@@ -17686,7 +17697,7 @@ unsafeWindow.fetch = function(...args) {
         #dmt-bl-picker .pset-row {
           display: flex; align-items: center; gap: 6px;
           padding: 5px 6px; border-radius: 5px;
-          background: rgba(255,255,255,0.03);
+          background: rgba(255,255,255,0.03); position: relative;
         }
         #dmt-bl-picker .pset-row:hover { background: rgba(255,255,255,0.07); }
         #dmt-bl-picker .pset-row-name {
@@ -17695,7 +17706,44 @@ unsafeWindow.fetch = function(...args) {
         }
         #dmt-bl-picker .pset-row-badge {
           font-size: 10px; color: rgba(185,187,190,0.55); flex-shrink: 0;
+          padding: 2px 5px; border-radius: 4px; cursor: pointer;
+          border: 1px solid transparent; transition: background 0.12s, border-color 0.12s;
+          position: relative;
         }
+        #dmt-bl-picker .pset-row-badge:hover {
+          background: rgba(88,101,242,0.15); border-color: rgba(88,101,242,0.35);
+          color: #a5adfa;
+        }
+        #dmt-bl-picker .pset-row-badge.temp-badge {
+          color: #f4a04a; border-color: rgba(242,153,74,0.25);
+          background: rgba(242,153,74,0.08);
+        }
+        #dmt-bl-picker .pset-row-badge.temp-badge:hover {
+          background: rgba(242,153,74,0.2); border-color: rgba(242,153,74,0.5);
+        }
+        
+        #dmt-bl-picker .pset-style-dropdown {
+          position: absolute; top: calc(100% + 3px); right: 0;
+          background: #1e1f22; border: 1px solid rgba(88,101,242,0.4);
+          border-radius: 7px; box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+          z-index: 2147483647; overflow: hidden; min-width: 100px;
+          animation: dmt-bl-picker-in 0.12s ease both;
+        }
+        #dmt-bl-picker .pset-style-opt {
+          display: flex; align-items: center; gap: 6px;
+          padding: 6px 10px; font-size: 11px; color: #dbdee1;
+          cursor: pointer; transition: background 0.1s; white-space: nowrap;
+        }
+        #dmt-bl-picker .pset-style-opt:hover { background: rgba(88,101,242,0.18); }
+        #dmt-bl-picker .pset-style-opt.active { color: #a5adfa; background: rgba(88,101,242,0.1); }
+        
+        #dmt-bl-picker .pset-extend-btn {
+          font-size: 9px; font-weight: 600; flex-shrink: 0;
+          padding: 2px 5px; border-radius: 4px; cursor: pointer;
+          background: rgba(242,153,74,0.1); border: 1px solid rgba(242,153,74,0.3);
+          color: #f4a04a; transition: background 0.12s; white-space: nowrap;
+        }
+        #dmt-bl-picker .pset-extend-btn:hover { background: rgba(242,153,74,0.28); }
         #dmt-bl-picker .pset-row-del {
           width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0;
           background: rgba(237,66,69,0.12); border: 1px solid rgba(237,66,69,0.25);
@@ -18267,7 +18315,7 @@ unsafeWindow.fetch = function(...args) {
           list.appendChild(row);
         });
 
-        document.addEventListener("mousedown", closeAllDropdowns, { capture: true, once: false });
+        document.addEventListener("mousedown", closeAllDropdowns, { capture: true, once: true });
       }
       renderList();
 
@@ -18295,7 +18343,13 @@ unsafeWindow.fetch = function(...args) {
           clearInterval(_panelTick);
         }
       }, 30000);
-      panel.addEventListener("remove", () => clearInterval(_panelTick), { once: true });
+      const _panelTickGuard = new MutationObserver(() => {
+        if (!document.getElementById(BL_PANEL_ID)) {
+          clearInterval(_panelTick);
+          _panelTickGuard.disconnect();
+        }
+      });
+      _panelTickGuard.observe(document.body, { childList: true, subtree: true });
     }
 
     function closeBlPanel(instant = false) {
@@ -18565,16 +18619,86 @@ unsafeWindow.fetch = function(...args) {
         }
         const listEl = document.createElement("div");
         listEl.className = "pset-list";
-        const STYLE_ICONS = { 0: "🌫", 1: "👻", 2: "━", [BL_TEMP_STYLE_ID]: "⏳" };
+
+        function closeAllPsetDropdowns() {
+          listEl.querySelectorAll(".pset-style-dropdown").forEach(d => d.remove());
+        }
+
         entries.forEach(entry => {
+          const isTemp   = !!entry.expiresAt;
+          const curStyle = (entry.style === BL_TEMP_STYLE_ID ? 2 : entry.style) ?? 2;
+          const styleDef = BL_STYLES[curStyle] || BL_STYLES[2];
+
           const row = document.createElement("div");
           row.className = "pset-row";
+
           const nameEl = document.createElement("div");
           nameEl.className = "pset-row-name";
           nameEl.textContent = entry.name;
+
           const badgeEl = document.createElement("div");
-          badgeEl.className = "pset-row-badge";
-          badgeEl.textContent = STYLE_ICONS[entry.style] ?? "•";
+          if (isTemp) {
+            const msLeft   = Math.max(0, new Date(entry.expiresAt).getTime() - Date.now());
+            const minsLeft = Math.round(msLeft / 60000);
+            const dLeft    = Math.floor(minsLeft / 1440);
+            const hLeft    = Math.floor((minsLeft % 1440) / 60);
+            const mLeft    = minsLeft % 60;
+            let remain = "";
+            if (dLeft) remain += dLeft + "d ";
+            if (hLeft) remain += hLeft + "h ";
+            if (mLeft || !remain) remain += (minsLeft === 0 ? "<1" : mLeft) + "m";
+            badgeEl.className = "pset-row-badge temp-badge";
+            badgeEl.textContent = `${styleDef.icon} ⏳ ${remain.trim()}`;
+            badgeEl.title = `Expires ${new Date(entry.expiresAt).toLocaleString()}\nClick to change style`;
+          } else {
+            badgeEl.className = "pset-row-badge";
+            badgeEl.textContent = `${styleDef.icon} ${styleDef.name}`;
+            badgeEl.title = "Click to change style";
+          }
+
+          badgeEl.addEventListener("click", (e) => {
+            e.stopPropagation();
+            const existing = badgeEl.querySelector(".pset-style-dropdown");
+            if (existing) { existing.remove(); return; }
+            closeAllPsetDropdowns();
+            const dd = document.createElement("div");
+            dd.className = "pset-style-dropdown";
+            Object.entries(BL_STYLES).forEach(([id, def]) => {
+              const opt = document.createElement("div");
+              opt.className = "pset-style-opt" + (curStyle === +id ? " active" : "");
+              opt.textContent = `${def.icon}  ${def.name}`;
+              opt.addEventListener("click", (ev) => {
+                ev.stopPropagation();
+                const arr = blLoad().map(u =>
+                  u.name === entry.name ? { ...u, style: +id } : u
+                );
+                blSave(arr);
+                blApplyAll();
+                _renderSettingsList();
+              });
+              dd.appendChild(opt);
+            });
+            badgeEl.appendChild(dd);
+          });
+
+          const extendBtn = isTemp ? (() => {
+            const btn = document.createElement("button");
+            btn.className = "pset-extend-btn";
+            btn.textContent = "+30m";
+            btn.title = "Extend by 30 minutes";
+            btn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const arr = blLoad().map(u => {
+                if (u.name !== entry.name) return u;
+                const base = Math.max(Date.now(), new Date(u.expiresAt).getTime());
+                return { ...u, expiresAt: new Date(base + 30 * 60 * 1000).toISOString() };
+              });
+              blSave(arr);
+              _renderSettingsList();
+            });
+            return btn;
+          })() : null;
+
           const delBtn = document.createElement("button");
           delBtn.className = "pset-row-del";
           delBtn.textContent = "✕";
@@ -18585,11 +18709,14 @@ unsafeWindow.fetch = function(...args) {
             blApplyAll();
             _renderSettingsList();
           });
+
           row.appendChild(nameEl);
           row.appendChild(badgeEl);
+          if (extendBtn) row.appendChild(extendBtn);
           row.appendChild(delBtn);
           listEl.appendChild(row);
         });
+
         pageList.appendChild(listEl);
 
         const clearBtn = document.createElement("button");
@@ -18603,6 +18730,8 @@ unsafeWindow.fetch = function(...args) {
           }
         });
         pageList.appendChild(clearBtn);
+
+        document.addEventListener("mousedown", closeAllPsetDropdowns, { capture: true, once: true });
       }
       _renderSettingsList();
 
