@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
 // @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      2.4.0
+// @version      2.4.1
 // @license      MIT
 // @author       Star-tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -946,6 +946,11 @@
       wm_send_empty: "Message cannot be empty.",
       wm_send_returning: "Returning...",
       wm_send_hint: "Shift+Click to send without switching channel",
+      wm_send_field_add:    "+ Add field",
+      wm_send_field_del:    "Remove field",
+      wm_send_sending_n:    "Sending {n}/{total}…",
+      wm_send_cool_warn:    "Cool-down: {s}s between messages",
+      wm_send_chat_btn:     "Send message",
       wm_send_mode_api: "⚡ API Mode",
       wm_send_mode_nav: "🔀 Navigate Mode",
       wm_send_mode_desc_api: "Send directly, no channel switch",
@@ -1353,6 +1358,11 @@
       wm_send_empty: "訊息不能為空白。",
       wm_send_returning: "返回原頻道...",
       wm_send_hint: "Shift+點擊蟲洞可在不切換頻道的情況下傳送",
+      wm_send_field_add:    "+ 新增欄位",
+      wm_send_field_del:    "移除欄位",
+      wm_send_sending_n:    "傳送中 {n}/{total}…",
+      wm_send_cool_warn:    "冷卻中：{s} 秒後傳送下一則",
+      wm_send_chat_btn:     "傳送訊息",
       wm_send_mode_api: "⚡ API 模式",
       wm_send_mode_nav: "🔀 跳頁模式",
       wm_send_mode_desc_api: "直接傳送，不切換頻道",
@@ -1751,6 +1761,11 @@
       wm_send_empty: "消息不能为空白。",
       wm_send_returning: "返回原频道...",
       wm_send_hint: "Shift+点击虫洞可在不切换频道的情况下发送",
+      wm_send_field_add:    "+ 添加欄位",
+      wm_send_field_del:    "移除欄位",
+      wm_send_sending_n:    "发送中 {n}/{total}…",
+      wm_send_cool_warn:    "冷却中：{s} 秒后发送下一条",
+      wm_send_chat_btn:     "发送消息",
       wm_send_mode_api: "⚡ API 模式",
       wm_send_mode_nav: "🔀 跳页模式",
       wm_send_mode_desc_api: "直接发送，不切换频道",
@@ -2156,6 +2171,11 @@
       wm_send_empty: "メッセージを入力してください。",
       wm_send_returning: "元のチャンネルに戻っています...",
       wm_send_hint: "Shift+クリックでチャンネル切替なしに送信できます",
+      wm_send_field_add:    "+ フィールド追加",
+      wm_send_field_del:    "フィールド削除",
+      wm_send_sending_n:    "送信中 {n}/{total}…",
+      wm_send_cool_warn:    "クールダウン：{s}秒後に次を送信",
+      wm_send_chat_btn:     "メッセージを送信",
       wm_send_mode_api: "⚡ API モード",
       wm_send_mode_nav: "🔀 ページ移動モード",
       wm_send_mode_desc_api: "直接送信、チャンネル切替なし",
@@ -2560,6 +2580,11 @@
       wm_send_empty: "메시지를 입력해 주세요.",
       wm_send_returning: "원래 채널로 돌아가는 중...",
       wm_send_hint: "Shift+클릭으로 채널 전환 없이 전송할 수 있습니다",
+      wm_send_field_add:    "+ 필드 추가",
+      wm_send_field_del:    "필드 제거",
+      wm_send_sending_n:    "전송 중 {n}/{total}…",
+      wm_send_cool_warn:    "쿨다운: {s}초 후 다음 메시지 전송",
+      wm_send_chat_btn:     "메시지 보내기",
       wm_send_mode_api: "⚡ API 모드",
       wm_send_mode_nav: "🔀 페이지 이동 모드",
       wm_send_mode_desc_api: "직접 전송, 채널 전환 없음",
@@ -13629,7 +13654,8 @@
       const chip = document.createElement("div");
       chip.className = "my-wormhole-vip-chip";
       chip.dataset.wormholeName = wormhole.name;
-      chip.dataset.wormholeId = wormhole.id;
+      chip.dataset.wormholeId   = wormhole.id;
+      chip.style.cssText = "position:relative; overflow:visible;";
 
       const iconHtml = wormhole.icon
         ? `<img src="${wormhole.icon}" style="width:20px;height:20px;border-radius:50%;object-fit:cover;" draggable="false">`
@@ -13640,17 +13666,35 @@
             <span class="vip-text">${escHtml(wormhole.name)}</span>
         `;
       chip.dataset.wormholeUrl = wormhole.url;
-
       chip.draggable = true;
-      DEBUG &&
-        console.log(
-          "[VIP Chip] Created:",
-          wormhole.name,
-          "draggable:",
-          chip.draggable,
-          "id:",
-          wormhole.id,
-        );
+
+      const chatBtn = document.createElement("button");
+      chatBtn.className = "wh-chat-btn";
+      chatBtn.title     = this.t("wm_send_chat_btn") || "Send message";
+      chatBtn.innerHTML = `<span class="wh-chat-icon">💬</span>`;
+      chatBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        this.openSendMessageOverlay(wormhole);
+      });
+      document.body.appendChild(chatBtn);
+
+      const _positionChatBtn = () => {
+        const r = chip.getBoundingClientRect();
+        chatBtn.style.top  = (r.top  - 10) + "px";
+        chatBtn.style.left = (r.right - 10) + "px";
+      };
+      chip.addEventListener("mouseenter", () => {
+        _positionChatBtn();
+        chatBtn.classList.add("visible");
+      });
+      chip.addEventListener("mouseleave", (e) => {
+        if (e.relatedTarget === chatBtn || chatBtn.contains(e.relatedTarget)) return;
+        chatBtn.classList.remove("visible");
+      });
+      chatBtn.addEventListener("mouseleave", () => chatBtn.classList.remove("visible"));
+
+      DEBUG && console.log("[VIP Chip] Created:", wormhole.name, "draggable:", chip.draggable, "id:", wormhole.id);
 
       this.attachChipEvents(chip, wormhole, true);
       this.attachDragEvents(chip, wormhole, "vip");
@@ -13661,7 +13705,8 @@
       const chip = document.createElement("div");
       chip.className = "my-wormhole-chip";
       chip.dataset.wormholeName = wormhole.name;
-      chip.dataset.wormholeId = wormhole.id;
+      chip.dataset.wormholeId   = wormhole.id;
+      chip.style.cssText = "position:relative; overflow:visible;";
 
       const iconHtml = wormhole.icon
         ? `<img src="${wormhole.icon}" style="width:16px;height:16px;border-radius:50%;object-fit:cover;" class="my-wormhole-icon" draggable="false">`
@@ -13669,17 +13714,35 @@
 
       chip.innerHTML = `${iconHtml}<span class="item-name">${escHtml(wormhole.name)}</span>`;
       chip.dataset.wormholeUrl = wormhole.url;
-
       chip.draggable = true;
-      DEBUG &&
-        console.log(
-          "[Wormhole Chip] Created:",
-          wormhole.name,
-          "draggable:",
-          chip.draggable,
-          "id:",
-          wormhole.id,
-        );
+
+      const chatBtn = document.createElement("button");
+      chatBtn.className  = "wh-chat-btn";
+      chatBtn.title      = this.t("wm_send_chat_btn") || "Send message";
+      chatBtn.innerHTML  = `<span class="wh-chat-icon">💬</span>`;
+      chatBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        this.openSendMessageOverlay(wormhole);
+      });
+      document.body.appendChild(chatBtn);
+
+      const _positionChatBtn = () => {
+        const r = chip.getBoundingClientRect();
+        chatBtn.style.top  = (r.top  - 10) + "px";
+        chatBtn.style.left = (r.right - 10) + "px";
+      };
+      chip.addEventListener("mouseenter", () => {
+        _positionChatBtn();
+        chatBtn.classList.add("visible");
+      });
+      chip.addEventListener("mouseleave", (e) => {
+        if (e.relatedTarget === chatBtn || chatBtn.contains(e.relatedTarget)) return;
+        chatBtn.classList.remove("visible");
+      });
+      chatBtn.addEventListener("mouseleave", () => chatBtn.classList.remove("visible"));
+
+      DEBUG && console.log("[Wormhole Chip] Created:", wormhole.name, "draggable:", chip.draggable, "id:", wormhole.id);
 
       this.attachChipEvents(chip, wormhole, false);
       this.attachDragEvents(chip, wormhole, "normal");
@@ -14151,10 +14214,10 @@
         dropdown.appendChild(item);
       };
 
-      addItem(this.t("wm_menu_edit"), "✎", () => this.editWormhole(wormhole));
       addItem(this.t("wm_menu_send"), "✉️", () =>
         this.openSendMessageOverlay(wormhole),
       );
+      addItem(this.t("wm_menu_edit"), "✎", () => this.editWormhole(wormhole));
 
       const label = isPinned
         ? this.t("wm_menu_vip_remove")
@@ -15013,7 +15076,9 @@ unsafeWindow.fetch = function(...args) {
           </div>
           ${needsToken ? `<div id="wh-send-token-warn" style="opacity:0">${this.t("wm_send_token_warn")}</div>` : ""}
           <div id="wh-send-dropzone">
-            <textarea id="wh-send-input" placeholder="${ph}" rows="3" maxlength="2000"></textarea>
+            <div id="wh-send-fields"></div>
+            <button id="wh-send-field-add">${this.t("wm_send_field_add") || "+ Add field"}</button>
+            <div id="wh-send-cool-note"></div>
             <div id="wh-send-paste-hint">${this.t("wm_send_paste_hint")}</div>
             <div id="wh-send-paste-preview"></div>
           </div>
@@ -15116,74 +15181,129 @@ unsafeWindow.fetch = function(...args) {
           #wh-send-submit-btn{padding:7px 18px;border-radius:3px;background:var(--dmt-accent);border:none;color:#fff;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s}
           #wh-send-submit-btn:hover:not(:disabled){filter:brightness(1.12)}
           #wh-send-submit-btn:disabled{background:#3c4270;color:var(--dmt-text-muted);cursor:not-allowed}
+
+          @keyframes wh-out{from{opacity:1;transform:none}to{opacity:0;transform:translateY(6px) scale(.97)}}
+          #wh-send-overlay.wh-leaving #wh-send-modal{animation:wh-out .15s ease-in forwards}
+          #wh-send-overlay.wh-leaving #wh-send-backdrop{animation:wh-out .15s ease-in forwards}
+
+          #wh-send-fields{display:flex;flex-direction:column;gap:8px}
+          .wh-field-row{display:flex;gap:6px;align-items:flex-start}
+          .wh-field-num{font-size:10px;color:rgba(185,187,190,.4);min-width:14px;padding-top:12px;flex-shrink:0;text-align:right}
+          .wh-field-textarea{flex:1;box-sizing:border-box;background:var(--dmt-bg-deep);color:var(--dmt-text-bright);border:1.5px solid rgba(88,101,242,.25);border-radius:6px;padding:8px 10px;font-size:14px;line-height:1.5;resize:vertical;min-height:60px;max-height:160px;outline:none;font-family:inherit;transition:border-color .15s}
+          .wh-field-textarea:focus{border-color:rgba(88,101,242,.7)}
+          .wh-field-textarea:disabled{opacity:.5;cursor:not-allowed}
+          .wh-field-del{background:transparent;border:none;color:rgba(237,66,69,.5);cursor:pointer;font-size:14px;padding:8px 2px;flex-shrink:0;transition:color .12s;line-height:1}
+          .wh-field-del:hover{color:rgba(237,66,69,.9)}
+          #wh-send-field-add{align-self:flex-start;font-size:11px;font-weight:600;padding:3px 10px;border-radius:5px;background:rgba(88,101,242,.1);border:1px solid rgba(88,101,242,.25);color:rgba(88,101,242,.8);cursor:pointer;transition:background .12s,color .12s;margin-top:2px}
+          #wh-send-field-add:hover{background:rgba(88,101,242,.22);color:#c0c5f7}
+          #wh-send-field-add:disabled{opacity:.35;cursor:not-allowed}
+          #wh-send-cool-note{font-size:10px;color:rgba(240,178,50,.75);min-height:14px}
+
         `;
         document.head.appendChild(s);
       }
 
       document.body.appendChild(overlay);
 
-      const input = overlay.querySelector("#wh-send-input");
-      const status = overlay.querySelector("#wh-send-status");
-      const submitBtn = overlay.querySelector("#wh-send-submit-btn");
-      const modeDesc = overlay.querySelector("#wh-send-mode-desc");
-      const autocloseEl = overlay.querySelector("#wh-send-autoclose");
-      const gotoEl = overlay.querySelector("#wh-send-goto");
-      const gotoLabel = overlay.querySelector("#wh-send-goto-label");
-      const showToastEl = overlay.querySelector("#wh-send-show-toast");
+      const fieldsEl   = overlay.querySelector("#wh-send-fields");
+      const addFieldBtn = overlay.querySelector("#wh-send-field-add");
+      const coolNote   = overlay.querySelector("#wh-send-cool-note");
+      const status     = overlay.querySelector("#wh-send-status");
+      const submitBtn  = overlay.querySelector("#wh-send-submit-btn");
+      const modeDesc   = overlay.querySelector("#wh-send-mode-desc");
 
-      const syncMutex = () => {
-        const acChecked = autocloseEl.checked;
-        gotoLabel.classList.toggle("cb-disabled", acChecked);
-        gotoEl.disabled = acChecked;
-        if (acChecked) gotoEl.checked = false;
-      };
+      const MAX_FIELDS = 5;
+      const POST_COOL_MAP = { 1: 0, 2: 0, 3: 5000, 4: 5000, 5: 8000 };
+      const SEND_JITTER_MIN = 300;
+      const SEND_JITTER_MAX = 600;
 
-      autocloseEl.addEventListener("change", () => {
-        localStorage.setItem(
-          "wh_send_autoclose",
-          autocloseEl.checked ? "true" : "false",
-        );
-        syncMutex();
+      function getFieldCount() {
+        return fieldsEl.querySelectorAll(".wh-field-textarea").length;
+      }
+
+      function updateCoolNote() {
+        const n = getFieldCount();
+        if (n <= 2) { coolNote.textContent = ""; return; }
+        const s = POST_COOL_MAP[Math.min(n, 5)] / 1000;
+        coolNote.textContent = (this.t("wm_send_cool_warn") || "Cool-down: {s}s between messages")
+          .replace("{s}", s.toFixed(0));
+      }
+
+      function addField(placeholder, autofocus = false) {
+        const n = getFieldCount() + 1;
+        const row = document.createElement("div");
+        row.className = "wh-field-row";
+        const numEl = document.createElement("span");
+        numEl.className = "wh-field-num";
+        numEl.textContent = n;
+        const ta = document.createElement("textarea");
+        ta.className   = "wh-field-textarea";
+        ta.placeholder = placeholder;
+        ta.rows        = 2;
+        ta.maxLength   = 2000;
+        const delBtn = document.createElement("button");
+        delBtn.className   = "wh-field-del";
+        delBtn.title       = this.t("wm_send_field_del") || "Remove";
+        delBtn.textContent = "✕";
+        delBtn.style.display = n <= 2 ? "none" : "";
+        delBtn.addEventListener("click", () => {
+          row.remove();
+          fieldsEl.querySelectorAll(".wh-field-num").forEach((el, i) => { el.textContent = i + 1; });
+          const rows = fieldsEl.querySelectorAll(".wh-field-row");
+          rows.forEach((r, i) => {
+            const btn = r.querySelector(".wh-field-del");
+            if (btn) btn.style.display = rows.length <= 2 ? "none" : "";
+          });
+          addFieldBtn.disabled = getFieldCount() >= MAX_FIELDS;
+          updateCoolNote.call(this);
+        });
+        row.appendChild(numEl);
+        row.appendChild(ta);
+        row.appendChild(delBtn);
+        fieldsEl.appendChild(row);
+        addFieldBtn.disabled = getFieldCount() >= MAX_FIELDS;
+        updateCoolNote.call(this);
+        if (autofocus) requestAnimationFrame(() => ta.focus());
+        ta.addEventListener("keydown", (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+            e.preventDefault();
+            submitBtn.click();
+          }
+        });
+        return ta;
+      }
+
+      addField.call(this, ph, true);
+      addField.call(this, this.t("wm_send_placeholder")?.replace("#{name}", "") || "Field 2…");
+
+      addFieldBtn.addEventListener("click", () => {
+        if (getFieldCount() >= MAX_FIELDS) return;
+        addField.call(this, "", true);
+        fieldsEl.querySelectorAll(".wh-field-del").forEach(b => { b.style.display = ""; });
       });
-
-      gotoEl.addEventListener("change", () => {
-        localStorage.setItem("wh_send_goto", gotoEl.checked ? "true" : "false");
-      });
-
-      showToastEl.addEventListener("change", () => {
-        localStorage.setItem(
-          "wh_send_show_toast",
-          showToastEl.checked ? "true" : "false",
-        );
-      });
-      const preview = overlay.querySelector("#wh-send-paste-preview");
-      let pendingFiles = [];
 
       const setStatus = (msg, cls = "") => {
         status.textContent = msg;
         status.className = cls;
       };
+      const closeOverlay = (instant = false) => {
+        if (instant) { overlay.remove(); document.removeEventListener("keydown", escHandler); return; }
+        overlay.classList.add("wh-leaving");
+        overlay.addEventListener("animationend", () => {
+          overlay.remove();
+          document.removeEventListener("keydown", escHandler);
+        }, { once: true });
+        setTimeout(() => { if (overlay.isConnected) { overlay.remove(); document.removeEventListener("keydown", escHandler); } }, 160);
+      };
       const lock = (on) => {
-        [
-          input,
-          submitBtn,
-          overlay.querySelector("#wh-send-cancel-btn"),
-          overlay.querySelector("#wh-send-close"),
-        ].forEach((el) => {
-          if (el) el.disabled = on;
-        });
+        overlay.querySelectorAll(".wh-field-textarea, #wh-send-submit-btn, #wh-send-cancel-btn, #wh-send-close, #wh-send-field-add")
+          .forEach(el => { el.disabled = on; });
       };
-      const escHandler = (e) => {
-        if (e.key === "Escape") closeOverlay();
-      };
-      const closeOverlay = () => {
-        overlay.remove();
-        document.removeEventListener("keydown", escHandler);
-      };
+      const escHandler = (e) => { if (e.key === "Escape") closeOverlay(); };
 
-      overlay.querySelector("#wh-send-backdrop").onclick = closeOverlay;
-      overlay.querySelector("#wh-send-close").onclick = closeOverlay;
-      overlay.querySelector("#wh-send-cancel-btn").onclick = closeOverlay;
+      overlay.querySelector("#wh-send-backdrop").onclick = () => closeOverlay();
+      overlay.querySelector("#wh-send-close").onclick    = () => closeOverlay();
+      overlay.querySelector("#wh-send-cancel-btn").onclick = () => closeOverlay();
       document.addEventListener("keydown", escHandler);
 
       const toggleBtn = overlay.querySelector("#wh-send-mode-toggle");
@@ -15203,6 +15323,8 @@ unsafeWindow.fetch = function(...args) {
         };
       }
 
+      const preview = overlay.querySelector("#wh-send-paste-preview");
+      let pendingFiles = [];
       const addThumb = (file) => {
         const idx = pendingFiles.length;
         pendingFiles.push(file);
@@ -15213,45 +15335,45 @@ unsafeWindow.fetch = function(...args) {
         const rm = document.createElement("button");
         rm.className = "wh-paste-thumb-rm";
         rm.textContent = "✕";
-        rm.onclick = () => {
-          pendingFiles.splice(idx, 1);
-          wrap.remove();
-          URL.revokeObjectURL(img.src);
-        };
+        rm.onclick = () => { pendingFiles.splice(idx, 1); wrap.remove(); URL.revokeObjectURL(img.src); };
         wrap.appendChild(img);
         wrap.appendChild(rm);
         preview.appendChild(wrap);
       };
-
-      input.addEventListener("paste", (e) => {
+      overlay.addEventListener("paste", (e) => {
+        if (!e.target.classList.contains("wh-field-textarea")) return;
         const items = e.clipboardData?.items;
         if (!items) return;
         let hasImage = false;
         for (const item of items) {
-          if (item.type.startsWith("image/")) {
-            hasImage = true;
-            const file = item.getAsFile();
-            if (file) addThumb(file);
-          }
+          if (item.type.startsWith("image/")) { hasImage = true; addThumb(item.getAsFile()); }
         }
         if (hasImage) e.preventDefault();
       });
 
-      input.addEventListener("keydown", (e) => {
-        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-          e.preventDefault();
-          submitBtn.click();
-        }
-      });
-      requestAnimationFrame(() => input.focus());
+      const autocloseEl  = overlay.querySelector("#wh-send-autoclose");
+      const gotoEl       = overlay.querySelector("#wh-send-goto");
+      const gotoLabel    = overlay.querySelector("#wh-send-goto-label");
+      const showToastEl  = overlay.querySelector("#wh-send-show-toast");
+      const syncMutex = () => {
+        const ac = autocloseEl.checked;
+        gotoLabel.classList.toggle("cb-disabled", ac);
+        gotoEl.disabled = ac;
+        if (ac) gotoEl.checked = false;
+      };
+      autocloseEl.addEventListener("change", () => { localStorage.setItem("wh_send_autoclose", autocloseEl.checked); syncMutex(); });
+      gotoEl.addEventListener("change",      () => { localStorage.setItem("wh_send_goto",       gotoEl.checked); });
+      showToastEl.addEventListener("change", () => { localStorage.setItem("wh_send_show_toast", showToastEl.checked); });
 
       submitBtn.onclick = async () => {
-        const text = input.value.trim();
+        const texts = [...fieldsEl.querySelectorAll(".wh-field-textarea")]
+          .map(ta => ta.value.trim())
+          .filter(Boolean);
         const hasImg = pendingFiles.length > 0;
 
-        if (!text && !hasImg) {
+        if (!texts.length && !hasImg) {
           setStatus(this.t("wm_send_empty"), "err");
-          input.focus();
+          fieldsEl.querySelector(".wh-field-textarea")?.focus();
           return;
         }
 
@@ -15262,74 +15384,124 @@ unsafeWindow.fetch = function(...args) {
             await new Promise((resolve) => {
               const deadline = Date.now() + 4000;
               const poll = setInterval(() => {
-                if (this._cachedToken || Date.now() >= deadline) {
-                  clearInterval(poll);
-                  resolve();
-                }
+                if (this._cachedToken || Date.now() >= deadline) { clearInterval(poll); resolve(); }
               }, 100);
             });
           }
 
-          const useApi = this.getApiMode() && !!this._cachedToken;
+          const useApi   = this.getApiMode() && !!this._cachedToken;
+          const total    = texts.length || 1;
+          const postCool = POST_COOL_MAP[Math.min(total, 5)] ?? 0;
+          const jitter   = () => new Promise(r =>
+            setTimeout(r, SEND_JITTER_MIN + Math.random() * (SEND_JITTER_MAX - SEND_JITTER_MIN))
+          );
 
-          if (useApi) {
-            const ok = await this._sendViaApi(
-              wormhole,
-              text,
-              setStatus,
-              hasImg ? pendingFiles : [],
-            );
-            if (!ok) {
-              setStatus(this.t("wm_api_send_fail"), "err");
-              lock(false);
-              return;
+          closeOverlay(true);
+
+          const existing = document.getElementById("wh-send-result-toast");
+          if (existing) existing.remove();
+          const pill = document.createElement("div");
+          pill.id = "wh-send-result-toast";
+          pill.style.cssText = `
+            position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(8px);
+            background:#2b2d31; color:#f2f3f5; padding:10px 20px; border-radius:20px;
+            font-size:13px; font-weight:500; box-shadow:0 8px 24px rgba(0,0,0,0.45);
+            z-index:2147483649; border:1px solid rgba(88,101,242,0.4);
+            user-select:none; text-align:center; min-width:160px;
+            opacity:0; transition:opacity 0.18s, transform 0.18s, border-color 0.2s, background 0.2s;
+            pointer-events:auto; white-space:nowrap;
+          `;
+          document.body.appendChild(pill);
+          requestAnimationFrame(() => {
+            pill.style.opacity = "1";
+            pill.style.transform = "translateX(-50%) translateY(0)";
+          });
+
+          const self = this;
+          const hint = self.t("wm_send_toast_hint") || "Click to go to channel";
+
+          const setPill = (topText, state = "progress") => {
+            pill.innerHTML = `<div style="font-weight:500">${topText}</div><div style="font-size:11px;margin-top:3px;opacity:0.65">${hint}</div>`;
+            if (state === "ok") {
+              pill.style.borderColor = "rgba(35,165,90,.55)";
+              pill.style.color = "#23a55a";
+              pill.onmouseenter = () => { pill.style.boxShadow = "0 8px 28px rgba(35,165,90,.25)"; pill.style.borderColor = "rgba(35,165,90,.85)"; };
+              pill.onmouseleave = () => { pill.style.boxShadow = "0 8px 24px rgba(0,0,0,0.45)"; pill.style.borderColor = "rgba(35,165,90,.55)"; };
+            } else if (state === "err") {
+              pill.style.borderColor = "rgba(237,66,69,.55)";
+              pill.style.color = "#ed4245";
+            } else if (state === "cool") {
+              pill.style.borderColor = "rgba(240,178,50,.4)";
+              pill.style.color = "#f0b232";
+            } else {
+              pill.style.borderColor = "rgba(88,101,242,.4)";
+              pill.style.color = "#dbdee1";
             }
-          } else {
-            const ok = await this._sendViaWormhole(
-              wormhole,
-              text,
-              setStatus,
-              hasImg ? pendingFiles : [],
+          };
+
+          pill.style.cursor = "pointer";
+          pill.onclick = () => self.navigateToChannel(wormhole.url);
+          pill.onmouseenter = () => { pill.style.boxShadow = "0 8px 28px rgba(88,101,242,.2)"; };
+          pill.onmouseleave = () => { pill.style.boxShadow = "0 8px 24px rgba(0,0,0,0.45)"; };
+
+          const dismissPill = (delay = 3000) => {
+            setTimeout(() => {
+              pill.style.opacity = "0";
+              pill.style.transform = "translateX(-50%) translateY(8px)";
+              setTimeout(() => pill.remove(), 220);
+            }, delay);
+          };
+
+          let sendOk = true;
+          for (let i = 0; i < total; i++) {
+            const segText = texts[i] ?? "";
+            const isLast  = i === total - 1;
+            const files   = isLast && hasImg ? pendingFiles : [];
+
+            setPill(
+              (self.t("wm_send_sending_n") || "Sending {n}/{total}…")
+                .replace("{n}", i + 1).replace("{total}", total)
             );
+
+            const ok = useApi
+              ? await self._sendViaApi(wormhole, segText, () => {}, files)
+              : await self._sendViaWormhole(wormhole, segText, () => {}, files);
+
             if (!ok) {
-              setStatus(this.t("wm_send_fail"), "err");
-              lock(false);
-              return;
+              pill.style.cursor = "default";
+              pill.onclick = null;
+              setPill(useApi ? self.t("wm_api_send_fail") : self.t("wm_send_fail"), "err");
+              dismissPill(3500);
+              sendOk = false;
+              break;
             }
+
+            if (!isLast) await jitter();
           }
+
+          if (!sendOk) return;
 
           pendingFiles = [];
-          preview.innerHTML = "";
 
-          setStatus(
-            this.t("wm_send_success").replace("#{name}", wormhole.name),
-            "ok",
-          );
-          if (localStorage.getItem("wh_send_show_toast") !== "false") {
-            this._showSendToast(wormhole);
-          }
+          if (postCool > 0) {
+            let remaining = Math.ceil(postCool / 1000);
+            const coolLabel = (s) =>
+              (self.t("wm_send_cool_warn") || "Cool-down: {s}s").replace("{s}", s);
+            setPill(coolLabel(remaining), "cool");
 
-          const autoClose =
-            localStorage.getItem("wh_send_autoclose") !== "false";
-          const gotoChannel =
-            !autoClose && localStorage.getItem("wh_send_goto") === "true";
-
-          if (gotoChannel) {
-            setTimeout(() => {
-              closeOverlay();
-              this.navigateToChannel(wormhole.url);
-            }, 600);
-          } else if (autoClose) {
-            setTimeout(closeOverlay, 1200);
+            const coolTick = setInterval(() => {
+              remaining--;
+              if (remaining <= 0) {
+                clearInterval(coolTick);
+                setPill(self.t("wm_send_toast_title").replace("#{name}", wormhole.name), "ok");
+                dismissPill(3000);
+              } else {
+                setPill(coolLabel(remaining), "cool");
+              }
+            }, 1000);
           } else {
-            setTimeout(() => {
-              input.value = "";
-              pendingFiles = [];
-              preview.innerHTML = "";
-              setStatus("", "");
-              lock(false);
-              input.focus();
-            }, 1200);
+            setPill(self.t("wm_send_toast_title").replace("#{name}", wormhole.name), "ok");
+            dismissPill(3000);
           }
         } catch (err) {
           console.error("[WH Send]", err);
@@ -16681,8 +16853,8 @@ unsafeWindow.fetch = function(...args) {
       style.id = "wormhole-pro-styles";
       style.textContent = `
             .my-wormhole-vip-section { display: flex; gap: 2px; margin-right: 10px; padding-right: 10px; border-right: 1px solid rgba(255,215,0,0.2); }
-            .my-wormhole-vip-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: transparent; border-radius: 6px; color: var(--dmt-gold); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
-            .my-wormhole-vip-chip:hover { transform: translateY(-2px); text-shadow: 0 0 8px rgba(255, 215, 0, 0.6); }
+            .my-wormhole-vip-chip { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: transparent; border-radius: 6px; color: var(--dmt-gold); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: visible; }
+            .my-wormhole-vip-chip:hover { transform: scale(1.08); transform-origin: center; text-shadow: 0 0 8px rgba(255, 215, 0, 0.6); }
             .my-wormhole-group-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(88, 101, 242, 0.1); border: 1.5px solid rgba(88, 101, 242, 0.3); border-radius: 5px; color: var(--dmt-accent); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; margin-right: 6px; }
             .my-wormhole-group-chip:hover { background: rgba(88, 101, 242, 0.2); border-color: rgba(88, 101, 242, 0.5); transform: translateY(-1px); }
             .my-wormhole-chip { background: rgba(30, 31, 34, 0.6); border: 1px solid rgba(88, 101, 242, 0.3); color: var(--dmt-text-primary); font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 12px; cursor: pointer; user-select: none; transition: all 0.2s; display: flex; align-items: center; gap: 4px; white-space: nowrap; margin-right: 4px; max-width: 120px; }
@@ -16772,7 +16944,8 @@ unsafeWindow.fetch = function(...args) {
             .wh-row-2 .my-wormhole-vip-chip:hover {
                 background: rgba(88, 101, 242, 0.3);
                 border-color: rgba(88, 101, 242, 0.7);
-                transform: translateY(-2px);
+                transform: scale(1.06);
+                transform-origin: center;
                 box-shadow: 0 4px 12px rgba(88,101,242,0.3);
             }
             .wh-row-2 .my-wormhole-vip-chip {
@@ -16782,6 +16955,8 @@ unsafeWindow.fetch = function(...args) {
                 background: rgba(255, 215, 0, 0.15);
                 border-color: rgba(255, 215, 0, 0.8);
                 box-shadow: 0 4px 12px rgba(255,215,0,0.25);
+                transform: scale(1.06);
+                transform-origin: center;
             }
 
             .wh-row-2 .my-wormhole-chip img.my-wormhole-icon,
@@ -16859,20 +17034,10 @@ unsafeWindow.fetch = function(...args) {
             }
             
             .my-wormhole-container.focus-mode .my-wormhole-vip-chip:hover {
-                width: 40px !important;
-                height: 40px !important;
-                max-width: 40px !important;
-                transform: translateY(-2px);
+                transform: scale(1.2);
+                transform-origin: center;
                 box-shadow: 0 6px 20px rgba(255, 215, 0, 0.8);
-                margin-right: 0;
                 z-index: 10;
-            }
-            .my-wormhole-container.focus-mode .my-wormhole-vip-chip:hover img {
-                width: 32px !important;
-                height: 32px !important;
-            }
-            .my-wormhole-container.focus-mode .my-wormhole-vip-chip:hover .vip-icon {
-                font-size: 28px;
             }
 
             .my-wormhole-container.focus-mode .wh-row-1 .my-wormhole-vip-chip::after,
@@ -17016,6 +17181,23 @@ unsafeWindow.fetch = function(...args) {
                 border: 1.5px solid rgba(0,0,0,0.5);
                 box-sizing: border-box;
             }
+
+            .wh-chat-btn {
+                position: fixed;
+                display: flex; align-items: center; gap: 3px;
+                background: rgba(24,25,28,.94);
+                border: 1px solid rgba(88,101,242,.5);
+                border-radius: 10px; padding: 2px 7px 2px 5px;
+                cursor: pointer;
+                opacity: 0; transform: translateY(3px) scale(.9);
+                transition: opacity .18s, transform .18s;
+                pointer-events: none;
+                z-index: 2147483640; white-space: nowrap;
+                box-shadow: 0 2px 8px rgba(0,0,0,.5);
+            }
+            .wh-chat-btn.visible { opacity: 1; transform: none; pointer-events: auto; }
+            .focus-mode .wh-chat-btn { display: none !important; }
+            .wh-chat-icon { font-size: 16px; line-height: 1; }
         `;
       document.head.appendChild(style);
     }
@@ -17288,18 +17470,18 @@ unsafeWindow.fetch = function(...args) {
           position: fixed; z-index: 2147483648;
           background: rgba(22,23,26,0.97);
           border: 1px solid rgba(88,101,242,0.35);
-          border-radius: 12px;
+          border-radius: 14px;
           box-shadow: 0 16px 48px rgba(0,0,0,0.75);
           backdrop-filter: blur(16px);
-          padding: 12px;
-          width: 340px;
+          padding: 18px;
+          width: 420px;
           font-family: sans-serif;
           animation: dmt-bl-picker-in 0.18s cubic-bezier(.19,1,.22,1) forwards;
         }
         #dmt-bl-picker .picker-title {
-          font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+          font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
           text-transform: uppercase; color: rgba(185,187,190,0.5);
-          margin-bottom: 10px;
+          margin-bottom: 12px;
         }
         
         @keyframes dmt-bl-or-shake {
@@ -17335,7 +17517,7 @@ unsafeWindow.fetch = function(...args) {
         }
         
         #dmt-bl-picker .picker-card {
-          flex: 1; border-radius: 6px; padding: 7px 4px;
+          flex: 1; border-radius: 8px; padding: 10px 6px;
           background: transparent;
           border: 1px solid transparent;
           cursor: pointer; text-align: center;
@@ -17351,7 +17533,7 @@ unsafeWindow.fetch = function(...args) {
         }
         
         #dmt-bl-picker .picker-card-temp {
-          flex: 1; border-radius: 6px; padding: 7px 4px;
+          flex: 1; border-radius: 8px; padding: 10px 6px;
           background: rgba(255,255,255,0.02);
           border: 1.5px solid rgba(255,255,255,0.07);
           cursor: default; text-align: center;
@@ -17369,13 +17551,13 @@ unsafeWindow.fetch = function(...args) {
           border-color: rgba(242,153,74,0.85);
           background: rgba(242,153,74,0.18);
         }
-        #dmt-bl-picker .picker-icon { font-size: 16px; margin-bottom: 3px; }
+        #dmt-bl-picker .picker-icon { font-size: 20px; margin-bottom: 5px; }
         #dmt-bl-picker .picker-name {
-          font-size: 10px; font-weight: 600;
-          color: rgba(219,222,225,0.8); margin-bottom: 2px;
+          font-size: 12px; font-weight: 600;
+          color: rgba(219,222,225,0.9); margin-bottom: 3px;
         }
         #dmt-bl-picker .picker-desc {
-          font-size: 9px; color: rgba(185,187,190,0.45); line-height: 1.3;
+          font-size: 11px; color: rgba(185,187,190,0.55); line-height: 1.4;
         }
         
         #dmt-bl-picker .picker-confirm {
@@ -17608,7 +17790,7 @@ unsafeWindow.fetch = function(...args) {
           display: flex; align-items: center; gap: 8px;
           padding: 7px 8px; border-radius: 7px;
           border-bottom: 1px solid rgba(255,255,255,0.04);
-          transition: background .12s;
+          transition: background .12s; position: relative;
         }
         #${BL_PANEL_ID} .bl-row:last-child { border-bottom: none; }
         #${BL_PANEL_ID} .bl-row:hover { background: rgba(88,101,242,0.07); }
@@ -17621,15 +17803,45 @@ unsafeWindow.fetch = function(...args) {
           text-transform: uppercase; padding: 2px 6px; border-radius: 4px;
           cursor: pointer; flex-shrink: 0; transition: background 0.15s;
           background: rgba(88,101,242,0.15); border: 1px solid rgba(88,101,242,0.3);
-          color: #9ea6f5;
+          color: #9ea6f5; position: relative;
         }
-        #${BL_PANEL_ID} .bl-style-badge:hover {
-          background: rgba(88,101,242,0.3);
+        #${BL_PANEL_ID} .bl-style-badge:hover { background: rgba(88,101,242,0.3); }
+
+        #${BL_PANEL_ID} .bl-style-dropdown {
+          position: absolute; top: calc(100% + 4px); left: 0;
+          background: #1e1f22; border: 1px solid rgba(88,101,242,0.4);
+          border-radius: 7px; box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+          z-index: 9999; overflow: hidden; min-width: 110px;
+          animation: dmt-bl-picker-in 0.14s ease both;
         }
+        #${BL_PANEL_ID} .bl-style-opt {
+          display: flex; align-items: center; gap: 7px;
+          padding: 7px 10px; font-size: 12px; color: #dbdee1;
+          cursor: pointer; transition: background 0.1s;
+          white-space: nowrap;
+        }
+        #${BL_PANEL_ID} .bl-style-opt:hover { background: rgba(88,101,242,0.18); }
+        #${BL_PANEL_ID} .bl-style-opt.active { color: #a5adfa; background: rgba(88,101,242,0.12); }
+
         #${BL_PANEL_ID} .bl-temp-badge {
           background: rgba(242,153,74,0.15); border-color: rgba(242,153,74,0.4);
-          color: #f4a04a; cursor: default; letter-spacing: 0.03em; text-transform: none;
+          color: #f4a04a; cursor: default; letter-spacing: 0.03em;
+          text-transform: none; position: relative;
         }
+        
+        #${BL_PANEL_ID} .bl-temp-badge.switchable {
+          cursor: pointer;
+        }
+        #${BL_PANEL_ID} .bl-temp-badge.switchable:hover { background: rgba(242,153,74,0.3); }
+
+        #${BL_PANEL_ID} .bl-extend-btn {
+          background: rgba(242,153,74,0.1); border: 1px solid rgba(242,153,74,0.3);
+          border-radius: 4px; color: #f4a04a; font-size: 10px;
+          padding: 2px 5px; cursor: pointer; flex-shrink: 0;
+          transition: background .12s; white-space: nowrap;
+        }
+        #${BL_PANEL_ID} .bl-extend-btn:hover { background: rgba(242,153,74,0.28); }
+
         #${BL_PANEL_ID} .bl-date {
           font-size: 10px; color: rgba(185,187,190,0.4); flex-shrink: 0;
         }
@@ -17933,6 +18145,11 @@ unsafeWindow.fetch = function(...args) {
           list.appendChild(empty);
           return;
         }
+
+        function closeAllDropdowns() {
+          list.querySelectorAll(".bl-style-dropdown").forEach(d => d.remove());
+        }
+
         entries.forEach(({ name, addedAt, style = 2, expiresAt }) => {
           const row = document.createElement("div");
           row.className = "bl-row";
@@ -17942,34 +18159,92 @@ unsafeWindow.fetch = function(...args) {
           nameEl.textContent = name;
 
           const isTemp = !!expiresAt;
+          const curStyle = style === BL_TEMP_STYLE_ID ? 2 : style;
+          const styleDef = BL_STYLES[curStyle] || BL_STYLES[2];
 
-          const styleDef = BL_STYLES[style === BL_TEMP_STYLE_ID ? 2 : style] || BL_STYLES[2];
           const badge = document.createElement("div");
-          badge.className = "bl-style-badge" + (isTemp ? " bl-temp-badge" : "");
+
           if (isTemp) {
-            const msLeft = expiresAt ? Math.max(0, new Date(expiresAt).getTime() - Date.now()) : 0;
+            badge.className = "bl-style-badge bl-temp-badge switchable";
+            const msLeft  = Math.max(0, new Date(expiresAt).getTime() - Date.now());
             const minsLeft = Math.round(msLeft / 60000);
             const dLeft = Math.floor(minsLeft / 1440);
             const hLeft = Math.floor((minsLeft % 1440) / 60);
             const mLeft = minsLeft % 60;
             let remain = "";
-            if (dLeft) remain += dLeft + "d ";
-            if (hLeft) remain += hLeft + "h ";
+            if (dLeft)  remain += dLeft + "d ";
+            if (hLeft)  remain += hLeft + "h ";
             if (mLeft || !remain) remain += (minsLeft === 0 ? "<1" : mLeft) + "m";
             badge.textContent = `${styleDef.icon} ⏳ ${remain.trim()}`;
-            badge.title = `${styleDef.name} (Temp) — expires ${expiresAt ? new Date(expiresAt).toLocaleString() : ""}`;
-          } else {
-            badge.title = "Click to change style";
-            badge.textContent = `${styleDef.icon} ${styleDef.name}`;
+            badge.title = `${styleDef.name} (Temp) — expires ${new Date(expiresAt).toLocaleString()}\nClick to change style`;
+
             badge.addEventListener("click", (e) => {
               e.stopPropagation();
-              const order = [2, 1, 0];
-              const nextStyle = order[(order.indexOf(style) + 1) % order.length];
-              blSetStyle(name, nextStyle);
-              blApplyAll();
-              renderList();
+              const existing = badge.querySelector(".bl-style-dropdown");
+              if (existing) { existing.remove(); return; }
+              closeAllDropdowns();
+              const dd = document.createElement("div");
+              dd.className = "bl-style-dropdown";
+              Object.entries(BL_STYLES).forEach(([id, def]) => {
+                const opt = document.createElement("div");
+                opt.className = "bl-style-opt" + (curStyle === +id ? " active" : "");
+                opt.textContent = `${def.icon}  ${def.name}`;
+                opt.addEventListener("click", (ev) => {
+                  ev.stopPropagation();
+                  const arr = blLoad().map(u => u.name === name ? { ...u, style: +id } : u);
+                  blSave(arr);
+                  blApplyAll();
+                  renderList();
+                });
+                dd.appendChild(opt);
+              });
+              badge.appendChild(dd);
+            });
+          } else {
+            badge.className = "bl-style-badge";
+            badge.textContent = `${styleDef.icon} ${styleDef.name}`;
+            badge.title = "Click to change style";
+
+            badge.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const existing = badge.querySelector(".bl-style-dropdown");
+              if (existing) { existing.remove(); return; }
+              closeAllDropdowns();
+              const dd = document.createElement("div");
+              dd.className = "bl-style-dropdown";
+              Object.entries(BL_STYLES).forEach(([id, def]) => {
+                const opt = document.createElement("div");
+                opt.className = "bl-style-opt" + (curStyle === +id ? " active" : "");
+                opt.textContent = `${def.icon}  ${def.name}`;
+                opt.addEventListener("click", (ev) => {
+                  ev.stopPropagation();
+                  blSetStyle(name, +id);
+                  blApplyAll();
+                  renderList();
+                });
+                dd.appendChild(opt);
+              });
+              badge.appendChild(dd);
             });
           }
+
+          const extendBtn = isTemp ? (() => {
+            const btn = document.createElement("button");
+            btn.className = "bl-extend-btn";
+            btn.textContent = "+30m";
+            btn.title = "Extend mute by 30 minutes";
+            btn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const arr = blLoad().map(u => {
+                if (u.name !== name) return u;
+                const base = Math.max(Date.now(), new Date(u.expiresAt).getTime());
+                return { ...u, expiresAt: new Date(base + 30 * 60 * 1000).toISOString() };
+              });
+              blSave(arr);
+              renderList();
+            });
+            return btn;
+          })() : null;
 
           const dateEl = document.createElement("div");
           dateEl.className = "bl-date";
@@ -17978,18 +18253,21 @@ unsafeWindow.fetch = function(...args) {
           const removeBtn = document.createElement("button");
           removeBtn.className = "bl-remove";
           removeBtn.textContent = t("mu_remove_btn");
-          removeBtn.onclick = () => {
+          removeBtn.addEventListener("click", () => {
             blRemove(name);
             blApplyAll();
             renderList();
-          };
+          });
 
           row.appendChild(nameEl);
           row.appendChild(badge);
+          if (extendBtn) row.appendChild(extendBtn);
           row.appendChild(dateEl);
           row.appendChild(removeBtn);
           list.appendChild(row);
         });
+
+        document.addEventListener("mousedown", closeAllDropdowns, { capture: true, once: false });
       }
       renderList();
 
