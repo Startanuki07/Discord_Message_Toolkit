@@ -8,11 +8,10 @@
 // @name:pt-BR   Discord Message Toolkit
 // @name:fr      Discord Message Toolkit
 // @name:ru      Discord Message Toolkit
-// @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07?locale_override=1
-// @namespace    https://github.com/Startanuki07?tab=repositories
-// @version      2.5.0.0
+// @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
+// @version      2.5.1.3
 // @license      MIT
-// @author       Star-tanuki07
+// @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
 // @description:zh-TW 為每則訊息新增工具列，支援文字複製、媒體下載與社群連結轉換，並提供強化轉發面板、側欄頻道捷徑（蟲洞）與表情收藏管理器。
 // @description:zh-CN 为每条消息添加工具栏，支持文字复制、媒体下载与社交链接转换，并提供强化转发面板、侧栏频道快捷方式（虫洞）与表情收藏管理器。
@@ -8564,7 +8563,7 @@
 
           const labelStyle =
             linkPrefix && linkPrefix !== "" ? `style="color:cyan"` : "";
-          const displayLabel = linkPrefix ? linkPrefix : " ";
+          const displayLabel = linkPrefix ? escHtml(linkPrefix) : " ";
           const bracketed = links
             .map((url) => `[${linkPrefix}](${url})`)
             .join(" || ");
@@ -17253,100 +17252,98 @@ unsafeWindow.fetch = function(...args) {
       const s = document.createElement("style");
       s.id = "dmt-bl-style";
       s.textContent = `
-        
+
         .dmt-bl-s1 {
-          height: 20px !important;
-          min-height: 0 !important;
-          max-height: 20px !important;
-          padding: 0 !important;
-          margin: 0 !important;
           position: relative !important;
-          overflow: hidden !important;
-          box-sizing: border-box !important;
-          display: flex !important;
-          align-items: center !important;
-          cursor: default !important;
+          will-change: transform, opacity;
+        }
+
+        .dmt-bl-s1.dmt-ghost-shrunk {
+          pointer-events: auto !important; 
         }
         
-        .dmt-bl-s1 [id^="message-content-"],
-        .dmt-bl-s1 [class*="repliedMessage_"],
-        .dmt-bl-s1 [id^="message-accessories-"],
-        .dmt-bl-s1 [class*="buttonContainer_"] {
+        .dmt-bl-s1.dmt-ghost-shrunk [id^="message-content-"] {
+          font-size: 7px !important;
+          line-height: 1.4 !important;
+          color: #6d6f78 !important;
+        }
+        
+        .dmt-bl-s1.dmt-ghost-shrunk [class*="username_"] {
+          font-size: 10px !important;
+          color: #6d6f78 !important;
+          opacity: 0.7 !important;
+        }
+        
+        .dmt-bl-s1.dmt-ghost-shrunk [class*="timestamp_"] {
+          font-size: 9px !important;
+          opacity: 0.4 !important;
+        }
+        
+        .dmt-bl-s1.dmt-ghost-shrunk [class*="avatar_"] {
+          width:     22px !important;
+          height:    22px !important;
+          min-width: 22px !important;
+          opacity: 0.45 !important;
+          filter: grayscale(60%) !important;
+        }
+        
+        .dmt-bl-s1.dmt-ghost-shrunk [class*="imageWrapper_"],
+        .dmt-bl-s1.dmt-ghost-shrunk [class*="mediaAttachment_"],
+        .dmt-bl-s1.dmt-ghost-shrunk [class*="embedWrapper_"],
+        .dmt-bl-s1.dmt-ghost-shrunk [class*="attachmentInner_"] {
+          width:   32px !important;
+          height:  18px !important;
+          overflow: hidden !important;
+          opacity:  0.30 !important;
+          filter:   grayscale(80%) !important;
+          border-radius: 3px !important;
+        }
+        
+        .dmt-bl-s1.dmt-ghost-shrunk [class*="reactions_"],
+        .dmt-bl-s1.dmt-ghost-shrunk [class*="threadButton_"],
+        .dmt-bl-s1.dmt-ghost-shrunk [class*="buttonContainer_"] {
           display: none !important;
         }
         
-        .dmt-bl-s1 [class*="cozyMessage_"],
-        .dmt-bl-s1 [class*="compact_"] {
-          padding: 0 !important;
-          min-height: 0 !important;
-        }
-        
-        .dmt-bl-s1 [class*="contents_"] {
-          display: flex !important;
-          align-items: center !important;
-          gap: 4px !important;
-          padding: 0 8px !important;
-          min-height: 0 !important;
-          height: 20px !important;
-        }
-        
-        .dmt-bl-s1 [class*="contents_"]::before {
+        .dmt-bl-s1.dmt-ghost-shrunk::after {
           content: "👻";
-          font-size: 11px;
-          flex-shrink: 0;
-          line-height: 1;
+          position: absolute;
+          top:   4px;
+          right: 14px;
+          font-size: 17px;
           pointer-events: none;
+          animation: dmt-ghost-bob 2s ease-in-out infinite;
+          transform-origin: center bottom;
+          z-index: 1;
         }
-        
-        .dmt-bl-s1 [class*="avatar_"] {
-          width:     16px !important;
-          height:    16px !important;
-          min-width: 16px !important;
-          border-radius: 50% !important;
-          margin: 0 !important;
-          flex-shrink: 0 !important;
+        @keyframes dmt-ghost-bob {
+          0%,100% { transform: translateY(0)   rotate(-5deg); }
+          30%     { transform: translateY(-3px) rotate(3deg);  }
+          60%     { transform: translateY(-5px) rotate(-2deg); }
         }
-        
-        .dmt-bl-s1 [class*="header_"] {
-          display: flex !important;
-          align-items: baseline !important;
-          gap: 4px !important;
-          margin: 0 !important;
-        }
-        
-        .dmt-bl-s1 [class*="username_"] {
-          font-size: 10px !important;
-          line-height: 1 !important;
-          white-space: nowrap !important;
-        }
-        
-        .dmt-bl-s1 [class*="timestamp_"] {
-          font-size: 8px !important;
-          opacity: 0.4 !important;
-          white-space: nowrap !important;
-        }
-        
-        .dmt-bl-s1 [class*="chipletContainerInner_"],
-        .dmt-bl-s1 [class*="clanTagChiplet_"] {
-          transform: scale(0.65) !important;
-          transform-origin: left center !important;
-          display: inline-flex !important;
-        }
-        
-        .dmt-bl-s1 [class*="roleIcon_"] {
-          width:  10px !important;
-          height: 10px !important;
-        }
-        
+
         @keyframes dmt-ghost-vanish {
-          0%   { opacity: 1;   transform: translate(0,    0);     filter: blur(0);    }
-          35%  { opacity: 0.7; transform: translate(10px, -4px);  filter: blur(0);    }
-          100% { opacity: 0;   transform: translate(28px, -10px); filter: blur(3px);  }
+          0%   { opacity: 0.75; transform: translateY(0)    rotate(0deg)   scale(1);    }
+          15%  { opacity: 0.65; transform: translateY(-4px) rotate(-1deg)  scale(0.99); }
+          60%  { opacity: 0.25; transform: translateY(-18px) rotate(-4deg) scale(0.98); }
+          100% { opacity: 0;    transform: translateY(-36px) rotate(-7deg) scale(0.96); }
+        }
+        .dmt-bl-s1.dmt-ghost-vanished {
+          animation: dmt-ghost-vanish 1.5s cubic-bezier(.19, 1, .22, 1) forwards !important;
+          pointer-events: none !important;
         }
         
-        .dmt-bl-s1.dmt-ghost-vanished {
-          animation: dmt-ghost-vanish 1.2s cubic-bezier(.25, 0, .75, 1) forwards !important;
+        .dmt-bl-s1.dmt-ghost-done {
+          height: 0 !important;
+          min-height: 0 !important;
+          padding-top: 0 !important;
+          padding-bottom: 0 !important;
+          margin-top: 0 !important;
+          margin-bottom: 0 !important;
+          overflow: hidden !important;
+          opacity: 0 !important;
           pointer-events: none !important;
+          transition: none !important;
         }
 
         .dmt-bl-s2 {
@@ -17457,6 +17454,138 @@ unsafeWindow.fetch = function(...args) {
           filter: grayscale(0%) !important;
         }
 
+        .dmt-bl-s4 {
+          height: 22px !important;
+          min-height: 0 !important;
+          max-height: 22px !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          position: relative !important;
+          overflow: hidden !important;
+          box-sizing: border-box !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          cursor: default !important;
+        }
+        .dmt-bl-s4 > * {
+          display: none !important;
+          visibility: hidden !important;
+        }
+        
+        .dmt-bl-s4::after {
+          content: "";
+          position: absolute;
+          top: 50%; left: 48px; right: 48px;
+          height: 1px;
+          background: rgba(88,101,242,0.22);
+          pointer-events: none;
+          z-index: 0;
+        }
+        
+        .dmt-bl-s4::before {
+          content: attr(data-dmt-author);
+          position: absolute; left: 50%; top: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 10px;
+          font-family: "gg sans", "Noto Sans", sans-serif;
+          letter-spacing: 0.10em;
+          text-transform: uppercase;
+          color: rgba(88,101,242,0.50);
+          pointer-events: none;
+          white-space: nowrap;
+          z-index: 1;
+          background: #313338;
+          padding: 0 10px;
+        }
+        
+        .dmt-bl-s4:not([data-dmt-author])::before,
+        .dmt-bl-s4[data-dmt-author=""]::before {
+          content: "ghost";
+          letter-spacing: 0.14em;
+        }
+
+        .dmt-bl-s5 {
+          opacity: 0.68 !important;
+          pointer-events: none !important;
+          cursor: default !important;
+        }
+        
+        .dmt-bl-s5 [class*="avatar_"] {
+          filter: grayscale(100%) !important;
+          opacity: 0.35 !important;
+        }
+        
+        .dmt-bl-s5 [id^="message-content-"],
+        .dmt-bl-s5 [id^="message-accessories-"],
+        .dmt-bl-s5 [class*="repliedMessage_"],
+        .dmt-bl-s5 [class*="buttonContainer_"] {
+          display: none !important;
+        }
+        
+        .dmt-bl-s5 [class*="cozyMessage_"]::after,
+        .dmt-bl-s5 [class*="compact_"]::after {
+          content: "";
+          display: block;
+          height: 12px;
+          border-radius: 3px;
+          background: rgba(79,84,92,0.40);
+          width: 55%;
+          margin: 4px 0 6px;
+          pointer-events: none;
+        }
+        
+        .dmt-bl-s5 [class*="username_"] {
+          opacity: 0.45 !important;
+          font-size: 12px !important;
+        }
+        
+        .dmt-bl-s5 [class*="timestamp_"] {
+          opacity: 0.25 !important;
+        }
+
+        .dmt-bl-s6 {
+          opacity: 0.28 !important;
+          border-left: 3px solid rgba(88,101,242,0.25) !important;
+          padding-left: 13px !important;
+          transition: opacity 0.25s ease, border-color 0.25s ease !important;
+          cursor: default !important;
+          pointer-events: none !important;
+        }
+        .dmt-bl-s6:hover {
+          opacity: 0.70 !important;
+          border-left-color: rgba(88,101,242,0.65) !important;
+        }
+        
+        .dmt-bl-s6 [id^="message-content-"],
+        .dmt-bl-s6 [id^="message-accessories-"],
+        .dmt-bl-s6 [class*="repliedMessage_"],
+        .dmt-bl-s6 [class*="buttonContainer_"],
+        .dmt-bl-s6 [class*="reactions_"],
+        .dmt-bl-s6 [class*="threadButton_"] {
+          display: none !important;
+        }
+        
+        .dmt-bl-s6 [class*="avatar_"] {
+          width:     22px !important;
+          height:    22px !important;
+          min-width: 22px !important;
+          border-radius: 50% !important;
+          opacity: 0.6 !important;
+          filter: grayscale(40%) !important;
+        }
+        
+        .dmt-bl-s6 [class*="username_"] {
+          font-size: 11px !important;
+        }
+        
+        .dmt-bl-s6 [class*="cozyMessage_"],
+        .dmt-bl-s6 [class*="compact_"] {
+          padding-top: 1px !important;
+          padding-bottom: 2px !important;
+          min-height: 0 !important;
+        }
+
         @keyframes dmt-bl-picker-in {
           from { opacity:0; transform:translateY(6px) scale(.96); }
           to   { opacity:1; transform:none; }
@@ -17475,9 +17604,20 @@ unsafeWindow.fetch = function(...args) {
           box-shadow: 0 16px 48px rgba(0,0,0,0.75);
           backdrop-filter: blur(16px);
           padding: 18px;
-          width: 420px;
+          width: 460px;
+          max-height: calc(100vh - 24px); 
+          overflow-y: auto;
+          overflow-x: hidden;
           font-family: sans-serif;
           animation: dmt-bl-picker-in 0.18s cubic-bezier(.19,1,.22,1) forwards;
+        }
+        #dmt-bl-picker::-webkit-scrollbar { width: 5px; }
+        #dmt-bl-picker::-webkit-scrollbar-track { background: transparent; }
+        #dmt-bl-picker::-webkit-scrollbar-thumb {
+          background: rgba(255,255,255,0.12); border-radius: 3px;
+        }
+        #dmt-bl-picker::-webkit-scrollbar-thumb:hover {
+          background: rgba(255,255,255,0.22);
         }
         #dmt-bl-picker .picker-title {
           font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
@@ -17498,7 +17638,7 @@ unsafeWindow.fetch = function(...args) {
         #dmt-bl-picker .picker-cards { display: flex; align-items: stretch; gap: 0; }
         
         #dmt-bl-picker .picker-group {
-          display: flex; gap: 5px; flex: 3;
+          display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; flex: 3;
           border: 1.5px solid rgba(255,255,255,0.10);
           border-radius: 9px; padding: 5px;
           background: rgba(255,255,255,0.02);
@@ -17560,6 +17700,117 @@ unsafeWindow.fetch = function(...args) {
         #dmt-bl-picker .picker-desc {
           font-size: 11px; color: rgba(185,187,190,0.55); line-height: 1.4;
         }
+        
+        #dmt-bl-picker .picker-preview {
+          background: rgba(0,0,0,0.28);
+          border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 8px;
+          padding: 8px 12px;
+          margin: 6px 0 4px;
+          min-height: 56px;
+          display: flex;
+          flex-direction: column;
+          gap: 3px;
+          overflow: hidden;
+        }
+        #dmt-bl-picker .picker-preview-label {
+          font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase;
+          color: rgba(185,187,190,0.30); margin-bottom: 4px; flex-shrink: 0;
+        }
+        #dmt-bl-picker .pv-msg {
+          display: flex; gap: 8px; align-items: flex-start;
+        }
+        #dmt-bl-picker .pv-av {
+          width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 10px; font-weight: 600; color: #fff;
+        }
+        #dmt-bl-picker .pv-name { font-size: 11px; font-weight: 600; margin-bottom: 1px; }
+        #dmt-bl-picker .pv-text { font-size: 11px; line-height: 1.35; }
+        
+        #dmt-bl-picker .pv-ghost-shrunk .pv-text { font-size: 6px !important; color: #6d6f78 !important; }
+        #dmt-bl-picker .pv-ghost-shrunk .pv-name { font-size: 9px !important; color: #6d6f78 !important; }
+        #dmt-bl-picker .pv-ghost-shrunk .pv-av   { width:18px !important; height:18px !important; font-size:8px !important; opacity:.4 !important; filter:grayscale(60%) !important; }
+        #dmt-bl-picker .pv-ghost-icon { font-size:13px; display:inline-block; vertical-align:middle; margin-right:3px; animation:dmt-ghost-bob 2s ease-in-out infinite; transform-origin:center bottom; }
+        
+        #dmt-bl-picker .pv-ghost { opacity: 0.75; will-change: transform, opacity; }
+        @keyframes pv-floatup {
+          0%   { opacity: 0.75; transform: translateY(0)     rotate(0deg)   scale(1);    }
+          20%  { opacity: 0.55; transform: translateY(-4px)  rotate(-1deg)  scale(0.99); }
+          100% { opacity: 0;    transform: translateY(-28px) rotate(-5deg)  scale(0.97); }
+        }
+        #dmt-bl-picker .pv-ghost.pv-go {
+          animation: pv-floatup 1.3s cubic-bezier(.19,1,.22,1) forwards;
+        }
+        
+        #dmt-bl-picker .pv-collapse {
+          height: 16px; position: relative; overflow: hidden; flex-shrink: 0;
+          cursor: pointer; transition: height 0.3s cubic-bezier(.4,0,.2,1);
+        }
+        #dmt-bl-picker .pv-collapse::before {
+          content: ""; position: absolute; top: 8px; left: 0; right: 0;
+          height: 1px; background: rgba(88,101,242,0.25); transition: opacity 0.2s;
+        }
+        #dmt-bl-picker .pv-collapse::after {
+          content: "collapsed · hover to expand";
+          position: absolute; left: 50%; top: 8px;
+          transform: translate(-50%, -50%);
+          font-size: 8px; letter-spacing: .1em; text-transform: uppercase;
+          color: rgba(88,101,242,0.5); background: rgba(22,23,26,0.95); padding: 0 6px;
+          white-space: nowrap; transition: opacity 0.2s;
+        }
+        #dmt-bl-picker .pv-collapse:hover { height: 38px; }
+        #dmt-bl-picker .pv-collapse:hover::before,
+        #dmt-bl-picker .pv-collapse:hover::after { opacity: 0; }
+        #dmt-bl-picker .pv-collapse .pv-expanded {
+          position: absolute; top: 4px; left: 0; right: 0;
+          display: flex; gap: 6px; align-items: flex-start;
+          opacity: 0; transition: opacity 0.2s 0.15s;
+        }
+        #dmt-bl-picker .pv-collapse:hover .pv-expanded { opacity: 1; }
+        
+        #dmt-bl-picker .pv-dim {
+          opacity: 0.06; filter: grayscale(100%); cursor: pointer;
+          transition: opacity 0.35s ease, filter 0.35s ease;
+        }
+        #dmt-bl-picker .pv-dim:hover { opacity: 0.55; filter: grayscale(0%); }
+        
+        #dmt-bl-picker .pv-fog {
+          height: 16px; position: relative; overflow: hidden; flex-shrink: 0;
+        }
+        #dmt-bl-picker .pv-fog::before {
+          content: ""; position: absolute; top: 50%; left: 0; right: 0;
+          height: 1px; background: rgba(88,101,242,0.22);
+        }
+        #dmt-bl-picker .pv-fog::after {
+          content: attr(data-name);
+          position: absolute; left: 50%; top: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 8px; letter-spacing: .10em; text-transform: uppercase;
+          color: rgba(88,101,242,0.5); background: rgba(22,23,26,0.95); padding: 0 6px;
+          white-space: nowrap;
+        }
+        
+        #dmt-bl-picker .pv-redacted { opacity: 0.65; }
+        #dmt-bl-picker .pv-redacted .pv-av { filter: grayscale(100%); opacity: 0.3; }
+        #dmt-bl-picker .pv-redacted .pv-name { font-size: 10px; color: #6d6f78; }
+        @keyframes pv-shimmer {
+          0%,100% { width: 62%; opacity: 0.40; }
+          50%      { width: 46%; opacity: 0.20; }
+        }
+        #dmt-bl-picker .pv-redacted-bar {
+          height: 10px; border-radius: 3px; background: #3a3b40; display: block;
+          animation: pv-shimmer 2.2s ease-in-out infinite;
+        }
+        
+        #dmt-bl-picker .pv-sidebar {
+          border-left: 3px solid rgba(88,101,242,0.22);
+          padding-left: 8px; opacity: 0.28; align-items: center; cursor: pointer;
+          transition: opacity 0.25s ease, border-color 0.25s ease;
+        }
+        #dmt-bl-picker .pv-sidebar:hover { opacity: 0.75; border-left-color: rgba(88,101,242,0.65); }
+        #dmt-bl-picker .pv-sidebar .pv-av { width: 18px; height: 18px; font-size: 8px; }
+        #dmt-bl-picker .pv-sidebar .pv-name { font-size: 10px; color: #949ba4; margin: 0; }
         
         #dmt-bl-picker .picker-confirm {
           margin-top: 10px; width: 100%;
@@ -17677,18 +17928,17 @@ unsafeWindow.fetch = function(...args) {
         #dmt-bl-picker .pset-page.active {
           display: flex;
           min-height: 120px;
-          max-height: 260px;
-          overflow-y: auto;
-          overflow-x: visible;
+          max-height: 280px;
+          overflow: visible;  
         }
-        #dmt-bl-picker .pset-page.active::-webkit-scrollbar { width: 4px; }
-        #dmt-bl-picker .pset-page.active::-webkit-scrollbar-thumb {
-          background: rgba(255,255,255,0.12); border-radius: 2px;
-        }
+        
+        #dmt-bl-picker .pset-page.active::-webkit-scrollbar { width: 0; }
 
         #dmt-bl-picker .pset-list {
           display: flex; flex-direction: column; gap: 2px;
-          overflow: visible;
+          max-height: 280px;
+          overflow-y: auto;   
+          overflow-x: visible;
         }
         #dmt-bl-picker .pset-list::-webkit-scrollbar { width: 4px; }
         #dmt-bl-picker .pset-list::-webkit-scrollbar-thumb {
@@ -17722,20 +17972,20 @@ unsafeWindow.fetch = function(...args) {
           background: rgba(242,153,74,0.2); border-color: rgba(242,153,74,0.5);
         }
         
-        #dmt-bl-picker .pset-style-dropdown {
-          position: absolute; top: calc(100% + 3px); right: 0;
+        .pset-style-dropdown {
+          position: fixed;
           background: #1e1f22; border: 1px solid rgba(88,101,242,0.4);
           border-radius: 7px; box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-          z-index: 2147483647; overflow: hidden; min-width: 100px;
+          z-index: 2147483649; overflow: hidden; min-width: 120px;
           animation: dmt-bl-picker-in 0.12s ease both;
         }
-        #dmt-bl-picker .pset-style-opt {
+        .pset-style-opt {
           display: flex; align-items: center; gap: 6px;
           padding: 6px 10px; font-size: 11px; color: #dbdee1;
           cursor: pointer; transition: background 0.1s; white-space: nowrap;
         }
-        #dmt-bl-picker .pset-style-opt:hover { background: rgba(88,101,242,0.18); }
-        #dmt-bl-picker .pset-style-opt.active { color: #a5adfa; background: rgba(88,101,242,0.1); }
+        .pset-style-opt:hover { background: rgba(88,101,242,0.18); }
+        .pset-style-opt.active { color: #a5adfa; background: rgba(88,101,242,0.1); }
         
         #dmt-bl-picker .pset-extend-btn {
           font-size: 9px; font-weight: 600; flex-shrink: 0;
@@ -17855,21 +18105,21 @@ unsafeWindow.fetch = function(...args) {
         }
         #${BL_PANEL_ID} .bl-style-badge:hover { background: rgba(88,101,242,0.3); }
 
-        #${BL_PANEL_ID} .bl-style-dropdown {
-          position: absolute; top: calc(100% + 4px); left: 0;
+        .bl-style-dropdown {
+          position: fixed;
           background: #1e1f22; border: 1px solid rgba(88,101,242,0.4);
           border-radius: 7px; box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-          z-index: 9999; overflow: hidden; min-width: 110px;
+          z-index: 2147483648; overflow: hidden; min-width: 120px;
           animation: dmt-bl-picker-in 0.14s ease both;
         }
-        #${BL_PANEL_ID} .bl-style-opt {
+        .bl-style-opt {
           display: flex; align-items: center; gap: 7px;
           padding: 7px 10px; font-size: 12px; color: #dbdee1;
           cursor: pointer; transition: background 0.1s;
           white-space: nowrap;
         }
-        #${BL_PANEL_ID} .bl-style-opt:hover { background: rgba(88,101,242,0.18); }
-        #${BL_PANEL_ID} .bl-style-opt.active { color: #a5adfa; background: rgba(88,101,242,0.12); }
+        .bl-style-opt:hover { background: rgba(88,101,242,0.18); }
+        .bl-style-opt.active { color: #a5adfa; background: rgba(88,101,242,0.12); }
 
         #${BL_PANEL_ID} .bl-temp-badge {
           background: rgba(242,153,74,0.15); border-color: rgba(242,153,74,0.4);
@@ -17919,6 +18169,9 @@ unsafeWindow.fetch = function(...args) {
       1: { cls: "dmt-bl-s1", icon: "👻", name: "Ghost" },
       2: { cls: "dmt-bl-s2", icon: "━",  name: "Collapse" },
       0: { cls: "dmt-bl-s0", icon: "🌫", name: "Dim" },
+      4: { cls: "dmt-bl-s4", icon: "〰", name: "Fog Strip" },
+      5: { cls: "dmt-bl-s5", icon: "▬",  name: "Redacted" },
+      6: { cls: "dmt-bl-s6", icon: "▎",  name: "Sidebar" },
     };
     const BL_TEMP_STYLE_ID = 99;
     const BL_ALL_CLS = Object.values(BL_STYLES).map(s => s.cls);
@@ -17990,7 +18243,14 @@ unsafeWindow.fetch = function(...args) {
         _ghostTimers.delete(container);
       }
       BL_ALL_CLS.forEach(c => container.classList.remove(c));
-      container.classList.remove("dmt-bl-open", "dmt-ghost-vanished");
+      container.classList.remove(
+        "dmt-bl-open", "dmt-ghost-vanished", "dmt-ghost-done", "dmt-ghost-shrunk"
+      );
+      container.style.cssText = "";
+      if (container._dmt_ghostIcon) {
+        container._dmt_ghostIcon.remove();
+        delete container._dmt_ghostIcon;
+      }
       if (authorName) {
         container.dataset.dmtAuthor = authorName;
       } else {
@@ -17999,11 +18259,82 @@ unsafeWindow.fetch = function(...args) {
       const def = BL_STYLES[styleId === BL_TEMP_STYLE_ID ? 2 : styleId];
       if (def) container.classList.add(def.cls);
       if (styleId === 1) {
-        const delayMs = Math.min(10, Math.max(1, GMStore.get("bl_ghost_delay", 4))) * 1000;
-        _ghostTimers.set(container, setTimeout(() => {
-          container.classList.add("dmt-ghost-vanished");
+        const delayMs  = Math.min(10, Math.max(1, GMStore.get("bl_ghost_delay", 4))) * 1000;
+        const VANISH_MS = 1500;
+        const HAS_SHRINK = delayMs >= 2000;
+
+        if (HAS_SHRINK) {
+          container.classList.add("dmt-ghost-shrunk");
+
+          const ghostIcon = document.createElement("span");
+          ghostIcon.className = "dmt-ghost-icon";
+          ghostIcon.textContent = "👻";
+          ghostIcon.style.cssText = [
+            "font-size:13px",
+            "pointer-events:none",
+            "animation:dmt-ghost-bob 2s ease-in-out infinite",
+            "transform-origin:center bottom",
+            "display:inline-block",
+            "vertical-align:middle",
+            "margin-right:3px",
+            "line-height:1",
+          ].join(";");
+          const replyBlock  = container.querySelector('[class*="repliedMessage_"]');
+          const usernameEls = container.querySelectorAll(AUTHOR_SEL);
+          let targetUsername = null;
+          for (const el of usernameEls) {
+            if (replyBlock && replyBlock.contains(el)) continue;
+            targetUsername = el;
+            break;
+          }
+          if (targetUsername) {
+            targetUsername.parentNode.insertBefore(ghostIcon, targetUsername);
+          } else {
+            container.appendChild(ghostIcon);
+          }
+          container._dmt_ghostIcon = ghostIcon;
+        }
+
+        const vanishTimer = setTimeout(() => {
           _ghostTimers.delete(container);
-        }, delayMs));
+
+          container.classList.remove("dmt-ghost-shrunk");
+
+          const fullH = container.scrollHeight;
+          container.style.height   = fullH + "px";
+          container.style.overflow = "hidden";
+
+          container.style.transition = [
+            "height 0.8s cubic-bezier(.4,0,.2,1) 0.5s",
+            "padding-top 0.8s cubic-bezier(.4,0,.2,1) 0.5s",
+            "padding-bottom 0.8s cubic-bezier(.4,0,.2,1) 0.5s",
+            "margin-top 0.8s cubic-bezier(.4,0,.2,1) 0.5s",
+            "margin-bottom 0.8s cubic-bezier(.4,0,.2,1) 0.5s",
+            "opacity 0.5s ease 0s",
+          ].join(",");
+
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              container.style.height        = "0";
+              container.style.paddingTop    = "0";
+              container.style.paddingBottom = "0";
+              container.style.marginTop     = "0";
+              container.style.marginBottom  = "0";
+              container.style.opacity       = "0";
+            });
+          });
+
+          container.classList.add("dmt-ghost-vanished");
+
+          const doneTimer = setTimeout(() => {
+            container.classList.add("dmt-ghost-done");
+            container.style.cssText = "";
+          }, VANISH_MS + 100);
+
+          _ghostTimers.set(container, doneTimer);
+        }, delayMs);
+
+        _ghostTimers.set(container, vanishTimer);
       }
     }
 
@@ -18165,8 +18496,9 @@ unsafeWindow.fetch = function(...args) {
       }
       const panel = document.createElement("div");
       panel.id = BL_PANEL_ID;
-      panel.style.right  = "20px";
-      panel.style.bottom = "80px";
+      panel.style.left      = "50%";
+      panel.style.top       = "50%";
+      panel.style.transform = "translate(-50%, -50%)";
 
       const header = document.createElement("div");
       header.className = "bl-header";
@@ -18195,7 +18527,7 @@ unsafeWindow.fetch = function(...args) {
         }
 
         function closeAllDropdowns() {
-          list.querySelectorAll(".bl-style-dropdown").forEach(d => d.remove());
+          document.querySelectorAll(".bl-style-dropdown").forEach(d => d.remove());
         }
 
         entries.forEach(({ name, addedAt, style = 2, expiresAt }) => {
@@ -18228,7 +18560,7 @@ unsafeWindow.fetch = function(...args) {
 
             badge.addEventListener("click", (e) => {
               e.stopPropagation();
-              const existing = badge.querySelector(".bl-style-dropdown");
+              const existing = document.querySelector(".bl-style-dropdown");
               if (existing) { existing.remove(); return; }
               closeAllDropdowns();
               const dd = document.createElement("div");
@@ -18246,7 +18578,14 @@ unsafeWindow.fetch = function(...args) {
                 });
                 dd.appendChild(opt);
               });
-              badge.appendChild(dd);
+              document.body.appendChild(dd);
+              requestAnimationFrame(() => {
+                const r = badge.getBoundingClientRect();
+                const ddH = dd.offsetHeight || 220;
+                const below = window.innerHeight - r.bottom;
+                dd.style.top  = (below >= ddH || below >= r.top ? r.bottom + 4 : r.top - ddH - 4) + "px";
+                dd.style.left = r.left + "px";
+              });
             });
           } else {
             badge.className = "bl-style-badge";
@@ -18255,7 +18594,7 @@ unsafeWindow.fetch = function(...args) {
 
             badge.addEventListener("click", (e) => {
               e.stopPropagation();
-              const existing = badge.querySelector(".bl-style-dropdown");
+              const existing = document.querySelector(".bl-style-dropdown");
               if (existing) { existing.remove(); return; }
               closeAllDropdowns();
               const dd = document.createElement("div");
@@ -18272,7 +18611,14 @@ unsafeWindow.fetch = function(...args) {
                 });
                 dd.appendChild(opt);
               });
-              badge.appendChild(dd);
+              document.body.appendChild(dd);
+              requestAnimationFrame(() => {
+                const r = badge.getBoundingClientRect();
+                const ddH = dd.offsetHeight || 220;
+                const below = window.innerHeight - r.bottom;
+                dd.style.top  = (below >= ddH || below >= r.top ? r.bottom + 4 : r.top - ddH - 4) + "px";
+                dd.style.left = r.left + "px";
+              });
             });
           }
 
@@ -18329,6 +18675,7 @@ unsafeWindow.fetch = function(...args) {
       document.body.appendChild(panel);
 
       const _outside = (e) => {
+        if (e.target.closest(".bl-style-dropdown")) return;
         if (!panel.contains(e.target)) {
           closeBlPanel();
           document.removeEventListener("mousedown", _outside, true);
@@ -18398,7 +18745,16 @@ unsafeWindow.fetch = function(...args) {
 
       const picker = document.createElement("div");
       picker.id = "dmt-bl-picker";
-      picker.style.cssText = `left:50%; top:30%; transform:translate(-50%,-50%);`;
+      picker.style.cssText = `left:50%; transform:translateX(-50%); top:12px;`;
+      const _clampPickerPos = () => {
+        requestAnimationFrame(() => {
+          const PAD = 12;
+          const vh  = window.innerHeight;
+          const h   = picker.offsetHeight;
+          const idealTop = Math.round((vh - h) / 2);
+          picker.style.top = Math.max(PAD, Math.min(idealTop, vh - h - PAD)) + "px";
+        });
+      };
 
       const headerEl = document.createElement("div");
       headerEl.className = "picker-header";
@@ -18504,9 +18860,12 @@ unsafeWindow.fetch = function(...args) {
       tempSection.appendChild(parsedEl);
 
       const PERM_STYLES = [
-        { id: 2, icon: "━",  name: "Collapse", desc: "Thin line · click to expand"      },
-        { id: 1, icon: "👻", name: "Ghost",    desc: "Avatar only · vanishes after 4s"  },
-        { id: 0, icon: "🌫", name: "Dim",      desc: "Dark & compact · hover to reveal" },
+        { id: 2, icon: "━",  name: "Collapse",  desc: "Thin line · click to expand"      },
+        { id: 1, icon: "👻", name: "Ghost",     desc: "Full msg · floats up & fades"     },
+        { id: 0, icon: "🌫", name: "Dim",       desc: "Dark & compact · hover to reveal" },
+        { id: 4, icon: "〰", name: "Fog Strip", desc: "Name label · indigo divider"      },
+        { id: 5, icon: "▬",  name: "Redacted",  desc: "Name kept · content blocked"      },
+        { id: 6, icon: "▎",  name: "Sidebar",   desc: "Single row · stripe indicator"    },
       ];
       const TEMP_DEF = {
         id: BL_TEMP_STYLE_ID,
@@ -18542,6 +18901,7 @@ unsafeWindow.fetch = function(...args) {
           groupEl.querySelectorAll(".picker-card").forEach(c => c.classList.remove("selected"));
           card.classList.add("selected");
           selectedStyle = id;
+          _updatePreview(id);
 
           if (!isTempMode) {
             tempCard.classList.add("enabled");
@@ -18567,11 +18927,120 @@ unsafeWindow.fetch = function(...args) {
           confirmBtn.textContent = t("mu_ctx_mute").replace("{name}", "").trim() || "Mute";
           confirmBtn.classList.add("lit");
         }
+        _clampPickerPos();
       });
 
       cardsEl.appendChild(groupEl);
       cardsEl.appendChild(orEl);
       cardsEl.appendChild(tempCard);
+
+      const previewEl = document.createElement("div");
+      previewEl.className = "picker-preview";
+
+      const pvLabel = document.createElement("div");
+      pvLabel.className = "picker-preview-label";
+      pvLabel.textContent = "Preview";
+      previewEl.appendChild(pvLabel);
+
+      const PV_AV_COLOR = "#5865f2";
+      const PV_NAME = name || "User";
+
+      function _updatePreview(styleId) {
+        while (previewEl.children.length > 1) previewEl.removeChild(previewEl.lastChild);
+
+        const avHtml   = `<div class="pv-av" style="background:${PV_AV_COLOR};">${PV_NAME.charAt(0).toUpperCase()}</div>`;
+        const nameSpan = `<span class="pv-name" style="color:#c9cdfb;">${PV_NAME}</span>`;
+        const timeSpan = `<span style="font-size:9px;color:#4f545c;margin-left:4px;">just now</span>`;
+        const textSpan = `<span class="pv-text" style="color:#dbdee1;">This message will be muted.</span>`;
+
+        switch (styleId) {
+          case 1: {
+            previewEl.insertAdjacentHTML("beforeend",
+              `<div class="pv-msg pv-ghost pv-ghost-shrunk" id="pv-ghost-row">
+                ${avHtml}
+                <div class="pv-mb"><div><span class="pv-ghost-icon">👻</span>${nameSpan}${timeSpan}</div>${textSpan}</div>
+              </div>`
+            );
+            (function scheduleGhost() {
+              const row = previewEl.querySelector("#pv-ghost-row");
+              if (!row) return;
+              row.classList.remove("pv-go");
+              row.classList.add("pv-ghost-shrunk");
+              row.style.cssText = "";
+              void row.offsetWidth;
+              const t1 = setTimeout(() => {
+                const r = previewEl.querySelector("#pv-ghost-row");
+                if (!r) return;
+                r.classList.remove("pv-ghost-shrunk");
+                const h = r.scrollHeight;
+                r.style.height     = h + "px";
+                r.style.overflow   = "hidden";
+                r.style.transition = "height 0.7s cubic-bezier(.4,0,.2,1) 0.4s, opacity 0.3s ease";
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                  r.style.height  = "0";
+                  r.style.opacity = "0";
+                }));
+                r.classList.add("pv-go");
+                const t2 = setTimeout(() => {
+                  if (!previewEl.querySelector("#pv-ghost-row")) return;
+                  scheduleGhost();
+                }, 1500);
+                previewEl._pvTimers.push(t2);
+              }, 2500);
+              previewEl._pvTimers.push(t1);
+            })();
+            return;
+          }
+          case 2:
+            previewEl.insertAdjacentHTML("beforeend",
+              `<div class="pv-collapse">
+                <div class="pv-expanded">
+                  ${avHtml}
+                  <div style="font-size:10px;color:#dbdee1;">${PV_NAME} · ${textSpan}</div>
+                </div>
+              </div>`
+            );
+            break;
+          case 0:
+            previewEl.insertAdjacentHTML("beforeend",
+              `<div class="pv-msg pv-dim">${avHtml}<div class="pv-mb"><div>${nameSpan}${timeSpan}</div>${textSpan}</div></div>`
+            );
+            break;
+          case 4:
+            previewEl.insertAdjacentHTML("beforeend",
+              `<div class="pv-fog" data-name="${PV_NAME}"></div>`
+            );
+            break;
+          case 5:
+            previewEl.insertAdjacentHTML("beforeend",
+              `<div class="pv-msg pv-redacted">${avHtml}<div class="pv-mb"><div class="pv-name">${PV_NAME}</div><span class="pv-redacted-bar"></span></div></div>`
+            );
+            break;
+          case 6:
+            previewEl.insertAdjacentHTML("beforeend",
+              `<div class="pv-msg pv-sidebar">${avHtml}<div class="pv-name">${PV_NAME} <span style="font-size:9px;color:#4f545c;">just now</span></div></div>`
+            );
+            break;
+          default:
+            previewEl.insertAdjacentHTML("beforeend",
+              `<div class="pv-msg">${avHtml}<div class="pv-mb"><div>${nameSpan}${timeSpan}</div>${textSpan}</div></div>`
+            );
+        }
+      }
+
+      const _clearPvTimers = () => {
+        (previewEl._pvTimers || []).forEach(clearTimeout);
+        previewEl._pvTimers = [];
+        const ghostRow = previewEl.querySelector("#pv-ghost-row");
+        if (ghostRow) ghostRow.style.cssText = "";
+      };
+      const _switchPreview = (id) => { _clearPvTimers(); _updatePreview(id); };
+
+      _updatePreview(selectedStyle);
+
+      groupEl.querySelectorAll(".picker-card").forEach(card => {
+        card.addEventListener("click", () => _clearPvTimers());
+      });
 
       confirmBtn.addEventListener("click", () => {
         if (isTempMode) {
@@ -18587,6 +19056,7 @@ unsafeWindow.fetch = function(...args) {
 
       picker.appendChild(headerEl);
       picker.appendChild(cardsEl);
+      picker.appendChild(previewEl);
       picker.appendChild(tempSection);
       picker.appendChild(confirmBtn);
 
@@ -18621,7 +19091,7 @@ unsafeWindow.fetch = function(...args) {
         listEl.className = "pset-list";
 
         function closeAllPsetDropdowns() {
-          listEl.querySelectorAll(".pset-style-dropdown").forEach(d => d.remove());
+          document.querySelectorAll(".pset-style-dropdown").forEach(d => d.remove());
         }
 
         entries.forEach(entry => {
@@ -18658,7 +19128,7 @@ unsafeWindow.fetch = function(...args) {
 
           badgeEl.addEventListener("click", (e) => {
             e.stopPropagation();
-            const existing = badgeEl.querySelector(".pset-style-dropdown");
+            const existing = document.querySelector(".pset-style-dropdown");
             if (existing) { existing.remove(); return; }
             closeAllPsetDropdowns();
             const dd = document.createElement("div");
@@ -18678,7 +19148,15 @@ unsafeWindow.fetch = function(...args) {
               });
               dd.appendChild(opt);
             });
-            badgeEl.appendChild(dd);
+            document.body.appendChild(dd);
+            requestAnimationFrame(() => {
+              const rect = badgeEl.getBoundingClientRect();
+              const ddH  = dd.offsetHeight || 220;
+              const spaceBelow = window.innerHeight - rect.bottom;
+              dd.style.top  = (spaceBelow >= ddH || spaceBelow >= rect.top
+                ? rect.bottom + 3 : rect.top - ddH - 3) + "px";
+              dd.style.right = (window.innerWidth - rect.right) + "px";
+            });
           });
 
           const extendBtn = isTemp ? (() => {
@@ -18799,7 +19277,7 @@ unsafeWindow.fetch = function(...args) {
       });
 
       document.body.appendChild(picker);
-
+      _clampPickerPos();
       setTimeout(() => {
         const dismiss = (e) => {
           if (!picker.contains(e.target)) {
@@ -18843,10 +19321,42 @@ unsafeWindow.fetch = function(...args) {
           injectItem.setAttribute("role", "menuitem");
           injectItem.setAttribute("tabindex", "-1");
           injectItem.setAttribute("data-menu-item", "true");
+          injectItem.style.cssText = "display:flex !important; align-items:center !important; gap:6px !important;";
 
           const labelEl = blockItem.querySelector('[class*="label_"]');
           const label = document.createElement("div");
           label.className = labelEl?.className || "";
+          label.style.cssText = "flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;";
+
+          const gearBtn = document.createElement("div");
+          gearBtn.textContent = "⚙️";
+          gearBtn.title = "Manage mute list";
+          gearBtn.style.cssText = [
+            "flex-shrink:0",
+            "width:20px",
+            "height:20px",
+            "display:flex",
+            "align-items:center",
+            "justify-content:center",
+            "font-size:13px",
+            "border-radius:4px",
+            "cursor:pointer",
+            "opacity:0.55",
+            "transition:opacity 0.15s, background 0.15s",
+          ].join(";");
+          gearBtn.addEventListener("mouseenter", () => {
+            gearBtn.style.opacity = "1";
+            gearBtn.style.background = "rgba(255,255,255,0.10)";
+          });
+          gearBtn.addEventListener("mouseleave", () => {
+            gearBtn.style.opacity = "0.55";
+            gearBtn.style.background = "";
+          });
+          gearBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            document.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+            setTimeout(() => openBlPanel(), 80);
+          });
 
           const renderLabel = () => {
             const blocked = getIsBlocked();
@@ -18857,6 +19367,7 @@ unsafeWindow.fetch = function(...args) {
           };
           renderLabel();
           injectItem.appendChild(label);
+          injectItem.appendChild(gearBtn);
 
           injectItem.addEventListener("mouseenter", () => {
             injectItem.style.background = getIsBlocked()
