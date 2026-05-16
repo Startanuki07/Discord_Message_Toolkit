@@ -9,7 +9,7 @@
 // @name:fr      Discord Message Toolkit
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
-// @version      2.5.1.3
+// @version      2.5.2.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -17323,10 +17323,9 @@ unsafeWindow.fetch = function(...args) {
         }
 
         @keyframes dmt-ghost-vanish {
-          0%   { opacity: 0.75; transform: translateY(0)    rotate(0deg)   scale(1);    }
-          15%  { opacity: 0.65; transform: translateY(-4px) rotate(-1deg)  scale(0.99); }
-          60%  { opacity: 0.25; transform: translateY(-18px) rotate(-4deg) scale(0.98); }
-          100% { opacity: 0;    transform: translateY(-36px) rotate(-7deg) scale(0.96); }
+          0%   { opacity: 0.55; transform: translateY(0)     rotate(0deg);   }
+          5%   { opacity: 0.52; transform: translateY(-2px)  rotate(-6deg);  }
+          100% { opacity: 0;    transform: translateY(-34px) rotate(-8deg);  }
         }
         .dmt-bl-s1.dmt-ghost-vanished {
           animation: dmt-ghost-vanish 1.5s cubic-bezier(.19, 1, .22, 1) forwards !important;
@@ -17586,6 +17585,17 @@ unsafeWindow.fetch = function(...args) {
           min-height: 0 !important;
         }
 
+        .dmt-bl-bot-relay {
+          opacity: 0.05 !important;
+          filter: grayscale(100%) !important;
+          transition: opacity 0.35s ease, filter 0.35s ease !important;
+          border-left: 2px solid rgba(242,153,74,0.35) !important;
+        }
+        .dmt-bl-bot-relay:hover {
+          opacity: 0.45 !important;
+          filter: grayscale(0%) !important;
+        }
+
         @keyframes dmt-bl-picker-in {
           from { opacity:0; transform:translateY(6px) scale(.96); }
           to   { opacity:1; transform:none; }
@@ -17735,9 +17745,9 @@ unsafeWindow.fetch = function(...args) {
         
         #dmt-bl-picker .pv-ghost { opacity: 0.75; will-change: transform, opacity; }
         @keyframes pv-floatup {
-          0%   { opacity: 0.75; transform: translateY(0)     rotate(0deg)   scale(1);    }
-          20%  { opacity: 0.55; transform: translateY(-4px)  rotate(-1deg)  scale(0.99); }
-          100% { opacity: 0;    transform: translateY(-28px) rotate(-5deg)  scale(0.97); }
+          0%   { opacity: 0.75; transform: translateY(0)     rotate(0deg);  }
+          5%   { opacity: 0.70; transform: translateY(-2px)  rotate(-6deg); }
+          100% { opacity: 0;    transform: translateY(-28px) rotate(-8deg); }
         }
         #dmt-bl-picker .pv-ghost.pv-go {
           animation: pv-floatup 1.3s cubic-bezier(.19,1,.22,1) forwards;
@@ -18174,7 +18184,45 @@ unsafeWindow.fetch = function(...args) {
       6: { cls: "dmt-bl-s6", icon: "▎",  name: "Sidebar" },
     };
     const BL_TEMP_STYLE_ID = 99;
-    const BL_ALL_CLS = Object.values(BL_STYLES).map(s => s.cls);
+    const BL_ALL_CLS = [...Object.values(BL_STYLES).map(s => s.cls), "dmt-bl-bot-relay"];
+
+    const BOT_TAG_SEL     = '[class*="botTag"]';
+    const REPLY_SEL       = '[class*="repliedMessage_"]';
+    const REPLY_USER_SEL  = '[class*="repliedMessage_"] [class*="username_"]';
+    const GROUP_START_SEL = '[class*="groupStart_"]';
+
+    function _applyBotRelay(container, nameMap) {
+      if (!GMStore.get("bl_bot_relay", true)) return false;
+      if (BL_ALL_CLS.some(c => c !== "dmt-bl-bot-relay" && container.classList.contains(c))) return false;
+      if (!container.querySelector(BOT_TAG_SEL)) return false;
+      const replyEl = container.querySelector(REPLY_SEL);
+      if (!replyEl) return false;
+      const replyUserEl = replyEl.querySelector('[class*="username_"]');
+      if (!replyUserEl) return false;
+      const repliedTo = replyUserEl.dataset.text || replyUserEl.textContent.replace(/^@/, "").trim();
+      if (!nameMap.has(repliedTo)) return false;
+      container.classList.add("dmt-bl-bot-relay");
+      return true;
+    }
+
+    function _applyBotRelayFollowUps(container, nameMap) {
+      if (!GMStore.get("bl_bot_relay", true)) return;
+      if (!container.classList.contains("dmt-bl-bot-relay")) return;
+      const li = container.closest("li");
+      if (!li) return;
+      let nextLi = li.nextElementSibling;
+      while (nextLi) {
+        const next = nextLi.querySelector?.(MSG_SEL);
+        if (!next) break;
+        if (next.matches(GROUP_START_SEL)) break;
+        if (next.querySelector(BOT_TAG_SEL) && !next.querySelector(REPLY_SEL)) {
+          next.classList.add("dmt-bl-bot-relay");
+        } else {
+          break;
+        }
+        nextLi = nextLi.nextElementSibling;
+      }
+    }
 
     function blLoad() {
       return GMStore.get(BL_STORE_KEY, [], true) || [];
@@ -18251,6 +18299,10 @@ unsafeWindow.fetch = function(...args) {
         container._dmt_ghostIcon.remove();
         delete container._dmt_ghostIcon;
       }
+      if (container._dmt_stopPeek) {
+        container._dmt_stopPeek();
+        delete container._dmt_stopPeek;
+      }
       if (authorName) {
         container.dataset.dmtAuthor = authorName;
       } else {
@@ -18293,35 +18345,70 @@ unsafeWindow.fetch = function(...args) {
             container.appendChild(ghostIcon);
           }
           container._dmt_ghostIcon = ghostIcon;
+
+          const peekIcon = document.createElement("span");
+          peekIcon.className = "dmt-ghost-peek";
+          peekIcon.textContent = "👻";
+          peekIcon.style.cssText = [
+            "position:fixed",
+            "font-size:17px",
+            "opacity:0.32",
+            "pointer-events:none",
+            "z-index:2147483600",
+            "transform:rotate(20deg) scaleX(-1)",
+            "transform-origin:center center",
+            "line-height:1",
+            "transition:opacity 0.4s ease",
+          ].join(";");
+          document.body.appendChild(peekIcon);
+          container._dmt_peekIcon = peekIcon;
+
+          let _peekRaf;
+          const _trackPeek = () => {
+            if (!peekIcon.isConnected || !container.isConnected) return;
+            const r = container.getBoundingClientRect();
+            peekIcon.style.top  = (r.top + 4) + "px";
+            peekIcon.style.left = (r.right - 8) + "px";
+            _peekRaf = requestAnimationFrame(_trackPeek);
+          };
+          _trackPeek();
+          container._dmt_peekRaf = _peekRaf;
+          container._dmt_stopPeek = () => {
+            cancelAnimationFrame(container._dmt_peekRaf);
+            if (container._dmt_peekIcon) {
+              container._dmt_peekIcon.style.opacity = "0";
+              setTimeout(() => container._dmt_peekIcon?.remove(), 450);
+              delete container._dmt_peekIcon;
+            }
+          };
         }
 
         const vanishTimer = setTimeout(() => {
           _ghostTimers.delete(container);
 
-          container.classList.remove("dmt-ghost-shrunk");
+          if (container._dmt_stopPeek) {
+            container._dmt_stopPeek();
+            delete container._dmt_stopPeek;
+          }
 
           const fullH = container.scrollHeight;
           container.style.height   = fullH + "px";
           container.style.overflow = "hidden";
 
           container.style.transition = [
-            "height 0.8s cubic-bezier(.4,0,.2,1) 0.5s",
-            "padding-top 0.8s cubic-bezier(.4,0,.2,1) 0.5s",
-            "padding-bottom 0.8s cubic-bezier(.4,0,.2,1) 0.5s",
-            "margin-top 0.8s cubic-bezier(.4,0,.2,1) 0.5s",
-            "margin-bottom 0.8s cubic-bezier(.4,0,.2,1) 0.5s",
-            "opacity 0.5s ease 0s",
+            "height 0.9s cubic-bezier(.4,0,.2,1) 0.35s",
+            "padding-top 0.9s cubic-bezier(.4,0,.2,1) 0.35s",
+            "padding-bottom 0.9s cubic-bezier(.4,0,.2,1) 0.35s",
+            "margin-top 0.9s cubic-bezier(.4,0,.2,1) 0.35s",
+            "margin-bottom 0.9s cubic-bezier(.4,0,.2,1) 0.35s",
           ].join(",");
 
           requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              container.style.height        = "0";
-              container.style.paddingTop    = "0";
-              container.style.paddingBottom = "0";
-              container.style.marginTop     = "0";
-              container.style.marginBottom  = "0";
-              container.style.opacity       = "0";
-            });
+            container.style.height        = "0";
+            container.style.paddingTop    = "0";
+            container.style.paddingBottom = "0";
+            container.style.marginTop     = "0";
+            container.style.marginBottom  = "0";
           });
 
           container.classList.add("dmt-ghost-vanished");
@@ -18350,6 +18437,9 @@ unsafeWindow.fetch = function(...args) {
           BL_ALL_CLS.forEach(c => container.classList.remove(c));
           container.classList.remove("dmt-bl-open");
           delete container.dataset.dmtAuthor;
+          if (_applyBotRelay(container, nameMap)) {
+            _applyBotRelayFollowUps(container, nameMap);
+          }
         }
       });
       _mergeCollapseGroups();
@@ -18366,6 +18456,9 @@ unsafeWindow.fetch = function(...args) {
         BL_ALL_CLS.forEach(c => container.classList.remove(c));
         container.classList.remove("dmt-bl-open");
         delete container.dataset.dmtAuthor;
+        if (_applyBotRelay(container, nameMap)) {
+          _applyBotRelayFollowUps(container, nameMap);
+        }
       }
       _mergeCollapseGroups();
     }
@@ -18702,6 +18795,7 @@ unsafeWindow.fetch = function(...args) {
     function closeBlPanel(instant = false) {
       const panel = document.getElementById(BL_PANEL_ID);
       if (!panel) return;
+      document.querySelectorAll(".bl-style-dropdown").forEach(d => d.remove());
       if (instant) { panel.remove(); return; }
       panel.classList.add("dmt-bl-leaving");
       setTimeout(() => panel.remove(), 200);
@@ -19241,6 +19335,31 @@ unsafeWindow.fetch = function(...args) {
       ghostRow.appendChild(ghostUnit);
       pageStyle.appendChild(ghostRow);
 
+      const botRelayRow = document.createElement("div");
+      botRelayRow.className = "pset-setting-row";
+      const botRelayLabel = document.createElement("div");
+      botRelayLabel.className = "pset-setting-label";
+      botRelayLabel.textContent = "Auto-mute bot relay";
+      const botRelayDesc = document.createElement("div");
+      botRelayDesc.className = "pset-setting-desc";
+      botRelayDesc.textContent = "Dim BOT messages that reply to muted users";
+      botRelayDesc.style.cssText = "font-size:10px;color:rgba(185,187,190,0.5);margin-top:2px;";
+      const botRelayToggle = document.createElement("input");
+      botRelayToggle.type = "checkbox";
+      botRelayToggle.className = "pset-setting-toggle";
+      botRelayToggle.checked = GMStore.get("bl_bot_relay", true);
+      botRelayToggle.style.cssText = "margin-left:auto;width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:rgba(88,101,242,0.9);";
+      botRelayToggle.addEventListener("change", () => {
+        GMStore.set("bl_bot_relay", botRelayToggle.checked);
+        blApplyAll();
+      });
+      const botRelayLeft = document.createElement("div");
+      botRelayLeft.style.cssText = "display:flex;flex-direction:column;flex:1;min-width:0;";
+      botRelayLeft.appendChild(botRelayLabel);
+      botRelayLeft.appendChild(botRelayDesc);
+      botRelayRow.appendChild(botRelayLeft);
+      botRelayRow.appendChild(botRelayToggle);
+      pageStyle.appendChild(botRelayRow);
       tabList.addEventListener("click", () => {
         tabList.classList.add("active");
         tabStyle.classList.remove("active");
