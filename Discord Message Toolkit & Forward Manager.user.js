@@ -9,7 +9,7 @@
 // @name:fr      Discord Message Toolkit
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
-// @version      2.5.2.4
+// @version      2.5.2.5
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
@@ -18272,6 +18272,19 @@ unsafeWindow.fetch = function(...args) {
       for (const el of candidates) {
         if (replyBlock && replyBlock.contains(el)) continue;
         const name = el.textContent.trim();
+        if (name) return name;
+      }
+      const labelledBy = container.getAttribute("aria-labelledby") || "";
+      for (const id of labelledBy.split(" ")) {
+        if (!id.startsWith("message-username-")) continue;
+        const usernameEl = document.getElementById(id);
+        if (!usernameEl) continue;
+        const nameEl = usernameEl.querySelector(AUTHOR_SEL) || usernameEl.closest(AUTHOR_SEL);
+        if (nameEl) {
+          const name = nameEl.dataset.text || nameEl.textContent.trim();
+          if (name) return name;
+        }
+        const name = usernameEl.dataset.text || usernameEl.textContent.trim();
         if (name) return name;
       }
       return null;
