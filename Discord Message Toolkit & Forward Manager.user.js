@@ -9,21 +9,22 @@
 // @name:fr      Discord Message Toolkit
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
-// @version      2.5.2.5
+// @version      2.6.0.0
 // @license      MIT
 // @author       Star_tanuki07
-// @description      Adds a per-message toolbar for copying, media downloading, and social media URL conversion, plus an enhanced forwarding panel, sidebar channel shortcuts (Wormhole), and an expression collection manager.
-// @description:zh-TW 為每則訊息新增工具列，支援文字複製、媒體下載與社群連結轉換，並提供強化轉發面板、側欄頻道捷徑（蟲洞）與表情收藏管理器。
-// @description:zh-CN 为每条消息添加工具栏，支持文字复制、媒体下载与社交链接转换，并提供强化转发面板、侧栏频道快捷方式（虫洞）与表情收藏管理器。
-// @description:ja    メッセージごとにツールバーを追加。テキストコピー・メディアダウンロード・SNSリンク変換に対応し、強化された転送パネル・サイドバーチャンネルショートカット（ワームホール）・スタンプ管理機能も搭載。
-// @description:ko    메시지마다 툴바를 추가하여 텍스트 복사, 미디어 다운로드, SNS 링크 변환을 지원하며, 강화된 전달 패널, 사이드바 채널 단축키(웜홀), 이모지 컬렉션 관리 기능도 제공합니다。
-// @description:es    Añade una barra de herramientas por mensaje para copiar, descargar medios y convertir URLs, además de un panel de reenvío mejorado, atajos de canal en la barra lateral (Agujero de gusano) y un gestor de colecciones de expresiones.
-// @description:pt-BR Adiciona uma barra de ferramentas por mensagem para copiar, baixar mídias e converter URLs, além de um painel de encaminhamento aprimorado, atalhos de canal na barra lateral (Buraco de minhoca) e um gerenciador de coleções de expressões.
-// @description:fr    Ajoute une barre d'outils par message pour copier, télécharger des médias et convertir des URL, ainsi qu'un panneau de transfert amélioré, des raccourcis de salon dans la barre latérale (Trou de ver) et un gestionnaire de collections d'expressions.
-// @description:de    Fügt eine Symbolleiste pro Nachricht zum Kopieren, Herunterladen von Medien und Konvertieren von URLs hinzu, sowie ein verbessertes Weiterleitungspanel, Kanal-Shortcuts in der Seitenleiste (Wurmloch) und einen Ausdrucks-Sammlungsmanager.
-// @description:ru    Добавляет панель инструментов для каждого сообщения для копирования, загрузки медиа и конвертации URL, а также улучшенную панель переадресации, ярлыки каналов на боковой панели (Червоточина) и менеджер коллекций выражений.
+// @description      Browse, search, and batch-delete your own Discord messages with daily rate-limit controls. Visually mute messages from specific users without blocking them. Per-message toolbar for copying text, downloading media, and converting social media links to embed-friendly formats. Save emojis, stickers, and GIFs into named collections for quick reuse. Also includes an enhanced forwarding panel and sidebar Wormhole shortcuts.
+// @description:zh-TW 瀏覽、搜尋並批次刪除自己在 Discord 的發文，支援每日配額排程；可對特定使用者套用視覺靜音，無需封鎖。逐則工具列提供文字複製、媒體下載與社群連結轉換。可將表情、貼圖與 GIF 收藏至自訂分頁供快速取用。另附強化轉發面板與蟲洞側欄捷徑。
+// @description:zh-CN 浏览、搜索并批量删除自己在 Discord 的发言，支持每日配额计划；可对特定用户套用视觉静音，无需屏蔽。逐条工具栏提供文字复制、媒体下载与社交链接转换。可将表情、贴纸与 GIF 收藏至自定义分组供快速取用。另附强化转发面板与虫洞侧栏快捷方式。
+// @description:ja    自分の Discord 投稿を検索・一括削除（毎日のレート制限対応）、ブロックせず特定ユーザーのメッセージを視覚的にミュート。逐次ツールバーでテキストコピー・メディアダウンロード・SNS リンク変換が可能。スタンプ・GIF をカスタムタブに収集してすぐ呼び出せる。転送パネル強化・ワームホールショートカットも搭載。
+// @description:ko    Discord 자신의 메시지를 검색·일괄 삭제(일일 할당량 지원)하고, 차단 없이 특정 사용자의 메시지를 시각적으로 숨깁니다. 메시지별 툴바로 텍스트 복사, 미디어 다운로드, SNS 링크 변환을 제공합니다. 이모지·스티커·GIF를 커스텀 탭에 저장해 빠르게 재사용할 수 있습니다. 강화된 전달 패널과 웜홀 단축키도 포함됩니다.
+// @description:es    Navega, busca y elimina en lote tus propios mensajes de Discord con límite diario; silencia visualmente mensajes de usuarios específicos sin bloquearlos. Barra de herramientas por mensaje: copiar texto, descargar medios y convertir enlaces de redes sociales. Guarda emojis, stickers y GIFs en colecciones personalizadas para reutilizarlos fácilmente. También incluye panel de reenvío mejorado y atajos Wormhole.
+// @description:pt-BR Navegue, pesquise e exclua em lote suas próprias mensagens do Discord com limite diário; silencie visualmente mensagens de usuários específicos sem bloqueá-los. Barra de ferramentas por mensagem: copiar texto, baixar mídia e converter links de redes sociais. Salve emojis, figurinhas e GIFs em coleções personalizadas para reutilização rápida. Inclui também painel de encaminhamento aprimorado e atalhos Wormhole.
+// @description:fr    Parcourez, recherchez et supprimez en masse vos propres messages Discord avec un quota journalier ; masquez visuellement les messages d'utilisateurs spécifiques sans les bloquer. Barre d'outils par message : copier du texte, télécharger des médias et convertir des liens de réseaux sociaux. Enregistrez emojis, stickers et GIFs dans des collections nommées pour les réutiliser rapidement. Panneau de transfert amélioré et raccourcis Wormhole inclus.
+// @description:de    Eigene Discord-Nachrichten durchsuchen und stapelweise löschen (mit Tageslimit); Nachrichten bestimmter Nutzer visuell ausblenden ohne Blockierung. Pro-Nachricht-Toolbar: Text kopieren, Medien herunterladen, Social-Media-Links konvertieren. Emojis, Sticker und GIFs in benannten Sammlungen speichern und schnell abrufen. Verbessertes Weiterleitungspanel und Wurmloch-Shortcuts inklusive.
+// @description:ru    Просматривайте, ищите и массово удаляйте собственные сообщения в Discord (с дневным лимитом); визуально скрывайте сообщения конкретных пользователей без блокировки. Панель инструментов для каждого сообщения: копирование текста, загрузка медиа, конвертация ссылок соцсетей. Сохраняйте эмодзи, стикеры и GIF в именованные коллекции для быстрого повторного использования. Также: улучшенная переадресация и ярлыки Червоточины.
 // @match       https://discord.com/*
 // @match       https://ptb.discord.com/*
+// @match       https://canary.discord.com/*
 // @icon        https://www.google.com/s2/favicons?sz=64&domain=discord.com
 // @grant       GM_setValue
 // @grant       GM_getValue
@@ -53,7 +54,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "2.5.0.0";
+  const SCRIPT_VERSION = "2.6.0.9";
 
   const GMStore = {
     
@@ -92,6 +93,7 @@
     "mod_urlchecker": "1.8.0",
     "mod_scout":      "2.2.9",
     "mod_blacklist":  "2.2.9",
+    "mod_myposts":    "2.5.3",
   };
 
   function isFeatureNew(featureKey) {
@@ -332,6 +334,21 @@
         "zh-CN": "弱化用户消息",
         ja: "ユーザーメッセージを弱化",
         ko: "사용자 메시지 약화",
+      },
+    },
+    {
+      key: "modMyPosts",
+      storageKey: "mod_myposts",
+      icon: "📝",
+      defaultEnabled: false,
+      enableWarn: "mp_token_warn",
+      tip: "mod_tip_myposts",
+      label: {
+        "en-US": "My Posts Manager",
+        "zh-TW": "個人訊息管理",
+        "zh-CN": "个人消息管理",
+        ja: "投稿マネージャー",
+        ko: "내 게시물 관리",
       },
     },
   ];
@@ -611,7 +628,10 @@
       okBtn.className = "dmt-confirm-btn dmt-confirm-btn-ok" + (danger ? " danger" : "");
       okBtn.textContent = confirmText;
 
+      const onKey = (e) => { if (e.key === "Escape") close(false); };
+
       const close = (result) => {
+        document.removeEventListener("keydown", onKey);
         overlay.remove();
         resolve(result);
       };
@@ -619,7 +639,6 @@
       cancelBtn.onclick = () => close(false);
       okBtn.onclick     = () => close(true);
       overlay.addEventListener("click", (e) => { if (e.target === overlay) close(false); });
-      const onKey = (e) => { if (e.key === "Escape") { close(false); document.removeEventListener("keydown", onKey); } };
       document.addEventListener("keydown", onKey);
 
       btns.appendChild(cancelBtn);
@@ -862,6 +881,7 @@
         "Message Utility (⠿) is the core of this script.\\nAfter disabling, all ⠿ buttons will disappear.\\n\\nTo re-enable: right-click the Tampermonkey icon → 'Enable ⠿ Message Utility'.",
       mod_msg_warn_confirm: "Disable anyway",
       mod_msg_warn_cancel: "Cancel",
+      mod_enable_confirm:   "Enable",
       mod_msg_enable_menu: "Enable ⠿ Message Utility",
       rescue_reload_msg: "Settings updated. Reload page to apply changes?",
       rescue_close_btn: "Close",
@@ -1078,6 +1098,106 @@
       mod_tip_urlchecker: "Warns you when a pasted URL has already been shared in recent messages. Works without API token (DOM mode).",
       mod_tip_scout:      "Press the search button above the input box or use the keyboard shortcut to search current channel messages by keyword.",
       mod_tip_blacklist:  "Dim messages from specific users so they fade into the background. Right-click any message to add the author.",
+      mod_tip_myposts:    "Browse, filter, and schedule deletion of your own messages. Requires API token (fetched automatically on panel open).",
+
+      mp_panel_title:           "My Posts",
+      mp_tab_browse:            "Browse",
+      mp_tab_tasks:             "Tasks",
+      mp_scope_server:          "Server",
+      mp_scope_channel:         "Channel",
+      mp_scope_thread:          "Thread",
+      mp_search_placeholder:    "Search message content…",
+      mp_type_text:             "Text",
+      mp_type_reply:            "Reply",
+      mp_type_command:          "Command",
+      mp_type_thread_start:     "Thread start",
+      mp_type_other:            "Other",
+      mp_load_more:             "Load more",
+      mp_loading:               "Loading…",
+      mp_no_results:            "No messages found.",
+      mp_group_select_all:      "Select all",
+      mp_group_deselect_all:    "Deselect all",
+      mp_jump_to:               "Jump to message",
+      mp_delete_single:         "Delete this message",
+      mp_undo:                  "Undo",
+      mp_selected_n:            "{n} selected",
+      mp_create_task:           "Create delete task",
+      mp_cancel_select:         "Cancel",
+      mp_token_warn:            "⚠️ This module fetches your API token from browser storage to query and delete messages. Only enable this on devices you trust.",
+      mp_token_fail:            "Could not retrieve API token. Please switch to any channel once to capture it.",
+      mp_token_fetching:        "Fetching token…",
+      mp_userid_fail:           "Could not retrieve your User ID.",
+      mp_confirm_delete_single: "Delete this message? This cannot be undone.",
+      mp_confirm_delete_batch:  "Delete {n} messages?\n{summary}\nThis cannot be undone.",
+      mp_undo_deleted:          "Message deleted.",
+      mp_err_401:               "Token expired. Please refresh the page.",
+      mp_err_403:               "Cannot delete this message (no permission).",
+      mp_err_net:               "Network error. Retrying…",
+      mp_quota_label:           "Daily quota:",
+      mp_quota_conservative:    "Conservative — 20 / day",
+      mp_quota_balanced:        "Balanced — 50 / day (default)",
+      mp_quota_aggressive:      "Aggressive — 100 / day",
+      mp_quota_custom:          "Custom",
+      mp_quota_custom_warn:     "⚠️ High deletion rates may flag your account.",
+      mp_quota_today:           "Today: {done} / {limit}",
+      mp_tasks_active:          "Active tasks",
+      mp_tasks_done:            "Completed",
+      mp_tasks_empty:           "No tasks yet.",
+      mp_task_progress:         "Deleted: {done} / {total}",
+      mp_task_eta:              "Est. {days} day(s) remaining",
+      mp_task_resume:           "Resume",
+      mp_task_pause:            "Pause",
+      mp_task_cancel:           "Cancel task",
+      mp_task_cancel_confirm:   "Cancel and discard this task?",
+      mp_quota_reached:         "Daily quota reached ({limit}/{limit}).\nTask progress: {done} / {total}\nEst. {days} day(s) remaining.",
+      mp_quota_continue:        "Continue anyway (risk)",
+      mp_quota_tomorrow:        "Resume tomorrow",
+      mp_task_done_toast:       "Task complete! Deleted {n} messages.",
+      mp_task_created:          "Delete task created.",
+      mp_task_running:          "Another task is already running.",
+      mp_refresh:               "Refresh",
+      mp_page_size_label:       "Messages per page:",
+      mp_page_size_n:           "{n} messages",
+      mp_tasks_empty_hint:      "Go to the Browse tab, select messages, then tap \"Create delete task\" at the bottom.",
+      mp_view_list:             "Switch to List view",
+      mp_view_grid:             "Switch to Grid view (media only)",
+      mp_no_media:              "No media messages in this range.",
+      mp_no_content:            "(no content)",
+      mp_sys_pin:               "Pinned a message",
+      mp_sys_channel_rename:    "Changed channel name",
+      mp_sys_command:           "Used a slash command",
+      mp_sys_thread_created:    "Created a thread",
+      mp_sys_reminder:          "Set a reminder",
+      mp_sys_action:            "System message",
+      mp_poll_unknown:          "Poll",
+      mp_tab_media:             "Media",
+      mp_media_all:             "All",
+      mp_media_images:          "Images",
+      mp_media_videos:          "Videos",
+      mp_att_video:             "Video",
+      mp_att_videos:            "Videos",
+      mp_att_image:             "Image",
+      mp_att_images:            "Images",
+      mp_media_loading_start:   "Loading media…",
+      mp_media_loading_more:    "Loaded {n} of {total}…",
+      mp_media_loaded_count:    "{n} / {total} loaded",
+      mp_media_loaded_all:      "All {n} items loaded",
+      mp_create_task_title:     "Create delete task",
+      mp_create_task_scope:     "Scope: {scope}",
+      mp_create_task_filters:   "Filters: {types}",
+      mp_create_task_count:     "Selected: {n} message(s)",
+      mp_create_task_quota:     "Quota: inherit global ({limit}/day)",
+      mp_create_task_label:     "Task label (optional):",
+      mp_create_task_warn:      "⚠️ Deleted messages cannot be recovered. Task will be queued.",
+      mp_create_task_confirm:   "Create task",
+      mp_img_expired:           "Image URL may have expired.",
+      mp_attachments_n:         "{n} attachment(s)",
+      mp_fav_add:               "Favorite (protected from Task deletion)",
+      mp_fav_remove:            "Unfavorite",
+      mp_fav_all_excluded:      "All selected messages are favorited — Task not created.",
+      mp_fav_filter_label:      "Favorites",
+      mp_fav_filter_tip:        "Show favorited messages only",
+      mp_copy_link:             "Copy message link",
 
       cs_panel_title:   "⌨ Channel Scout",
       cs_placeholder:   "Type a keyword to search channel messages…",
@@ -1271,6 +1391,8 @@
         "⠿ 訊息工具是本腳本的核心功能。\\n停用後，所有訊息的 ⠿ 按鈕將會消失。\\n\\n若要重新啟用：右鍵點擊 Tampermonkey 圖示 → 選擇「啟用 ⠿ 訊息工具」。",
       mod_msg_warn_confirm: "仍要停用",
       mod_msg_warn_cancel: "取消",
+      mod_enable_confirm:   "启用",
+      mod_enable_confirm:   "確認啟用",
       mod_msg_enable_menu: "啟用 ⠿ 訊息工具",
       rescue_reload_msg: "設定已更新。需要重新整理頁面才能生效。是否立即重新整理？",
       rescue_close_btn: "關閉",
@@ -1482,6 +1604,106 @@
       mod_tip_urlchecker: "當貼上的網址已在近期訊息中出現過時發出警告，不需 API token 即可運作（DOM 模式）。",
       mod_tip_scout:      "點擊輸入框上方的搜尋按鈕，或使用快捷鍵，以關鍵字搜尋目前頻道的訊息。",
       mod_tip_blacklist:  "將特定使用者的訊息弱化至背景，讓它們不再吸引注意。對任何訊息按右鍵即可新增。",
+      mod_tip_myposts:    "瀏覽、篩選並排程刪除自己的發文。開啟面板時自動取得 API Token，使用內建排程功能可限制每日刪除則數。",
+
+      mp_panel_title:           "個人發文",
+      mp_tab_browse:            "瀏覽",
+      mp_tab_tasks:             "任務",
+      mp_scope_server:          "伺服器",
+      mp_scope_channel:         "頻道",
+      mp_scope_thread:          "子頻道",
+      mp_search_placeholder:    "搜尋訊息內容…",
+      mp_type_text:             "文字",
+      mp_type_reply:            "回覆",
+      mp_type_command:          "指令回應",
+      mp_type_thread_start:     "子頻道起始",
+      mp_type_other:            "其他",
+      mp_load_more:             "載入更多",
+      mp_loading:               "載入中…",
+      mp_no_results:            "未找到訊息。",
+      mp_group_select_all:      "全選",
+      mp_group_deselect_all:    "取消全選",
+      mp_jump_to:               "跳轉至訊息",
+      mp_delete_single:         "刪除此訊息",
+      mp_undo:                  "復原",
+      mp_selected_n:            "已選 {n} 則",
+      mp_create_task:           "建立刪除任務",
+      mp_cancel_select:         "取消",
+      mp_token_warn:            "⚠️ 此模組將從瀏覽器儲存取得 API Token，用於查詢與刪除訊息。請僅在您信任的裝置上啟用此功能。",
+      mp_token_fail:            "無法取得 API Token，請切換一次頻道以促使腳本捕捉 Token。",
+      mp_token_fetching:        "取得 Token 中…",
+      mp_userid_fail:           "無法取得您的 User ID。",
+      mp_confirm_delete_single: "確認刪除此訊息？刪除後無法復原。",
+      mp_confirm_delete_batch:  "確認刪除 {n} 則訊息？\n{summary}\n刪除後無法復原。",
+      mp_undo_deleted:          "訊息已刪除。",
+      mp_err_401:               "Token 已失效，請重新整理頁面。",
+      mp_err_403:               "無法刪除此訊息（權限不足）。",
+      mp_err_net:               "網路錯誤，重試中…",
+      mp_quota_label:           "每日配額：",
+      mp_quota_conservative:    "保守 — 20 則 / 天",
+      mp_quota_balanced:        "平衡 — 50 則 / 天（預設）",
+      mp_quota_aggressive:      "積極 — 100 則 / 天",
+      mp_quota_custom:          "自訂",
+      mp_quota_custom_warn:     "⚠️ 高頻刪除可能觸發帳號異常偵測。",
+      mp_quota_today:           "今日：{done} / {limit} 則",
+      mp_tasks_active:          "進行中",
+      mp_tasks_done:            "已完成",
+      mp_tasks_empty:           "尚無任務。",
+      mp_task_progress:         "已刪除：{done} / {total}",
+      mp_task_eta:              "预計還需 {days} 天",
+      mp_task_resume:           "繼續",
+      mp_task_pause:            "暂停",
+      mp_task_cancel:           "取消任務",
+      mp_task_cancel_confirm:   "確認取消並丟棄此任務？",
+      mp_quota_reached:         "今日配額已達（{limit}/{limit}）。\n任務進度：{done} / {total}\n预計還需 {days} 天完成。",
+      mp_quota_continue:        "繼續刪除（自负風險）",
+      mp_quota_tomorrow:        "明天再繼續",
+      mp_task_done_toast:       "任務完成！共刪除 {n} 則訊息。",
+      mp_task_created:          "刪除任務已建立。",
+      mp_task_running:          "已有任務進行中，請先完成或暂停現有任務。",
+      mp_refresh:               "重新掃載",
+      mp_page_size_label:       "每頁訊息數：",
+      mp_page_size_n:           "{n} 則",
+      mp_tasks_empty_hint:      "前往「瀏覽」頁籤選取訊息，再點底部「建立刪除任務」即可建立。",
+      mp_view_list:             "切換列表視圖",
+      mp_view_grid:             "切換媒體方格視圖",
+      mp_no_media:              "此範圍內沒有媒體訊息。",
+      mp_no_content:            "（無內容）",
+      mp_sys_pin:               "置頂了一則訊息",
+      mp_sys_channel_rename:    "更改了頻道名稱",
+      mp_sys_command:           "使用了斜線指令",
+      mp_sys_thread_created:    "建立了子頻道",
+      mp_sys_reminder:          "設定了提醒",
+      mp_sys_action:            "系統訊息",
+      mp_poll_unknown:          "投票",
+      mp_tab_media:             "媒體",
+      mp_media_all:             "全部",
+      mp_media_images:          "圖片",
+      mp_media_videos:          "影片",
+      mp_att_video:             "影片",
+      mp_att_videos:            "影片",
+      mp_att_image:             "圖片",
+      mp_att_images:            "圖片",
+      mp_media_loading_start:   "媒體載入中…",
+      mp_media_loading_more:    "已載入 {n} / {total}…",
+      mp_media_loaded_count:    "已載入 {n} / {total}",
+      mp_media_loaded_all:      "已全部載入（{n} 則）",
+      mp_create_task_title:     "建立刪除任務",
+      mp_create_task_scope:     "範圍：{scope}",
+      mp_create_task_filters:   "篩選：{types}",
+      mp_create_task_count:     "已選取：{n} 則",
+      mp_create_task_quota:     "配額：繼承全域設定（{limit} 則/天）",
+      mp_create_task_label:     "任務標籤（選填）：",
+      mp_create_task_warn:      "⚠️ 刪除後無法復原。任務將加入佇列。",
+      mp_create_task_confirm:   "確認建立",
+      mp_img_expired:           "圖片連結可能已過期。",
+      mp_attachments_n:         "{n} 個附件",
+      mp_fav_add:               "收藏（保護此訊息不被 Task 刪除）",
+      mp_fav_remove:            "取消收藏",
+      mp_fav_all_excluded:      "所有已選訊息均已收藏，Task 未建立。",
+      mp_fav_filter_label:      "已收藏",
+      mp_fav_filter_tip:        "只顯示已收藏的訊息",
+      mp_copy_link:             "複製訊息連結",
 
       cs_panel_title:   "⌨ 頻道搜尋",
       cs_placeholder:   "輸入關鍵字搜尋頻道訊息…",
@@ -1884,6 +2106,7 @@
       mod_tip_urlchecker: "当粘贴的链接已在近期消息中出现过时发出警告，无需 API token（DOM 模式）。",
       mod_tip_scout:      "点击输入框上方的搜索按钮，或使用快捷键，按关键字搜索当前频道的消息。",
       mod_tip_blacklist:  "将特定用户的消息弱化至背景，让其不再引人注意。右键任意消息即可添加。",
+      mod_tip_myposts:    "浏览、筛选并安排删除自己的消息。打开面板时自动获取 API Token，内置配额功能可限制每日删除数量。",
 
       cs_panel_title:   "⌨ 频道搜索",
       cs_placeholder:   "输入关键字搜索频道消息…",
@@ -2295,6 +2518,7 @@
       mod_tip_urlchecker: "貼り付けたURLが最近の投稿に既に存在する場合に警告。APIトークン不要（DOMモード）。",
       mod_tip_scout:      "入力欄上の検索ボタンまたはショートカットで現在のチャンネルをキーワード検索。",
       mod_tip_blacklist:  "特定ユーザーのメッセージを薄く表示して目立たなくする。右クリックから追加可能。",
+      mod_tip_myposts:    "自分の投稿を閲覧・絞り込み・制限削除。パネルを開くと自動で API Token を取得します。",
 
       cs_panel_title:   "⌨ チャンネル検索",
       cs_placeholder:   "キーワードでチャンネルメッセージを検索…",
@@ -2333,6 +2557,105 @@
       mu_settings_clear_confirm: "ミュートユーザーをすべて削除しますか？",
       mu_settings_ghost_delay: "Ghost 消去ディレイ（秒）",
       mu_settings_title:       "設定",
+
+      mp_panel_title:           "マイ投稿",
+      mp_tab_browse:            "ブラウズ",
+      mp_tab_tasks:             "タスク",
+      mp_tab_media:             "メディア",
+      mp_scope_server:          "サーバー",
+      mp_scope_channel:         "チャンネル",
+      mp_scope_thread:          "スレッド",
+      mp_search_placeholder:    "メッセージ内容を検索…",
+      mp_type_text:             "テキスト",
+      mp_type_reply:            "返信",
+      mp_type_command:          "コマンド",
+      mp_type_thread_start:     "スレッド起点",
+      mp_type_other:            "その他",
+      mp_load_more:             "さらに読み込む",
+      mp_loading:               "読み込み中…",
+      mp_no_results:            "メッセージが見つかりません。",
+      mp_group_select_all:      "すべて選択",
+      mp_group_deselect_all:    "選択解除",
+      mp_jump_to:               "メッセージへジャンプ",
+      mp_delete_single:         "このメッセージを削除",
+      mp_undo:                  "元に戻す",
+      mp_selected_n:            "{n} 件選択中",
+      mp_create_task:           "削除タスクを作成",
+      mp_cancel_select:         "キャンセル",
+      mp_token_warn:            "⚠️ このモジュールはAPIトークンを取得します。信頼できる端末でのみ使用してください。",
+      mp_token_fail:            "APIトークンを取得できません。チャンネルを一度切り替えてください。",
+      mp_token_fetching:        "トークン取得中…",
+      mp_userid_fail:           "ユーザーIDを取得できません。",
+      mp_confirm_delete_single: "このメッセージを削除しますか？この操作は元に戻せません。",
+      mp_confirm_delete_batch:  "{n} 件のメッセージを削除しますか？\n{summary}\nこの操作は元に戻せません。",
+      mp_undo_deleted:          "メッセージを削除しました。",
+      mp_err_401:               "トークンが無効です。ページを再読み込みしてください。",
+      mp_err_403:               "このメッセージを削除できません（権限不足）。",
+      mp_err_net:               "ネットワークエラー、再試行中…",
+      mp_quota_label:           "1日の上限：",
+      mp_quota_conservative:    "控えめ — 20 件/日",
+      mp_quota_balanced:        "バランス — 50 件/日（デフォルト）",
+      mp_quota_aggressive:      "積極的 — 100 件/日",
+      mp_quota_custom:          "カスタム",
+      mp_quota_custom_warn:     "⚠️ 高頻度の削除はアカウント異常の検知を引き起こす可能性があります。",
+      mp_quota_today:           "本日：{done} / {limit} 件",
+      mp_tasks_active:          "進行中",
+      mp_tasks_done:            "完了",
+      mp_tasks_empty:           "タスクなし。",
+      mp_task_progress:         "削除済み：{done} / {total}",
+      mp_task_eta:              "あと約 {days} 日",
+      mp_task_resume:           "再開",
+      mp_task_pause:            "一時停止",
+      mp_task_cancel:           "タスクをキャンセル",
+      mp_task_cancel_confirm:   "このタスクをキャンセルして破棄しますか？",
+      mp_quota_reached:         "本日の上限に達しました（{limit}/{limit}）。\n進捗：{done} / {total}\nあと約 {days} 日かかります。",
+      mp_quota_continue:        "削除を続ける（自己責任）",
+      mp_quota_tomorrow:        "明日また続ける",
+      mp_task_done_toast:       "タスク完了！{n} 件削除しました。",
+      mp_task_created:          "削除タスクを作成しました。",
+      mp_task_running:          "タスクが実行中です。完了または一時停止してから新しいタスクを作成してください。",
+      mp_refresh:               "再読み込み",
+      mp_page_size_label:       "1ページの件数：",
+      mp_page_size_n:           "{n} 件",
+      mp_tasks_empty_hint:      "「ブラウズ」タブでメッセージを選択し、「削除タスクを作成」を押してください。",
+      mp_view_list:             "リスト表示に切り替え",
+      mp_view_grid:             "メディアグリッド表示に切り替え",
+      mp_no_media:              "この範囲にメディアメッセージはありません。",
+      mp_no_content:            "（内容なし）",
+      mp_sys_pin:               "メッセージをピン留めしました",
+      mp_sys_channel_rename:    "チャンネル名を変更しました",
+      mp_sys_command:           "スラッシュコマンドを使用しました",
+      mp_sys_thread_created:    "スレッドを作成しました",
+      mp_sys_reminder:          "リマインダーを設定しました",
+      mp_sys_action:            "システムメッセージ",
+      mp_poll_unknown:          "投票",
+      mp_media_all:             "すべて",
+      mp_media_images:          "画像",
+      mp_media_videos:          "動画",
+      mp_att_video:             "動画",
+      mp_att_videos:            "動画",
+      mp_att_image:             "画像",
+      mp_att_images:            "画像",
+      mp_media_loading_start:   "メディアを読み込み中…",
+      mp_media_loading_more:    "{n} / {total} 読み込み中…",
+      mp_media_loaded_count:    "{n} / {total} 読み込み完了",
+      mp_media_loaded_all:      "すべて読み込みました（{n} 件）",
+      mp_create_task_title:     "削除タスクを作成",
+      mp_create_task_scope:     "スコープ：{scope}",
+      mp_create_task_filters:   "フィルター：{types}",
+      mp_create_task_count:     "選択中：{n} 件",
+      mp_create_task_quota:     "上限：グローバル設定を継承（{limit} 件/日）",
+      mp_create_task_label:     "タスクラベル（任意）：",
+      mp_create_task_warn:      "⚠️ 削除後は元に戻せません。タスクはキューに追加されます。",
+      mp_create_task_confirm:   "タスクを作成",
+      mp_img_expired:           "画像URLが期限切れの可能性があります。",
+      mp_attachments_n:         "{n} 件の添付ファイル",
+      mp_fav_add:               "お気に入り（Taskによる削除から保護）",
+      mp_fav_remove:            "お気に入りを解除",
+      mp_fav_all_excluded:      "選択したメッセージはすべてお気に入りです — Taskを作成できません。",
+      mp_fav_filter_label:      "お気に入り",
+      mp_fav_filter_tip:        "お気に入りのメッセージのみ表示",
+      mp_copy_link:             "メッセージリンクをコピー",
     },
 
     ko: {
@@ -2728,7 +3051,107 @@
       mu_settings_clear_confirm: "모든 음소거 대상을 제거할까요?",
       mu_settings_ghost_delay: "Ghost 사라짐 지연 (초)",
       mu_settings_title:       "설정",
+
+      mp_panel_title:           "내 게시물",
+      mp_tab_browse:            "브라우즈",
+      mp_tab_tasks:             "작업",
+      mp_tab_media:             "미디어",
+      mp_scope_server:          "서버",
+      mp_scope_channel:         "채널",
+      mp_scope_thread:          "스레드",
+      mp_search_placeholder:    "메시지 내용 검색…",
+      mp_type_text:             "텍스트",
+      mp_type_reply:            "답글",
+      mp_type_command:          "명령어",
+      mp_type_thread_start:     "스레드 시작",
+      mp_type_other:            "기타",
+      mp_load_more:             "더 불러오기",
+      mp_loading:               "불러오는 중…",
+      mp_no_results:            "메시지를 찾을 수 없습니다.",
+      mp_group_select_all:      "모두 선택",
+      mp_group_deselect_all:    "선택 해제",
+      mp_jump_to:               "메시지로 이동",
+      mp_delete_single:         "이 메시지 삭제",
+      mp_undo:                  "실행 취소",
+      mp_selected_n:            "{n}개 선택됨",
+      mp_create_task:           "삭제 작업 만들기",
+      mp_cancel_select:         "취소",
+      mp_token_warn:            "⚠️ 이 모듈은 API 토큰을 가져옵니다. 신뢰할 수 있는 기기에서만 사용하세요.",
+      mp_token_fail:            "API 토큰을 가져올 수 없습니다. 채널을 한 번 전환해 주세요.",
+      mp_token_fetching:        "토큰 가져오는 중…",
+      mp_userid_fail:           "사용자 ID를 가져올 수 없습니다.",
+      mp_confirm_delete_single: "이 메시지를 삭제하시겠습니까? 되돌릴 수 없습니다.",
+      mp_confirm_delete_batch:  "{n}개의 메시지를 삭제하시겠습니까?\n{summary}\n되돌릴 수 없습니다.",
+      mp_undo_deleted:          "메시지가 삭제되었습니다.",
+      mp_err_401:               "토큰이 만료되었습니다. 페이지를 새로고침하세요.",
+      mp_err_403:               "이 메시지를 삭제할 수 없습니다 (권한 부족).",
+      mp_err_net:               "네트워크 오류, 재시도 중…",
+      mp_quota_label:           "일일 한도:",
+      mp_quota_conservative:    "보수적 — 20개/일",
+      mp_quota_balanced:        "균형 — 50개/일 (기본값)",
+      mp_quota_aggressive:      "적극적 — 100개/일",
+      mp_quota_custom:          "사용자 지정",
+      mp_quota_custom_warn:     "⚠️ 높은 빈도의 삭제는 계정 이상 감지를 유발할 수 있습니다.",
+      mp_quota_today:           "오늘: {done} / {limit}개",
+      mp_tasks_active:          "진행 중",
+      mp_tasks_done:            "완료",
+      mp_tasks_empty:           "작업 없음.",
+      mp_task_progress:         "삭제됨: {done} / {total}",
+      mp_task_eta:              "약 {days}일 남음",
+      mp_task_resume:           "재개",
+      mp_task_pause:            "일시 정지",
+      mp_task_cancel:           "작업 취소",
+      mp_task_cancel_confirm:   "이 작업을 취소하고 삭제하시겠습니까?",
+      mp_quota_reached:         "오늘 한도에 도달했습니다 ({limit}/{limit}).\n진행률: {done} / {total}\n완료까지 약 {days}일 남았습니다.",
+      mp_quota_continue:        "계속 삭제 (자기 책임)",
+      mp_quota_tomorrow:        "내일 계속하기",
+      mp_task_done_toast:       "작업 완료! {n}개의 메시지가 삭제되었습니다.",
+      mp_task_created:          "삭제 작업이 만들어졌습니다.",
+      mp_task_running:          "이미 실행 중인 작업이 있습니다. 완료하거나 일시 중지하세요.",
+      mp_refresh:               "새로 고침",
+      mp_page_size_label:       "페이지당 메시지 수:",
+      mp_page_size_n:           "{n}개",
+      mp_tasks_empty_hint:      "\"브라우즈\" 탭에서 메시지를 선택한 후 \"삭제 작업 만들기\"를 클릭하세요.",
+      mp_view_list:             "목록 보기로 전환",
+      mp_view_grid:             "미디어 그리드 보기로 전환",
+      mp_no_media:              "이 범위에 미디어 메시지가 없습니다.",
+      mp_no_content:            "(내용 없음)",
+      mp_sys_pin:               "메시지를 고정했습니다",
+      mp_sys_channel_rename:    "채널 이름이 변경되었습니다",
+      mp_sys_command:           "슬래시 명령어를 사용했습니다",
+      mp_sys_thread_created:    "스레드를 만들었습니다",
+      mp_sys_reminder:          "알림을 설정했습니다",
+      mp_sys_action:            "시스템 메시지",
+      mp_poll_unknown:          "투표",
+      mp_media_all:             "전체",
+      mp_media_images:          "이미지",
+      mp_media_videos:          "동영상",
+      mp_att_video:             "동영상",
+      mp_att_videos:            "동영상",
+      mp_att_image:             "이미지",
+      mp_att_images:            "이미지",
+      mp_media_loading_start:   "미디어 불러오는 중…",
+      mp_media_loading_more:    "{n} / {total} 불러오는 중…",
+      mp_media_loaded_count:    "{n} / {total} 불러옴",
+      mp_media_loaded_all:      "모두 불러왔습니다 ({n}개)",
+      mp_create_task_title:     "삭제 작업 만들기",
+      mp_create_task_scope:     "범위: {scope}",
+      mp_create_task_filters:   "필터: {types}",
+      mp_create_task_count:     "선택됨: {n}개",
+      mp_create_task_quota:     "한도: 전역 설정 상속 ({limit}개/일)",
+      mp_create_task_label:     "작업 레이블 (선택 사항):",
+      mp_create_task_warn:      "⚠️ 삭제 후 복구할 수 없습니다. 작업이 대기열에 추가됩니다.",
+      mp_create_task_confirm:   "작업 만들기",
+      mp_img_expired:           "이미지 URL이 만료되었을 수 있습니다.",
+      mp_attachments_n:         "첨부파일 {n}개",
+      mp_fav_add:               "즐겨찾기 (Task 삭제로부터 보호)",
+      mp_fav_remove:            "즐겨찾기 해제",
+      mp_fav_all_excluded:      "선택한 모든 메시지가 즐겨찾기 상태입니다 — Task가 생성되지 않았습니다.",
+      mp_fav_filter_label:      "즐겨찾기",
+      mp_fav_filter_tip:        "즐겨찾기한 메시지만 표시",
+      mp_copy_link:             "메시지 링크 복사",
     },
+
     es: {
       name: "Español",
       fm_pinned_channels: "★ Canales fijados",
@@ -3473,6 +3896,105 @@
       mu_temp_confirm:  "⏳ Silenciar temporariamente",
       mu_temp_expired_toast: "⏰ Silêncio temporário expirado: {name}",
       mu_temp_badge_label: "⏳",
+
+      mp_panel_title:           "Mis publicaciones",
+      mp_tab_browse:            "Explorar",
+      mp_tab_tasks:             "Tareas",
+      mp_tab_media:             "Multimedia",
+      mp_scope_server:          "Servidor",
+      mp_scope_channel:         "Canal",
+      mp_scope_thread:          "Hilo",
+      mp_search_placeholder:    "Buscar en el contenido…",
+      mp_type_text:             "Texto",
+      mp_type_reply:            "Respuesta",
+      mp_type_command:          "Comando",
+      mp_type_thread_start:     "Inicio de hilo",
+      mp_type_other:            "Otro",
+      mp_load_more:             "Cargar más",
+      mp_loading:               "Cargando…",
+      mp_no_results:            "No se encontraron mensajes.",
+      mp_group_select_all:      "Seleccionar todo",
+      mp_group_deselect_all:    "Deseleccionar todo",
+      mp_jump_to:               "Ir al mensaje",
+      mp_delete_single:         "Eliminar este mensaje",
+      mp_undo:                  "Deshacer",
+      mp_selected_n:            "{n} seleccionado(s)",
+      mp_create_task:           "Crear tarea de eliminación",
+      mp_cancel_select:         "Cancelar",
+      mp_token_warn:            "⚠️ Este módulo obtiene tu token de API. Úsalo solo en dispositivos de confianza.",
+      mp_token_fail:            "No se pudo obtener el token de API. Cambia de canal y vuelve a intentarlo.",
+      mp_token_fetching:        "Obteniendo token…",
+      mp_userid_fail:           "No se pudo obtener el ID de usuario.",
+      mp_confirm_delete_single: "¿Eliminar este mensaje? Esta acción no se puede deshacer.",
+      mp_confirm_delete_batch:  "¿Eliminar {n} mensaje(s)?\n{summary}\nEsta acción no se puede deshacer.",
+      mp_undo_deleted:          "Mensaje eliminado.",
+      mp_err_401:               "Token inválido. Recarga la página.",
+      mp_err_403:               "No se puede eliminar este mensaje (sin permisos).",
+      mp_err_net:               "Error de red, reintentando…",
+      mp_quota_label:           "Límite diario:",
+      mp_quota_conservative:    "Conservador — 20/día",
+      mp_quota_balanced:        "Equilibrado — 50/día (predeterminado)",
+      mp_quota_aggressive:      "Agresivo — 100/día",
+      mp_quota_custom:          "Personalizado",
+      mp_quota_custom_warn:     "⚠️ Una alta frecuencia de eliminación puede activar la detección de anomalías.",
+      mp_quota_today:           "Hoy: {done} / {limit}",
+      mp_tasks_active:          "En curso",
+      mp_tasks_done:            "Completado",
+      mp_tasks_empty:           "Sin tareas.",
+      mp_task_progress:         "Eliminados: {done} / {total}",
+      mp_task_eta:              "~{days} día(s) restante(s)",
+      mp_task_resume:           "Reanudar",
+      mp_task_pause:            "Pausar",
+      mp_task_cancel:           "Cancelar tarea",
+      mp_task_cancel_confirm:   "¿Cancelar y eliminar esta tarea?",
+      mp_quota_reached:         "Límite diario alcanzado ({limit}/{limit}).\nProgreso: {done} / {total}\nFaltan ~{days} días.",
+      mp_quota_continue:        "Continuar (bajo tu responsabilidad)",
+      mp_quota_tomorrow:        "Continuar mañana",
+      mp_task_done_toast:       "¡Tarea completada! {n} mensaje(s) eliminado(s).",
+      mp_task_created:          "Tarea de eliminación creada.",
+      mp_task_running:          "Ya hay una tarea en curso. Complétala o ponla en pausa.",
+      mp_refresh:               "Actualizar",
+      mp_page_size_label:       "Mensajes por página:",
+      mp_page_size_n:           "{n} mensajes",
+      mp_tasks_empty_hint:      "Selecciona mensajes en «Explorar» y pulsa «Crear tarea de eliminación».",
+      mp_view_list:             "Cambiar a vista de lista",
+      mp_view_grid:             "Cambiar a vista de cuadrícula",
+      mp_no_media:              "No hay mensajes multimedia en este ámbito.",
+      mp_no_content:            "(sin contenido)",
+      mp_sys_pin:               "Mensaje fijado",
+      mp_sys_channel_rename:    "Canal renombrado",
+      mp_sys_command:           "Comando de barra usad",
+      mp_sys_thread_created:    "Hilo creado",
+      mp_sys_reminder:          "Recordatorio establecido",
+      mp_sys_action:            "Mensaje del sistema",
+      mp_poll_unknown:          "Encuesta",
+      mp_media_all:             "Todo",
+      mp_media_images:          "Imágenes",
+      mp_media_videos:          "Vídeos",
+      mp_att_video:             "Vídeo",
+      mp_att_videos:            "Vídeos",
+      mp_att_image:             "Imagen",
+      mp_att_images:            "Imágenes",
+      mp_media_loading_start:   "Cargando multimedia…",
+      mp_media_loading_more:    "Cargando {n} / {total}…",
+      mp_media_loaded_count:    "{n} / {total} cargados",
+      mp_media_loaded_all:      "Todo cargado ({n})",
+      mp_create_task_title:     "Crear tarea de eliminación",
+      mp_create_task_scope:     "Ámbito: {scope}",
+      mp_create_task_filters:   "Filtros: {types}",
+      mp_create_task_count:     "Seleccionados: {n}",
+      mp_create_task_quota:     "Límite: hereda configuración global ({limit}/día)",
+      mp_create_task_label:     "Etiqueta de tarea (opcional):",
+      mp_create_task_warn:      "⚠️ Esta acción no se puede deshacer. La tarea se añadirá a la cola.",
+      mp_create_task_confirm:   "Crear tarea",
+      mp_img_expired:           "La URL de la imagen puede haber caducado.",
+      mp_attachments_n:         "{n} adjunto(s)",
+      mp_fav_add:               "Favorito (protegido de eliminación por Tarea)",
+      mp_fav_remove:            "Quitar de favoritos",
+      mp_fav_all_excluded:      "Todos los mensajes seleccionados son favoritos — Tarea no creada.",
+      mp_fav_filter_label:      "Favoritos",
+      mp_fav_filter_tip:        "Mostrar solo mensajes favoritos",
+      mp_copy_link:             "Copiar enlace del mensaje",
     },
 
     fr: {
@@ -3837,6 +4359,105 @@
       mu_temp_confirm:  "⏳ Muet temporaire",
       mu_temp_expired_toast: "⏰ Muet temporaire expiré : {name}",
       mu_temp_badge_label: "⏳",
+
+      mp_panel_title:           "Mes publications",
+      mp_tab_browse:            "Parcourir",
+      mp_tab_tasks:             "Tâches",
+      mp_tab_media:             "Médias",
+      mp_scope_server:          "Serveur",
+      mp_scope_channel:         "Salon",
+      mp_scope_thread:          "Fil",
+      mp_search_placeholder:    "Rechercher dans le contenu…",
+      mp_type_text:             "Texte",
+      mp_type_reply:            "Réponse",
+      mp_type_command:          "Commande",
+      mp_type_thread_start:     "Début de fil",
+      mp_type_other:            "Autre",
+      mp_load_more:             "Charger plus",
+      mp_loading:               "Chargement…",
+      mp_no_results:            "Aucun message trouvé.",
+      mp_group_select_all:      "Tout sélectionner",
+      mp_group_deselect_all:    "Tout désélectionner",
+      mp_jump_to:               "Aller au message",
+      mp_delete_single:         "Supprimer ce message",
+      mp_undo:                  "Annuler",
+      mp_selected_n:            "{n} sélectionné(s)",
+      mp_create_task:           "Créer une tâche de suppression",
+      mp_cancel_select:         "Annuler",
+      mp_token_warn:            "⚠️ Ce module récupère votre token API. Utilisez-le uniquement sur des appareils de confiance.",
+      mp_token_fail:            "Impossible d'obtenir le token API. Changez de salon et réessayez.",
+      mp_token_fetching:        "Récupération du token…",
+      mp_userid_fail:           "Impossible d'obtenir l'ID utilisateur.",
+      mp_confirm_delete_single: "Supprimer ce message ? Cette action est irréversible.",
+      mp_confirm_delete_batch:  "Supprimer {n} message(s) ?\n{summary}\nCette action est irréversible.",
+      mp_undo_deleted:          "Message supprimé.",
+      mp_err_401:               "Token invalide. Rechargez la page.",
+      mp_err_403:               "Impossible de supprimer ce message (permissions insuffisantes).",
+      mp_err_net:               "Erreur réseau, nouvelle tentative…",
+      mp_quota_label:           "Limite quotidienne :",
+      mp_quota_conservative:    "Conservateur — 20/jour",
+      mp_quota_balanced:        "Équilibré — 50/jour (par défaut)",
+      mp_quota_aggressive:      "Agressif — 100/jour",
+      mp_quota_custom:          "Personnalisé",
+      mp_quota_custom_warn:     "⚠️ Une fréquence élevée de suppression peut déclencher la détection d'anomalies.",
+      mp_quota_today:           "Aujourd'hui : {done} / {limit}",
+      mp_tasks_active:          "En cours",
+      mp_tasks_done:            "Terminé",
+      mp_tasks_empty:           "Aucune tâche.",
+      mp_task_progress:         "Supprimés : {done} / {total}",
+      mp_task_eta:              "~{days} jour(s) restant(s)",
+      mp_task_resume:           "Reprendre",
+      mp_task_pause:            "Mettre en pause",
+      mp_task_cancel:           "Annuler la tâche",
+      mp_task_cancel_confirm:   "Annuler et supprimer cette tâche ?",
+      mp_quota_reached:         "Limite quotidienne atteinte ({limit}/{limit}).\nProgression : {done} / {total}\nEncore ~{days} jour(s).",
+      mp_quota_continue:        "Continuer (à vos risques)",
+      mp_quota_tomorrow:        "Continuer demain",
+      mp_task_done_toast:       "Tâche terminée ! {n} message(s) supprimé(s).",
+      mp_task_created:          "Tâche de suppression créée.",
+      mp_task_running:          "Une tâche est déjà en cours. Terminez-la ou mettez-la en pause.",
+      mp_refresh:               "Actualiser",
+      mp_page_size_label:       "Messages par page :",
+      mp_page_size_n:           "{n} messages",
+      mp_tasks_empty_hint:      "Sélectionnez des messages dans «Parcourir» puis cliquez sur «Créer une tâche de suppression».",
+      mp_view_list:             "Passer en vue liste",
+      mp_view_grid:             "Passer en vue grille",
+      mp_no_media:              "Aucun message multimédia dans cette portée.",
+      mp_no_content:            "(sans contenu)",
+      mp_sys_pin:               "Message épinglé",
+      mp_sys_channel_rename:    "Salon renommé",
+      mp_sys_command:           "Commande slash utilisée",
+      mp_sys_thread_created:    "Fil créé",
+      mp_sys_reminder:          "Rappel défini",
+      mp_sys_action:            "Message système",
+      mp_poll_unknown:          "Sondage",
+      mp_media_all:             "Tout",
+      mp_media_images:          "Images",
+      mp_media_videos:          "Vidéos",
+      mp_att_video:             "Vidéo",
+      mp_att_videos:            "Vidéos",
+      mp_att_image:             "Image",
+      mp_att_images:            "Images",
+      mp_media_loading_start:   "Chargement des médias…",
+      mp_media_loading_more:    "Chargement {n} / {total}…",
+      mp_media_loaded_count:    "{n} / {total} chargés",
+      mp_media_loaded_all:      "Tout chargé ({n})",
+      mp_create_task_title:     "Créer une tâche de suppression",
+      mp_create_task_scope:     "Portée : {scope}",
+      mp_create_task_filters:   "Filtres : {types}",
+      mp_create_task_count:     "Sélectionnés : {n}",
+      mp_create_task_quota:     "Limite : hérite de la configuration globale ({limit}/jour)",
+      mp_create_task_label:     "Étiquette de tâche (optionnel) :",
+      mp_create_task_warn:      "⚠️ Cette action est irréversible. La tâche sera ajoutée à la file.",
+      mp_create_task_confirm:   "Créer la tâche",
+      mp_img_expired:           "L'URL de l'image a peut-être expiré.",
+      mp_attachments_n:         "{n} pièce(s) jointe(s)",
+      mp_fav_add:               "Favori (protégé contre la suppression par Tâche)",
+      mp_fav_remove:            "Retirer des favoris",
+      mp_fav_all_excluded:      "Tous les messages sélectionnés sont en favoris — Tâche non créée.",
+      mp_fav_filter_label:      "Favoris",
+      mp_fav_filter_tip:        "Afficher uniquement les messages favoris",
+      mp_copy_link:             "Copier le lien du message",
     },
 
     ru: {
@@ -4210,6 +4831,105 @@
       mu_temp_confirm:  "⏳ Временно заглушить",
       mu_temp_expired_toast: "⏰ Временное заглушение истекло: {name}",
       mu_temp_badge_label: "⏳",
+
+      mp_panel_title:           "Мои публикации",
+      mp_tab_browse:            "Обзор",
+      mp_tab_tasks:             "Задачи",
+      mp_tab_media:             "Медиа",
+      mp_scope_server:          "Сервер",
+      mp_scope_channel:         "Канал",
+      mp_scope_thread:          "Тред",
+      mp_search_placeholder:    "Поиск по содержимому…",
+      mp_type_text:             "Текст",
+      mp_type_reply:            "Ответ",
+      mp_type_command:          "Команда",
+      mp_type_thread_start:     "Начало треда",
+      mp_type_other:            "Другое",
+      mp_load_more:             "Загрузить ещё",
+      mp_loading:               "Загрузка…",
+      mp_no_results:            "Сообщения не найдены.",
+      mp_group_select_all:      "Выбрать все",
+      mp_group_deselect_all:    "Снять выбор",
+      mp_jump_to:               "Перейти к сообщению",
+      mp_delete_single:         "Удалить это сообщение",
+      mp_undo:                  "Отменить",
+      mp_selected_n:            "Выбрано: {n}",
+      mp_create_task:           "Создать задачу удаления",
+      mp_cancel_select:         "Отмена",
+      mp_token_warn:            "⚠️ Этот модуль получает ваш API-токен. Используйте только на доверенных устройствах.",
+      mp_token_fail:            "Не удалось получить API-токен. Переключите канал и попробуйте снова.",
+      mp_token_fetching:        "Получение токена…",
+      mp_userid_fail:           "Не удалось получить ID пользователя.",
+      mp_confirm_delete_single: "Удалить это сообщение? Действие необратимо.",
+      mp_confirm_delete_batch:  "Удалить {n} сообщений?\n{summary}\nДействие необратимо.",
+      mp_undo_deleted:          "Сообщение удалено.",
+      mp_err_401:               "Недействительный токен. Перезагрузите страницу.",
+      mp_err_403:               "Не удалось удалить сообщение (недостаточно прав).",
+      mp_err_net:               "Ошибка сети, повтор…",
+      mp_quota_label:           "Дневной лимит:",
+      mp_quota_conservative:    "Консервативный — 20/день",
+      mp_quota_balanced:        "Сбалансированный — 50/день (по умолчанию)",
+      mp_quota_aggressive:      "Агрессивный — 100/день",
+      mp_quota_custom:          "Своё значение",
+      mp_quota_custom_warn:     "⚠️ Высокая частота удалений может вызвать обнаружение аномалий аккаунта.",
+      mp_quota_today:           "Сегодня: {done} / {limit}",
+      mp_tasks_active:          "В процессе",
+      mp_tasks_done:            "Завершено",
+      mp_tasks_empty:           "Нет задач.",
+      mp_task_progress:         "Удалено: {done} / {total}",
+      mp_task_eta:              "~{days} дн. осталось",
+      mp_task_resume:           "Возобновить",
+      mp_task_pause:            "Пауза",
+      mp_task_cancel:           "Отменить задачу",
+      mp_task_cancel_confirm:   "Отменить и удалить эту задачу?",
+      mp_quota_reached:         "Дневной лимит достигнут ({limit}/{limit}).\nПрогресс: {done} / {total}\nОсталось ~{days} дн.",
+      mp_quota_continue:        "Продолжить (на свой риск)",
+      mp_quota_tomorrow:        "Продолжить завтра",
+      mp_task_done_toast:       "Задача выполнена! Удалено {n} сообщений.",
+      mp_task_created:          "Задача удаления создана.",
+      mp_task_running:          "Задача уже выполняется. Завершите или поставьте на паузу.",
+      mp_refresh:               "Обновить",
+      mp_page_size_label:       "Сообщений на страницу:",
+      mp_page_size_n:           "{n} сообщений",
+      mp_tasks_empty_hint:      "Выберите сообщения во вкладке «Обзор» и нажмите «Создать задачу удаления».",
+      mp_view_list:             "Переключить на список",
+      mp_view_grid:             "Переключить на медиа-сетку",
+      mp_no_media:              "Медиа-сообщений в этой области нет.",
+      mp_no_content:            "(нет содержимого)",
+      mp_sys_pin:               "Сообщение закреплено",
+      mp_sys_channel_rename:    "Канал переименован",
+      mp_sys_command:           "Использована слэш-команда",
+      mp_sys_thread_created:    "Создан тред",
+      mp_sys_reminder:          "Установлено напоминание",
+      mp_sys_action:            "Системное сообщение",
+      mp_poll_unknown:          "Опрос",
+      mp_media_all:             "Все",
+      mp_media_images:          "Изображения",
+      mp_media_videos:          "Видео",
+      mp_att_video:             "Видео",
+      mp_att_videos:            "Видео",
+      mp_att_image:             "Изображение",
+      mp_att_images:            "Изображения",
+      mp_media_loading_start:   "Загрузка медиа…",
+      mp_media_loading_more:    "Загрузка {n} / {total}…",
+      mp_media_loaded_count:    "{n} / {total} загружено",
+      mp_media_loaded_all:      "Всё загружено ({n})",
+      mp_create_task_title:     "Создать задачу удаления",
+      mp_create_task_scope:     "Область: {scope}",
+      mp_create_task_filters:   "Фильтры: {types}",
+      mp_create_task_count:     "Выбрано: {n}",
+      mp_create_task_quota:     "Лимит: наследует глобальную настройку ({limit}/день)",
+      mp_create_task_label:     "Метка задачи (необязательно):",
+      mp_create_task_warn:      "⚠️ Действие необратимо. Задача будет добавлена в очередь.",
+      mp_create_task_confirm:   "Создать задачу",
+      mp_img_expired:           "URL изображения мог устареть.",
+      mp_attachments_n:         "Вложений: {n}",
+      mp_fav_add:               "В избранное (защита от удаления Задачей)",
+      mp_fav_remove:            "Удалить из избранного",
+      mp_fav_all_excluded:      "Все выбранные сообщения в избранном — Задача не создана.",
+      mp_fav_filter_label:      "Избранное",
+      mp_fav_filter_tip:        "Показывать только избранные сообщения",
+      mp_copy_link:             "Скопировать ссылку на сообщение",
     },
   };
 
@@ -7702,6 +8422,64 @@
             dlg.addEventListener("click", (e) => {
               if (e.target === dlg) dlg.remove();
             });
+            return;
+          }
+
+          if (next && mod.enableWarn) {
+            const warnDlg = document.createElement("div");
+            warnDlg.style.cssText =
+              "position:fixed;inset:0;background:rgba(0,0,0,0.7);" +
+              "z-index:2147483647;display:flex;align-items:center;justify-content:center;";
+            const warnBox = document.createElement("div");
+            warnBox.style.cssText =
+              "background:#2f3136;border-radius:10px;padding:22px 24px;max-width:400px;" +
+              "color:#dcddde;font-size:13px;line-height:1.6;" +
+              "box-shadow:0 12px 40px rgba(0,0,0,0.6);";
+            const warnHead = document.createElement("div");
+            warnHead.style.cssText = "font-size:15px;font-weight:700;margin-bottom:10px;color:#fff;";
+            warnHead.textContent = mod.icon + "  " + getLang(mod.label);
+            const warnBody = document.createElement("div");
+            warnBody.style.cssText = "white-space:pre-line;color:#b9bbbe;margin-bottom:18px;";
+            warnBody.textContent = t(mod.enableWarn);
+            const warnBtns = document.createElement("div");
+            warnBtns.style.cssText = "display:flex;gap:10px;justify-content:flex-end;";
+            const warnCancel = document.createElement("button");
+            warnCancel.textContent = t("mod_msg_warn_cancel");
+            warnCancel.style.cssText =
+              "padding:7px 16px;border-radius:5px;background:#4f545c;color:#fff;" +
+              "border:none;cursor:pointer;font-size:13px;";
+            warnCancel.onclick = () => {
+              warnDlg.remove();
+            };
+            const warnConfirm = document.createElement("button");
+            warnConfirm.textContent = t("mod_enable_confirm");
+            warnConfirm.style.cssText =
+              "padding:7px 16px;border-radius:5px;background:#5865f2;color:#fff;" +
+              "border:none;cursor:pointer;font-size:13px;";
+            warnConfirm.onclick = () => {
+              warnDlg.remove();
+              setModEnabled(mod.storageKey, true);
+              updateToggle(true);
+              markFeatureSeen(mod.storageKey);
+              const existingBadge = label.querySelector(".dmt-new-badge");
+              if (existingBadge) existingBadge.remove();
+              if (mod.enableWarn === "mp_token_warn") {
+                setTimeout(() => {
+                  dmtConfirm(
+                    t("reload_confirm") || "Reload page now to apply changes?",
+                    { confirmText: t("reload_now") || "Reload now", cancelText: t("later") || "Later" }
+                  ).then(ok => { if (ok) location.reload(); });
+                }, 200);
+              }
+            };
+            warnBtns.appendChild(warnCancel);
+            warnBtns.appendChild(warnConfirm);
+            warnBox.appendChild(warnHead);
+            warnBox.appendChild(warnBody);
+            warnBox.appendChild(warnBtns);
+            warnDlg.appendChild(warnBox);
+            document.body.appendChild(warnDlg);
+            warnDlg.addEventListener("click", e => { if (e.target === warnDlg) warnDlg.remove(); });
             return;
           }
 
@@ -19019,8 +19797,9 @@ unsafeWindow.fetch = function(...args) {
       function _updatePreview(styleId) {
         while (previewEl.children.length > 1) previewEl.removeChild(previewEl.lastChild);
 
-        const avHtml   = `<div class="pv-av" style="background:${PV_AV_COLOR};">${PV_NAME.charAt(0).toUpperCase()}</div>`;
-        const nameSpan = `<span class="pv-name" style="color:#c9cdfb;">${PV_NAME}</span>`;
+        const pvNameEsc = escHtml(PV_NAME);
+        const avHtml   = `<div class="pv-av" style="background:${PV_AV_COLOR};">${escHtml(PV_NAME.charAt(0).toUpperCase())}</div>`;
+        const nameSpan = `<span class="pv-name" style="color:#c9cdfb;">${pvNameEsc}</span>`;
         const timeSpan = `<span style="font-size:9px;color:#4f545c;margin-left:4px;">just now</span>`;
         const textSpan = `<span class="pv-text" style="color:#dbdee1;">This message will be muted.</span>`;
 
@@ -19067,7 +19846,7 @@ unsafeWindow.fetch = function(...args) {
               `<div class="pv-collapse">
                 <div class="pv-expanded">
                   ${avHtml}
-                  <div style="font-size:10px;color:#dbdee1;">${PV_NAME} · ${textSpan}</div>
+                  <div style="font-size:10px;color:#dbdee1;">${pvNameEsc} · ${textSpan}</div>
                 </div>
               </div>`
             );
@@ -19079,17 +19858,17 @@ unsafeWindow.fetch = function(...args) {
             break;
           case 4:
             previewEl.insertAdjacentHTML("beforeend",
-              `<div class="pv-fog" data-name="${PV_NAME}"></div>`
+              `<div class="pv-fog" data-name="${pvNameEsc}"></div>`
             );
             break;
           case 5:
             previewEl.insertAdjacentHTML("beforeend",
-              `<div class="pv-msg pv-redacted">${avHtml}<div class="pv-mb"><div class="pv-name">${PV_NAME}</div><span class="pv-redacted-bar"></span></div></div>`
+              `<div class="pv-msg pv-redacted">${avHtml}<div class="pv-mb"><div class="pv-name">${pvNameEsc}</div><span class="pv-redacted-bar"></span></div></div>`
             );
             break;
           case 6:
             previewEl.insertAdjacentHTML("beforeend",
-              `<div class="pv-msg pv-sidebar">${avHtml}<div class="pv-name">${PV_NAME} <span style="font-size:9px;color:#4f545c;">just now</span></div></div>`
+              `<div class="pv-msg pv-sidebar">${avHtml}<div class="pv-name">${pvNameEsc} <span style="font-size:9px;color:#4f545c;">just now</span></div></div>`
             );
             break;
           default:
@@ -19608,6 +20387,2604 @@ unsafeWindow.fetch = function(...args) {
     });
 
     DEBUG && console.log("[Blacklist] Module H initialized, entries:", blLoad().length);
+  }
+
+  function initMyPostsManager() {
+
+    const SK_TASKS       = "mp_tasks";
+    const SK_QUOTA_LOG   = "mp_quota_log";
+    const SK_PANEL_POS   = "mp_panel_pos";
+    const SK_COLLAPSED   = "mp_collapsed_dates";
+    const SK_TYPE_FILTER = "mp_type_filter";
+    const SK_USERID      = "mp_userid";
+    const SK_PAGE_SIZE   = "mp_page_size";
+    const SK_FAVS        = "mp_favs";
+    const SK_LAST_SCOPE  = "mp_last_scope";
+    const SK_LAST_TAB    = "mp_last_tab";
+    const SK_PREFETCH_LIMIT = "mp_prefetch_limit";
+    const API_BASE       = "https://discord.com/api/v9";
+    const SEARCH_PAGE_OPTIONS = [25, 50, 100];
+    function _getPageSize() {
+      const v = parseInt(GMStore.get(SK_PAGE_SIZE, "25"), 10);
+      return SEARCH_PAGE_OPTIONS.includes(v) ? v : 25;
+    }
+    const QUOTA_DEFAULTS = { conservative: 20, balanced: 50, aggressive: 100 };
+    const DELETABLE_TYPES = new Set([0, 6, 7, 19, 20, 21, 23]);
+    const TYPE_GROUPS = {
+      text:    [0],
+      reply:   [19],
+      command: [20],
+      other:   [6, 7, 21, 23],
+    };
+    const SYS_MSG_LABELS = {
+      6:  "\uD83D\uDC65 pinned_message",
+      7:  "\uD83D\uDCCC channel_name_changed",
+      20: "\uD83D\uDEE0\uFE0F slash_command",
+      21: "\uD83E\uDDF5 created_thread",
+      23: "\u23F0 reminder",
+    };
+
+    let _token        = null;
+    let _userId       = null;
+    let _panelEl      = null;
+    let _browseData   = [];
+    let _browseOffset = 0;
+    let _browseTotal  = null;
+    let _browseGen    = 0;
+    let _browseScope  = "channel";
+    let _browseView   = "list";
+    let _selectedIds  = new Set();
+    let _anchorIdx    = null;
+    let _abortWait    = null;
+    let _runningTask  = null;
+    let _stopRequested = false;
+    let _typeFilter   = null;
+    let _setupBrowseSentinel = null;
+    let _mpRefreshBtn = null;
+    let _mpStatusBar  = null;
+    let _favFilterOn = false;
+    let _mpUndoBuffer = null;
+    let _mpUndoTimer  = null;
+    let _favIds = new Set(GMStore.get(SK_FAVS, [], true));
+
+    const mp = (key, params = {}) => t("mp_" + key, params);
+
+    function _sleep(ms) {
+      return new Promise(resolve => {
+        const tid = setTimeout(() => { _abortWait = null; resolve(); }, ms);
+        _abortWait = () => { clearTimeout(tid); _abortWait = null; resolve(); };
+      });
+    }
+
+    function _todayKey() {
+      const d = new Date();
+      return d.getFullYear() + "-" +
+        String(d.getMonth() + 1).padStart(2, "0") + "-" +
+        String(d.getDate()).padStart(2, "0");
+    }
+    function _getQuotaToday() {
+      const log = GMStore.get(SK_QUOTA_LOG, {}, true);
+      return log[_todayKey()] || 0;
+    }
+    function _bumpQuota() {
+      const log = GMStore.get(SK_QUOTA_LOG, {}, true);
+      const today = _todayKey();
+      log[today] = (log[today] || 0) + 1;
+      const cutoff = Date.now() - 30 * 86400000;
+      Object.keys(log).forEach(k => { if (new Date(k).getTime() < cutoff) delete log[k]; });
+      GMStore.set(SK_QUOTA_LOG, log, true);
+    }
+    function _getGlobalQuota() {
+      const raw = GMStore.get("mp_quota_level", "balanced");
+      if (raw === "custom") {
+        const v = parseInt(GMStore.get("mp_quota_custom", "50"), 10);
+        return isNaN(v) || v < 1 ? 50 : v;
+      }
+      return QUOTA_DEFAULTS[raw] || 50;
+    }
+    function _getTaskQuota(task) { return task.quotaPerDay ?? _getGlobalQuota(); }
+
+    function _fetchFromStorage() {
+      return new Promise(resolve => {
+        const iframe = document.createElement("iframe");
+        iframe.style.cssText = "display:none;position:absolute;width:0;height:0;";
+        document.body.appendChild(iframe);
+        requestAnimationFrame(() => {
+          try {
+            const ls = iframe.contentWindow.localStorage;
+            const token  = ls ? JSON.parse(ls.getItem("token")         || "null") : null;
+            const userId = ls ? JSON.parse(ls.getItem("user_id_cache") || "null") : null;
+            document.body.removeChild(iframe);
+            resolve({ token, userId });
+          } catch (e) {
+            try { document.body.removeChild(iframe); } catch (_) {}
+            resolve({ token: null, userId: null });
+          }
+        });
+      });
+    }
+
+    let _tokenFetchedAt = 0;
+    const TOKEN_TTL_MS  = 15 * 60 * 1000;
+
+    async function _ensureCredentials() {
+      const now = Date.now();
+      if (_token && _userId && (now - _tokenFetchedAt) < TOKEN_TTL_MS) return true;
+      const { token, userId } = await _fetchFromStorage();
+      if (token)  { _token = token; _tokenFetchedAt = now; }
+      if (userId) { _userId = userId; GMStore.set(SK_USERID, userId); }
+      if (!_userId) _userId = GMStore.get(SK_USERID, null);
+      if (!_token) {
+        try {
+          let wpToken = null;
+          window.webpackChunkdiscord_app?.push?.([[Symbol()], {},
+            r => {
+              for (const m of Object.values(r.c || {})) {
+                const e = m?.exports;
+                const tok = e?.default?.getToken?.() ?? e?.getToken?.();
+                if (tok) { wpToken = tok; break; }
+              }
+            }
+          ]);
+          if (wpToken) { _token = wpToken; _tokenFetchedAt = now; }
+        } catch (_) {}
+      }
+      return !!(_token && _userId);
+    }
+
+    function _gmFetch(method, url, body) {
+      return new Promise((resolve, reject) => {
+        const opts = {
+          method, url,
+          headers: { "Authorization": _token, "Content-Type": "application/json" },
+          timeout: 15000,
+          onload:    r  => resolve(r),
+          onerror:   () => reject(new Error("network")),
+          ontimeout: () => reject(new Error("timeout")),
+        };
+        if (body) opts.data = JSON.stringify(body);
+        GM_xmlhttpRequest(opts);
+      });
+    }
+
+    let _searchDelay = 1200, _deleteDelay = 1000;
+    const SEARCH_BASE = 1200, DELETE_BASE = 1000;
+    let _browseFetchDelay = 300;
+    const BROWSE_BASE = 300;
+    const _decay = (cur, base) => Math.max(base, Math.floor((cur + base) / 2));
+
+    async function _apiSearch(params, retries = 3, skipDelay = false) {
+      let retries202 = 0;
+      for (let i = 0; i < retries; i++) {
+        if (!skipDelay) await _sleep(_searchDelay);
+        if (_stopRequested) return null;
+        try {
+          let route, qs;
+          if (params.guild_id) {
+            const p = { ...params };
+            delete p.channel_id_scope;
+            route = "guilds/" + p.guild_id;
+            qs = new URLSearchParams(p).toString();
+          } else {
+            const chId = params.channel_id_scope || params.channel_id;
+            const p = { author_id: params.author_id, sort_by: params.sort_by,
+                        sort_order: params.sort_order, offset: params.offset,
+                        include_nsfw: params.include_nsfw };
+            route = "channels/" + chId;
+            qs = new URLSearchParams(p).toString();
+          }
+          const res = await _gmFetch("GET", API_BASE + "/" + route + "/messages/search?" + qs);
+          if (res.status === 429) {
+            let w = 3000;
+            try { w = (JSON.parse(res.responseText).retry_after || 3) * 1000; } catch (_) {}
+            _browseFetchDelay = Math.max(_browseFetchDelay, w);
+            _searchDelay = Math.max(_searchDelay, w);
+            await _sleep(w); i--; continue;
+          }
+          if (res.status === 401) { _handleExpiredToken(); return null; }
+          if (res.status === 202) {
+            if (++retries202 > 10) {
+              DEBUG && console.warn("[MyPosts] _apiSearch: 202 exceeded 10 retries, aborting");
+              return null;
+            }
+            let w = 2000;
+            try { w = (JSON.parse(res.responseText).retry_after || 2) * 1000; } catch (_) {}
+            if (_stopRequested) return null;
+            await _sleep(w);
+            if (_stopRequested) return null;
+            i--; continue;
+          }
+          if (res.status >= 500) { await _sleep(1000 * Math.pow(2, i)); continue; }
+          _browseFetchDelay = _decay(_browseFetchDelay, BROWSE_BASE);
+          _searchDelay = _decay(_searchDelay, SEARCH_BASE);
+          return JSON.parse(res.responseText);
+        } catch (e) {
+          if (i < retries - 1) await _sleep(1000 * Math.pow(2, i));
+        }
+      }
+      return null;
+    }
+
+    async function _apiDelete(channelId, msgId, retries = 3) {
+      for (let i = 0; i < retries; i++) {
+        await _sleep(_deleteDelay);
+        if (_stopRequested) return false;
+        try {
+          const res = await _gmFetch("DELETE", API_BASE + "/channels/" + channelId + "/messages/" + msgId);
+          if (res.status === 429) {
+            let w = 3000;
+            try { w = (JSON.parse(res.responseText).retry_after || 3) * 1000; } catch (_) {}
+            _deleteDelay = Math.max(_deleteDelay, w);
+            await _sleep(w); i--; continue;
+          }
+          if (res.status === 401) { _handleExpiredToken(); return false; }
+          if (res.status === 403) return false;
+          if (res.status >= 500) { await _sleep(1000 * Math.pow(2, i)); continue; }
+          _deleteDelay = _decay(_deleteDelay, DELETE_BASE);
+          return res.status === 204;
+        } catch (e) {
+          if (i < retries - 1) await _sleep(1000 * Math.pow(2, i));
+        }
+      }
+      return false;
+    }
+
+    function _handleExpiredToken() {
+      _token = null;
+      _tokenFetchedAt = 0;
+      _stopRequested = true;
+      _abortWait?.();
+      dmtShowToast(mp("err_401"), { duration: 5000 });
+    }
+
+    function _getCtx() {
+      const m = location.pathname.match(/^\/channels\/([^/]+)\/([^/]+)(?:\/([^/]+))?/);
+      if (!m) return null;
+      return { guildId: m[1] === "@me" ? null : m[1], channelId: m[2], threadId: m[3] || null };
+    }
+
+    async function _searchMyPosts(opts = {}) {
+      const ctx = _getCtx();
+      if (!ctx || !_userId) return null;
+      const { scope = _browseScope, offset = 0, skipDelay = false } = opts;
+      const params = {
+        author_id: _userId, sort_by: "timestamp",
+        sort_order: "desc", offset, include_nsfw: "true",
+        limit: _getPageSize(),
+      };
+      if (scope === "server" && ctx.guildId) {
+        params.guild_id = ctx.guildId;
+      } else {
+        if (ctx.guildId) { params.guild_id = ctx.guildId; params.channel_id = ctx.channelId; }
+        else             { params.channel_id_scope = ctx.channelId; }
+      }
+      return _apiSearch(params, 3, skipDelay);
+    }
+
+    function _loadTypeFilter() {
+      if (_typeFilter) return _typeFilter;
+      const stored = GMStore.get(SK_TYPE_FILTER, null, true);
+      if (stored) { delete stored.thread_start; }
+      _typeFilter = stored || { text: true, reply: true, command: true, other: true };
+      return _typeFilter;
+    }
+    function _saveTypeFilter() { GMStore.set(SK_TYPE_FILTER, _typeFilter, true); }
+    function _passesTypeFilter(msg) {
+      const f = _loadTypeFilter();
+      for (const [g, types] of Object.entries(TYPE_GROUPS)) {
+        if (types.includes(msg.type)) return f[g] !== false;
+      }
+      return true;
+    }
+    function _passesFavFilter(msg) {
+      return !_favFilterOn || _favIds.has(msg.id);
+    }
+
+    function _dateKey(msg) { return msg.timestamp.slice(0, 10); }
+    function _groupByDate(msgs) {
+      const map = new Map();
+      for (const m of msgs) {
+        const k = _dateKey(m);
+        if (!map.has(k)) map.set(k, []);
+        map.get(k).push(m);
+      }
+      return map;
+    }
+
+    function _isExpired(url) {
+      if (!url) return false;
+      const m = url.match(/[?&]ex=([0-9a-f]+)/i);
+      return m ? Date.now() > parseInt(m[1], 16) * 1000 : false;
+    }
+
+    function _getThumbUrl(msg) {
+      const att = (msg.attachments || []).find(a => a.content_type?.startsWith("image/"));
+      if (att) return att.proxy_url || att.url;
+      const emb = (msg.embeds || []).find(e => e.thumbnail?.url || e.image?.url);
+      if (emb) return emb.thumbnail?.proxy_url || emb.thumbnail?.url
+                    || emb.image?.proxy_url    || emb.image?.url;
+      return null;
+    }
+
+    function _getVideoUrl(msg) {
+      const att = (msg.attachments || []).find(a => a.content_type?.startsWith("video/"));
+      return att ? (att.proxy_url || att.url) : null;
+    }
+
+    function _buildGridItem(msg, idx, allMedia, selCount, createBtn, cancelBtn) {
+      const item = document.createElement("div");
+      item.className = "mp-grid-item" + (_selectedIds.has(msg.id) ? " selected" : "");
+      item.dataset.msgId = msg.id;
+
+      const thumbUrl = _getThumbUrl(msg);
+      const videoUrl = _getVideoUrl(msg);
+
+      if (thumbUrl) {
+        const img = document.createElement("img");
+        img.src = thumbUrl; img.alt = "";
+        img.loading = "lazy";
+        if (_isExpired(thumbUrl)) img.style.opacity = "0.6";
+        img.onclick = e => { e.stopPropagation(); _lightbox(thumbUrl); };
+        item.appendChild(img);
+      } else if (videoUrl) {
+        const vid = document.createElement("video");
+        vid.src = videoUrl; vid.muted = true; vid.preload = "metadata";
+        vid.style.cssText = "width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;";
+        item.appendChild(vid);
+      }
+
+      const overlay = document.createElement("div");
+      overlay.className = "mp-grid-overlay";
+
+      const metaEl = document.createElement("div");
+      metaEl.className = "mp-grid-meta";
+      const ts = new Date(msg.timestamp);
+      metaEl.textContent = ts.toLocaleDateString([], { month: "short", day: "numeric" })
+        + " " + ts.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+      const actsEl = document.createElement("div");
+      actsEl.className = "mp-grid-acts";
+
+      const jumpBtn2 = document.createElement("button");
+      jumpBtn2.className = "mp-action-btn";
+      jumpBtn2.title = mp("jump_to");
+      jumpBtn2.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>';
+      jumpBtn2.onclick = e => {
+        e.stopPropagation();
+        const g = _getCtx()?.guildId || "@me";
+        const url = "/channels/" + g + "/" + msg.channel_id + "/" + msg.id;
+        try { history.pushState({}, "", url); window.dispatchEvent(new PopStateEvent("popstate", { state: {} })); }
+        catch (_) { location.assign(url); }
+      };
+
+      const delBtn2 = document.createElement("button");
+      delBtn2.className = "mp-action-btn danger";
+      delBtn2.title = mp("delete_single");
+      delBtn2.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
+      delBtn2.onclick = async e => {
+        e.stopPropagation();
+        const ok = await dmtConfirm(mp("confirm_delete_single"), { danger: true });
+        if (!ok) return;
+        _stopRequested = false;
+        item.style.transition = "opacity .25s"; item.style.opacity = "0";
+        const snapshot = _browseData.slice();
+        if (await _apiDelete(msg.channel_id, msg.id)) {
+          _browseData = _browseData.filter(m => m.id !== msg.id);
+          setTimeout(() => { if (item.style.opacity === "0") item.style.display = "none"; }, 280);
+          _mpShowUndo(msg.id, item, () => {
+            _browseData = snapshot;
+            item.style.opacity = "1"; item.style.display = "";
+          });
+        } else { item.style.opacity = "1"; }
+      };
+
+      const favBtn2 = document.createElement("button");
+      favBtn2.className = "mp-action-btn mp-fav-btn" + (_favIds.has(msg.id) ? " mp-fav-active" : "");
+      favBtn2.title = _favIds.has(msg.id) ? mp("fav_remove") : mp("fav_add");
+      favBtn2.innerHTML = _favIds.has(msg.id) ? _SVG_HEART_FULL : _SVG_HEART_EMPTY;
+      favBtn2.onclick = e => { e.stopPropagation(); _mpToggleFav(msg.id, favBtn2); };
+
+      actsEl.append(jumpBtn2, favBtn2, delBtn2);
+      overlay.append(metaEl, actsEl);
+      item.appendChild(overlay);
+
+      item.onclick = e => {
+        if (e.target.closest(".mp-action-btn")) return;
+        if (_selectedIds.has(msg.id)) _selectedIds.delete(msg.id);
+        else                          _selectedIds.add(msg.id);
+        item.classList.toggle("selected", _selectedIds.has(msg.id));
+        _updateSB(selCount, createBtn, cancelBtn);
+      };
+
+      return item;
+    }
+
+    function _injectBtnCSS() {
+      if (document.getElementById("dmt-mp-btn-styles")) return;
+      const s = document.createElement("style");
+      s.id = "dmt-mp-btn-styles";
+      s.textContent = [
+        ".dmt-myposts-btn{display:flex;align-items:center;justify-content:center;",
+        "width:32px;height:32px;border-radius:6px;cursor:pointer;",
+        "transition:background .15s,color .15s;flex-shrink:0;color:var(--dmt-text-muted,#949ba4);}",
+        ".dmt-myposts-btn svg{width:20px;height:20px;fill:currentColor;}",
+        ".dmt-myposts-btn:hover{background:rgba(255,255,255,.08);color:var(--dmt-text-bright,#f2f3f5);}",
+        ".dmt-myposts-btn.active{color:#5865f2;background:rgba(88,101,242,.15);}",
+        ".dmt-myposts-btn.active:hover{background:rgba(88,101,242,.25);}",
+      ].join("");
+      document.head.appendChild(s);
+    }
+
+    function _injectCSS() {
+      if (document.getElementById("dmt-mp-styles")) return;
+      const s = document.createElement("style");
+      s.id = "dmt-mp-styles";
+      s.textContent = [
+        
+        "#dmt-mp-panel{position:fixed;z-index:2147483600;width:420px;height:580px;",
+        "min-width:320px;max-width:760px;min-height:260px;max-height:calc(100vh - 24px);",
+        "background:var(--dmt-bg-primary,#2b2d31);",
+        "border:1px solid rgba(255,255,255,.1);border-radius:12px;",
+        "box-shadow:0 16px 48px rgba(0,0,0,.7);display:flex;flex-direction:column;",
+        "font-family:sans-serif;font-size:13px;color:var(--dmt-text-primary,#dcddde);",
+        
+        "overflow:hidden;resize:both;box-sizing:border-box;will-change:transform;}",
+        "#dmt-mp-panel .mp-titlebar{display:flex;align-items:center;gap:8px;",
+        "padding:10px 14px 8px;background:var(--dmt-bg-secondary,#1e1f22);",
+        "border-bottom:1px solid rgba(255,255,255,.07);cursor:move;user-select:none;flex-shrink:0;}",
+        "#dmt-mp-panel .mp-title{font-size:14px;font-weight:700;flex:1;color:var(--dmt-text-bright,#f2f3f5);}",
+        "#dmt-mp-panel .mp-close{width:26px;height:26px;border-radius:6px;border:none;",
+        "background:transparent;color:var(--dmt-text-muted,#949ba4);font-size:16px;cursor:pointer;",
+        "display:flex;align-items:center;justify-content:center;transition:background .15s;}",
+        "#dmt-mp-panel .mp-close:hover{background:rgba(255,255,255,.08);color:var(--dmt-text-primary,#dcddde);}",
+        "#dmt-mp-panel .mp-tabs{display:flex;gap:4px;padding:6px 12px 0;",
+        "border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;}",
+        "#dmt-mp-panel .mp-tab{padding:5px 14px;border-radius:6px 6px 0 0;font-size:12px;font-weight:600;",
+        "cursor:pointer;color:var(--dmt-text-muted,#949ba4);border-bottom:2px solid transparent;",
+        "transition:color .15s,border-color .15s;}",
+        "#dmt-mp-panel .mp-tab.active{color:var(--dmt-accent,#5865f2);border-bottom-color:var(--dmt-accent,#5865f2);}",
+
+        "#dmt-mp-panel .mp-scope-btn{flex:1;padding:4px 8px;border-radius:6px;",
+        "border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--dmt-text-muted,#949ba4);",
+        "font-size:12px;cursor:pointer;transition:background .15s,color .15s,border-color .15s;}",
+        "#dmt-mp-panel .mp-scope-btn.active{background:var(--dmt-accent,#5865f2);color:#fff;border-color:transparent;}",
+        "#dmt-mp-panel .mp-search-row{padding:4px 12px 6px;flex-shrink:0;}",
+        "#dmt-mp-panel .mp-search{width:100%;box-sizing:border-box;padding:6px 10px;border-radius:6px;",
+        "background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);",
+        "color:var(--dmt-text-primary,#dcddde);font-size:13px;outline:none;}",
+        "#dmt-mp-panel .mp-search:focus{border-color:var(--dmt-accent,#5865f2);}",
+        "#dmt-mp-panel .mp-type-row{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 6px;flex-shrink:0;}",
+        "#dmt-mp-panel .mp-type-chip{display:flex;align-items:center;gap:4px;font-size:11px;",
+        "cursor:pointer;color:var(--dmt-text-muted,#949ba4);transition:color .15s;}",
+        "#dmt-mp-panel .mp-type-chip input{accent-color:var(--dmt-accent,#5865f2);cursor:pointer;}",
+        "#dmt-mp-panel .mp-type-chip.checked{color:var(--dmt-text-primary,#dcddde);}",
+        
+        "#dmt-mp-panel .mp-body{flex:1;overflow-y:auto;min-height:0;contain:content;}",
+        
+        "#dmt-mp-panel ::-webkit-scrollbar{width:4px;}",
+        "#dmt-mp-panel ::-webkit-scrollbar-track{background:transparent;}",
+        "#dmt-mp-panel ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:2px;}",
+        "#dmt-mp-panel ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.3);}",
+        
+        "#dmt-mp-panel .mp-media-body{flex:1;overflow-y:auto;min-height:0;padding:4px 4px 0;}",
+        "#dmt-mp-panel .mp-media-toolbar{display:flex;align-items:center;gap:6px;padding:6px 12px 4px;flex-shrink:0;}",
+        "#dmt-mp-panel .mp-media-filter-btn{padding:3px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.12);",
+        "background:transparent;color:var(--dmt-text-muted,#949ba4);font-size:11px;cursor:pointer;",
+        "transition:background .15s,color .15s,border-color .15s;}",
+        "#dmt-mp-panel .mp-media-filter-btn.active{background:var(--dmt-accent,#5865f2);color:#fff;border-color:transparent;}",
+        "#dmt-mp-panel .mp-media-search{flex:1;padding:4px 8px;border-radius:6px;",
+        "background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);",
+        "color:var(--dmt-text-primary,#dcddde);font-size:12px;outline:none;}",
+        "#dmt-mp-panel .mp-media-search:focus{border-color:var(--dmt-accent,#5865f2);}",
+        
+        "#dmt-mp-panel .mp-masonry{columns:3;column-gap:3px;padding:0 0 4px;}",
+        "#dmt-mp-panel .mp-masonry-item{break-inside:avoid;position:relative;margin-bottom:3px;",
+        "border-radius:4px;overflow:hidden;cursor:pointer;background:rgba(255,255,255,.04);display:block;}",
+        "#dmt-mp-panel .mp-masonry-item img,#dmt-mp-panel .mp-masonry-item video{",
+        "width:100%;display:block;border-radius:4px;}",
+        "#dmt-mp-panel .mp-masonry-item video{background:#000;}",
+        
+        "#dmt-mp-panel .mp-masonry-item .mp-grid-overlay{position:absolute;inset:0;",
+        "background:rgba(0,0,0,.5);opacity:0;transition:opacity .15s;",
+        "display:flex;flex-direction:column;justify-content:flex-end;padding:6px;border-radius:4px;}",
+        "#dmt-mp-panel .mp-masonry-item:hover .mp-grid-overlay{opacity:1;}",
+        "#dmt-mp-panel .mp-masonry-item.selected .mp-grid-overlay{opacity:1;background:rgba(88,101,242,.4);}",
+        "#dmt-mp-panel .mp-masonry-item.selected::after{content:'✓';position:absolute;top:5px;right:6px;",
+        "color:#fff;font-size:12px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.9);",
+        "width:20px;height:20px;background:var(--dmt-accent,#5865f2);border-radius:50%;",
+        "display:flex;align-items:center;justify-content:center;}",
+        
+        "#dmt-mp-panel .mp-video-badge{position:absolute;top:5px;left:6px;",
+        "background:rgba(0,0,0,.65);border-radius:3px;padding:1px 4px;",
+        "font-size:10px;color:#fff;pointer-events:none;}",
+        
+        "#dmt-mp-panel .mp-jump-corner{position:absolute;top:5px;right:5px;",
+        
+        "#dmt-mp-hover-zoom{position:fixed;z-index:2147483640;width:200px;height:200px;",
+        "border-radius:8px;overflow:hidden;pointer-events:none;",
+        "box-shadow:0 8px 24px rgba(0,0,0,.5);border:1.5px solid rgba(255,255,255,.18);}",
+        "#dmt-mp-hover-zoom img{width:100%;height:100%;object-fit:contain;display:block;background:#111;}",
+        
+        "#dmt-mp-panel .mp-fav-btn{color:var(--dmt-text-muted,#949ba4);}",
+        "#dmt-mp-panel .mp-fav-btn:hover,#dmt-mp-panel .mp-fav-btn.mp-fav-active{color:#f04747;}",
+        "#dmt-mp-panel .mp-fav-btn svg{width:14px;height:14px;}",
+        
+        "#dmt-mp-panel .mp-fav-chip{border-color:rgba(240,71,71,.35);}",
+        "#dmt-mp-panel .mp-fav-chip.checked{background:rgba(240,71,71,.15);color:#f04747;border-color:rgba(240,71,71,.6);}",
+        "width:22px;height:22px;border-radius:5px;border:none;",
+        "background:rgba(0,0,0,.55);color:rgba(255,255,255,.85);cursor:pointer;padding:0;",
+        "display:flex;align-items:center;justify-content:center;",
+        "opacity:.7;transition:opacity .15s,background .15s;z-index:2;}",
+        "#dmt-mp-panel .mp-jump-corner:hover{opacity:1;background:rgba(88,101,242,.85);}",
+        "#dmt-mp-panel .mp-jump-corner svg{width:13px;height:13px;fill:currentColor;}",
+        
+        "#dmt-mp-panel .mp-media-status{display:flex;align-items:center;gap:7px;",
+        "padding:6px 12px;font-size:11px;color:var(--dmt-text-muted,#949ba4);flex-shrink:0;}",
+        "#dmt-mp-panel .mp-media-spinner{width:13px;height:13px;border-radius:50%;",
+        "border:2px solid rgba(255,255,255,.12);border-top-color:var(--dmt-accent,#5865f2);",
+        "animation:mp-spin .7s linear infinite;flex-shrink:0;}",
+        
+        "#dmt-mp-panel .mp-media-date-sep{font-size:11px;font-weight:700;",
+        "color:var(--dmt-text-muted,#949ba4);padding:8px 4px 4px;",
+        "letter-spacing:.04em;}",
+        
+        "#dmt-mp-panel .mp-grid-meta{font-size:10px;color:rgba(255,255,255,.85);line-height:1.3;}",
+        "#dmt-mp-panel .mp-grid-acts{display:flex;gap:4px;margin-top:4px;}",
+        "#dmt-mp-panel .mp-grid-acts .mp-action-btn{width:22px;height:22px;background:rgba(0,0,0,.4);color:#fff;}",
+        "#dmt-mp-panel .mp-grid-acts .mp-action-btn:hover{background:rgba(0,0,0,.65);}",
+        
+        "#dmt-mp-lightbox{position:fixed;inset:0;z-index:2147483647;",
+        "background:rgba(0,0,0,.92);display:flex;align-items:center;justify-content:center;",
+        "flex-direction:column;cursor:default;}",
+        "#dmt-mp-lightbox .lb-media{max-width:90vw;max-height:80vh;border-radius:6px;",
+        "box-shadow:0 8px 32px rgba(0,0,0,.9);object-fit:contain;display:block;}",
+        "#dmt-mp-lightbox .lb-info{margin-top:10px;font-size:12px;color:rgba(255,255,255,.7);text-align:center;}",
+        "#dmt-mp-lightbox .lb-close{position:fixed;top:16px;right:20px;",
+        "width:32px;height:32px;border-radius:8px;border:none;",
+        "background:rgba(255,255,255,.1);color:#fff;font-size:18px;cursor:pointer;",
+        "display:flex;align-items:center;justify-content:center;transition:background .15s;}",
+        "#dmt-mp-lightbox .lb-close:hover{background:rgba(255,255,255,.2);}",
+        "#dmt-mp-lightbox .lb-nav{position:fixed;top:50%;transform:translateY(-50%);",
+        "width:40px;height:56px;border-radius:8px;border:none;",
+        "background:rgba(255,255,255,.08);color:#fff;font-size:22px;cursor:pointer;",
+        "display:flex;align-items:center;justify-content:center;transition:background .15s;}",
+        "#dmt-mp-lightbox .lb-nav:hover{background:rgba(255,255,255,.18);}",
+        "#dmt-mp-lightbox .lb-prev{left:12px;}",
+        "#dmt-mp-lightbox .lb-next{right:12px;}",
+        "#dmt-mp-panel .mp-view-toggle{width:24px;height:24px;border-radius:5px;border:none;",
+        "background:transparent;color:var(--dmt-text-muted,#949ba4);cursor:pointer;padding:0;",
+        "display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;}",
+        "#dmt-mp-panel .mp-view-toggle svg{width:16px;height:16px;fill:currentColor;}",
+        "#dmt-mp-panel .mp-view-toggle:hover{background:rgba(255,255,255,.08);color:var(--dmt-text-bright,#f2f3f5);}",
+        "#dmt-mp-panel .mp-group-header{display:flex;align-items:center;gap:6px;padding:6px 12px 4px;",
+        "position:sticky;top:0;background:var(--dmt-bg-secondary,#1e1f22);",
+        "border-bottom:1px solid rgba(255,255,255,.05);z-index:1;}",
+        "#dmt-mp-panel .mp-chevron{font-size:11px;cursor:pointer;color:var(--dmt-text-muted,#949ba4);",
+        "width:16px;flex-shrink:0;user-select:none;}",
+        "#dmt-mp-panel .mp-group-label{flex:1;font-size:12px;font-weight:700;",
+        "color:var(--dmt-text-bright,#f2f3f5);cursor:pointer;display:flex;align-items:center;gap:6px;}",
+        "#dmt-mp-panel .mp-group-count{font-size:11px;color:var(--dmt-text-muted,#949ba4);font-weight:400;}",
+        "#dmt-mp-panel .mp-group-selall{font-size:11px;color:var(--dmt-accent,#5865f2);",
+        "cursor:pointer;flex-shrink:0;padding:2px 6px;border-radius:4px;transition:background .15s;}",
+        "#dmt-mp-panel .mp-group-selall:hover{background:rgba(88,101,242,.15);}",
+        "#dmt-mp-panel .mp-msg-row{display:flex;align-items:flex-start;gap:8px;padding:6px 12px;",
+        "cursor:pointer;border-bottom:1px solid rgba(255,255,255,.04);transition:background .1s;}",
+        "#dmt-mp-panel .mp-msg-row:hover{background:rgba(255,255,255,.04);}",
+        "#dmt-mp-panel .mp-msg-row.selected{background:rgba(88,101,242,.12);}",
+        "#dmt-mp-panel .mp-msg-cb{flex-shrink:0;margin-top:2px;accent-color:var(--dmt-accent,#5865f2);}",
+        "#dmt-mp-panel .mp-msg-thumb{width:44px;height:44px;border-radius:4px;object-fit:cover;",
+        "flex-shrink:0;cursor:zoom-in;transition:transform .15s;}",
+        "#dmt-mp-panel .mp-msg-thumb:hover{transform:scale(1.08);}",
+        "#dmt-mp-panel .mp-msg-main{flex:1;min-width:0;}",
+        "#dmt-mp-panel .mp-msg-text{font-size:13px;color:var(--dmt-text-primary,#dcddde);",
+        "display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;",
+        "overflow:hidden;word-break:break-word;}",
+        "#dmt-mp-panel .mp-msg-meta{font-size:11px;color:var(--dmt-text-muted,#949ba4);margin-top:2px;}",
+        "#dmt-mp-panel .mp-expired-warn{font-size:10px;color:#faa61a;margin-top:1px;}",
+        "#dmt-mp-panel .mp-msg-actions{display:flex;gap:4px;align-items:center;flex-shrink:0;}",
+        "#dmt-mp-panel .mp-action-btn{width:26px;height:26px;border-radius:5px;border:none;",
+        "background:transparent;color:var(--dmt-text-muted,#949ba4);cursor:pointer;padding:0;",
+        "display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s;}",
+        "#dmt-mp-panel .mp-action-btn svg{width:16px;height:16px;fill:currentColor;flex-shrink:0;}",
+        "#dmt-mp-panel .mp-action-btn:hover{background:rgba(255,255,255,.1);color:var(--dmt-text-bright,#f2f3f5);}",
+        "#dmt-mp-panel .mp-action-btn.danger:hover{background:rgba(237,66,69,.15);color:#ed4245;}",
+        
+        "#dmt-mp-panel .mp-refresh-btn{width:26px;height:26px;border-radius:6px;border:none;",
+        "background:transparent;color:var(--dmt-text-muted,#949ba4);cursor:pointer;padding:0;flex-shrink:0;",
+        "display:flex;align-items:center;justify-content:center;transition:background .15s,color .15s,transform .3s;}",
+        "#dmt-mp-panel .mp-refresh-btn svg{width:15px;height:15px;fill:currentColor;}",
+        "#dmt-mp-panel .mp-refresh-btn:hover{background:rgba(255,255,255,.08);color:var(--dmt-text-bright,#f2f3f5);}",
+        "#dmt-mp-panel .mp-refresh-btn.spinning{animation:mp-spin .6s linear infinite;}",
+        "#dmt-mp-panel .mp-refresh-btn.needs-refresh{color:#faa81a !important;animation:mp-pulse-color 1.2s ease-in-out 4;}",
+        "@keyframes mp-spin{to{transform:rotate(360deg)}}",
+        "@keyframes mp-pulse-color{0%,100%{opacity:1}50%{opacity:.35}}",
+        
+        "@keyframes mp-fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}",
+        "#dmt-mp-panel .mp-masonry-item.mp-new{animation:mp-fadein .18s ease both;}",
+        "#dmt-mp-panel .mp-scope-row{display:flex;gap:4px;padding:8px 12px 4px;flex-shrink:0;align-items:center;}",
+        "#dmt-mp-panel .mp-load-more{text-align:center;padding:10px;",
+        "color:var(--dmt-accent,#5865f2);cursor:pointer;font-size:12px;transition:opacity .15s;}",
+        "#dmt-mp-panel .mp-load-more:hover{opacity:.75;}",
+        "#dmt-mp-panel .mp-empty{text-align:center;padding:32px 16px;",
+        "color:var(--dmt-text-muted,#949ba4);font-size:13px;}",
+        "#dmt-mp-panel .mp-statusbar{display:flex;align-items:center;gap:8px;padding:7px 12px;",
+        "border-top:1px solid rgba(255,255,255,.07);background:var(--dmt-bg-secondary,#1e1f22);flex-shrink:0;}",
+        "#dmt-mp-panel .mp-sel-count{flex:1;font-size:12px;color:var(--dmt-text-muted,#949ba4);}",
+        "#dmt-mp-panel .mp-sbtn{padding:4px 12px;border-radius:6px;border:none;",
+        "font-size:12px;font-weight:600;cursor:pointer;transition:filter .15s;}",
+        "#dmt-mp-panel .mp-sbtn:hover{filter:brightness(1.12);}",
+        "#dmt-mp-panel .mp-sbtn.primary{background:var(--dmt-accent,#5865f2);color:#fff;}",
+        "#dmt-mp-panel .mp-sbtn.danger{background:#ed4245;color:#fff;}",
+        "#dmt-mp-panel .mp-sbtn.ghost{background:transparent;",
+        "border:1px solid rgba(255,255,255,.15);color:var(--dmt-text-primary,#dcddde);}",
+        "#dmt-mp-panel .mp-tasks-body{padding:10px 12px;overflow-y:auto;flex:1;min-height:0;}",
+        "#dmt-mp-panel .mp-quota-title{font-size:12px;font-weight:700;",
+        "color:var(--dmt-text-bright,#f2f3f5);margin-bottom:8px;}",
+        "#dmt-mp-panel .mp-quota-opts{display:flex;flex-direction:column;gap:5px;}",
+        "#dmt-mp-panel .mp-quota-opt{display:flex;align-items:center;gap:8px;font-size:12px;",
+        "cursor:pointer;color:var(--dmt-text-muted,#949ba4);}",
+        "#dmt-mp-panel .mp-quota-opt input{accent-color:var(--dmt-accent,#5865f2);cursor:pointer;}",
+        "#dmt-mp-panel .mp-quota-opt.selected{color:var(--dmt-text-primary,#dcddde);}",
+        "#dmt-mp-panel .mp-cust-warn{font-size:11px;color:#faa61a;margin-top:3px;padding-left:20px;}",
+        "#dmt-mp-panel .mp-qprog-row{margin-top:8px;font-size:12px;color:var(--dmt-text-muted,#949ba4);}",
+        "#dmt-mp-panel .mp-prog-wrap{height:4px;background:rgba(255,255,255,.1);border-radius:2px;margin-top:4px;overflow:hidden;}",
+        "#dmt-mp-panel .mp-prog-bar{height:100%;background:var(--dmt-accent,#5865f2);border-radius:2px;transition:width .3s;}",
+        "#dmt-mp-panel .mp-sec-title{font-size:12px;font-weight:700;",
+        "color:var(--dmt-text-bright,#f2f3f5);margin:12px 0 6px;}",
+        "#dmt-mp-panel .mp-task-card{background:rgba(255,255,255,.04);",
+        "border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 12px;margin-bottom:8px;}",
+        "#dmt-mp-panel .mp-task-card.running{border-color:var(--dmt-accent,#5865f2);}",
+        "#dmt-mp-panel .mp-task-name{font-size:13px;font-weight:600;",
+        "color:var(--dmt-text-bright,#f2f3f5);margin-bottom:4px;}",
+        "#dmt-mp-panel .mp-task-meta{font-size:11px;color:var(--dmt-text-muted,#949ba4);margin-bottom:6px;line-height:1.6;}",
+        "#dmt-mp-panel .mp-task-acts{display:flex;gap:6px;flex-wrap:wrap;}",
+        "#dmt-mp-panel .mp-tbtn{padding:3px 10px;border-radius:5px;border:none;",
+        "font-size:11px;font-weight:600;cursor:pointer;transition:filter .15s;}",
+        "#dmt-mp-panel .mp-tbtn:hover{filter:brightness(1.15);}",
+        "#dmt-mp-panel .mp-tbtn.resume{background:var(--dmt-accent,#5865f2);color:#fff;}",
+        "#dmt-mp-panel .mp-tbtn.pause{background:rgba(255,255,255,.12);color:var(--dmt-text-primary,#dcddde);}",
+        "#dmt-mp-panel .mp-tbtn.cancel{background:rgba(237,66,69,.15);color:#ed4245;border:1px solid rgba(237,66,69,.3);}",
+        "#dmt-mp-lightbox{position:fixed;inset:0;z-index:2147483647;",
+        "background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;cursor:zoom-out;}",
+        "#dmt-mp-lightbox img{max-width:90vw;max-height:90vh;border-radius:6px;box-shadow:0 8px 32px rgba(0,0,0,.8);}",
+        "#dmt-mp-panel .mp-token-warn{margin:10px 12px;padding:10px 12px;border-radius:8px;",
+        "background:rgba(250,166,26,.1);border:1px solid rgba(250,166,26,.3);",
+        "font-size:12px;color:#faa61a;line-height:1.5;}",
+      ].join("");
+      document.head.appendChild(s);
+    }
+
+    function _makeDraggable(panel, handle) {
+      let ox = 0, oy = 0, on = false;
+      const _dragAC = new AbortController();
+      const _dragSig = { signal: _dragAC.signal };
+      panel._mpCleanup = () => _dragAC.abort();
+
+      handle.addEventListener("mousedown", e => {
+        if (e.button !== 0) return;
+        on = true; ox = e.clientX - panel.getBoundingClientRect().left;
+        oy = e.clientY - panel.getBoundingClientRect().top; e.preventDefault();
+      });
+      document.addEventListener("mousemove", e => {
+        if (!on) return;
+        let nx = Math.max(0, Math.min(window.innerWidth  - 60, e.clientX - ox));
+        let ny = Math.max(0, Math.min(window.innerHeight - 60, e.clientY - oy));
+        panel.style.left = nx + "px"; panel.style.top = ny + "px";
+        panel.style.right = "auto"; panel.style.bottom = "auto";
+      }, _dragSig);
+      document.addEventListener("mouseup", () => {
+        if (!on) return; on = false;
+        GMStore.set(SK_PANEL_POS, {
+          left: panel.style.left, top: panel.style.top,
+          width: panel.offsetWidth + "px", height: panel.offsetHeight + "px",
+        }, true);
+      }, _dragSig);
+      if (typeof ResizeObserver !== "undefined") {
+        let _resizeTimer = null;
+        const ro = new ResizeObserver(() => {
+          clearTimeout(_resizeTimer);
+          _resizeTimer = setTimeout(() => {
+            if (!panel.isConnected) return;
+            GMStore.set(SK_PANEL_POS, {
+              left: panel.style.left, top: panel.style.top,
+              width: panel.offsetWidth + "px", height: panel.offsetHeight + "px",
+            }, true);
+          }, 300);
+        });
+        ro.observe(panel);
+      }
+    }
+
+    function _lightbox(url) {
+      const lb = document.createElement("div");
+      lb.id = "dmt-mp-lightbox";
+      const img = document.createElement("img");
+      img.src = url; lb.appendChild(img);
+      lb.onclick = () => lb.remove();
+      document.body.appendChild(lb);
+    }
+
+    function _updateSB(selCount, createBtn, cancelBtn) {
+      const n = _selectedIds.size;
+      selCount.textContent = n > 0 ? mp("selected_n", { n }) : "";
+      createBtn.style.display = cancelBtn.style.display = n > 0 ? "" : "none";
+    }
+
+    function _updatePrefetchProgress(statusBar) {
+      let el = statusBar.querySelector(".mp-prefetch-progress");
+      if (!_prefetchActive && (!_browseTotal || _browseData.length >= Math.min(_browseTotal, parseInt(GMStore.get(SK_PREFETCH_LIMIT,"200",true),10)||200))) {
+        el?.remove(); return;
+      }
+      if (!el) {
+        el = document.createElement("span");
+        el.className = "mp-prefetch-progress";
+        el.style.cssText = "font-size:11px;color:var(--dmt-text-muted,#949ba4);margin-left:auto;display:flex;align-items:center;gap:4px;";
+        statusBar.appendChild(el);
+      }
+      const loaded = _browseData.length;
+      const total = _browseTotal ?? "?";
+      el.textContent = loaded + " / " + total + " " + mp("loading");
+      el.style.display = "";
+    }
+
+    function _buildPanel() {
+      if (_panelEl) { if (typeof _panelEl._mpCleanup === "function") _panelEl._mpCleanup(); _panelEl.remove(); _panelEl = null; }
+      _injectCSS();
+
+      const panel = document.createElement("div");
+      panel.id = "dmt-mp-panel";
+      const pos = GMStore.get(SK_PANEL_POS, null, true);
+      if (pos?.left && pos?.top) {
+        panel.style.left = pos.left; panel.style.top = pos.top;
+      } else {
+        panel.style.right = "20px"; panel.style.top = "80px";
+      }
+      if (pos?.width)  panel.style.width  = pos.width;
+      if (pos?.height) panel.style.height = pos.height;
+
+      const titlebar = document.createElement("div");
+      titlebar.className = "mp-titlebar";
+      const titleText = document.createElement("span");
+      titleText.className = "mp-title";
+      titleText.textContent = "📝 " + mp("panel_title");
+      const closeBtn = document.createElement("button");
+      closeBtn.className = "mp-close"; closeBtn.textContent = "✕";
+      closeBtn.onclick = () => {
+        if (_browseObs) { _browseObs.disconnect(); _browseObs = null; }
+        if (typeof panel._mpCleanup === "function") panel._mpCleanup();
+        _setupBrowseSentinel = null;
+        _mpRefreshBtn = null;
+        _mpStatusBar = null;
+        _stopRequested = true; _prefetchActive = false;
+        _abortWait?.();
+        panel.remove(); _panelEl = null;
+      };
+      titlebar.append(titleText, closeBtn);
+
+      const tabsRow = document.createElement("div");
+      tabsRow.className = "mp-tabs";
+      let _activeTab = GMStore.get(SK_LAST_TAB, "browse", true);
+      if (!["browse","media","tasks"].includes(_activeTab)) _activeTab = "browse";
+
+      const browseArea = document.createElement("div");
+      browseArea.style.cssText = "display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;";
+      const mediaArea = document.createElement("div");
+      mediaArea.style.cssText = "display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;";
+      const tasksArea = document.createElement("div");
+      tasksArea.className = "mp-tasks-body";
+      tasksArea.style.display = "none";
+
+      const tabDefs = [
+        { key: "browse", labelKey: "tab_browse" },
+        { key: "media",  labelKey: "tab_media"  },
+        { key: "tasks",  labelKey: "tab_tasks"  },
+      ];
+      tabDefs.forEach(({ key, labelKey }) => {
+        const tab = document.createElement("div");
+        tab.className = "mp-tab" + (key === _activeTab ? " active" : "");
+        tab.textContent = mp(labelKey); tab.dataset.tab = key;
+        tab.onclick = () => {
+          _activeTab = key;
+          GMStore.set(SK_LAST_TAB, key, true);
+          tabsRow.querySelectorAll(".mp-tab").forEach(t => t.classList.toggle("active", t.dataset.tab === key));
+          browseArea.style.display = key === "browse" ? "flex" : "none";
+          mediaArea.style.display  = key === "media"  ? "flex" : "none";
+          tasksArea.style.display  = key === "tasks"  ? ""    : "none";
+          if (key === "tasks") _renderTasksTab(tasksArea);
+          if (key === "media") _renderMediaTab(mediaArea);
+        };
+        tabsRow.appendChild(tab);
+      });
+
+      const scopeRow = document.createElement("div");
+      scopeRow.className = "mp-scope-row";
+      const ctx = _getCtx();
+      const _savedScope = GMStore.get(SK_LAST_SCOPE, null, true);
+      if (_savedScope === "server" && ctx?.guildId) _browseScope = "server";
+      else if (_savedScope === "channel")           _browseScope = "channel";
+      else _browseScope = (ctx?.guildId) ? "server" : "channel";
+      [
+        { key: "server",  label: mp("scope_server"),  ok: !!ctx?.guildId },
+        { key: "channel", label: mp("scope_channel"), ok: true },
+      ].forEach(s => {
+        const btn = document.createElement("button");
+        btn.className = "mp-scope-btn" + (s.key === _browseScope ? " active" : "");
+        btn.textContent = s.label; btn.disabled = !s.ok;
+        btn.style.opacity = s.ok ? "1" : "0.35";
+        btn.onclick = () => {
+          _browseScope = s.key;
+          GMStore.set(SK_LAST_SCOPE, s.key, true);
+          scopeRow.querySelectorAll(".mp-scope-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          _browseData = []; _browseOffset = 0; _browseTotal = null;
+          _selectedIds.clear(); _anchorIdx = null;
+          _stopRequested = true; _prefetchActive = false;
+          _abortWait?.();
+          _browseGen++;
+          setTimeout(() => { _stopRequested = false; _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput); }, 0);
+        };
+        scopeRow.appendChild(btn);
+      });
+
+      const refreshBtn = document.createElement("button");
+      _mpRefreshBtn = refreshBtn;
+      refreshBtn.className = "mp-refresh-btn";
+      refreshBtn.title = mp("refresh");
+      refreshBtn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>';
+      refreshBtn.onclick = () => {
+        refreshBtn.classList.add("spinning");
+        refreshBtn.classList.remove("needs-refresh");
+        _browseData = []; _browseOffset = 0; _browseTotal = null;
+        _selectedIds.clear(); _anchorIdx = null;
+        _stopRequested = true; _prefetchActive = false;
+        _abortWait?.();
+        _browseGen++;
+        setTimeout(() => {
+          _stopRequested = false;
+          _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput)
+            .finally(() => setTimeout(() => refreshBtn.classList.remove("spinning"), 400));
+        }, 0);
+      };
+      scopeRow.appendChild(refreshBtn);
+      const searchRow = document.createElement("div");
+      searchRow.className = "mp-search-row";
+      const searchInput = document.createElement("input");
+      searchInput.className = "mp-search"; searchInput.type = "text";
+      searchInput.placeholder = mp("search_placeholder");
+      let _st = null;
+      searchInput.oninput = () => {
+        clearTimeout(_st);
+        _st = setTimeout(() => _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput), 300);
+      };
+      searchRow.appendChild(searchInput);
+
+      const typeRow = document.createElement("div");
+      typeRow.className = "mp-type-row";
+      const tf = _loadTypeFilter();
+      Object.keys(TYPE_GROUPS).forEach(group => {
+        const chip = document.createElement("label");
+        chip.className = "mp-type-chip" + (tf[group] !== false ? " checked" : "");
+        const cb = document.createElement("input");
+        cb.type = "checkbox"; cb.checked = tf[group] !== false;
+        cb.onchange = () => {
+          _typeFilter[group] = cb.checked;
+          chip.classList.toggle("checked", cb.checked);
+          _saveTypeFilter();
+          _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
+        };
+        chip.append(cb, document.createTextNode(mp("type_" + group)));
+        typeRow.appendChild(chip);
+      });
+
+      const favChip = document.createElement("label");
+      favChip.className = "mp-type-chip mp-fav-chip" + (_favFilterOn ? " checked" : "");
+      favChip.title = mp("fav_filter_tip") || "Show favorited messages only";
+      const favCb = document.createElement("input");
+      favCb.type = "checkbox"; favCb.checked = _favFilterOn;
+      favCb.onchange = () => {
+        _favFilterOn = favCb.checked;
+        favChip.classList.toggle("checked", favCb.checked);
+        _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
+      };
+      favChip.append(favCb, document.createTextNode(" ♥ " + (mp("fav_filter_label") || "Favorites")));
+      typeRow.appendChild(favChip);
+
+      const msgList = document.createElement("div");
+      msgList.className = "mp-body";
+
+      let _browseObs = null;
+      const browseSentinel = document.createElement("div");
+      browseSentinel.style.cssText = "height:1px;width:100%;";
+
+      _setupBrowseSentinel = function() {
+        if (_prefetchActive) return;
+        if (_browseObs) { _browseObs.disconnect(); _browseObs = null; }
+        if (_browseTotal !== null && _browseOffset < _browseTotal && _browseData.length < _browseTotal) {
+          _browseObs = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && !_prefetchActive && _browseTotal !== null && _browseOffset < _browseTotal) {
+              _browseObs.disconnect(); _browseObs = null;
+              _fetchPage(true).then(() =>
+                _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput)
+              );
+            }
+          }, { threshold: 0.1, rootMargin: "200px" });
+          _browseObs.observe(browseSentinel);
+        }
+      };
+
+      const statusBar = document.createElement("div");
+      statusBar.className = "mp-statusbar";
+      _mpStatusBar = statusBar;
+      const selCount = document.createElement("span");
+      selCount.className = "mp-sel-count";
+      const createBtn = document.createElement("button");
+      createBtn.className = "mp-sbtn danger";
+      createBtn.textContent = mp("create_task");
+      createBtn.style.display = "none";
+      createBtn.onclick = () => _openCreateTaskDialog();
+      const cancelBtn = document.createElement("button");
+      cancelBtn.className = "mp-sbtn ghost";
+      cancelBtn.textContent = mp("cancel_select");
+      cancelBtn.style.display = "none";
+      cancelBtn.onclick = () => {
+        _selectedIds.clear(); _anchorIdx = null;
+        _updateSB(selCount, createBtn, cancelBtn);
+        msgList.querySelectorAll(".mp-msg-row").forEach(r => {
+          r.classList.remove("selected");
+          const cb = r.querySelector(".mp-msg-cb");
+          if (cb) cb.checked = false;
+        });
+      };
+      statusBar.append(selCount, cancelBtn, createBtn);
+
+      browseArea.append(scopeRow, searchRow, typeRow, msgList, browseSentinel, statusBar);
+
+      panel.append(titlebar, tabsRow, browseArea, mediaArea, tasksArea);
+      _panelEl = panel;
+      document.body.appendChild(panel);
+      _makeDraggable(panel, titlebar);
+
+      browseArea.style.display = _activeTab === "browse" ? "flex" : "none";
+      mediaArea.style.display  = _activeTab === "media"  ? "flex" : "none";
+      tasksArea.style.display  = _activeTab === "tasks"  ? ""    : "none";
+      if (_activeTab === "tasks") _renderTasksTab(tasksArea);
+      else if (_activeTab === "media") _renderMediaTab(mediaArea);
+      else _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput);
+      return panel;
+    }
+
+    function _makeMsgPlaceholder(className, text) {
+      const d = document.createElement("div");
+      d.className = className;
+      d.textContent = text;
+      return d;
+    }
+
+    async function _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput) {
+      const capturedGen = _browseGen;
+      msgList.innerHTML = "";
+      msgList.appendChild(_makeMsgPlaceholder("mp-empty", mp("loading")));
+      const ok = await _ensureCredentials();
+      if (!ok || capturedGen !== _browseGen) {
+        msgList.innerHTML = "";
+        if (!ok) msgList.appendChild(_makeMsgPlaceholder("mp-token-warn", mp("token_fail")));
+        return;
+      }
+      _browseData = []; _browseOffset = 0; _browseTotal = null;
+      await _fetchPage(true);
+      if (capturedGen !== _browseGen) return;
+      _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
+      _startPrefetch(msgList, selCount, createBtn, cancelBtn, searchInput, _mpStatusBar);
+    }
+
+    let _prefetchActive = false;
+    async function _startPrefetch(msgList, selCount, createBtn, cancelBtn, searchInput, statusBar) {
+      if (_prefetchActive) return;
+      const limit = parseInt(GMStore.get(SK_PREFETCH_LIMIT, "200", true), 10) || 200;
+      if (limit <= 0) return;
+      _prefetchActive = true;
+      if (statusBar) _updatePrefetchProgress(statusBar);
+      try {
+        while (!_stopRequested && _browseTotal !== null && _browseData.length < _browseTotal && _browseData.length < limit) {
+          await _sleep(_browseFetchDelay);
+          if (_stopRequested) break;
+          const prevLen = _browseData.length;
+          await _fetchPage(true);
+          if (_stopRequested) break;
+          const newMsgs = _browseData.slice(prevLen);
+          if (newMsgs.length > 0) {
+            const q = (searchInput?.value || "").toLowerCase();
+            const allFiltered = _browseData.filter(m =>
+              _passesTypeFilter(m) && _passesFavFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
+            );
+            _appendFilteredRows(msgList, newMsgs, allFiltered, selCount, createBtn, cancelBtn);
+          }
+          if (statusBar) _updatePrefetchProgress(statusBar);
+        }
+      } finally {
+        _prefetchActive = false;
+        if (statusBar) _updatePrefetchProgress(statusBar);
+      }
+    }
+
+    function _appendFilteredRows(msgList, newMsgs, allFiltered, selCount, createBtn, cancelBtn) {
+      const q_raw = "";
+      const collapsed = new Set(GMStore.get(SK_COLLAPSED, [], true));
+
+      const newGroups = _groupByDate(newMsgs);
+      let rowIdx = allFiltered.length - newMsgs.length;
+
+      newGroups.forEach((msgs, dateKey) => {
+        let rowsWrap = msgList.querySelector(`.mp-rows-wrap[data-date-key="${CSS.escape(dateKey)}"]`);
+        if (!rowsWrap) {
+          const isCol = collapsed.has(dateKey);
+          const gh = document.createElement("div");
+          gh.className = "mp-group-header";
+          const chev = document.createElement("span");
+          chev.className = "mp-chevron"; chev.textContent = isCol ? "▶" : "▼";
+          rowsWrap = document.createElement("div");
+          rowsWrap.className = "mp-rows-wrap";
+          rowsWrap.dataset.dateKey = dateKey;
+          rowsWrap.style.display = isCol ? "none" : "";
+          chev.onclick = () => {
+            const col = new Set(GMStore.get(SK_COLLAPSED, [], true));
+            if (col.has(dateKey)) { col.delete(dateKey); chev.textContent = "▼"; rowsWrap.style.display = ""; }
+            else                  { col.add(dateKey);    chev.textContent = "▶"; rowsWrap.style.display = "none"; }
+            GMStore.set(SK_COLLAPSED, [...col], true);
+          };
+          const label = document.createElement("span"); label.className = "mp-group-label";
+          const cnt   = document.createElement("span"); cnt.className = "mp-group-count";
+          const allMsgsInDate = allFiltered.filter(m => _dateKey(m) === dateKey);
+          cnt.textContent = allMsgsInDate.length + " msg" + (allMsgsInDate.length !== 1 ? "s" : "");
+
+          const selAllBtn = document.createElement("span");
+          selAllBtn.className = "mp-group-selall";
+          const refreshSelAll = () => {
+            const allSel = allMsgsInDate.every(m => _selectedIds.has(m.id));
+            selAllBtn.textContent = allSel ? mp("group_deselect_all") : mp("group_select_all");
+          };
+          refreshSelAll();
+          label.onclick = () => {
+            const allSel = allMsgsInDate.every(m => _selectedIds.has(m.id));
+            allMsgsInDate.forEach(m => allSel ? _selectedIds.delete(m.id) : _selectedIds.add(m.id));
+            refreshSelAll();
+            rowsWrap.querySelectorAll(".mp-msg-row").forEach((r, i) => {
+              if (!allMsgsInDate[i]) return;
+              r.classList.toggle("selected", _selectedIds.has(allMsgsInDate[i].id));
+              const cb = r.querySelector(".mp-msg-cb"); if (cb) cb.checked = _selectedIds.has(allMsgsInDate[i].id);
+            });
+            _updateSB(selCount, createBtn, cancelBtn);
+          };
+          selAllBtn.onclick = e => { e.stopPropagation(); label.click(); };
+          label.append(document.createTextNode(dateKey), cnt);
+          gh.append(chev, label, selAllBtn);
+
+          msgList.appendChild(gh);
+          msgList.appendChild(rowsWrap);
+        } else {
+          const allMsgsInDate = allFiltered.filter(m => _dateKey(m) === dateKey);
+          const cnt = msgList.querySelector(`.mp-rows-wrap[data-date-key="${CSS.escape(dateKey)}"]`)
+            ?.previousElementSibling?.querySelector(".mp-group-count");
+          if (cnt) cnt.textContent = allMsgsInDate.length + " msg" + (allMsgsInDate.length !== 1 ? "s" : "");
+        }
+
+        const frag = document.createDocumentFragment();
+        msgs.forEach(msg => {
+          const gi = allFiltered.indexOf(msg);
+          frag.appendChild(_buildMsgRow(msg, gi >= 0 ? gi : rowIdx++, allFiltered, selCount, createBtn, cancelBtn, () => {}));
+        });
+        rowsWrap.appendChild(frag);
+      });
+    }
+
+    async function _fetchPage(skipDelay = false) {
+      const data = await _searchMyPosts({ scope: _browseScope, offset: _browseOffset, skipDelay });
+      if (!data) return;
+      _browseTotal = data.total_results || 0;
+      const raw = data.messages || [];
+      const msgs = raw.flat().filter(m => m.author?.id === _userId && DELETABLE_TYPES.has(m.type));
+      _browseData = _browseData.concat(msgs);
+      _browseOffset += raw.length || _getPageSize();
+    }
+
+    function _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput) {
+      const q = (searchInput?.value || "").toLowerCase();
+      const filtered = _browseData.filter(m =>
+        _passesTypeFilter(m) && _passesFavFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
+      );
+      msgList.innerHTML = "";
+
+      if (_browseView === "grid") {
+        msgList.classList.add("grid-view");
+        const mediaItems = filtered.filter(m => _getThumbUrl(m) || _getVideoUrl(m));
+        if (mediaItems.length === 0) {
+          msgList.classList.remove("grid-view");
+          msgList.appendChild(Object.assign(document.createElement("div"), {
+            className: "mp-empty", textContent: mp("no_media"),
+          }));
+        } else {
+          mediaItems.forEach((msg, idx) => {
+            msgList.appendChild(_buildGridItem(msg, idx, mediaItems, selCount, createBtn, cancelBtn));
+          });
+        }
+        if (_browseTotal !== null && _browseOffset < _browseTotal)
+          _setupBrowseSentinel();
+        return;
+      }
+
+      msgList.classList.remove("grid-view");
+
+      if (filtered.length === 0) {
+        msgList.appendChild(Object.assign(document.createElement("div"), {
+          className: "mp-empty", textContent: mp("no_results"),
+        }));
+        if (_browseTotal !== null && _browseOffset < _browseTotal)
+          _setupBrowseSentinel();
+        return;
+      }
+
+      const collapsed = new Set(GMStore.get(SK_COLLAPSED, [], true));
+      const groups = _groupByDate(filtered);
+      const outerFrag = document.createDocumentFragment();
+      let rowIdx = 0;
+
+      groups.forEach((msgs, dateKey) => {
+        const isCol = collapsed.has(dateKey);
+        const gh = document.createElement("div");
+        gh.className = "mp-group-header";
+        const chev = document.createElement("span");
+        chev.className = "mp-chevron";
+        chev.textContent = isCol ? "▶" : "▼";
+        const rowsWrap = document.createElement("div");
+        rowsWrap.className = "mp-rows-wrap";
+        rowsWrap.dataset.dateKey = dateKey;
+        rowsWrap.style.display = isCol ? "none" : "";
+        chev.onclick = () => {
+          const col = new Set(GMStore.get(SK_COLLAPSED, [], true));
+          if (col.has(dateKey)) { col.delete(dateKey); chev.textContent = "▼"; rowsWrap.style.display = ""; }
+          else                   { col.add(dateKey);    chev.textContent = "▶"; rowsWrap.style.display = "none"; }
+          GMStore.set(SK_COLLAPSED, [...col], true);
+        };
+        const label = document.createElement("span");
+        label.className = "mp-group-label";
+        const cnt = document.createElement("span");
+        cnt.className = "mp-group-count";
+        cnt.textContent = msgs.length + " msg" + (msgs.length !== 1 ? "s" : "");
+        label.append(document.createTextNode(dateKey), cnt);
+
+        const selAllBtn = document.createElement("span");
+        selAllBtn.className = "mp-group-selall";
+        const refreshSelAll = () => {
+          const allSel = msgs.every(m => _selectedIds.has(m.id));
+          selAllBtn.textContent = allSel ? mp("group_deselect_all") : mp("group_select_all");
+        };
+        refreshSelAll();
+
+        label.onclick = () => {
+          const allSel = msgs.every(m => _selectedIds.has(m.id));
+          msgs.forEach(m => allSel ? _selectedIds.delete(m.id) : _selectedIds.add(m.id));
+          refreshSelAll();
+          rowsWrap.querySelectorAll(".mp-msg-row").forEach((r, i) => {
+            if (!msgs[i]) return;
+            r.classList.toggle("selected", _selectedIds.has(msgs[i].id));
+            const cb = r.querySelector(".mp-msg-cb");
+            if (cb) cb.checked = _selectedIds.has(msgs[i].id);
+          });
+          _updateSB(selCount, createBtn, cancelBtn);
+        };
+        selAllBtn.onclick = e => { e.stopPropagation(); label.click(); };
+
+        gh.append(chev, label, selAllBtn);
+
+        const rowFrag = document.createDocumentFragment();
+        msgs.forEach(msg => {
+          const globalIdx = rowIdx++;
+          rowFrag.appendChild(_buildMsgRow(msg, globalIdx, filtered, selCount, createBtn, cancelBtn, refreshSelAll));
+        });
+        rowsWrap.appendChild(rowFrag);
+
+        outerFrag.appendChild(gh);
+        outerFrag.appendChild(rowsWrap);
+      });
+
+      msgList.appendChild(outerFrag);
+
+      if (_browseTotal !== null && _browseOffset < _browseTotal)
+        _setupBrowseSentinel();
+    }
+
+    function _renderMsgContent(el, content) {
+      el.innerHTML = "";
+
+      const lines = content.split("\n");
+      lines.forEach((line, li) => {
+        if (li > 0) el.appendChild(document.createElement("br"));
+
+        let processLine = line;
+        let isSubtext   = false;
+
+        if (/^-#\s/.test(processLine)) {
+          isSubtext   = true;
+          processLine = processLine.slice(3);
+        }
+
+        const lineWrap = isSubtext ? (() => {
+          const s = document.createElement("span");
+          s.style.cssText = "font-size:0.75em;color:var(--dmt-text-muted,#949ba4);";
+          el.appendChild(s);
+          return s;
+        })() : el;
+
+        const LINK_RE   = /\[([^\]]+)\]\([^)]+\)/g;
+        const prepLine  = processLine.replace(LINK_RE, "$1");
+
+        const TOKEN_RE = /<a?:([^:>]+):(\d+)>|<@!?(\d+)>|<#(\d+)>/g;
+        let last = 0, m;
+        TOKEN_RE.lastIndex = 0;
+        while ((m = TOKEN_RE.exec(prepLine)) !== null) {
+          if (m.index > last) {
+            lineWrap.appendChild(document.createTextNode(prepLine.slice(last, m.index)));
+          }
+          if (m[1] && m[2]) {
+            const isAnim = line[line.indexOf(m[0]) + 1] === "a";
+            const ext    = isAnim ? "gif" : "webp";
+            const img    = document.createElement("img");
+            img.src    = "https://cdn.discordapp.com/emojis/" + m[2] + "." + ext + "?size=20&quality=lossless";
+            img.alt    = ":" + m[1] + ":";
+            img.title  = ":" + m[1] + ":";
+            img.style.cssText = "width:20px;height:20px;vertical-align:-4px;margin:0 1px;object-fit:contain;";
+            img.onerror = () => img.replaceWith(document.createTextNode(":" + m[1] + ":"));
+            lineWrap.appendChild(img);
+          } else if (m[3]) {
+            lineWrap.appendChild(Object.assign(document.createElement("span"), {
+              textContent: "@user", style: "color:var(--dmt-accent,#5865f2);",
+            }));
+          } else if (m[4]) {
+            lineWrap.appendChild(Object.assign(document.createElement("span"), {
+              textContent: "#channel", style: "color:var(--dmt-accent,#5865f2);",
+            }));
+          }
+          last = m.index + m[0].length;
+        }
+        if (last < prepLine.length) {
+          lineWrap.appendChild(document.createTextNode(prepLine.slice(last)));
+        }
+      });
+    }
+
+    function _mpJumpToMessage(channelId, msgId) {
+      const guildId = _getCtx()?.guildId || "@me";
+      const path = "/channels/" + guildId + "/" + channelId + "/" + msgId;
+      const fullUrl = "https://discord.com" + path;
+
+      try {
+        const fiberKey = Object.keys(document.querySelector("div") || {})
+          .find(k => k.startsWith("__reactFiber"));
+        if (fiberKey) {
+          const roots = [
+            document.querySelector('div[class*="appMount"]'),
+            document.body,
+          ];
+          for (const root of roots) {
+            if (!root) continue;
+            let fiber = root[fiberKey];
+            let depth = 50;
+            while (fiber && depth-- > 0) {
+              const h = fiber.memoizedProps?.history || fiber.memoizedProps?.navigator;
+              if (h?.push) { h.push(path); return; }
+              if (fiber.stateNode?.history?.push) { fiber.stateNode.history.push(path); return; }
+              fiber = fiber.child || fiber.return;
+            }
+          }
+        }
+      } catch (_) {}
+
+      try {
+        window.history.pushState(null, "", path);
+        window.dispatchEvent(new PopStateEvent("popstate", { state: null }));
+        return;
+      } catch (_) {}
+
+      try {
+        window.history.replaceState(window.history.state, "", path);
+        window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }));
+        return;
+      } catch (_) {}
+
+      window.location.href = fullUrl;
+    }
+
+    function _mpToggleFav(msgId, btn) {
+      if (_favIds.has(msgId)) {
+        _favIds.delete(msgId);
+        if (btn) { btn.innerHTML = _SVG_HEART_EMPTY; btn.classList.remove("mp-fav-active"); btn.title = mp("fav_add"); }
+      } else {
+        _favIds.add(msgId);
+        if (btn) { btn.innerHTML = _SVG_HEART_FULL; btn.classList.add("mp-fav-active"); btn.title = mp("fav_remove"); }
+      }
+      GMStore.set(SK_FAVS, [..._favIds], true);
+    }
+    const _SVG_HEART_EMPTY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+    const _SVG_HEART_FULL  = '<svg viewBox="0 0 24 24" fill="#f04747" stroke="#f04747" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+
+    function _mpShowZoom(url, e) {
+      let z = document.getElementById("dmt-mp-hover-zoom");
+      if (!z) {
+        z = document.createElement("div");
+        z.id = "dmt-mp-hover-zoom";
+        document.body.appendChild(z);
+      }
+      z.innerHTML = "";
+      const img = document.createElement("img");
+      try {
+        const u = new URL(url);
+        u.searchParams.set("width", "400");
+        u.searchParams.set("height", "400");
+        img.src = u.toString();
+      } catch (_) { img.src = url; }
+      img.alt = "";
+      z.appendChild(img);
+      _mpMoveZoom(e);
+    }
+    function _mpMoveZoom(e) {
+      const z = document.getElementById("dmt-mp-hover-zoom");
+      if (!z) return;
+      const w = 200, h = 200, margin = 14;
+      let left = e.clientX - w - margin;
+      let top  = e.clientY - h / 2;
+      if (left < 4) left = e.clientX + margin;
+      if (top  < 4) top  = 4;
+      if (top + h > window.innerHeight - 4) top = window.innerHeight - h - 4;
+      z.style.left = left + "px";
+      z.style.top  = top  + "px";
+    }
+    function _mpHideZoom() { document.getElementById("dmt-mp-hover-zoom")?.remove(); }
+
+    function _mpShowUndo(msgId, originEl, restoreLocal) {
+      if (_mpUndoTimer) { clearTimeout(_mpUndoTimer); _mpUndoTimer = null; }
+      document.getElementById("dmt-mp-undo-toast")?.remove();
+
+      const toast = document.createElement("div");
+      toast.id = "dmt-mp-undo-toast";
+      toast.style.cssText = [
+        "position:fixed;bottom:24px;left:50%;transform:translateX(-50%);",
+        "background:rgba(15,17,22,0.93);color:#dcddde;padding:8px 16px;",
+        "border-radius:99px;font-size:12px;font-family:system-ui,sans-serif;",
+        "display:flex;align-items:center;gap:10px;z-index:2147483640;",
+        "box-shadow:0 4px 16px rgba(0,0,0,0.4);white-space:nowrap;",
+        "animation:dmt-undo-rise 0.25s cubic-bezier(0.34,1.56,0.64,1);",
+      ].join("");
+
+      const msg = document.createElement("span");
+      msg.textContent = mp("undo_deleted");
+
+      const undoBtn = document.createElement("button");
+      undoBtn.textContent = mp("undo");
+      undoBtn.style.cssText = "background:none;border:none;color:#5865f2;cursor:pointer;font-weight:700;font-size:12px;padding:0;";
+      undoBtn.onclick = () => {
+        clearTimeout(_mpUndoTimer); _mpUndoTimer = null;
+        toast.remove();
+        if (originEl && originEl.isConnected === false) {
+          originEl.style.display = "";
+          originEl.style.opacity = "1";
+        }
+        if (typeof restoreLocal === "function") restoreLocal();
+        _mpUndoBuffer = null;
+      };
+
+      toast.appendChild(msg);
+      toast.appendChild(undoBtn);
+
+      if (!document.getElementById("dmt-mp-undo-style")) {
+        const s = document.createElement("style");
+        s.id = "dmt-mp-undo-style";
+        s.textContent = "@keyframes dmt-undo-rise{from{opacity:0;transform:translateX(-50%) translateY(8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}";
+        document.head.appendChild(s);
+      }
+
+      document.body.appendChild(toast);
+      _mpUndoTimer = setTimeout(() => {
+        toast.remove(); _mpUndoBuffer = null; _mpUndoTimer = null;
+      }, 5000);
+    }
+
+    function _buildMsgRow(msg, globalIdx, allFiltered, selCount, createBtn, cancelBtn, onGroupChange) {
+      const row = document.createElement("div");
+      row.className = "mp-msg-row" + (_selectedIds.has(msg.id) ? " selected" : "");
+      row.dataset.msgId = msg.id;
+
+      const cb = document.createElement("input");
+      cb.type = "checkbox"; cb.className = "mp-msg-cb";
+      cb.checked = _selectedIds.has(msg.id);
+      cb.onclick = e => e.stopPropagation();
+      cb.onchange = e => {
+        _handleCb(msg.id, globalIdx, allFiltered, e.shiftKey);
+        row.classList.toggle("selected", _selectedIds.has(msg.id));
+        _updateSB(selCount, createBtn, cancelBtn);
+        onGroupChange?.();
+      };
+      row.appendChild(cb);
+
+      const thumb = _getThumbUrl(msg);
+      if (thumb) {
+        const img = document.createElement("img");
+        img.className = "mp-msg-thumb"; img.src = thumb; img.alt = "";
+        if (_isExpired(thumb)) { img.style.opacity = "0.5"; img.title = mp("img_expired"); }
+        img.onclick = e => { e.stopPropagation(); _lightbox(thumb); };
+        row.appendChild(img);
+      }
+
+      const main = document.createElement("div");
+      main.className = "mp-msg-main";
+      const textEl = document.createElement("div");
+      textEl.className = "mp-msg-text";
+
+      if (SYS_MSG_LABELS[msg.type] && !msg.content) {
+        const sysLabels = {
+          6:  "📌 " + mp("sys_pin"),
+          7:  "✏️ " + mp("sys_channel_rename"),
+          20: "🛠️ " + mp("sys_command"),
+          21: "🧵 " + mp("sys_thread_created"),
+          23: "⏰ " + mp("sys_reminder"),
+        };
+        textEl.textContent = sysLabels[msg.type] || mp("sys_action");
+        textEl.style.color = "var(--dmt-text-muted,#949ba4)";
+        textEl.style.fontStyle = "italic";
+      } else if (msg.poll && !msg.content) {
+        const q = msg.poll.question?.text || mp("poll_unknown");
+        textEl.textContent = "📊 " + q;
+        textEl.style.color = "var(--dmt-text-muted,#949ba4)";
+        textEl.style.fontStyle = "italic";
+      } else if (!msg.content && (msg.attachments || []).length > 0) {
+        const atts = msg.attachments;
+        const imgs  = atts.filter(a => a.content_type?.startsWith("image/"));
+        const vids  = atts.filter(a => a.content_type?.startsWith("video/"));
+        const other = atts.filter(a => !a.content_type?.startsWith("image/") && !a.content_type?.startsWith("video/"));
+        const parts = [];
+        if (vids.length)  parts.push("🎬 " + (vids.length > 1 ? vids.length + " " + mp("att_videos") : mp("att_video")));
+        if (imgs.length)  parts.push("🖼️ " + (imgs.length > 1 ? imgs.length + " " + mp("att_images") : mp("att_image")));
+        if (other.length) parts.push("📎 " + other.length);
+        textEl.textContent = parts.join("  ");
+        textEl.style.color = "var(--dmt-text-muted,#949ba4)";
+        textEl.style.fontStyle = "italic";
+      } else if (msg.content) {
+        _renderMsgContent(textEl, msg.content);
+      } else {
+        textEl.textContent = mp("no_content");
+        textEl.style.color = "var(--dmt-text-muted,#949ba4)";
+      }
+
+      const meta = document.createElement("div");
+      meta.className = "mp-msg-meta";
+      const ts  = new Date(msg.timestamp);
+      const att = (msg.attachments || []).length;
+      meta.textContent = ts.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                       + (att > 0 ? "  📎" + att : "");
+      main.append(textEl, meta);
+      if (thumb && _isExpired(thumb)) {
+        const w = Object.assign(document.createElement("div"), {
+          className: "mp-expired-warn", textContent: mp("img_expired"),
+        });
+        main.appendChild(w);
+      }
+
+      const acts = document.createElement("div");
+      acts.className = "mp-msg-actions";
+
+      const jumpBtn = document.createElement("button");
+      jumpBtn.className = "mp-action-btn";
+      jumpBtn.title = mp("jump_to");
+      jumpBtn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>';
+      jumpBtn.onclick = e => { e.stopPropagation(); _mpJumpToMessage(msg.channel_id, msg.id); };
+
+      const delBtn = document.createElement("button");
+      delBtn.className = "mp-action-btn danger";
+      delBtn.title = mp("delete_single");
+      delBtn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
+      delBtn.onclick = async e => {
+        e.stopPropagation();
+        const ok = await dmtConfirm(mp("confirm_delete_single"), { danger: true });
+        if (!ok) return;
+        _stopRequested = false;
+        row.style.transition = "opacity .25s";
+        row.style.opacity = "0";
+        const snapshot = _browseData.slice();
+        if (await _apiDelete(msg.channel_id, msg.id)) {
+          _browseData = _browseData.filter(m => m.id !== msg.id);
+          setTimeout(() => { if (row.style.opacity === "0") row.style.display = "none"; }, 280);
+          _mpShowUndo(msg.id, row, () => {
+            _browseData = snapshot;
+            row.style.opacity = "1";
+            row.style.display = "";
+          });
+        } else {
+          row.style.opacity = "1";
+        }
+      };
+
+      const favBtn = document.createElement("button");
+      favBtn.className = "mp-action-btn mp-fav-btn" + (_favIds.has(msg.id) ? " mp-fav-active" : "");
+      favBtn.title = _favIds.has(msg.id) ? mp("fav_remove") : mp("fav_add");
+      favBtn.innerHTML = _favIds.has(msg.id) ? _SVG_HEART_FULL : _SVG_HEART_EMPTY;
+      favBtn.onclick = e => { e.stopPropagation(); _mpToggleFav(msg.id, favBtn); };
+
+      acts.append(jumpBtn, favBtn, delBtn);
+      row.append(main, acts);
+
+      row.onclick = e => {
+        if (e.target === cb) return;
+        cb.checked = !cb.checked;
+        _handleCb(msg.id, globalIdx, allFiltered, e.shiftKey);
+        row.classList.toggle("selected", _selectedIds.has(msg.id));
+        _updateSB(selCount, createBtn, cancelBtn);
+        onGroupChange?.();
+      };
+      return row;
+    }
+
+    function _handleCb(msgId, idx, all, isShift) {
+      if (isShift && _anchorIdx !== null) {
+        const lo = Math.min(_anchorIdx, idx), hi = Math.max(_anchorIdx, idx);
+        const adding = !_selectedIds.has(msgId);
+        for (let i = lo; i <= hi; i++) {
+          if (all[i]) adding ? _selectedIds.add(all[i].id) : _selectedIds.delete(all[i].id);
+        }
+      } else {
+        _selectedIds.has(msgId) ? _selectedIds.delete(msgId) : _selectedIds.add(msgId);
+        _anchorIdx = idx;
+      }
+    }
+
+    function _loadMoreBtn(msgList, selCount, createBtn, cancelBtn, searchInput) {
+      const btn = document.createElement("div");
+      btn.className = "mp-load-more"; btn.textContent = mp("load_more");
+      btn.onclick = async () => {
+        btn.textContent = mp("loading");
+        await _fetchPage();
+        _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
+      };
+      return btn;
+    }
+
+    let _mediaFilter  = "all";
+    let _mediaData    = [];
+    let _mediaOffset  = 0;
+    let _mediaTotal   = null;
+    let _mediaLoading = false;
+    let _mediaGen     = 0;
+    let _mediaScope   = "channel";
+    let _mediaQuery   = "";
+    let _mediaObs     = null;
+    let _lbItems      = [];
+    let _lbIndex      = 0;
+
+    function _renderMediaTab(container) {
+      container.querySelectorAll("[data-has-vid-obs]").forEach(el => el._vidObs?.disconnect());
+      container.innerHTML = "";
+      _mediaData = []; _mediaOffset = 0; _mediaTotal = null; _mediaLoading = false;
+      if (_mediaObs) { _mediaObs.disconnect(); _mediaObs = null; }
+
+      _mediaScope = _browseScope;
+
+      const toolbar = document.createElement("div");
+      toolbar.className = "mp-media-toolbar";
+
+      const ctx = _getCtx();
+      const scopeWrap = document.createElement("div");
+      scopeWrap.style.cssText = "display:flex;gap:3px;flex-shrink:0;";
+      [
+        { key: "server",  label: mp("scope_server"),  ok: !!ctx?.guildId },
+        { key: "channel", label: mp("scope_channel"), ok: true },
+      ].forEach(s => {
+        const b = document.createElement("button");
+        b.className = "mp-media-filter-btn" + (s.key === _mediaScope ? " active" : "");
+        b.textContent = s.label; b.disabled = !s.ok;
+        b.style.opacity = s.ok ? "1" : "0.4";
+        b.onclick = () => {
+          _mediaScope = s.key;
+          scopeWrap.querySelectorAll(".mp-media-filter-btn").forEach(x => x.classList.remove("active"));
+          b.classList.add("active");
+          _mediaData = []; _mediaOffset = 0; _mediaTotal = null;
+          if (_mediaObs) { _mediaObs.disconnect(); _mediaObs = null; }
+          _loadMediaPage(grid, sentinel);
+        };
+        scopeWrap.appendChild(b);
+      });
+
+      const typeWrap = document.createElement("div");
+      typeWrap.style.cssText = "display:flex;gap:3px;flex-shrink:0;margin-left:4px;";
+      [
+        { key: "all",   label: mp("media_all")   },
+        { key: "image", label: mp("media_images") },
+        { key: "video", label: mp("media_videos") },
+      ].forEach(f => {
+        const b = document.createElement("button");
+        b.className = "mp-media-filter-btn" + (f.key === _mediaFilter ? " active" : "");
+        b.textContent = f.label;
+        b.onclick = () => {
+          _mediaFilter = f.key;
+          typeWrap.querySelectorAll(".mp-media-filter-btn").forEach(x => x.classList.remove("active"));
+          b.classList.add("active");
+          _mediaData = []; _mediaOffset = 0; _mediaTotal = null;
+          if (_mediaObs) { _mediaObs.disconnect(); _mediaObs = null; }
+          _loadMediaPage(grid, sentinel);
+        };
+        typeWrap.appendChild(b);
+      });
+
+      const searchEl = document.createElement("input");
+      searchEl.className = "mp-media-search"; searchEl.type = "text";
+      searchEl.placeholder = mp("search_placeholder");
+      let _mst = null;
+      searchEl.oninput = () => {
+        clearTimeout(_mst);
+        _mediaQuery = searchEl.value.toLowerCase();
+        _mst = setTimeout(() => _renderMasonryGrid(grid, sentinel), 250);
+      };
+
+      const rBtn = document.createElement("button");
+      rBtn.className = "mp-refresh-btn"; rBtn.title = mp("refresh");
+      rBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>';
+      rBtn.onclick = () => {
+        rBtn.classList.add("spinning");
+        _mediaGen++;
+        _mediaData = []; _mediaOffset = 0; _mediaTotal = null;
+        _mediaLoading = false;
+        if (_mediaObs) { _mediaObs.disconnect(); _mediaObs = null; }
+        _loadMediaPage(grid, sentinel).finally(() =>
+          setTimeout(() => rBtn.classList.remove("spinning"), 400));
+      };
+
+      toolbar.append(scopeWrap, typeWrap, searchEl, rBtn);
+
+      const scrollWrap = document.createElement("div");
+      scrollWrap.className = "mp-media-body";
+
+      const grid = document.createElement("div");
+      grid.className = "mp-masonry";
+      scrollWrap.appendChild(grid);
+
+      const sentinel = document.createElement("div");
+      sentinel.style.cssText = "height:1px;width:100%;";
+      scrollWrap.appendChild(sentinel);
+
+      const selBar = document.createElement("div");
+      selBar.className = "mp-statusbar";
+      const selCount2 = document.createElement("span");
+      selCount2.className = "mp-sel-count";
+      const createBtn2 = document.createElement("button");
+      createBtn2.className = "mp-sbtn danger"; createBtn2.textContent = mp("create_task");
+      createBtn2.style.display = "none";
+      createBtn2.onclick = () => _openCreateTaskDialog();
+      const cancelBtn2 = document.createElement("button");
+      cancelBtn2.className = "mp-sbtn ghost"; cancelBtn2.textContent = mp("cancel_select");
+      cancelBtn2.style.display = "none";
+      cancelBtn2.onclick = () => {
+        _selectedIds.clear();
+        _updateSB(selCount2, createBtn2, cancelBtn2);
+        grid.querySelectorAll(".mp-masonry-item.selected").forEach(el => el.classList.remove("selected"));
+      };
+      selBar.append(selCount2, cancelBtn2, createBtn2);
+
+      const statusBar = document.createElement("div");
+      statusBar.className = "mp-media-status";
+      statusBar.style.display = "none";
+      const spinner = document.createElement("div");
+      spinner.className = "mp-media-spinner";
+      const statusText = document.createElement("span");
+      statusBar.append(spinner, statusText);
+
+      container.append(toolbar, scrollWrap, statusBar, selBar);
+
+      const browseHasData = _browseData.length > 0 && _browseTotal !== null;
+      if (browseHasData) {
+        const inherited = _browseData.filter(m => _getThumbUrl(m) || _getVideoUrl(m));
+        _mediaData   = inherited;
+        _mediaOffset = _browseOffset;
+        _mediaTotal  = _browseTotal;
+        _renderMasonryGrid(grid, sentinel, selCount2, createBtn2, cancelBtn2);
+        if (_mediaOffset < _mediaTotal) {
+          _loadMediaPage(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
+        }
+      } else {
+        _loadMediaPage(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
+      }
+    }
+
+    async function _loadMediaPage(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText) {
+      if (_mediaLoading) return;
+      if (_mediaTotal !== null && _mediaOffset >= _mediaTotal) {
+        if (statusBar) statusBar.style.display = "none";
+        return;
+      }
+      const capturedGen = _mediaGen;
+      _mediaLoading = true;
+
+      if (statusBar) {
+        statusBar.style.display = "flex";
+        statusText.textContent = _mediaOffset === 0
+          ? mp("media_loading_start")
+          : mp("media_loading_more", { n: _mediaData.length, total: _mediaTotal ?? "?" });
+      }
+
+      if (_mediaOffset === 0) {
+        grid.innerHTML = "";
+        const ok = await _ensureCredentials();
+        if (!ok) {
+          grid.innerHTML = "";
+          grid.appendChild(_makeMsgPlaceholder("mp-token-warn", mp("token_fail")));
+          _mediaLoading = false;
+          if (statusBar) statusBar.style.display = "none";
+          return;
+        }
+      }
+
+      const ctx = _getCtx();
+      if (!ctx || !_userId) {
+        _mediaLoading = false;
+        if (statusBar) statusBar.style.display = "none";
+        return;
+      }
+
+      const hasParam = _mediaFilter === "image" ? "image"
+                     : _mediaFilter === "video" ? "video" : null;
+
+      const params = {
+        author_id:    _userId,
+        sort_by:      "timestamp",
+        sort_order:   "desc",
+        offset:       _mediaOffset,
+        include_nsfw: "true",
+        limit:        _getPageSize(),
+      };
+      if (hasParam) params.has = hasParam;
+
+      if (_mediaScope === "server" && ctx.guildId) {
+        params.guild_id = ctx.guildId;
+      } else {
+        if (ctx.guildId) { params.guild_id = ctx.guildId; params.channel_id = ctx.channelId; }
+        else             { params.channel_id_scope = ctx.channelId; }
+      }
+
+      const data = await _apiSearch(params);
+      _mediaLoading = false;
+      if (!data) {
+        if (statusBar) statusBar.style.display = "none";
+        return;
+      }
+
+      if (capturedGen !== _mediaGen) { _mediaLoading = false; return; }
+
+      _mediaTotal = data.total_results || 0;
+      const raw  = data.messages || [];
+      const flatRaw = raw.flat();
+      const msgs = flatRaw.filter(m =>
+        m.author?.id === _userId &&
+        (_getThumbUrl(m) || _getVideoUrl(m))
+      );
+      _mediaData = _mediaData.concat(msgs);
+      _mediaOffset += flatRaw.length || _getPageSize();
+
+      if (statusBar && statusText) {
+        const remaining = _mediaTotal - _mediaOffset;
+        if (remaining > 0) {
+          statusText.textContent = mp("media_loaded_count", { n: _mediaData.length, total: _mediaTotal });
+        } else {
+          statusText.textContent = mp("media_loaded_all", { n: _mediaData.length });
+          setTimeout(() => { if (statusBar) statusBar.style.display = "none"; }, 1800);
+        }
+      }
+
+      const placeholder = grid.querySelector(".mp-empty");
+      if (placeholder) placeholder.remove();
+
+      _renderMasonryGrid(grid, sentinel, selCount2, createBtn2, cancelBtn2);
+    }
+
+    function _renderMasonryGrid(grid, sentinel, selCount2, createBtn2, cancelBtn2) {
+      const q = _mediaQuery;
+
+      if (q) {
+        grid.querySelectorAll(".mp-masonry-item, .mp-media-date-sep").forEach(el => {
+          const msgId = el.dataset.msgId;
+          if (!msgId) { el.style.display = ""; return; }
+          const msg = _mediaData.find(m => m.id === msgId);
+          if (!msg) return;
+          const match = (msg.content || "").toLowerCase().includes(q) ||
+            (msg.attachments || []).some(a => a.filename?.toLowerCase().includes(q));
+          el.style.display = match ? "" : "none";
+        });
+        return;
+      }
+
+      grid.querySelectorAll("[style*='display']").forEach(el => el.style.display = "");
+
+      const rendered = new Set(
+        [...grid.querySelectorAll(".mp-masonry-item")].map(el => el.dataset.msgId)
+      );
+      const newMsgs = _mediaData.filter(m => !rendered.has(m.id));
+
+      if (rendered.size === 0 && newMsgs.length === 0) {
+        grid.appendChild(_makeMsgPlaceholder("mp-empty", mp("no_media")));
+        _lbItems = [];
+        return;
+      }
+
+      _lbItems = _mediaData;
+
+      if (newMsgs.length === 0) {
+        _setupSentinelObs(grid, sentinel, selCount2, createBtn2, cancelBtn2);
+        return;
+      }
+
+      const groups = _groupByDate(newMsgs);
+
+      const BATCH = 6;
+      const allNewItems = [];
+
+      groups.forEach((msgs, dateKey) => {
+        let section = grid.querySelector("[data-datekey='" + dateKey + "']");
+        if (!section) {
+          const sep = document.createElement("div");
+          sep.className = "mp-media-date-sep";
+          sep.dataset.datekey = dateKey;
+          sep.textContent = dateKey + "  ·  0";
+          grid.appendChild(sep);
+          section = sep;
+        }
+        msgs.forEach(msg => {
+          const item = _buildMasonryItem(msg, _mediaData.indexOf(msg), selCount2, createBtn2, cancelBtn2);
+          item.classList.add("mp-new");
+          allNewItems.push({ item, section: section, dateKey });
+        });
+      });
+
+      const updateCounts = () => {
+        const countMap = new Map();
+        _mediaData.forEach(m => {
+          const k = _dateKey(m);
+          countMap.set(k, (countMap.get(k) || 0) + 1);
+        });
+        grid.querySelectorAll(".mp-media-date-sep").forEach(el => {
+          const k = el.dataset.datekey;
+          if (k && countMap.has(k)) el.textContent = k + "  ·  " + countMap.get(k);
+        });
+      };
+
+      let batchIdx = 0;
+      const appendBatch = () => {
+        if (batchIdx >= allNewItems.length) {
+          updateCounts();
+          _setupSentinelObs(grid, sentinel, selCount2, createBtn2, cancelBtn2);
+          return;
+        }
+        const batch = allNewItems.slice(batchIdx, batchIdx + BATCH);
+        batchIdx += BATCH;
+
+        const decodePromises = batch.map(({ item }) => {
+          const img = item.querySelector("img");
+          return img ? img.decode().catch(() => {}) : Promise.resolve();
+        });
+
+        Promise.all(decodePromises).then(() => {
+          requestAnimationFrame(() => {
+            batch.forEach(({ item, dateKey }) => {
+              const sep = grid.querySelector("[data-datekey='" + dateKey + "']");
+              if (sep) {
+                let insertBefore = sep.nextSibling;
+                while (insertBefore &&
+                  insertBefore.dataset?.msgId &&
+                  _dateKey(_mediaData.find(m => m.id === insertBefore.dataset.msgId) || {}) === dateKey) {
+                  insertBefore = insertBefore.nextSibling;
+                }
+                grid.insertBefore(item, insertBefore || null);
+              } else {
+                grid.appendChild(item);
+              }
+              item.addEventListener("animationend", () => item.classList.remove("mp-new"), { once: true });
+            });
+            requestAnimationFrame(appendBatch);
+          });
+        });
+      };
+
+      requestAnimationFrame(appendBatch);
+    }
+
+    function _setupSentinelObs(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText) {
+      if (_mediaObs) _mediaObs.disconnect();
+      if (_mediaTotal !== null && _mediaOffset < _mediaTotal) {
+        _mediaObs = new IntersectionObserver(entries => {
+          if (entries[0].isIntersecting)
+            _loadMediaPage(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
+        }, { threshold: 0.1, rootMargin: "0px" });
+        _mediaObs.observe(sentinel);
+      }
+    }
+
+    function _buildMasonryItem(msg, globalIdx, selCount2, createBtn2, cancelBtn2) {
+      const item = document.createElement("div");
+      item.className = "mp-masonry-item" + (_selectedIds.has(msg.id) ? " selected" : "");
+      item.dataset.msgId = msg.id;
+
+      const thumbUrl = _getThumbUrl(msg);
+      const videoUrl = _getVideoUrl(msg);
+
+      if (thumbUrl) {
+        const img = document.createElement("img");
+        img.src = thumbUrl; img.alt = ""; img.loading = "lazy";
+        if (_isExpired(thumbUrl)) img.style.opacity = "0.6";
+        try {
+          const u = new URL(thumbUrl);
+          const w = parseInt(u.searchParams.get("width") || u.searchParams.get("w") || "0", 10);
+          const h = parseInt(u.searchParams.get("height") || u.searchParams.get("h") || "0", 10);
+          if (w > 0 && h > 0) { img.style.aspectRatio = w + "/" + h; img.style.width = "100%"; }
+        } catch (_) {}
+        img.addEventListener("mouseenter", e => _mpShowZoom(thumbUrl, e));
+        img.addEventListener("mousemove",  e => _mpMoveZoom(e));
+        img.addEventListener("mouseleave", _mpHideZoom);
+        item.appendChild(img);
+      } else if (videoUrl) {
+        const vid = document.createElement("video");
+        vid.dataset.src = videoUrl;
+        vid.muted = true;
+        vid.style.cssText = "width:100%;display:block;border-radius:4px;background:#000;min-height:60px;";
+        item.appendChild(vid);
+        const badge = Object.assign(document.createElement("div"), {
+          className: "mp-video-badge", textContent: "▶",
+        });
+        item.appendChild(badge);
+        const vidObs = new IntersectionObserver(entries => {
+          const entry = entries[0];
+          if (entry.isIntersecting) {
+            if (!vid.src && vid.dataset.src) {
+              vid.src = vid.dataset.src;
+              vid.preload = "metadata";
+            }
+          } else {
+            if (vid.src) {
+              vid.pause();
+              vid.removeAttribute("src");
+              vid.load();
+            }
+          }
+        }, { threshold: 0.1 });
+        vidObs.observe(vid);
+        item.dataset.hasVidObs = "1";
+        item._vidObs = vidObs;
+      }
+
+      const jumpCorner = document.createElement("button");
+      jumpCorner.className = "mp-jump-corner";
+      jumpCorner.title = mp("jump_to");
+      jumpCorner.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>';
+      jumpCorner.onclick = e => { e.stopPropagation(); _mpJumpToMessage(msg.channel_id, msg.id); };
+      item.appendChild(jumpCorner);
+
+      const overlay = document.createElement("div");
+      overlay.className = "mp-grid-overlay";
+      const metaEl = Object.assign(document.createElement("div"), {
+        className: "mp-grid-meta",
+        textContent: new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      });
+      const actsEl = document.createElement("div");
+      actsEl.className = "mp-grid-acts";
+
+      const db = document.createElement("button");
+      db.className = "mp-action-btn danger"; db.title = mp("delete_single");
+      db.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
+      db.onclick = async e => {
+        e.stopPropagation();
+        const ok = await dmtConfirm(mp("confirm_delete_single"), { danger: true });
+        if (!ok) return;
+        _stopRequested = false;
+        item.style.transition = "opacity .25s"; item.style.opacity = "0";
+        const snapMedia = _mediaData.slice();
+        const snapBrowse = _browseData.slice();
+        if (await _apiDelete(msg.channel_id, msg.id)) {
+          _mediaData  = _mediaData.filter(m => m.id !== msg.id);
+          _browseData = _browseData.filter(m => m.id !== msg.id);
+          setTimeout(() => { if (item.style.opacity === "0") item.style.display = "none"; }, 280);
+          _mpShowUndo(msg.id, item, () => {
+            _mediaData = snapMedia; _browseData = snapBrowse;
+            item.style.opacity = "1"; item.style.display = "";
+          });
+        } else { item.style.opacity = "1"; }
+      };
+
+      const favBtnM = document.createElement("button");
+      favBtnM.className = "mp-action-btn mp-fav-btn" + (_favIds.has(msg.id) ? " mp-fav-active" : "");
+      favBtnM.title = _favIds.has(msg.id) ? mp("fav_remove") : mp("fav_add");
+      favBtnM.innerHTML = _favIds.has(msg.id) ? _SVG_HEART_FULL : _SVG_HEART_EMPTY;
+      favBtnM.onclick = e => { e.stopPropagation(); _mpToggleFav(msg.id, favBtnM); };
+
+      actsEl.append(favBtnM, db);
+      overlay.append(metaEl, actsEl);
+      item.appendChild(overlay);
+
+      item.addEventListener("contextmenu", e => {
+        e.preventDefault(); e.stopPropagation();
+        _mpHideZoom();
+        document.getElementById("dmt-mp-ctx")?.remove();
+
+        const menu = document.createElement("div");
+        menu.id = "dmt-mp-ctx";
+        menu.style.cssText = [
+          "position:fixed;left:" + e.clientX + "px;top:" + e.clientY + "px;",
+          "background:var(--dmt-bg,#313338);border:1px solid rgba(255,255,255,.1);",
+          "border-radius:8px;padding:4px;min-width:172px;",
+          "z-index:2147483641;box-shadow:0 8px 24px rgba(0,0,0,.55);",
+          "font-size:12px;font-family:system-ui,sans-serif;",
+        ].join("");
+
+        const mkItem = (label, icon, onClick, danger = false) => {
+          const btn = document.createElement("button");
+          btn.style.cssText = [
+            "display:flex;align-items:center;gap:8px;width:100%;",
+            "padding:6px 10px;background:transparent;border:none;border-radius:5px;",
+            "color:" + (danger ? "#f04747" : "var(--dmt-text-primary,#dcddde)") + ";",
+            "cursor:pointer;font-size:12px;font-family:inherit;text-align:left;transition:background .1s;",
+          ].join("");
+          btn.innerHTML = '<span style="opacity:.7;display:flex;align-items:center;width:14px;flex-shrink:0">' + icon + '</span><span>' + label + '</span>';
+          btn.addEventListener("mouseover", () => btn.style.background = danger ? "rgba(240,71,71,.12)" : "rgba(255,255,255,.07)");
+          btn.addEventListener("mouseout",  () => btn.style.background = "transparent");
+          btn.addEventListener("click", () => { menu.remove(); onClick(); });
+          return btn;
+        };
+
+        const SVG_COPY = '<svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="4" y="4" width="8" height="9" rx="1.2"/><path d="M2.5 9.5H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h6.5a1 1 0 0 1 1 1v1"/></svg>';
+        const SVG_JUMP = '<svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8.5 1.5h4v4"/><path d="M6.5 7.5L12.5 1.5"/><path d="M10.5 8.5v4h-9v-9h4"/></svg>';
+        const SVG_DEL  = '<svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><polyline points="1.5,3 3,3 12.5,3"/><path d="M11.5 3l-.8 8.5H3.3L2.5 3"/><path d="M5.5 6v3M8.5 6v3"/><path d="M4.5 3V2a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v1"/></svg>';
+
+        const guildId = _getCtx()?.guildId || "@me";
+        const msgUrl = "https://discord.com/channels/" + guildId + "/" + msg.channel_id + "/" + msg.id;
+        menu.appendChild(mkItem(mp("copy_link") || "Copy link", SVG_COPY, () => {
+          try { GM_setClipboard ? GM_setClipboard(msgUrl) : navigator.clipboard.writeText(msgUrl); }
+          catch (_) {}
+          dmtShowToast("✅ Link copied", { duration: 1500 });
+        }));
+
+        menu.appendChild(mkItem(mp("jump_to"), SVG_JUMP, () => _mpJumpToMessage(msg.channel_id, msg.id)));
+
+        const sep = document.createElement("div");
+        sep.style.cssText = "height:1px;background:rgba(255,255,255,.08);margin:3px 6px";
+        menu.appendChild(sep);
+
+        menu.appendChild(mkItem(mp("delete_single"), SVG_DEL, async () => {
+          const ok = await dmtConfirm(mp("confirm_delete_single"), { danger: true });
+          if (!ok) return;
+          item.style.transition = "opacity .25s"; item.style.opacity = "0";
+          const snapM = _mediaData.slice(), snapB = _browseData.slice();
+          if (await _apiDelete(msg.channel_id, msg.id)) {
+            _mediaData = _mediaData.filter(m => m.id !== msg.id);
+            _browseData = _browseData.filter(m => m.id !== msg.id);
+            setTimeout(() => { if (item.style.opacity === "0") item.style.display = "none"; }, 280);
+            _mpShowUndo(msg.id, item, () => {
+              _mediaData = snapM; _browseData = snapB;
+              item.style.opacity = "1"; item.style.display = "";
+            });
+          } else { item.style.opacity = "1"; }
+        }, true));
+
+        document.body.appendChild(menu);
+
+        requestAnimationFrame(() => {
+          const r = menu.getBoundingClientRect();
+          if (r.right  > window.innerWidth)  menu.style.left = (e.clientX - r.width)  + "px";
+          if (r.bottom > window.innerHeight) menu.style.top  = (e.clientY - r.height) + "px";
+        });
+
+        const _closeCtx = ev => {
+          if (!menu.contains(ev.target)) { menu.remove(); document.removeEventListener("mousedown", _closeCtx, true); }
+        };
+        setTimeout(() => document.addEventListener("mousedown", _closeCtx, true), 60);
+      });
+      let _pressTimer = null;
+      item.addEventListener("pointerdown", e => {
+        if (e.button !== 0 || e.target.closest(".mp-action-btn") || e.target.closest(".mp-jump-corner")) return;
+        _pressTimer = setTimeout(() => {
+          _pressTimer = null;
+          if (_selectedIds.has(msg.id)) _selectedIds.delete(msg.id);
+          else _selectedIds.add(msg.id);
+          item.classList.toggle("selected", _selectedIds.has(msg.id));
+          if (selCount2) _updateSB(selCount2, createBtn2, cancelBtn2);
+        }, 450);
+      });
+      item.addEventListener("pointerup", e => {
+        if (_pressTimer === null) return;
+        clearTimeout(_pressTimer); _pressTimer = null;
+        if (e.target.closest(".mp-action-btn") || e.target.closest(".mp-jump-corner")) return;
+        if (_selectedIds.size > 0) {
+          if (_selectedIds.has(msg.id)) _selectedIds.delete(msg.id);
+          else _selectedIds.add(msg.id);
+          item.classList.toggle("selected", _selectedIds.has(msg.id));
+          if (selCount2) _updateSB(selCount2, createBtn2, cancelBtn2);
+        } else {
+          _lbIndex = globalIdx;
+          _openMediaLightbox(_lbItems, _lbIndex, item);
+        }
+      });
+      item.addEventListener("pointerleave", () => clearTimeout(_pressTimer));
+
+      return item;
+    }
+
+    function _openMediaLightbox(items, startIdx, originEl) {
+      document.getElementById("dmt-mp-lightbox")?.remove();
+
+      const lb = document.createElement("div");
+      lb.id = "dmt-mp-lightbox";
+
+      lb.style.cssText = "background:rgba(0,0,0,0);transition:background 0.22s ease;";
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        lb.style.background = "rgba(0,0,0,0.88)";
+      }));
+      lb.onclick = e => { if (e.target === lb) _lbClose(); };
+
+      const closeEl = document.createElement("button");
+      closeEl.className = "lb-close"; closeEl.textContent = "✕";
+      closeEl.onclick = () => _lbClose();
+
+      const prev = document.createElement("button");
+      prev.className = "lb-nav lb-prev"; prev.textContent = "‹";
+      const next = document.createElement("button");
+      next.className = "lb-nav lb-next"; next.textContent = "›";
+
+      const mediaWrap = document.createElement("div");
+      mediaWrap.style.cssText = "display:flex;align-items:center;justify-content:center;flex:1;";
+      const infoEl = document.createElement("div");
+      infoEl.className = "lb-info";
+
+      lb.append(closeEl, prev, mediaWrap, infoEl, next);
+      document.body.appendChild(lb);
+
+      function _calcOrigin(el) {
+        if (!el) return null;
+        try {
+          const r = el.getBoundingClientRect();
+          const vpW = window.innerWidth, vpH = window.innerHeight;
+          const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+          const finalW = Math.min(vpW * 0.9, vpH * 0.85 * 1.5);
+          const finalH = finalW / 1.5;
+          const imgCx = vpW / 2, imgCy = vpH / 2;
+          const ox = ((cx - imgCx) / finalW * 100 + 50).toFixed(2) + "%";
+          const oy = ((cy - imgCy) / finalH * 100 + 50).toFixed(2) + "%";
+          const scale = Math.max(r.width / finalW, 0.06).toFixed(3);
+          return { ox, oy, scale };
+        } catch (_) { return null; }
+      }
+
+      function _animIn(mediaEl, origin) {
+        if (!origin) { mediaEl.style.opacity = "1"; return; }
+        mediaEl.style.cssText += [
+          "transform-origin:" + origin.ox + " " + origin.oy + ";",
+          "transform:scale(" + origin.scale + ");opacity:0;",
+          "transition:transform 0.32s cubic-bezier(0.22,1,0.36,1),opacity 0.22s ease;",
+        ].join("");
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          mediaEl.style.transform = "scale(1)";
+          mediaEl.style.opacity   = "1";
+        }));
+      }
+
+      let curIdx = startIdx;
+      function show(idx, fromEl) {
+        curIdx = Math.max(0, Math.min(items.length - 1, idx));
+        const msg = items[curIdx];
+        const thumb = _getThumbUrl(msg);
+        const video = _getVideoUrl(msg);
+        mediaWrap.innerHTML = "";
+        const origin = _calcOrigin(fromEl);
+        if (thumb) {
+          const img = document.createElement("img");
+          img.className = "lb-media"; img.src = thumb; img.alt = "";
+          mediaWrap.appendChild(img);
+          _animIn(img, origin);
+        } else if (video) {
+          const vid = document.createElement("video");
+          vid.className = "lb-media"; vid.src = video;
+          vid.controls = true; vid.autoplay = true; vid.style.maxHeight = "80vh";
+          mediaWrap.appendChild(vid);
+          _animIn(vid, origin);
+        }
+        const ts = new Date(msg.timestamp);
+        infoEl.textContent = ts.toLocaleString() + "  |  " + (curIdx + 1) + " / " + items.length;
+        prev.style.visibility = curIdx > 0               ? "" : "hidden";
+        next.style.visibility = curIdx < items.length - 1 ? "" : "hidden";
+      }
+
+      function _lbClose() {
+        lb.style.background = "rgba(0,0,0,0)";
+        document.removeEventListener("keydown", onKey);
+        setTimeout(() => lb.remove(), 220);
+      }
+
+      prev.onclick = e => { e.stopPropagation(); show(curIdx - 1, null); };
+      next.onclick = e => { e.stopPropagation(); show(curIdx + 1, null); };
+
+      const onKey = e => {
+        if (!document.getElementById("dmt-mp-lightbox")) { document.removeEventListener("keydown", onKey); return; }
+        if (e.key === "ArrowLeft")  { e.preventDefault(); show(curIdx - 1, null); }
+        if (e.key === "ArrowRight") { e.preventDefault(); show(curIdx + 1, null); }
+        if (e.key === "Escape")     { _lbClose(); }
+      };
+      document.addEventListener("keydown", onKey);
+
+      show(curIdx, originEl || null);
+    }
+
+    function _renderTasksTab(container) {
+      container.innerHTML = "";
+
+      const qTitle = Object.assign(document.createElement("div"), { className: "mp-quota-title", textContent: mp("quota_label") });
+      const levels = ["conservative", "balanced", "aggressive", "custom"];
+      const curLv  = GMStore.get("mp_quota_level", "balanced");
+      const optsWrap = document.createElement("div");
+      optsWrap.className = "mp-quota-opts";
+
+      const custWarn = Object.assign(document.createElement("div"), { className: "mp-cust-warn", textContent: mp("quota_custom_warn") });
+      custWarn.style.display = curLv === "custom" ? "" : "none";
+      const custInput = document.createElement("input");
+      custInput.type = "number"; custInput.min = "1"; custInput.max = "500";
+      custInput.value = GMStore.get("mp_quota_custom", "50");
+      custInput.className = "mp-search"; custInput.style.marginTop = "4px";
+      custInput.style.display = curLv === "custom" ? "" : "none";
+      custInput.onchange = () => GMStore.set("mp_quota_custom", custInput.value);
+
+      levels.forEach(lv => {
+        const opt = document.createElement("label");
+        opt.className = "mp-quota-opt" + (lv === curLv ? " selected" : "");
+        const r = document.createElement("input");
+        r.type = "radio"; r.name = "mp-qlv"; r.value = lv; r.checked = lv === curLv;
+        r.onchange = () => {
+          GMStore.set("mp_quota_level", lv);
+          optsWrap.querySelectorAll(".mp-quota-opt").forEach((o, i) =>
+            o.classList.toggle("selected", levels[i] === lv));
+          custWarn.style.display = custInput.style.display = lv === "custom" ? "" : "none";
+          _refreshQProg(qProg);
+        };
+        opt.append(r, document.createTextNode(mp("quota_" + lv)));
+        optsWrap.appendChild(opt);
+      });
+
+      const qProg = document.createElement("div");
+      qProg.className = "mp-qprog-row";
+      _refreshQProg(qProg);
+
+      container.append(qTitle, optsWrap, custWarn, custInput, qProg);
+
+      const pgTitle = Object.assign(document.createElement("div"), {
+        className: "mp-quota-title", textContent: mp("page_size_label"),
+        style: "margin-top:14px;",
+      });
+      const pgWrap = document.createElement("div");
+      pgWrap.className = "mp-quota-opts";
+      const curPg = _getPageSize();
+      SEARCH_PAGE_OPTIONS.forEach(sz => {
+        const opt = document.createElement("label");
+        opt.className = "mp-quota-opt" + (sz === curPg ? " selected" : "");
+        const r = document.createElement("input");
+        r.type = "radio"; r.name = "mp-pgsize"; r.value = sz; r.checked = sz === curPg;
+        r.onchange = () => {
+          GMStore.set(SK_PAGE_SIZE, String(sz));
+          pgWrap.querySelectorAll(".mp-quota-opt").forEach((o, i) =>
+            o.classList.toggle("selected", SEARCH_PAGE_OPTIONS[i] === sz));
+        };
+        opt.append(r, document.createTextNode(mp("page_size_n", { n: sz })));
+        pgWrap.appendChild(opt);
+      });
+      container.append(pgTitle, pgWrap);
+
+      const tasks  = _getTasks();
+      const active = tasks.filter(t => t.status !== "done");
+      const done   = tasks.filter(t => t.status === "done");
+
+      container.appendChild(Object.assign(document.createElement("div"), {
+        className: "mp-sec-title", textContent: mp("tasks_active"),
+      }));
+      if (active.length === 0) {
+        const emptyWrap = document.createElement("div");
+        emptyWrap.className = "mp-empty";
+        emptyWrap.style.cssText = "padding:12px 0;text-align:left;";
+        const emptyMain = document.createElement("div");
+        emptyMain.textContent = mp("tasks_empty");
+        const emptyHint = document.createElement("div");
+        emptyHint.style.cssText = "margin-top:6px;font-size:11px;color:var(--dmt-text-muted,#949ba4);line-height:1.6;";
+        emptyHint.textContent = mp("tasks_empty_hint");
+        emptyWrap.append(emptyMain, emptyHint);
+        container.appendChild(emptyWrap);
+      } else {
+        active.forEach(t => container.appendChild(_taskCard(t, container)));
+      }
+      if (done.length > 0) {
+        container.appendChild(Object.assign(document.createElement("div"), {
+          className: "mp-sec-title", textContent: mp("tasks_done"),
+        }));
+        done.slice(0, 5).forEach(t => container.appendChild(_taskCard(t, container)));
+      }
+    }
+
+    function _refreshQProg(el) {
+      const limit = _getGlobalQuota(), done = _getQuotaToday();
+      const pct = Math.min(100, Math.round(done / limit * 100));
+      el.innerHTML = "";
+      const label = document.createElement("span");
+      label.textContent = mp("quota_today", { done, limit });
+      const wrap = document.createElement("div");
+      wrap.className = "mp-prog-wrap";
+      const bar = document.createElement("div");
+      bar.className = "mp-prog-bar";
+      bar.style.width = pct + "%";
+      wrap.appendChild(bar);
+      el.appendChild(label);
+      el.appendChild(wrap);
+    }
+
+    function _taskCard(task, container) {
+      const card = document.createElement("div");
+      card.className = "mp-task-card" + (task.id === _runningTask ? " running" : "");
+      const icon = { active: "🟡", paused: "⏸", done: "✅" }[task.status] || "🔴";
+      card.appendChild(Object.assign(document.createElement("div"), {
+        className: "mp-task-name",
+        textContent: icon + " " + (task.label || task.channelName || task.scope),
+      }));
+      const total   = task.pendingTotal ?? task.totalFound ?? (task.pendingIds?.length) ?? 0;
+      const left    = total - task.deletedCount;
+      const qLimit  = _getTaskQuota(task);
+      const etaDays = left > 0 ? Math.ceil(left / qLimit) : 0;
+      card.appendChild(Object.assign(document.createElement("div"), {
+        className: "mp-task-meta",
+        textContent: mp("task_progress", { done: task.deletedCount, total: total || "?" })
+                   + (etaDays > 0 ? "  " + mp("task_eta", { days: etaDays }) : ""),
+      }));
+      const acts = document.createElement("div");
+      acts.className = "mp-task-acts";
+      if (task.status !== "done") {
+        if (task.id !== _runningTask) {
+          const rb = Object.assign(document.createElement("button"), { className: "mp-tbtn resume", textContent: mp("task_resume") });
+          rb.onclick = () => _runTask(task.id, container);
+          acts.appendChild(rb);
+        } else {
+          const pb = Object.assign(document.createElement("button"), { className: "mp-tbtn pause", textContent: mp("task_pause") });
+          pb.onclick = () => { _stopRequested = true; _abortWait?.(); _setTaskStatus(task.id, "paused"); _renderTasksTab(container); };
+          acts.appendChild(pb);
+        }
+        const cb2 = Object.assign(document.createElement("button"), { className: "mp-tbtn cancel", textContent: mp("task_cancel") });
+        cb2.onclick = async () => {
+          const ok = await dmtConfirm(mp("task_cancel_confirm"), { danger: true });
+          if (!ok) return;
+          if (task.id === _runningTask) { _stopRequested = true; _abortWait?.(); }
+          _removeTask(task.id); _renderTasksTab(container);
+        };
+        acts.appendChild(cb2);
+      }
+      card.appendChild(acts);
+      return card;
+    }
+
+    const _getTasks   = ()        => GMStore.get(SK_TASKS, [], true);
+    const _saveTasks  = tasks     => GMStore.set(SK_TASKS, tasks, true);
+    function _setTaskStatus(id, status) {
+      const ts = _getTasks(); const t = ts.find(x => x.id === id);
+      if (t) { t.status = status; _saveTasks(ts); }
+    }
+    function _removeTask(id) { _saveTasks(_getTasks().filter(t => t.id !== id)); }
+
+    async function _openCreateTaskDialog() {
+      const ctx   = _getCtx();
+      const sLbl  = { server: mp("scope_server"), channel: mp("scope_channel"), thread: mp("scope_thread") }[_browseScope];
+      const tLbl  = Object.entries(_loadTypeFilter()).filter(([,v]) => v).map(([k]) => mp("type_" + k)).join(", ");
+      const n     = _selectedIds.size;
+      const limit = _getGlobalQuota();
+      const body  = [
+        mp("create_task_scope",   { scope: sLbl }),
+        mp("create_task_filters", { types: tLbl }),
+        mp("create_task_count",   { n }),
+        mp("create_task_quota",   { limit }),
+        "", mp("create_task_warn"),
+      ].join("\n");
+      try {
+        const ok = await dmtConfirm(mp("create_task_title") + "\n\n" + body,
+          { confirmText: mp("create_task_confirm"), danger: true }
+        );
+        if (!ok) return;
+        const favExcluded = [..._selectedIds].filter(id => _favIds.has(id));
+        const pendingIdList = [..._selectedIds]
+          .filter(id => !_favIds.has(id))
+          .map(msgId => {
+            const m = _browseData.find(x => x.id === msgId);
+            return { id: msgId, channelId: m?.channel_id || ctx?.channelId || null };
+          });
+        if (pendingIdList.length === 0) {
+          dmtShowToast("⚠️ " + (mp("fav_all_excluded") || "All selected messages are favorited — Task not created."), { duration: 3000 });
+          return;
+        }
+        if (favExcluded.length > 0) {
+          dmtShowToast("♥ " + favExcluded.length + " favorited message(s) excluded from Task.", { duration: 2500 });
+        }
+        const task = {
+          id: crypto.randomUUID(), createdAt: Date.now(), label: "",
+          scope: _browseScope, guildId: ctx?.guildId || null,
+          channelId: ctx?.channelId || null, channelName: ctx ? "#" + ctx.channelId : "",
+          filters: { ..._loadTypeFilter() }, status: "active",
+          pendingTotal: pendingIdList.length, deletedCount: 0, offset: 0,
+          quotaPerDay: null, quotaLevel: "inherit",
+          pendingIds: pendingIdList,
+        };
+        const ts = _getTasks(); ts.push(task); _saveTasks(ts);
+        _selectedIds.clear();
+        dmtShowToast(mp("task_created"), { duration: 2000 });
+        _panelEl?.querySelectorAll(".mp-tab").forEach(tab => {
+          if (tab.dataset.tab === "tasks") tab.click();
+        });
+      } catch (e) {
+        DEBUG && console.warn("[MyPosts] _openCreateTaskDialog error:", e);
+      }
+    }
+
+    async function _runTask(taskId, tasksContainer) {
+      if (_runningTask) { dmtShowToast(mp("task_running"), { duration: 2000 }); return; }
+      const tasks = _getTasks();
+      const task  = tasks.find(t => t.id === taskId);
+      if (!task || task.status === "done") return;
+      const ok = await _ensureCredentials();
+      if (!ok) { dmtShowToast(mp("token_fail"), { duration: 4000 }); return; }
+
+      _runningTask   = taskId;
+      _stopRequested = false;
+      task.status    = "active"; _saveTasks(tasks);
+      _renderTasksTab(tasksContainer);
+
+      const quota   = _getTaskQuota(task);
+      let   pending = task.pendingIds || [];
+      let   pIdx    = task.offset;
+      let   quotaOverride = false;
+
+      while (pIdx < pending.length && !_stopRequested) {
+        if (!quotaOverride && _getQuotaToday() >= quota) {
+          _setTaskStatus(taskId, "paused"); _runningTask = null;
+          const left = pending.length - pIdx;
+          const days = Math.ceil(left / quota);
+          const cont = await dmtConfirm(
+            mp("quota_reached", { limit: quota, done: pIdx, total: pending.length })
+            + "\n" + mp("task_eta", { days }),
+            { confirmText: mp("quota_continue"), cancelText: mp("quota_tomorrow"), danger: true }
+          );
+          if (!cont) return;
+          quotaOverride = true;
+          _runningTask = taskId;
+          _setTaskStatus(taskId, "active");
+        }
+
+        const entry  = pending[pIdx];
+        const msgId  = typeof entry === "object" ? entry.id        : entry;
+        const chId   = typeof entry === "object" ? entry.channelId : (
+          _browseData.find(m => m.id === msgId)?.channel_id || task.channelId
+        );
+        if (!chId) { pIdx++; task.offset = pIdx; continue; }
+
+        const success = await _apiDelete(chId, msgId);
+        if (success) { task.deletedCount++; _bumpQuota(); }
+        task.offset = ++pIdx;
+
+        if (pIdx % 5 === 0) {
+          const ts2 = _getTasks(); const i2 = ts2.findIndex(t => t.id === taskId);
+          if (i2 >= 0) { ts2[i2] = task; _saveTasks(ts2); }
+          _renderTasksTab(tasksContainer);
+        }
+        if (_stopRequested) break;
+      }
+
+      const ft = _getTasks(); const fi = ft.findIndex(t => t.id === taskId);
+      if (fi >= 0) {
+        ft[fi].status = (pIdx >= pending.length && !_stopRequested) ? "done" : "paused";
+        ft[fi].offset = pIdx; _saveTasks(ft);
+        if (ft[fi].status === "done")
+          dmtShowToast(mp("task_done_toast", { n: task.deletedCount }), { duration: 4000 });
+      }
+      _runningTask = null;
+      _renderTasksTab(tasksContainer);
+    }
+
+    function _injectBtn() {
+      const trailing = document.querySelector('div[class*="trailing_"]');
+      if (!trailing || trailing.querySelector(".dmt-myposts-btn")) return !!trailing;
+      const btn = document.createElement("div");
+      btn.className = "dmt-myposts-btn" + (_panelEl ? " active" : "");
+      btn.title = (mp("panel_title") || "My Posts Manager") + " (Alt+P)";
+      btn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
+      btn.onclick = () => {
+        if (_panelEl) {
+          if (typeof _panelEl._mpCleanup === "function") _panelEl._mpCleanup();
+          _stopRequested = true; _prefetchActive = false; _abortWait?.();
+          _panelEl.remove(); _panelEl = null;
+        } else _buildPanel();
+        _syncBtnActive();
+      };
+      trailing.prepend(btn);
+      return true;
+    }
+
+    function _syncBtnActive() {
+      document.querySelectorAll(".dmt-myposts-btn").forEach(b => {
+        b.classList.toggle("active", !!_panelEl);
+        b.title = (mp("panel_title") || "My Posts Manager") + " (Alt+P)";
+      });
+    }
+
+    const _onKeydown = e => {
+      if (e.altKey && e.key === "p") {
+        e.preventDefault();
+        if (_panelEl) {
+          if (typeof _panelEl._mpCleanup === "function") _panelEl._mpCleanup();
+          _stopRequested = true; _prefetchActive = false; _abortWait?.();
+          _panelEl.remove(); _panelEl = null;
+        } else _buildPanel();
+        _syncBtnActive();
+      }
+    };
+    document.addEventListener("keydown", _onKeydown);
+
+    let _mpObsTarget = null;
+    let _mpDebounce  = null;
+    const _mpObs = new MutationObserver(() => {
+      if (document.hidden) return;
+      clearTimeout(_mpDebounce);
+      _mpDebounce = setTimeout(() => {
+        _injectBtn();
+        const trailing = document.querySelector('div[class*="trailing_"]');
+        if (trailing && trailing !== _mpObsTarget) {
+          _mpObsTarget = trailing;
+          _mpObs.disconnect();
+          _mpObs.observe(trailing,       { childList: true });
+          _mpObs.observe(document.body,  { childList: true });
+        }
+      }, 150);
+    });
+
+    const _initTrailing = document.querySelector('div[class*="trailing_"]');
+    if (_initTrailing) {
+      _mpObsTarget = _initTrailing;
+      _mpObs.observe(_initTrailing,   { childList: true });
+      _mpObs.observe(document.body,   { childList: true });
+    } else {
+      _mpObs.observe(document.body, { childList: true, subtree: true });
+    }
+    _injectBtnCSS();
+    _injectBtn();
+
+    CleanupRegistry.add(() => {
+      _mpObs.disconnect();
+      clearTimeout(_mpDebounce);
+      document.removeEventListener("keydown", _onKeydown);
+      _panelEl?.remove();
+    });
+
+    let _mpLastPath = location.pathname;
+    function _mpOnNavChange() {
+      const newPath = location.pathname;
+      if (newPath === _mpLastPath) return;
+      _mpLastPath = newPath;
+      _stopRequested = true;
+      _prefetchActive = false;
+      _abortWait?.();
+      if (_mpRefreshBtn && _panelEl) {
+        _mpRefreshBtn.classList.remove("needs-refresh");
+        void _mpRefreshBtn.offsetWidth;
+        _mpRefreshBtn.classList.add("needs-refresh");
+        setTimeout(() => _mpRefreshBtn?.classList.remove("needs-refresh"), 5000);
+      }
+    }
+    if (typeof navigation !== "undefined") {
+      navigation.addEventListener("navigate", _mpOnNavChange, { passive: true });
+    } else {
+      window.addEventListener("popstate", _mpOnNavChange, { passive: true });
+    }
+    CleanupRegistry.add(() => {
+      if (typeof navigation !== "undefined") navigation.removeEventListener("navigate", _mpOnNavChange);
+      else window.removeEventListener("popstate", _mpOnNavChange);
+    });
+    DEBUG && console.log("[MyPosts] Module I initialized.");
   }
 
   function initURLChecker() {
@@ -20833,6 +24210,7 @@ if (type === "warn" && scanLimit !== null) {
     { name: "Webhook", fn: initWebhookManager, key: "mod_webhook" },
     { name: "URLChecker", fn: initURLChecker, key: "mod_urlchecker" },
     { name: "Blacklist",  fn: initBlacklist,  key: "mod_blacklist"  },
+    { name: "MyPosts",   fn: initMyPostsManager, key: "mod_myposts" },
   ];
 
   initModules.forEach(({ name, fn, key }) => {
