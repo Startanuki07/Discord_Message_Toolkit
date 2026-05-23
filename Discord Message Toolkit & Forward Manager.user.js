@@ -9,7 +9,7 @@
 // @name:fr      Discord Message Toolkit
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
-// @version      2.6.0.0
+// @version      2.6.2.2
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Browse, search, and batch-delete your own Discord messages with daily rate-limit controls. Visually mute messages from specific users without blocking them. Per-message toolbar for copying text, downloading media, and converting social media links to embed-friendly formats. Save emojis, stickers, and GIFs into named collections for quick reuse. Also includes an enhanced forwarding panel and sidebar Wormhole shortcuts.
@@ -54,7 +54,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "2.6.0.9";
+  const SCRIPT_VERSION = "2.6.2.2";
 
   const GMStore = {
     
@@ -1115,6 +1115,12 @@
       mp_load_more:             "Load more",
       mp_loading:               "Loading…",
       mp_no_results:            "No messages found.",
+      search_scope_hint:     "Search is limited to the {n} messages currently loaded.",
+      fav_tab_empty_hint:       "No messages loaded yet. Switch to Browse tab first.",
+      mp_empty_cta_title:       "No messages loaded yet",
+      mp_empty_cta_sub:         "Click the ↻ button above to reload",
+      mp_media_cta_title:       "No media loaded yet",
+      mp_media_cta_sub:         "Click the ↻ button above to reload media",
       mp_group_select_all:      "Select all",
       mp_group_deselect_all:    "Deselect all",
       mp_jump_to:               "Jump to message",
@@ -1621,6 +1627,11 @@
       mp_load_more:             "載入更多",
       mp_loading:               "載入中…",
       mp_no_results:            "未找到訊息。",
+      search_scope_hint:     "搜尋範圍僅限已載入的 {n} 則訊息。",
+      mp_empty_cta_title:       "尚未載入任何訊息",
+      mp_empty_cta_sub:         "點擊上方 ↻ 刷新鍵重新載入",
+      mp_media_cta_title:       "尚未載入媒體",
+      mp_media_cta_sub:         "點擊上方 ↻ 刷新鍵重新載入媒體",
       mp_group_select_all:      "全選",
       mp_group_deselect_all:    "取消全選",
       mp_jump_to:               "跳轉至訊息",
@@ -2574,6 +2585,11 @@
       mp_load_more:             "さらに読み込む",
       mp_loading:               "読み込み中…",
       mp_no_results:            "メッセージが見つかりません。",
+      search_scope_hint:     "検索は現在読み込まれている {n} 件のメッセージのみ対象です。",
+      mp_empty_cta_title:       "まだメッセージが読み込まれていません",
+      mp_empty_cta_sub:         "上の ↻ ボタンをクリックして再読み込み",
+      mp_media_cta_title:       "メディアはまだ読み込まれていません",
+      mp_media_cta_sub:         "上の ↻ ボタンをクリックしてメディアを再読み込み",
       mp_group_select_all:      "すべて選択",
       mp_group_deselect_all:    "選択解除",
       mp_jump_to:               "メッセージへジャンプ",
@@ -3068,6 +3084,11 @@
       mp_load_more:             "더 불러오기",
       mp_loading:               "불러오는 중…",
       mp_no_results:            "메시지를 찾을 수 없습니다.",
+      search_scope_hint:     "검색 범위는 현재 로드된 {n}개 메시지로 제한됩니다.",
+      mp_empty_cta_title:       "아직 메시지가 로드되지 않았습니다",
+      mp_empty_cta_sub:         "위의 ↻ 버튼을 클릭하여 다시 불러오세요",
+      mp_media_cta_title:       "미디어가 아직 로드되지 않았습니다",
+      mp_media_cta_sub:         "위의 ↻ 버튼을 클릭하여 미디어를 다시 불러오세요",
       mp_group_select_all:      "모두 선택",
       mp_group_deselect_all:    "선택 해제",
       mp_jump_to:               "메시지로 이동",
@@ -3913,6 +3934,11 @@
       mp_load_more:             "Cargar más",
       mp_loading:               "Cargando…",
       mp_no_results:            "No se encontraron mensajes.",
+      search_scope_hint:     "La búsqueda se limita a los {n} mensajes cargados.",
+      mp_empty_cta_title:       "No hay mensajes cargados",
+      mp_empty_cta_sub:         "Haz clic en el botón ↻ de arriba para recargar",
+      mp_media_cta_title:       "No hay medios cargados",
+      mp_media_cta_sub:         "Haz clic en el botón ↻ de arriba para recargar medios",
       mp_group_select_all:      "Seleccionar todo",
       mp_group_deselect_all:    "Deseleccionar todo",
       mp_jump_to:               "Ir al mensaje",
@@ -4376,6 +4402,11 @@
       mp_load_more:             "Charger plus",
       mp_loading:               "Chargement…",
       mp_no_results:            "Aucun message trouvé.",
+      search_scope_hint:     "La recherche est limitée aux {n} messages chargés.",
+      mp_empty_cta_title:       "Aucun message chargé",
+      mp_empty_cta_sub:         "Cliquez sur le bouton ↻ ci-dessus pour recharger",
+      mp_media_cta_title:       "Aucun média chargé",
+      mp_media_cta_sub:         "Cliquez sur le bouton ↻ ci-dessus pour recharger les médias",
       mp_group_select_all:      "Tout sélectionner",
       mp_group_deselect_all:    "Tout désélectionner",
       mp_jump_to:               "Aller au message",
@@ -4848,6 +4879,11 @@
       mp_load_more:             "Загрузить ещё",
       mp_loading:               "Загрузка…",
       mp_no_results:            "Сообщения не найдены.",
+      search_scope_hint:     "Поиск ограничен {n} загруженными сообщениями.",
+      mp_empty_cta_title:       "Сообщения ещё не загружены",
+      mp_empty_cta_sub:         "Нажмите кнопку ↻ выше, чтобы перезагрузить",
+      mp_media_cta_title:       "Медиа ещё не загружено",
+      mp_media_cta_sub:         "Нажмите кнопку ↻ выше, чтобы перезагрузить медиа",
       mp_group_select_all:      "Выбрать все",
       mp_group_deselect_all:    "Снять выбор",
       mp_jump_to:               "Перейти к сообщению",
@@ -20402,8 +20438,27 @@ unsafeWindow.fetch = function(...args) {
     const SK_LAST_SCOPE  = "mp_last_scope";
     const SK_LAST_TAB    = "mp_last_tab";
     const SK_PREFETCH_LIMIT = "mp_prefetch_limit";
+    const SK_TIME_FORMAT = "mp_time_fmt";
     const API_BASE       = "https://discord.com/api/v9";
     const SEARCH_PAGE_OPTIONS = [25, 50, 100];
+    function _fmtTs(date, includeDate = true, dateOnly = false) {
+      const fmt = GMStore.get(SK_TIME_FORMAT, "us");
+      const pad = n => String(n).padStart(2, "0");
+      const hhmm = pad(date.getHours()) + ":" + pad(date.getMinutes());
+      if (fmt === "asia") {
+        const d = date.getFullYear() + "/" + pad(date.getMonth() + 1) + "/" + pad(date.getDate());
+        if (dateOnly) return d;
+        return includeDate ? d + " " + hhmm : hhmm;
+      }
+      const d = (date.getMonth() + 1) + "/" + date.getDate();
+      if (dateOnly) return d;
+      return includeDate ? d + " " + hhmm : hhmm;
+    }
+
+    function _fmtDateKey(dateKey) {
+      return _fmtTs(new Date(dateKey + "T00:00:00"), true, true);
+    }
+
     function _getPageSize() {
       const v = parseInt(GMStore.get(SK_PAGE_SIZE, "25"), 10);
       return SEARCH_PAGE_OPTIONS.includes(v) ? v : 25;
@@ -20676,9 +20731,7 @@ unsafeWindow.fetch = function(...args) {
       }
       return true;
     }
-    function _passesFavFilter(msg) {
-      return !_favFilterOn || _favIds.has(msg.id);
-    }
+    function _passesFavFilter(_msg) { return true; }
 
     function _dateKey(msg) { return msg.timestamp.slice(0, 10); }
     function _groupByDate(msgs) {
@@ -20739,8 +20792,8 @@ unsafeWindow.fetch = function(...args) {
       const metaEl = document.createElement("div");
       metaEl.className = "mp-grid-meta";
       const ts = new Date(msg.timestamp);
-      metaEl.textContent = ts.toLocaleDateString([], { month: "short", day: "numeric" })
-        + " " + ts.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      metaEl.textContent = _fmtTs(ts);
+      metaEl.dataset.ts  = ts.getTime();
 
       const actsEl = document.createElement("div");
       actsEl.className = "mp-grid-acts";
@@ -20906,11 +20959,11 @@ unsafeWindow.fetch = function(...args) {
         "#dmt-mp-hover-zoom img{width:100%;height:100%;object-fit:contain;display:block;background:#111;}",
         
         "#dmt-mp-panel .mp-fav-btn{color:var(--dmt-text-muted,#949ba4);}",
-        "#dmt-mp-panel .mp-fav-btn:hover,#dmt-mp-panel .mp-fav-btn.mp-fav-active{color:#f04747;}",
+        "#dmt-mp-panel .mp-fav-btn:hover,#dmt-mp-panel .mp-fav-btn.mp-fav-active{color:#ff1744;filter:drop-shadow(0 0 4px rgba(255,23,68,.55));}",
         "#dmt-mp-panel .mp-fav-btn svg{width:14px;height:14px;}",
         
-        "#dmt-mp-panel .mp-fav-chip{border-color:rgba(240,71,71,.35);}",
-        "#dmt-mp-panel .mp-fav-chip.checked{background:rgba(240,71,71,.15);color:#f04747;border-color:rgba(240,71,71,.6);}",
+        "#dmt-mp-panel .mp-fav-chip{border-color:rgba(255,23,68,.35);}",
+        "#dmt-mp-panel .mp-fav-chip.checked{background:rgba(255,23,68,.15);color:#ff1744;border-color:rgba(255,23,68,.6);}",
         "width:22px;height:22px;border-radius:5px;border:none;",
         "background:rgba(0,0,0,.55);color:rgba(255,255,255,.85);cursor:pointer;padding:0;",
         "display:flex;align-items:center;justify-content:center;",
@@ -21001,6 +21054,31 @@ unsafeWindow.fetch = function(...args) {
         
         "@keyframes mp-fadein{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}",
         "#dmt-mp-panel .mp-masonry-item.mp-new{animation:mp-fadein .18s ease both;}",
+        
+        "@keyframes mp-skeleton-pulse{0%,100%{opacity:.35}50%{opacity:.7}}",
+        "@keyframes mp-cta-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}",
+        
+        "#dmt-mp-panel .mp-empty-cta{display:flex;flex-direction:column;align-items:center;justify-content:center;",
+        "gap:12px;padding:40px 24px;text-align:center;animation:mp-cta-in .25s ease both;}",
+        "#dmt-mp-panel .mp-empty-cta svg{opacity:.35;flex-shrink:0;}",
+        "#dmt-mp-panel .mp-empty-cta .mp-cta-title{font-size:14px;font-weight:600;",
+        "color:var(--dmt-text-primary,#dcddde);margin:0;}",
+        "#dmt-mp-panel .mp-empty-cta .mp-cta-sub{font-size:12px;color:var(--dmt-text-muted,#949ba4);margin:0;}",
+        
+        "#dmt-mp-panel .mp-skeleton-row{display:flex;align-items:flex-start;gap:8px;padding:6px 12px;}",
+        "#dmt-mp-panel .mp-skeleton-row .sk-av{width:32px;height:32px;border-radius:50%;flex-shrink:0;",
+        "background:rgba(255,255,255,.08);animation:mp-skeleton-pulse 1.4s ease-in-out infinite;}",
+        "#dmt-mp-panel .mp-skeleton-row .sk-lines{flex:1;display:flex;flex-direction:column;gap:6px;padding-top:4px;}",
+        "#dmt-mp-panel .mp-skeleton-row .sk-name{height:10px;width:25%;border-radius:4px;",
+        "background:rgba(255,255,255,.1);animation:mp-skeleton-pulse 1.4s ease-in-out infinite;}",
+        "#dmt-mp-panel .mp-skeleton-row .sk-text{height:9px;border-radius:4px;",
+        "background:rgba(255,255,255,.07);animation:mp-skeleton-pulse 1.4s ease-in-out infinite;}",
+        "#dmt-mp-panel .mp-skeleton-row .sk-text:nth-child(2){width:80%;}",
+        "#dmt-mp-panel .mp-skeleton-row .sk-text:nth-child(3){width:60%;}",
+        
+        "#dmt-mp-panel .mp-skeleton-card{border-radius:6px;overflow:hidden;",
+        "background:rgba(255,255,255,.07);animation:mp-skeleton-pulse 1.4s ease-in-out infinite;",
+        "aspect-ratio:1/1;}",
         "#dmt-mp-panel .mp-scope-row{display:flex;gap:4px;padding:8px 12px 4px;flex-shrink:0;align-items:center;}",
         "#dmt-mp-panel .mp-load-more{text-align:center;padding:10px;",
         "color:var(--dmt-accent,#5865f2);cursor:pointer;font-size:12px;transition:opacity .15s;}",
@@ -21164,10 +21242,12 @@ unsafeWindow.fetch = function(...args) {
       const tabsRow = document.createElement("div");
       tabsRow.className = "mp-tabs";
       let _activeTab = GMStore.get(SK_LAST_TAB, "browse", true);
-      if (!["browse","media","tasks"].includes(_activeTab)) _activeTab = "browse";
+      if (!["browse","favs","media","tasks"].includes(_activeTab)) _activeTab = "browse";
 
       const browseArea = document.createElement("div");
       browseArea.style.cssText = "display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;";
+      const favsArea = document.createElement("div");
+      favsArea.style.cssText = "display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;";
       const mediaArea = document.createElement("div");
       mediaArea.style.cssText = "display:none;flex-direction:column;flex:1;min-height:0;overflow:hidden;";
       const tasksArea = document.createElement("div");
@@ -21176,22 +21256,26 @@ unsafeWindow.fetch = function(...args) {
 
       const tabDefs = [
         { key: "browse", labelKey: "tab_browse" },
+        { key: "favs",   label: "💗"             },
         { key: "media",  labelKey: "tab_media"  },
         { key: "tasks",  labelKey: "tab_tasks"  },
       ];
-      tabDefs.forEach(({ key, labelKey }) => {
+      tabDefs.forEach(({ key, labelKey, label }) => {
         const tab = document.createElement("div");
         tab.className = "mp-tab" + (key === _activeTab ? " active" : "");
-        tab.textContent = mp(labelKey); tab.dataset.tab = key;
+        tab.textContent = label || mp(labelKey); tab.dataset.tab = key;
+        if (key === "favs") tab.title = mp("fav_filter_label") || "Favorites";
         tab.onclick = () => {
           _activeTab = key;
           GMStore.set(SK_LAST_TAB, key, true);
           tabsRow.querySelectorAll(".mp-tab").forEach(t => t.classList.toggle("active", t.dataset.tab === key));
           browseArea.style.display = key === "browse" ? "flex" : "none";
+          favsArea.style.display   = key === "favs"   ? "flex" : "none";
           mediaArea.style.display  = key === "media"  ? "flex" : "none";
           tasksArea.style.display  = key === "tasks"  ? ""    : "none";
           if (key === "tasks") _renderTasksTab(tasksArea);
           if (key === "media") _renderMediaTab(mediaArea);
+          if (key === "favs")  _renderFavsTab(favsArea);
         };
         tabsRow.appendChild(tab);
       });
@@ -21231,7 +21315,8 @@ unsafeWindow.fetch = function(...args) {
       refreshBtn.className = "mp-refresh-btn";
       refreshBtn.title = mp("refresh");
       refreshBtn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>';
-      refreshBtn.onclick = () => {
+
+      function _doRefresh() {
         refreshBtn.classList.add("spinning");
         refreshBtn.classList.remove("needs-refresh");
         _browseData = []; _browseOffset = 0; _browseTotal = null;
@@ -21244,8 +21329,26 @@ unsafeWindow.fetch = function(...args) {
           _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput)
             .finally(() => setTimeout(() => refreshBtn.classList.remove("spinning"), 400));
         }, 0);
-      };
+      }
+      refreshBtn.onclick = _doRefresh;
       scopeRow.appendChild(refreshBtn);
+
+      const timeFmtBtn = document.createElement("button");
+      timeFmtBtn.className = "mp-refresh-btn";
+      timeFmtBtn.style.cssText = "font-size:11px;font-weight:600;padding:0 6px;min-width:0;letter-spacing:.3px;";
+      const _updateTimeFmtBtn = () => {
+        const fmt = GMStore.get(SK_TIME_FORMAT, "us");
+        timeFmtBtn.textContent = fmt === "asia" ? "ASIA" : "US";
+        timeFmtBtn.title = fmt === "asia" ? "Switch to US time format (M/D HH:mm)" : "Switch to Asia time format (YYYY/MM/DD HH:mm)";
+      };
+      _updateTimeFmtBtn();
+      timeFmtBtn.onclick = () => {
+        const fmt = GMStore.get(SK_TIME_FORMAT, "us");
+        GMStore.set(SK_TIME_FORMAT, fmt === "asia" ? "us" : "asia");
+        _updateTimeFmtBtn();
+        _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
+      };
+      scopeRow.appendChild(timeFmtBtn);
       const searchRow = document.createElement("div");
       searchRow.className = "mp-search-row";
       const searchInput = document.createElement("input");
@@ -21276,19 +21379,6 @@ unsafeWindow.fetch = function(...args) {
         typeRow.appendChild(chip);
       });
 
-      const favChip = document.createElement("label");
-      favChip.className = "mp-type-chip mp-fav-chip" + (_favFilterOn ? " checked" : "");
-      favChip.title = mp("fav_filter_tip") || "Show favorited messages only";
-      const favCb = document.createElement("input");
-      favCb.type = "checkbox"; favCb.checked = _favFilterOn;
-      favCb.onchange = () => {
-        _favFilterOn = favCb.checked;
-        favChip.classList.toggle("checked", favCb.checked);
-        _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
-      };
-      favChip.append(favCb, document.createTextNode(" ♥ " + (mp("fav_filter_label") || "Favorites")));
-      typeRow.appendChild(favChip);
-
       const msgList = document.createElement("div");
       msgList.className = "mp-body";
 
@@ -21303,9 +21393,19 @@ unsafeWindow.fetch = function(...args) {
           _browseObs = new IntersectionObserver(entries => {
             if (entries[0].isIntersecting && !_prefetchActive && _browseTotal !== null && _browseOffset < _browseTotal) {
               _browseObs.disconnect(); _browseObs = null;
-              _fetchPage(true).then(() =>
-                _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput)
-              );
+              const prevLen = _browseData.length;
+              _fetchPage(true).then(() => {
+                const q = (searchInput?.value || "").toLowerCase();
+                const allFiltered = _browseData.filter(m =>
+                  _passesTypeFilter(m) && _passesFavFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
+                );
+                const newIds = new Set(_browseData.slice(prevLen).map(m => m.id));
+                const newFiltered = allFiltered.filter(m => newIds.has(m.id));
+                if (newFiltered.length > 0) {
+                  _appendFilteredRows(msgList, newFiltered, allFiltered, selCount, createBtn, cancelBtn);
+                }
+                if (_browseTotal !== null && _browseOffset < _browseTotal) _setupBrowseSentinel();
+              });
             }
           }, { threshold: 0.1, rootMargin: "200px" });
           _browseObs.observe(browseSentinel);
@@ -21339,17 +21439,30 @@ unsafeWindow.fetch = function(...args) {
 
       browseArea.append(scopeRow, searchRow, typeRow, msgList, browseSentinel, statusBar);
 
-      panel.append(titlebar, tabsRow, browseArea, mediaArea, tasksArea);
+      panel.append(titlebar, tabsRow, browseArea, favsArea, mediaArea, tasksArea);
       _panelEl = panel;
       document.body.appendChild(panel);
       _makeDraggable(panel, titlebar);
 
       browseArea.style.display = _activeTab === "browse" ? "flex" : "none";
+      favsArea.style.display   = _activeTab === "favs"   ? "flex" : "none";
       mediaArea.style.display  = _activeTab === "media"  ? "flex" : "none";
       tasksArea.style.display  = _activeTab === "tasks"  ? ""    : "none";
       if (_activeTab === "tasks") _renderTasksTab(tasksArea);
       else if (_activeTab === "media") _renderMediaTab(mediaArea);
+      else if (_activeTab === "favs") _renderFavsTab(favsArea);
       else _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput);
+
+      if (_activeTab !== "browse" && _browseData.length === 0) {
+        _ensureCredentials().then(ok => {
+          if (!ok || _stopRequested) return;
+          _fetchPage(true).then(() => {
+            if (_stopRequested) return;
+            _startPrefetch(msgList, selCount, createBtn, cancelBtn, searchInput, null);
+          });
+        });
+      }
+
       return panel;
     }
 
@@ -21360,10 +21473,57 @@ unsafeWindow.fetch = function(...args) {
       return d;
     }
 
+    function _makeSkeletonRow() {
+      const row = document.createElement("div");
+      row.className = "mp-skeleton-row";
+      const av = document.createElement("div"); av.className = "sk-av";
+      const lines = document.createElement("div"); lines.className = "sk-lines";
+      const name = document.createElement("div"); name.className = "sk-name";
+      const t1 = document.createElement("div"); t1.className = "sk-text";
+      const t2 = document.createElement("div"); t2.className = "sk-text";
+      lines.append(name, t1, t2);
+      row.append(av, lines);
+      return row;
+    }
+
+    function _makeSkeletonCard() {
+      const card = document.createElement("div");
+      card.className = "mp-skeleton-card";
+      return card;
+    }
+
+    function _makeEmptyCta(isBrowse = true) {
+      const wrap = document.createElement("div");
+      wrap.className = "mp-empty-cta";
+
+      const iconSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      iconSvg.setAttribute("viewBox", "0 0 24 24");
+      iconSvg.setAttribute("width", "52");
+      iconSvg.setAttribute("height", "52");
+      iconSvg.setAttribute("fill", "var(--dmt-text-muted,#949ba4)");
+      iconSvg.innerHTML = isBrowse
+        ? '<path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/>'
+        : '<path d="M21 3H3C1.9 3 1 3.9 1 5v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zm-9-6.5c1.93 0 3.5-1.57 3.5-3.5S13.93 5.5 12 5.5 8.5 7.07 8.5 9s1.57 3.5 3.5 3.5zm0-5c.83 0 1.5.67 1.5 1.5S12.83 10.5 12 10.5 10.5 9.83 10.5 9s.67-1.5 1.5-1.5zM4 18h16v-1c0-2.66-5.33-4-8-4s-8 1.34-8 4v1z"/>';
+
+      const title = document.createElement("p");
+      title.className = "mp-cta-title";
+      title.textContent = mp(isBrowse ? "empty_cta_title" : "media_cta_title");
+
+      const sub = document.createElement("p");
+      sub.className = "mp-cta-sub";
+      sub.textContent = mp(isBrowse ? "empty_cta_sub" : "media_cta_sub");
+
+      wrap.append(iconSvg, title, sub);
+      return wrap;
+    }
+
     async function _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput) {
       const capturedGen = _browseGen;
       msgList.innerHTML = "";
-      msgList.appendChild(_makeMsgPlaceholder("mp-empty", mp("loading")));
+      const skelFrag = document.createDocumentFragment();
+      for (let i = 0; i < 5; i++) skelFrag.appendChild(_makeSkeletonRow());
+      msgList.appendChild(skelFrag);
+
       const ok = await _ensureCredentials();
       if (!ok || capturedGen !== _browseGen) {
         msgList.innerHTML = "";
@@ -21373,6 +21533,13 @@ unsafeWindow.fetch = function(...args) {
       _browseData = []; _browseOffset = 0; _browseTotal = null;
       await _fetchPage(true);
       if (capturedGen !== _browseGen) return;
+
+      if (_browseData.length === 0) {
+        msgList.innerHTML = "";
+        msgList.appendChild(_makeEmptyCta(true));
+        return;
+      }
+
       _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
       _startPrefetch(msgList, selCount, createBtn, cancelBtn, searchInput, _mpStatusBar);
     }
@@ -21391,13 +21558,14 @@ unsafeWindow.fetch = function(...args) {
           const prevLen = _browseData.length;
           await _fetchPage(true);
           if (_stopRequested) break;
-          const newMsgs = _browseData.slice(prevLen);
-          if (newMsgs.length > 0) {
-            const q = (searchInput?.value || "").toLowerCase();
-            const allFiltered = _browseData.filter(m =>
-              _passesTypeFilter(m) && _passesFavFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
-            );
-            _appendFilteredRows(msgList, newMsgs, allFiltered, selCount, createBtn, cancelBtn);
+          const q = (searchInput?.value || "").toLowerCase();
+          const allFiltered = _browseData.filter(m =>
+            _passesTypeFilter(m) && _passesFavFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
+          );
+          const newIds = new Set(_browseData.slice(prevLen).map(m => m.id));
+          const newFiltered = allFiltered.filter(m => newIds.has(m.id));
+          if (newFiltered.length > 0) {
+            _appendFilteredRows(msgList, newFiltered, allFiltered, selCount, createBtn, cancelBtn);
           }
           if (statusBar) _updatePrefetchProgress(statusBar);
         }
@@ -21408,11 +21576,11 @@ unsafeWindow.fetch = function(...args) {
     }
 
     function _appendFilteredRows(msgList, newMsgs, allFiltered, selCount, createBtn, cancelBtn) {
-      const q_raw = "";
       const collapsed = new Set(GMStore.get(SK_COLLAPSED, [], true));
 
+      const idxMap = new Map(allFiltered.map((m, i) => [m.id, i]));
+
       const newGroups = _groupByDate(newMsgs);
-      let rowIdx = allFiltered.length - newMsgs.length;
 
       newGroups.forEach((msgs, dateKey) => {
         let rowsWrap = msgList.querySelector(`.mp-rows-wrap[data-date-key="${CSS.escape(dateKey)}"]`);
@@ -21434,29 +21602,38 @@ unsafeWindow.fetch = function(...args) {
           };
           const label = document.createElement("span"); label.className = "mp-group-label";
           const cnt   = document.createElement("span"); cnt.className = "mp-group-count";
-          const allMsgsInDate = allFiltered.filter(m => _dateKey(m) === dateKey);
-          cnt.textContent = allMsgsInDate.length + " msg" + (allMsgsInDate.length !== 1 ? "s" : "");
+          const initCount = allFiltered.filter(m => _dateKey(m) === dateKey).length;
+          cnt.textContent = initCount + " msg" + (initCount !== 1 ? "s" : "");
 
           const selAllBtn = document.createElement("span");
           selAllBtn.className = "mp-group-selall";
+
+          const getLiveIds = () =>
+            [...rowsWrap.querySelectorAll(".mp-msg-row[data-msg-id]")]
+              .map(r => r.dataset.msgId);
+
           const refreshSelAll = () => {
-            const allSel = allMsgsInDate.every(m => _selectedIds.has(m.id));
+            const ids = getLiveIds();
+            const allSel = ids.length > 0 && ids.every(id => _selectedIds.has(id));
             selAllBtn.textContent = allSel ? mp("group_deselect_all") : mp("group_select_all");
           };
           refreshSelAll();
           label.onclick = () => {
-            const allSel = allMsgsInDate.every(m => _selectedIds.has(m.id));
-            allMsgsInDate.forEach(m => allSel ? _selectedIds.delete(m.id) : _selectedIds.add(m.id));
+            const ids = getLiveIds();
+            const allSel = ids.length > 0 && ids.every(id => _selectedIds.has(id));
+            ids.forEach(id => allSel ? _selectedIds.delete(id) : _selectedIds.add(id));
             refreshSelAll();
-            rowsWrap.querySelectorAll(".mp-msg-row").forEach((r, i) => {
-              if (!allMsgsInDate[i]) return;
-              r.classList.toggle("selected", _selectedIds.has(allMsgsInDate[i].id));
-              const cb = r.querySelector(".mp-msg-cb"); if (cb) cb.checked = _selectedIds.has(allMsgsInDate[i].id);
+            rowsWrap.querySelectorAll(".mp-msg-row[data-msg-id]").forEach(r => {
+              const id = r.dataset.msgId;
+              r.classList.toggle("selected", _selectedIds.has(id));
+              const cb = r.querySelector(".mp-msg-cb"); if (cb) cb.checked = _selectedIds.has(id);
             });
             _updateSB(selCount, createBtn, cancelBtn);
           };
           selAllBtn.onclick = e => { e.stopPropagation(); label.click(); };
-          label.append(document.createTextNode(dateKey), cnt);
+          const dateSpan = Object.assign(document.createElement("span"), { className:"mp-date-label", textContent:_fmtDateKey(dateKey) });
+          dateSpan.dataset.dateKey = dateKey;
+          label.append(dateSpan, cnt);
           gh.append(chev, label, selAllBtn);
 
           msgList.appendChild(gh);
@@ -21470,8 +21647,8 @@ unsafeWindow.fetch = function(...args) {
 
         const frag = document.createDocumentFragment();
         msgs.forEach(msg => {
-          const gi = allFiltered.indexOf(msg);
-          frag.appendChild(_buildMsgRow(msg, gi >= 0 ? gi : rowIdx++, allFiltered, selCount, createBtn, cancelBtn, () => {}));
+          const gi = idxMap.get(msg.id) ?? allFiltered.length;
+          frag.appendChild(_buildMsgRow(msg, gi, allFiltered, selCount, createBtn, cancelBtn, () => {}));
         });
         rowsWrap.appendChild(frag);
       });
@@ -21515,9 +21692,22 @@ unsafeWindow.fetch = function(...args) {
       msgList.classList.remove("grid-view");
 
       if (filtered.length === 0) {
-        msgList.appendChild(Object.assign(document.createElement("div"), {
-          className: "mp-empty", textContent: mp("no_results"),
-        }));
+        if (_browseData.length === 0) {
+          msgList.appendChild(_makeEmptyCta(true));
+        } else {
+          const noRes = Object.assign(document.createElement("div"), {
+            className: "mp-empty", textContent: mp("no_results"),
+          });
+          msgList.appendChild(noRes);
+          if (q) {
+            const hint = Object.assign(document.createElement("div"), {
+              className: "mp-empty",
+              textContent: mp("search_scope_hint", { n: _browseData.length }),
+            });
+            hint.style.cssText = "font-size:11px;opacity:.6;margin-top:4px;";
+            msgList.appendChild(hint);
+          }
+        }
         if (_browseTotal !== null && _browseOffset < _browseTotal)
           _setupBrowseSentinel();
         return;
@@ -21550,7 +21740,9 @@ unsafeWindow.fetch = function(...args) {
         const cnt = document.createElement("span");
         cnt.className = "mp-group-count";
         cnt.textContent = msgs.length + " msg" + (msgs.length !== 1 ? "s" : "");
-        label.append(document.createTextNode(dateKey), cnt);
+        const dateSpan2 = Object.assign(document.createElement("span"), { className:"mp-date-label", textContent:_fmtDateKey(dateKey) });
+        dateSpan2.dataset.dateKey = dateKey;
+        label.append(dateSpan2, cnt);
 
         const selAllBtn = document.createElement("span");
         selAllBtn.className = "mp-group-selall";
@@ -21641,7 +21833,7 @@ unsafeWindow.fetch = function(...args) {
             }));
           } else if (m[4]) {
             lineWrap.appendChild(Object.assign(document.createElement("span"), {
-              textContent: "#channel", style: "color:var(--dmt-accent,#5865f2);",
+              textContent: "#" + m[4], style: "color:var(--dmt-accent,#5865f2);",
             }));
           }
           last = m.index + m[0].length;
@@ -21705,7 +21897,7 @@ unsafeWindow.fetch = function(...args) {
       GMStore.set(SK_FAVS, [..._favIds], true);
     }
     const _SVG_HEART_EMPTY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
-    const _SVG_HEART_FULL  = '<svg viewBox="0 0 24 24" fill="#f04747" stroke="#f04747" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+    const _SVG_HEART_FULL  = '<svg viewBox="0 0 24 24" fill="#ff1744" stroke="#ff1744" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
 
     function _mpShowZoom(url, e) {
       let z = document.getElementById("dmt-mp-hover-zoom");
@@ -21858,7 +22050,7 @@ unsafeWindow.fetch = function(...args) {
       meta.className = "mp-msg-meta";
       const ts  = new Date(msg.timestamp);
       const att = (msg.attachments || []).length;
-      meta.textContent = ts.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+      meta.textContent = _fmtTs(ts)
                        + (att > 0 ? "  📎" + att : "");
       main.append(textEl, meta);
       if (thumb && _isExpired(thumb)) {
@@ -21984,9 +22176,15 @@ unsafeWindow.fetch = function(...args) {
           _mediaScope = s.key;
           scopeWrap.querySelectorAll(".mp-media-filter-btn").forEach(x => x.classList.remove("active"));
           b.classList.add("active");
+          _mediaGen++;
           _mediaData = []; _mediaOffset = 0; _mediaTotal = null;
+          _mediaLoading = false;
           if (_mediaObs) { _mediaObs.disconnect(); _mediaObs = null; }
-          _loadMediaPage(grid, sentinel);
+          grid.innerHTML = "";
+          const skF = document.createDocumentFragment();
+          for (let i = 0; i < 6; i++) skF.appendChild(_makeSkeletonCard());
+          grid.appendChild(skF);
+          _loadMediaPage(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
         };
         scopeWrap.appendChild(b);
       });
@@ -22019,23 +22217,47 @@ unsafeWindow.fetch = function(...args) {
       searchEl.oninput = () => {
         clearTimeout(_mst);
         _mediaQuery = searchEl.value.toLowerCase();
-        _mst = setTimeout(() => _renderMasonryGrid(grid, sentinel), 250);
+        _mst = setTimeout(() => _renderMasonryGrid(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText), 250);
       };
 
       const rBtn = document.createElement("button");
       rBtn.className = "mp-refresh-btn"; rBtn.title = mp("refresh");
       rBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>';
-      rBtn.onclick = () => {
+
+      function _doMediaRefresh() {
         rBtn.classList.add("spinning");
         _mediaGen++;
         _mediaData = []; _mediaOffset = 0; _mediaTotal = null;
         _mediaLoading = false;
         if (_mediaObs) { _mediaObs.disconnect(); _mediaObs = null; }
-        _loadMediaPage(grid, sentinel).finally(() =>
-          setTimeout(() => rBtn.classList.remove("spinning"), 400));
+        grid.innerHTML = "";
+        const skFrag = document.createDocumentFragment();
+        for (let i = 0; i < 6; i++) skFrag.appendChild(_makeSkeletonCard());
+        grid.appendChild(skFrag);
+        _loadMediaPage(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText)
+          .finally(() => setTimeout(() => rBtn.classList.remove("spinning"), 400));
+      }
+      rBtn.onclick = _doMediaRefresh;
+
+      const mediaTimeFmtBtn = document.createElement("button");
+      mediaTimeFmtBtn.className = "mp-refresh-btn";
+      mediaTimeFmtBtn.style.cssText = "font-size:11px;font-weight:600;padding:0 6px;min-width:0;letter-spacing:.3px;";
+      const _updateMediaTimeFmtBtn = () => {
+        const fmt = GMStore.get(SK_TIME_FORMAT, "us");
+        mediaTimeFmtBtn.textContent = fmt === "asia" ? "ASIA" : "US";
+        mediaTimeFmtBtn.title = fmt === "asia" ? "Switch to US time format" : "Switch to Asia time format (YYYY/MM/DD HH:mm)";
+      };
+      _updateMediaTimeFmtBtn();
+      mediaTimeFmtBtn.onclick = () => {
+        const fmt = GMStore.get(SK_TIME_FORMAT, "us");
+        GMStore.set(SK_TIME_FORMAT, fmt === "asia" ? "us" : "asia");
+        _updateMediaTimeFmtBtn();
+        grid.querySelectorAll(".mp-grid-meta[data-ts]").forEach(el => {
+          el.textContent = _fmtTs(new Date(parseInt(el.dataset.ts)));
+        });
       };
 
-      toolbar.append(scopeWrap, typeWrap, searchEl, rBtn);
+      toolbar.append(scopeWrap, typeWrap, searchEl, rBtn, mediaTimeFmtBtn);
 
       const scrollWrap = document.createElement("div");
       scrollWrap.className = "mp-media-body";
@@ -22082,11 +22304,18 @@ unsafeWindow.fetch = function(...args) {
         _mediaData   = inherited;
         _mediaOffset = _browseOffset;
         _mediaTotal  = _browseTotal;
-        _renderMasonryGrid(grid, sentinel, selCount2, createBtn2, cancelBtn2);
-        if (_mediaOffset < _mediaTotal) {
-          _loadMediaPage(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
+        if (_mediaData.length === 0 && _mediaOffset >= _mediaTotal) {
+          grid.appendChild(_makeEmptyCta(false));
+        } else {
+          _renderMasonryGrid(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
+          if (_mediaOffset < _mediaTotal) {
+            _loadMediaPage(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
+          }
         }
       } else {
+        const skFrag = document.createDocumentFragment();
+        for (let i = 0; i < 6; i++) skFrag.appendChild(_makeSkeletonCard());
+        grid.appendChild(skFrag);
         _loadMediaPage(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
       }
     }
@@ -22175,13 +22404,19 @@ unsafeWindow.fetch = function(...args) {
         }
       }
 
-      const placeholder = grid.querySelector(".mp-empty");
-      if (placeholder) placeholder.remove();
+      grid.querySelectorAll(".mp-skeleton-card,.mp-empty,.mp-empty-cta").forEach(el => el.remove());
 
-      _renderMasonryGrid(grid, sentinel, selCount2, createBtn2, cancelBtn2);
+      if (_mediaData.length === 0 && (_mediaTotal === 0 || _mediaOffset >= _mediaTotal)) {
+        grid.appendChild(_makeEmptyCta(false));
+        _lbItems = [];
+        _mediaLoading = false;
+        return;
+      }
+
+      _renderMasonryGrid(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
     }
 
-    function _renderMasonryGrid(grid, sentinel, selCount2, createBtn2, cancelBtn2) {
+    function _renderMasonryGrid(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText) {
       const q = _mediaQuery;
 
       if (q) {
@@ -22213,7 +22448,7 @@ unsafeWindow.fetch = function(...args) {
       _lbItems = _mediaData;
 
       if (newMsgs.length === 0) {
-        _setupSentinelObs(grid, sentinel, selCount2, createBtn2, cancelBtn2);
+        _setupSentinelObs(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
         return;
       }
 
@@ -22255,7 +22490,7 @@ unsafeWindow.fetch = function(...args) {
       const appendBatch = () => {
         if (batchIdx >= allNewItems.length) {
           updateCounts();
-          _setupSentinelObs(grid, sentinel, selCount2, createBtn2, cancelBtn2);
+          _setupSentinelObs(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
           return;
         }
         const batch = allNewItems.slice(batchIdx, batchIdx + BATCH);
@@ -22363,10 +22598,12 @@ unsafeWindow.fetch = function(...args) {
 
       const overlay = document.createElement("div");
       overlay.className = "mp-grid-overlay";
+      const _mTs = new Date(msg.timestamp);
       const metaEl = Object.assign(document.createElement("div"), {
         className: "mp-grid-meta",
-        textContent: new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        textContent: _fmtTs(_mTs),
       });
+      metaEl.dataset.ts = _mTs.getTime();
       const actsEl = document.createElement("div");
       actsEl.className = "mp-grid-acts";
 
@@ -22613,8 +22850,108 @@ unsafeWindow.fetch = function(...args) {
       show(curIdx, originEl || null);
     }
 
+    function _renderFavsTab(container) {
+      container.innerHTML = "";
+      container.style.cssText = "display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;padding:8px 0 0;";
+
+      const toolbar = document.createElement("div");
+      toolbar.style.cssText = "display:flex;align-items:center;gap:6px;padding:0 12px 6px;flex-shrink:0;";
+      const titleEl = document.createElement("span");
+      titleEl.style.cssText = "font-size:12px;color:var(--dmt-text-muted,#949ba4);flex:1;";
+
+      const favRefreshBtn = document.createElement("button");
+      favRefreshBtn.className = "mp-refresh-btn";
+      favRefreshBtn.title = mp("refresh");
+      favRefreshBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>';
+      favRefreshBtn.onclick = () => _renderFavsTab(container);
+      toolbar.append(titleEl, favRefreshBtn);
+      container.appendChild(toolbar);
+
+      const list = document.createElement("div");
+      list.className = "mp-body";
+      list.style.cssText = "flex:1;overflow-y:auto;min-height:0;contain:content;";
+      container.appendChild(list);
+
+      function _drawFavs() {
+        list.innerHTML = "";
+        const favMsgs = _browseData.filter(m => _favIds.has(m.id));
+
+        if (_browseData.length === 0) {
+          const skelFrag = document.createDocumentFragment();
+          for (let i = 0; i < 3; i++) skelFrag.appendChild(_makeSkeletonRow());
+          list.appendChild(skelFrag);
+          titleEl.textContent = "💗 Loading…";
+
+          let tries = 0;
+          const poll = setInterval(() => {
+            tries++;
+            if (_browseData.length > 0 || tries > 50 || _stopRequested) {
+              clearInterval(poll);
+              if (_browseData.length > 0) _drawFavs();
+            }
+          }, 600);
+          return;
+        }
+
+        if (favMsgs.length === 0) {
+          titleEl.textContent = "💗 0 saved";
+          list.appendChild(_makeEmptyCta(true));
+          return;
+        }
+
+        titleEl.textContent = "💗 " + favMsgs.length + " saved";
+
+        const frag = document.createDocumentFragment();
+        const groups = _groupByDate(favMsgs);
+        groups.forEach((msgs, dateKey) => {
+          const gh = document.createElement("div");
+          gh.className = "mp-group-header";
+          const dateSpan = Object.assign(document.createElement("span"), {
+            className: "mp-date-label", textContent: _fmtDateKey(dateKey),
+          });
+          dateSpan.dataset.dateKey = dateKey;
+          const cnt = Object.assign(document.createElement("span"), {
+            className: "mp-group-count",
+            textContent: msgs.length + " msg" + (msgs.length !== 1 ? "s" : ""),
+          });
+          const label = document.createElement("span");
+          label.className = "mp-group-label";
+          label.append(dateSpan, cnt);
+          gh.appendChild(label);
+          frag.appendChild(gh);
+
+          const rowFrag = document.createDocumentFragment();
+          msgs.forEach((msg, i) => {
+            rowFrag.appendChild(_buildMsgRow(msg, i, favMsgs, null, null, null, () => {}));
+          });
+          const rowsWrap = document.createElement("div");
+          rowsWrap.className = "mp-rows-wrap";
+          rowsWrap.dataset.dateKey = dateKey;
+          rowsWrap.appendChild(rowFrag);
+          frag.appendChild(rowsWrap);
+        });
+        list.appendChild(frag);
+      }
+
+      _drawFavs();
+    }
+
     function _renderTasksTab(container) {
       container.innerHTML = "";
+
+      const warning = document.createElement("div");
+      warning.style.cssText = [
+        "margin:10px 12px 4px;padding:10px 12px;border-radius:8px;font-size:11px;line-height:1.55;",
+        "background:rgba(250,168,26,.1);border:1px solid rgba(250,168,26,.35);",
+        "color:var(--dmt-text-muted,#949ba4);",
+      ].join("");
+      warning.innerHTML = [
+        "<b style='color:#faa81a;display:block;margin-bottom:4px;'>⚠️ Notice — Not designed for bulk deletion</b>",
+        "This tool is a minimal safeguard, not a mass-delete utility. ",
+        "Tasks run with conservative rate limits to avoid account flags. ",
+        "If you need large-scale deletion, consider other dedicated scripts ",
+        "designed specifically for that purpose.",
+      ].join("");
 
       const qTitle = Object.assign(document.createElement("div"), { className: "mp-quota-title", textContent: mp("quota_label") });
       const levels = ["conservative", "balanced", "aggressive", "custom"];
@@ -22651,7 +22988,7 @@ unsafeWindow.fetch = function(...args) {
       qProg.className = "mp-qprog-row";
       _refreshQProg(qProg);
 
-      container.append(qTitle, optsWrap, custWarn, custInput, qProg);
+      container.append(warning, qTitle, optsWrap, custWarn, custInput, qProg);
 
       const pgTitle = Object.assign(document.createElement("div"), {
         className: "mp-quota-title", textContent: mp("page_size_label"),
