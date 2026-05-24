@@ -9,7 +9,7 @@
 // @name:fr      Discord Message Toolkit
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
-// @version      2.6.2.2
+// @version      2.6.2.3
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Browse, search, and batch-delete your own Discord messages with daily rate-limit controls. Visually mute messages from specific users without blocking them. Per-message toolbar for copying text, downloading media, and converting social media links to embed-friendly formats. Save emojis, stickers, and GIFs into named collections for quick reuse. Also includes an enhanced forwarding panel and sidebar Wormhole shortcuts.
@@ -54,7 +54,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "2.6.2.2";
+  const SCRIPT_VERSION = "2.6.2.3";
 
   const GMStore = {
     
@@ -208,6 +208,8 @@
         modUrlChecker: "mod_urlchecker",
         modScout: "mod_scout",
         modBlacklist: "mod_blacklist",
+        modWebhook: "mod_webhook",
+        modMyPosts: "mod_myposts",
       };
       return keyMap[prop] || prop;
     },
@@ -1397,7 +1399,6 @@
         "⠿ 訊息工具是本腳本的核心功能。\\n停用後，所有訊息的 ⠿ 按鈕將會消失。\\n\\n若要重新啟用：右鍵點擊 Tampermonkey 圖示 → 選擇「啟用 ⠿ 訊息工具」。",
       mod_msg_warn_confirm: "仍要停用",
       mod_msg_warn_cancel: "取消",
-      mod_enable_confirm:   "启用",
       mod_enable_confirm:   "確認啟用",
       mod_msg_enable_menu: "啟用 ⠿ 訊息工具",
       rescue_reload_msg: "設定已更新。需要重新整理頁面才能生效。是否立即重新整理？",
@@ -1661,17 +1662,17 @@
       mp_tasks_done:            "已完成",
       mp_tasks_empty:           "尚無任務。",
       mp_task_progress:         "已刪除：{done} / {total}",
-      mp_task_eta:              "预計還需 {days} 天",
+      mp_task_eta:              "預計還需 {days} 天",
       mp_task_resume:           "繼續",
-      mp_task_pause:            "暂停",
+      mp_task_pause:            "暫停",
       mp_task_cancel:           "取消任務",
       mp_task_cancel_confirm:   "確認取消並丟棄此任務？",
-      mp_quota_reached:         "今日配額已達（{limit}/{limit}）。\n任務進度：{done} / {total}\n预計還需 {days} 天完成。",
-      mp_quota_continue:        "繼續刪除（自负風險）",
+      mp_quota_reached:         "今日配額已達（{limit}/{limit}）。\n任務進度：{done} / {total}\n預計還需 {days} 天完成。",
+      mp_quota_continue:        "繼續刪除（自負風險）",
       mp_quota_tomorrow:        "明天再繼續",
       mp_task_done_toast:       "任務完成！共刪除 {n} 則訊息。",
       mp_task_created:          "刪除任務已建立。",
-      mp_task_running:          "已有任務進行中，請先完成或暂停現有任務。",
+      mp_task_running:          "已有任務進行中，請先完成或暫停現有任務。",
       mp_refresh:               "重新掃載",
       mp_page_size_label:       "每頁訊息數：",
       mp_page_size_n:           "{n} 則",
@@ -1905,9 +1906,10 @@
       tip_manual: "使用说明",
       mod_msg_warn_title: "⚠️ 确定停用消息工具？",
       mod_msg_warn_body:
-        "⠿ 消息工具是本脚本的核心功能。\\n停用后，所有消息的 ⠿ 按鈕将会消失。\\n\\n若要重新启用：右键点击 Tampermonkey 图标 → 选择「启用 ⠿ 消息工具」。",
+        "⠿ 消息工具是本脚本的核心功能。\\n停用后，所有消息的 ⠿ 按钮将会消失。\\n\\n若要重新启用：右键点击 Tampermonkey 图标 → 选择「启用 ⠿ 消息工具」。",
       mod_msg_warn_confirm: "仍要停用",
       mod_msg_warn_cancel: "取消",
+      mod_enable_confirm:   "确认启用",
       mod_msg_enable_menu: "启用 ⠿ 消息工具",
       rescue_reload_msg: "设置已更新。需要刷新页面才能生效。是否立即刷新？",
       rescue_close_btn: "关闭",
@@ -3270,9 +3272,9 @@
       to_vxreddit: "🛠️ vxreddit",
       to_instagram: "📷 instagram.com",
       to_kkinstagram: "🔁 kkinstagram",
-      to_vxinstagram: "🔁 to vxinstagram",
-      to_ddinstagram: "🔁 to ddinstagram",
-      to_uuinstagram: "🔁 to uuinstagram",
+      to_vxinstagram: "🔁 vxinstagram",
+      to_ddinstagram: "🔁 ddinstagram",
+      to_uuinstagram: "🔁 uuinstagram",
       to_facebed: "🔁 facebed.com",
       to_tiktok: "🎵 tiktok.com",
       to_vxtiktok: "🔁 vxtiktok",
@@ -3643,9 +3645,9 @@
       to_vxreddit: "🛠️ vxreddit",
       to_instagram: "📷 instagram.com",
       to_kkinstagram: "🔁 kkinstagram",
-      to_vxinstagram: "🔁 to vxinstagram",
-      to_ddinstagram: "🔁 to ddinstagram",
-      to_uuinstagram: "🔁 to uuinstagram",
+      to_vxinstagram: "🔁 vxinstagram",
+      to_ddinstagram: "🔁 ddinstagram",
+      to_uuinstagram: "🔁 uuinstagram",
       to_facebed: "🔁 facebed.com",
       to_tiktok: "🎵 tiktok.com",
       to_vxtiktok: "🔁 vxtiktok",
@@ -4121,9 +4123,9 @@
       to_vxreddit: "🛠️ vxreddit",
       to_instagram: "📷 instagram.com",
       to_kkinstagram: "🔁 kkinstagram",
-      to_vxinstagram: "🔁 to vxinstagram",
-      to_ddinstagram: "🔁 to ddinstagram",
-      to_uuinstagram: "🔁 to uuinstagram",
+      to_vxinstagram: "🔁 vxinstagram",
+      to_ddinstagram: "🔁 ddinstagram",
+      to_uuinstagram: "🔁 uuinstagram",
       to_facebed: "🔁 facebed.com",
       to_tiktok: "🎵 tiktok.com",
       to_vxtiktok: "🔁 vxtiktok",
@@ -4588,9 +4590,9 @@
       to_vxreddit: "🛠️ vxreddit",
       to_instagram: "📷 instagram.com",
       to_kkinstagram: "🔁 kkinstagram",
-      to_vxinstagram: "🔁 to vxinstagram",
-      to_ddinstagram: "🔁 to ddinstagram",
-      to_uuinstagram: "🔁 to uuinstagram",
+      to_vxinstagram: "🔁 vxinstagram",
+      to_ddinstagram: "🔁 ddinstagram",
+      to_uuinstagram: "🔁 uuinstagram",
       to_facebed: "🔁 facebed.com",
       to_tiktok: "🎵 tiktok.com",
       to_vxtiktok: "🔁 vxtiktok",
