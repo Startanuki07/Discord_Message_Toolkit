@@ -9,19 +9,19 @@
 // @name:fr      Discord Message Toolkit
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
-// @version      2.6.2.3
+// @version      2.6.3.0
 // @license      MIT
 // @author       Star_tanuki07
-// @description      Browse, search, and batch-delete your own Discord messages with daily rate-limit controls. Visually mute messages from specific users without blocking them. Per-message toolbar for copying text, downloading media, and converting social media links to embed-friendly formats. Save emojis, stickers, and GIFs into named collections for quick reuse. Also includes an enhanced forwarding panel and sidebar Wormhole shortcuts.
-// @description:zh-TW 瀏覽、搜尋並批次刪除自己在 Discord 的發文，支援每日配額排程；可對特定使用者套用視覺靜音，無需封鎖。逐則工具列提供文字複製、媒體下載與社群連結轉換。可將表情、貼圖與 GIF 收藏至自訂分頁供快速取用。另附強化轉發面板與蟲洞側欄捷徑。
-// @description:zh-CN 浏览、搜索并批量删除自己在 Discord 的发言，支持每日配额计划；可对特定用户套用视觉静音，无需屏蔽。逐条工具栏提供文字复制、媒体下载与社交链接转换。可将表情、贴纸与 GIF 收藏至自定义分组供快速取用。另附强化转发面板与虫洞侧栏快捷方式。
-// @description:ja    自分の Discord 投稿を検索・一括削除（毎日のレート制限対応）、ブロックせず特定ユーザーのメッセージを視覚的にミュート。逐次ツールバーでテキストコピー・メディアダウンロード・SNS リンク変換が可能。スタンプ・GIF をカスタムタブに収集してすぐ呼び出せる。転送パネル強化・ワームホールショートカットも搭載。
-// @description:ko    Discord 자신의 메시지를 검색·일괄 삭제(일일 할당량 지원)하고, 차단 없이 특정 사용자의 메시지를 시각적으로 숨깁니다. 메시지별 툴바로 텍스트 복사, 미디어 다운로드, SNS 링크 변환을 제공합니다. 이모지·스티커·GIF를 커스텀 탭에 저장해 빠르게 재사용할 수 있습니다. 강화된 전달 패널과 웜홀 단축키도 포함됩니다.
-// @description:es    Navega, busca y elimina en lote tus propios mensajes de Discord con límite diario; silencia visualmente mensajes de usuarios específicos sin bloquearlos. Barra de herramientas por mensaje: copiar texto, descargar medios y convertir enlaces de redes sociales. Guarda emojis, stickers y GIFs en colecciones personalizadas para reutilizarlos fácilmente. También incluye panel de reenvío mejorado y atajos Wormhole.
-// @description:pt-BR Navegue, pesquise e exclua em lote suas próprias mensagens do Discord com limite diário; silencie visualmente mensagens de usuários específicos sem bloqueá-los. Barra de ferramentas por mensagem: copiar texto, baixar mídia e converter links de redes sociais. Salve emojis, figurinhas e GIFs em coleções personalizadas para reutilização rápida. Inclui também painel de encaminhamento aprimorado e atalhos Wormhole.
-// @description:fr    Parcourez, recherchez et supprimez en masse vos propres messages Discord avec un quota journalier ; masquez visuellement les messages d'utilisateurs spécifiques sans les bloquer. Barre d'outils par message : copier du texte, télécharger des médias et convertir des liens de réseaux sociaux. Enregistrez emojis, stickers et GIFs dans des collections nommées pour les réutiliser rapidement. Panneau de transfert amélioré et raccourcis Wormhole inclus.
-// @description:de    Eigene Discord-Nachrichten durchsuchen und stapelweise löschen (mit Tageslimit); Nachrichten bestimmter Nutzer visuell ausblenden ohne Blockierung. Pro-Nachricht-Toolbar: Text kopieren, Medien herunterladen, Social-Media-Links konvertieren. Emojis, Sticker und GIFs in benannten Sammlungen speichern und schnell abrufen. Verbessertes Weiterleitungspanel und Wurmloch-Shortcuts inklusive.
-// @description:ru    Просматривайте, ищите и массово удаляйте собственные сообщения в Discord (с дневным лимитом); визуально скрывайте сообщения конкретных пользователей без блокировки. Панель инструментов для каждого сообщения: копирование текста, загрузка медиа, конвертация ссылок соцсетей. Сохраняйте эмодзи, стикеры и GIF в именованные коллекции для быстрого повторного использования. Также: улучшенная переадресация и ярлыки Червоточины.
+// @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
+// @description:zh-TW 逐則工具列，快速複製文字並轉換社群連結為可預覽格式（Twitter、Instagram、Pixiv 等）。可瀏覽、搜尋並批次刪除自己的發文，支援每日配額排程。可對特定使用者套用視覺弱化，無需封鎖；並可將表情、貼圖與 GIF 收藏至自訂分頁。另附轉發面板、蟲洞側欄捷徑、頻道搜尋及重複網址偵測。
+// @description:zh-CN 逐条工具栏，快速复制文字并转换社交链接为可预览格式（Twitter、Instagram、Pixiv 等）。可浏览、搜索并批量删除自己的发言，支持每日配额计划。可对特定用户套用视觉弱化，无需屏蔽；并可将表情、贴纸与 GIF 收藏至自定义分组。另附转发面板、虫洞侧栏快捷方式、频道搜索及重复网址检测。
+// @description:ja    メッセージごとのツールバーで、テキストコピー・SNS リンクの埋め込み変換（Twitter・Instagram・Pixiv など）を即実行。自分の投稿を検索・一括削除（毎日のレート制限対応）。特定ユーザーのメッセージをブロックせず視覚的に弱化；絵文字・スタンプ・GIF をカスタムコレクションに保存。転送パネル・ワームホールショートカット・チャンネル検索・重複 URL 検出も搭載。
+// @description:ko    메시지별 툴바로 텍스트 복사, SNS 링크 임베드 변환(Twitter, Instagram, Pixiv 등)을 즉시 실행합니다. 자신의 메시지를 검색·일괄 삭제(일일 할당량 지원)할 수 있습니다. 차단 없이 특정 사용자의 메시지를 시각적으로 약화시키고, 이모지·스티커·GIF를 컬렉션에 저장해 재사용할 수 있습니다. 전달 패널, 웜홀 단축키, 채널 검색, 중복 URL 감지도 포함됩니다.
+// @description:es    Barra de herramientas por mensaje: copia texto y convierte enlaces de redes sociales a formatos embebibles (Twitter, Instagram, Pixiv y más). Navega, busca y elimina en lote tus propios mensajes con límite diario. Silencia visualmente mensajes de usuarios sin bloquearlos; guarda emojis, stickers y GIFs en colecciones. También incluye panel de reenvío, atajos Wormhole, búsqueda de canal y detección de URL duplicadas.
+// @description:pt-BR Barra de ferramentas por mensagem: copie texto e converta links de redes sociais para formatos de incorporação (Twitter, Instagram, Pixiv e mais). Navegue, pesquise e exclua em lote suas próprias mensagens com limite diário. Silencie visualmente mensagens de usuários sem bloqueá-los; salve emojis, figurinhas e GIFs em coleções. Inclui também painel de encaminhamento, atalhos Wormhole, busca de canal e detecção de URLs duplicadas.
+// @description:fr    Barre d'outils par message : copiez du texte et convertissez des liens de réseaux sociaux en formats intégrables (Twitter, Instagram, Pixiv…). Parcourez, recherchez et supprimez en masse vos propres messages avec un quota journalier. Masquez visuellement les messages d'utilisateurs sans les bloquer ; enregistrez emojis, stickers et GIFs dans des collections. Inclut aussi un panneau de transfert, des raccourcis Wormhole, une recherche de salon et une détection d'URL en double.
+// @description:de    Symbolleiste pro Nachricht: Text kopieren und Social-Media-Links in einbettungsfreundliche Formate konvertieren (Twitter, Instagram, Pixiv u. a.). Eigene Nachrichten durchsuchen und stapelweise löschen (mit Tageslimit). Nachrichten bestimmter Nutzer visuell ausblenden ohne Blockierung; Emojis, Sticker und GIFs in Sammlungen speichern. Außerdem: Weiterleitungspanel, Wurmloch-Shortcuts, Kanalsuche und Duplikat-URL-Erkennung.
+// @description:ru    Панель инструментов для каждого сообщения: копирование текста и конвертация ссылок соцсетей в форматы с превью (Twitter, Instagram, Pixiv и др.). Просматривайте, ищите и массово удаляйте собственные сообщения с дневным лимитом. Визуально приглушайте сообщения конкретных пользователей без блокировки; сохраняйте эмодзи, стикеры и GIF в именованные коллекции. Также: панель переадресации, ярлыки Червоточины, поиск по каналу и проверка дублирующихся ссылок.
 // @match       https://discord.com/*
 // @match       https://ptb.discord.com/*
 // @match       https://canary.discord.com/*
@@ -54,7 +54,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "2.6.2.3";
+  const SCRIPT_VERSION = "2.6.3.0";
 
   const GMStore = {
     
@@ -20441,6 +20441,329 @@ unsafeWindow.fetch = function(...args) {
     const SK_LAST_TAB    = "mp_last_tab";
     const SK_PREFETCH_LIMIT = "mp_prefetch_limit";
     const SK_TIME_FORMAT = "mp_time_fmt";
+
+    const IDB_NAME = "dmt_cache";
+    const IDB_VER  = 1;
+    let _idbInstance      = null;
+    let _idbReadyPromise  = null;
+
+    function _idbOpen() {
+      if (_idbReadyPromise) return _idbReadyPromise;
+      _idbReadyPromise = new Promise((resolve, reject) => {
+        const req = indexedDB.open(IDB_NAME, IDB_VER);
+        req.onupgradeneeded = e => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains("messages")) {
+            const store = db.createObjectStore("messages", { keyPath: "id" });
+            store.createIndex("scope",    "scope",              { unique: false });
+            store.createIndex("ts",       "timestamp",          { unique: false });
+            store.createIndex("scope_ts", ["scope","timestamp"],{ unique: false });
+          }
+          if (!db.objectStoreNames.contains("sync_meta")) {
+            db.createObjectStore("sync_meta", { keyPath: "scope_key" });
+          }
+        };
+        req.onsuccess = e => { _idbInstance = e.target.result; resolve(_idbInstance); };
+        req.onerror   = e => {
+          DEBUG && console.warn("[IDB] open failed:", e.target.error);
+          reject(e.target.error);
+        };
+      });
+      return _idbReadyPromise;
+    }
+
+    function _slimMsg(raw) {
+      const scopeKey = raw.guild_id ? ("g:" + raw.guild_id) : ("c:" + raw.channel_id + "@me");
+      return {
+        id:          raw.id,
+        content:     raw.content || "",
+        timestamp:   raw.timestamp,
+        channel_id:  raw.channel_id,
+        guild_id:    raw.guild_id || null,
+        scope:       scopeKey,
+        type:        raw.type,
+        author: raw.author ? {
+          id:          raw.author.id,
+          username:    raw.author.username,
+          global_name: raw.author.global_name || null,
+        } : null,
+        attachments: (raw.attachments || []).map(a => ({
+          url: a.url, proxy_url: a.proxy_url,
+          content_type: a.content_type, filename: a.filename,
+          width: a.width, height: a.height,
+        })),
+        embeds: (raw.embeds || []).map(e => ({
+          type: e.type,
+          thumbnail: e.thumbnail ? { url: e.thumbnail.url, proxy_url: e.thumbnail.proxy_url } : null,
+          image:     e.image     ? { url: e.image.url,     proxy_url: e.image.proxy_url     } : null,
+        })),
+      };
+    }
+
+    async function _idbPut(msgs) {
+      if (!msgs || msgs.length === 0) return;
+      try {
+        const db = await _idbOpen();
+        await new Promise((resolve, reject) => {
+          const tx    = db.transaction("messages", "readwrite");
+          const store = tx.objectStore("messages");
+          for (const m of msgs) store.put(_slimMsg(m));
+          tx.oncomplete = resolve;
+          tx.onerror    = e => reject(e.target.error);
+        });
+      } catch (err) {
+        DEBUG && console.warn("[IDB] put failed:", err);
+      }
+    }
+
+    async function _idbGetByScope(scope) {
+      try {
+        const db = await _idbOpen();
+        return await new Promise((resolve, reject) => {
+          const tx  = db.transaction("messages", "readonly");
+          const idx = tx.objectStore("messages").index("scope");
+          const req = idx.getAll(IDBKeyRange.only(scope));
+          req.onsuccess = () => {
+            const sorted = req.result.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+            resolve(sorted);
+          };
+          req.onerror = e => reject(e.target.error);
+        });
+      } catch (err) {
+        DEBUG && console.warn("[IDB] getByScope failed:", err);
+        return [];
+      }
+    }
+
+    async function _idbSearch(scope, keyword) {
+      try {
+        const db  = await _idbOpen();
+        const kw  = keyword.toLowerCase();
+        return await new Promise((resolve, reject) => {
+          const results = [];
+          const tx  = db.transaction("messages", "readonly");
+          const idx = tx.objectStore("messages").index("scope");
+          const req = idx.openCursor(IDBKeyRange.only(scope));
+          req.onsuccess = e => {
+            const cursor = e.target.result;
+            if (cursor) {
+              if ((cursor.value.content || "").toLowerCase().includes(kw)) results.push(cursor.value);
+              cursor.continue();
+            } else {
+              results.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+              resolve(results);
+            }
+          };
+          req.onerror = e => reject(e.target.error);
+        });
+      } catch (err) {
+        DEBUG && console.warn("[IDB] search failed:", err);
+        return [];
+      }
+    }
+
+    async function _idbGetStats() {
+      try {
+        const db = await _idbOpen();
+        const msgStats = await new Promise((resolve, reject) => {
+          const byScope = new Map();
+          const tx  = db.transaction("messages", "readonly");
+          const req = tx.objectStore("messages").openCursor();
+          req.onsuccess = e => {
+            const cursor = e.target.result;
+            if (cursor) {
+              const { scope, timestamp } = cursor.value;
+              const ym = (timestamp || "").slice(0, 7);
+              if (!byScope.has(scope)) byScope.set(scope, new Map());
+              const months = byScope.get(scope);
+              months.set(ym, (months.get(ym) || 0) + 1);
+              cursor.continue();
+            } else {
+              resolve(byScope);
+            }
+          };
+          req.onerror = e => reject(e.target.error);
+        });
+        const metas = await new Promise((resolve, reject) => {
+          const tx  = db.transaction("sync_meta", "readonly");
+          const req = tx.objectStore("sync_meta").getAll();
+          req.onsuccess = () => resolve(req.result);
+          req.onerror   = e => reject(e.target.error);
+        });
+        let totalCount = 0;
+        const scopes = [];
+        for (const [scope, months] of msgStats) {
+          const scopeCount = [...months.values()].reduce((a, b) => a + b, 0);
+          totalCount += scopeCount;
+          const meta = metas.find(m => m.scope_key === scope) || {};
+          scopes.push({
+            scope_key:     scope,
+            count:         scopeCount,
+            fetchedAt:     meta.fetchedAt     || null,
+            isFullySynced: meta.isFullySynced || false,
+            months: [...months.entries()]
+              .sort((a, b) => b[0].localeCompare(a[0]))
+              .map(([ym, count]) => ({ ym, count })),
+          });
+        }
+        scopes.sort((a, b) => b.count - a.count);
+        return { scopes, totalCount, sizeEstimateKB: Math.round(totalCount * 400 / 1024) };
+      } catch (err) {
+        DEBUG && console.warn("[IDB] getStats failed:", err);
+        return { scopes: [], totalCount: 0, sizeEstimateKB: 0 };
+      }
+    }
+
+    async function _idbDeleteByYM(scope, ym) {
+      try {
+        const db   = await _idbOpen();
+        const from = ym + "-01T00:00:00.000Z";
+        const to   = ym + "-31T23:59:59.999Z";
+        return await new Promise((resolve, reject) => {
+          let count = 0;
+          const tx  = db.transaction("messages", "readwrite");
+          const idx = tx.objectStore("messages").index("scope_ts");
+          const req = idx.openCursor(IDBKeyRange.bound([scope, from], [scope, to]));
+          req.onsuccess = e => {
+            const cursor = e.target.result;
+            if (cursor) { cursor.delete(); count++; cursor.continue(); }
+            else resolve(count);
+          };
+          req.onerror = e => reject(e.target.error);
+        });
+      } catch (err) {
+        DEBUG && console.warn("[IDB] deleteByYM failed:", err);
+        return 0;
+      }
+    }
+
+    async function _idbClearScope(scope) {
+      try {
+        const db = await _idbOpen();
+        await new Promise((resolve, reject) => {
+          let count = 0;
+          const tx  = db.transaction("messages", "readwrite");
+          const idx = tx.objectStore("messages").index("scope");
+          const req = idx.openCursor(IDBKeyRange.only(scope));
+          req.onsuccess = e => {
+            const cursor = e.target.result;
+            if (cursor) { cursor.delete(); count++; cursor.continue(); }
+            else resolve(count);
+          };
+          req.onerror = e => reject(e.target.error);
+        });
+        await new Promise((resolve, reject) => {
+          const tx  = db.transaction("sync_meta", "readwrite");
+          const req = tx.objectStore("sync_meta").delete(scope);
+          req.onsuccess = resolve; req.onerror = e => reject(e.target.error);
+        });
+      } catch (err) {
+        DEBUG && console.warn("[IDB] clearScope failed:", err);
+      }
+    }
+
+    async function _idbClearAll() {
+      try {
+        const db = await _idbOpen();
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction(["messages","sync_meta"], "readwrite");
+          tx.objectStore("messages").clear();
+          tx.objectStore("sync_meta").clear();
+          tx.oncomplete = resolve;
+          tx.onerror    = e => reject(e.target.error);
+        });
+        _idbReadyPromise = null; _idbInstance = null;
+      } catch (err) {
+        DEBUG && console.warn("[IDB] clearAll failed:", err);
+      }
+    }
+    function _scopeKey() {
+      const ctx = _getCtx();
+      if (!ctx) return null;
+      return ctx.guildId ? ("g:" + ctx.guildId) : ("c:" + ctx.channelId + "@me");
+    }
+
+    async function _readSyncMeta(scope) {
+      try {
+        const db = await _idbOpen();
+        return await new Promise((resolve, reject) => {
+          const tx  = db.transaction("sync_meta", "readonly");
+          const req = tx.objectStore("sync_meta").get(scope);
+          req.onsuccess = () => resolve(req.result || null);
+          req.onerror   = e => reject(e.target.error);
+        });
+      } catch { return null; }
+    }
+
+    async function _writeSyncMeta(scope, patch) {
+      try {
+        const db   = await _idbOpen();
+        const prev = await _readSyncMeta(scope) || { scope_key: scope };
+        const next = Object.assign({}, prev, patch, { scope_key: scope });
+        await new Promise((resolve, reject) => {
+          const tx  = db.transaction("sync_meta", "readwrite");
+          const req = tx.objectStore("sync_meta").put(next);
+          req.onsuccess = resolve; req.onerror = e => reject(e.target.error);
+        });
+      } catch (err) {
+        DEBUG && console.warn("[SYNC] writeSyncMeta failed:", err);
+      }
+    }
+
+    async function _deltaSync(scope) {
+      if (!_token || !_userId) return;
+      const meta = await _readSyncMeta(scope);
+      if (!meta?.newestId) return;
+
+      const ctx = _getCtx();
+      if (!ctx) return;
+      const DELTA_PAGE = 25;
+      const params = {
+        author_id: _userId, sort_by: "timestamp",
+        sort_order: "desc", offset: 0, include_nsfw: "true",
+        limit: DELTA_PAGE,
+      };
+      if (ctx.guildId) {
+        params.guild_id = ctx.guildId;
+        if (scope.startsWith("c:")) { params.channel_id = ctx.channelId; }
+      } else {
+        params.channel_id_scope = ctx.channelId;
+      }
+
+      let newMsgs = [];
+      let offset  = 0;
+      let found   = false;
+      while (!found) {
+        params.offset = offset;
+        let data;
+        try { data = await _apiSearch(params, 2, true); } catch { break; }
+        if (!data?.messages?.length) break;
+
+        const batch = data.messages.flat().filter(m =>
+          m.author?.id === _userId && DELETABLE_TYPES.has(m.type)
+        );
+        for (const m of batch) {
+          if (m.id === meta.newestId) { found = true; break; }
+          newMsgs.push(m);
+        }
+        if (batch.length < DELTA_PAGE) break;
+        offset += data.messages.length;
+        if (offset > 200) break;
+      }
+
+      if (newMsgs.length > 0) {
+        await _idbPut(newMsgs);
+        const latestMsg = newMsgs[0];
+        await _writeSyncMeta(scope, {
+          newestId: latestMsg.id,
+          newestTs: latestMsg.timestamp,
+          fetchedAt: new Date().toISOString(),
+        });
+        DEBUG && console.log("[SYNC] delta:", newMsgs.length, "new msgs written to IDB");
+      }
+      return newMsgs.length;
+    }
+
     const API_BASE       = "https://discord.com/api/v9";
     const SEARCH_PAGE_OPTIONS = [25, 50, 100];
     function _fmtTs(date, includeDate = true, dateOnly = false) {
@@ -21207,6 +21530,159 @@ unsafeWindow.fetch = function(...args) {
       el.style.display = "";
     }
 
+    async function _buildCacheModal() {
+      document.getElementById("dmt-cache-modal")?.remove();
+
+      const overlay = document.createElement("div");
+      overlay.id = "dmt-cache-modal";
+      overlay.style.cssText = [
+        "position:fixed;inset:0;z-index:99999;",
+        "background:rgba(0,0,0,.55);backdrop-filter:blur(2px);",
+        "display:flex;align-items:center;justify-content:center;",
+      ].join("");
+      overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
+
+      const panel = document.createElement("div");
+      panel.style.cssText = [
+        "background:var(--dmt-panel-bg,#313338);border-radius:12px;",
+        "width:min(480px,92vw);max-height:80vh;display:flex;flex-direction:column;",
+        "overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.5);",
+        "font-family:var(--dmt-font,'gg sans','Noto Sans',sans-serif);",
+      ].join("");
+
+      const hdr = document.createElement("div");
+      hdr.style.cssText = "display:flex;align-items:center;padding:14px 16px 10px;border-bottom:1px solid var(--dmt-divider,#1e1f22);";
+      const hdrTitle = document.createElement("span");
+      hdrTitle.textContent = "📦 Cache Management";
+      hdrTitle.style.cssText = "font-size:15px;font-weight:600;color:var(--dmt-text,#dbdee1);flex:1;";
+      const closeBtn = document.createElement("button");
+      closeBtn.textContent = "✕";
+      closeBtn.style.cssText = "background:none;border:none;color:var(--dmt-text-muted,#949ba4);font-size:16px;cursor:pointer;padding:0 4px;line-height:1;";
+      closeBtn.onclick = () => overlay.remove();
+      hdr.append(hdrTitle, closeBtn);
+
+      const body = document.createElement("div");
+      body.style.cssText = "flex:1;overflow-y:auto;padding:12px 16px;";
+
+      body.textContent = "Loading…";
+      panel.append(hdr, body);
+      overlay.appendChild(panel);
+      document.body.appendChild(overlay);
+
+      const stats = await _idbGetStats();
+
+      body.innerHTML = "";
+
+      if (stats.totalCount === 0) {
+        const empty = document.createElement("p");
+        empty.textContent = "No cached messages yet. Browse your posts to build the cache.";
+        empty.style.cssText = "color:var(--dmt-text-muted,#949ba4);font-size:13px;text-align:center;margin:24px 0;";
+        body.appendChild(empty);
+      } else {
+        const summaryRow = document.createElement("div");
+        summaryRow.style.cssText = "display:flex;gap:16px;margin-bottom:12px;padding:10px 12px;background:var(--dmt-row-hover,rgba(255,255,255,.04));border-radius:8px;";
+        const mkStat = (label, val) => {
+          const wrap = document.createElement("div");
+          wrap.style.cssText = "display:flex;flex-direction:column;gap:2px;";
+          wrap.innerHTML = `<span style="font-size:18px;font-weight:700;color:var(--dmt-text,#dbdee1);">${val}</span><span style="font-size:11px;color:var(--dmt-text-muted,#949ba4);">${label}</span>`;
+          return wrap;
+        };
+        summaryRow.append(
+          mkStat("Total cached",   stats.totalCount.toLocaleString()),
+          mkStat("Est. size",      stats.sizeEstimateKB >= 1024
+            ? (stats.sizeEstimateKB / 1024).toFixed(1) + " MB"
+            : stats.sizeEstimateKB + " KB"),
+          mkStat("Scopes", stats.scopes.length.toString()),
+        );
+        body.appendChild(summaryRow);
+
+        for (const sc of stats.scopes) {
+          const scopeLabel = sc.scope_key.startsWith("g:") ? "Server " + sc.scope_key.slice(2) : "DM/Channel";
+          const syncStatus = sc.isFullySynced
+            ? `<span style="color:#3ba55c;">✅ Fully synced</span>`
+            : `<span style="color:#faa81a;">⚠ Partial</span>`;
+          const lastSync = sc.fetchedAt
+            ? new Date(sc.fetchedAt).toLocaleString()
+            : "Never";
+
+          const scopeBlock = document.createElement("div");
+          scopeBlock.style.cssText = "margin-bottom:16px;";
+
+          const scopeHdr = document.createElement("div");
+          scopeHdr.style.cssText = "display:flex;align-items:center;gap:8px;margin-bottom:6px;";
+          scopeHdr.innerHTML = `
+            <span style="font-size:12px;font-weight:600;color:var(--dmt-text,#dbdee1);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${sc.scope_key}">${scopeLabel}</span>
+            <span style="font-size:11px;">${syncStatus}</span>
+            <span style="font-size:11px;color:var(--dmt-text-muted,#949ba4);">${sc.count.toLocaleString()} msgs</span>
+          `;
+
+          const metaLine = document.createElement("div");
+          metaLine.style.cssText = "font-size:11px;color:var(--dmt-text-muted,#949ba4);margin-bottom:8px;";
+          metaLine.textContent = "Last sync: " + lastSync;
+
+          const monthTable = document.createElement("div");
+          monthTable.style.cssText = "display:flex;flex-direction:column;gap:3px;margin-bottom:8px;";
+
+          for (const { ym, count } of sc.months) {
+            const row = document.createElement("div");
+            row.style.cssText = "display:flex;align-items:center;gap:8px;padding:4px 8px;border-radius:6px;background:var(--dmt-row-hover,rgba(255,255,255,.04));";
+            const ymLabel = document.createElement("span");
+            ymLabel.textContent = ym;
+            ymLabel.style.cssText = "font-size:12px;color:var(--dmt-text,#dbdee1);flex:1;font-variant-numeric:tabular-nums;";
+            const countLabel = document.createElement("span");
+            countLabel.textContent = count.toLocaleString() + " msgs";
+            countLabel.style.cssText = "font-size:11px;color:var(--dmt-text-muted,#949ba4);";
+            const delBtn = document.createElement("button");
+            delBtn.textContent = "Delete";
+            delBtn.style.cssText = "font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid var(--dmt-danger,#ed4245);background:none;color:var(--dmt-danger,#ed4245);cursor:pointer;";
+            delBtn.onclick = async () => {
+              delBtn.disabled = true; delBtn.textContent = "…";
+              const n = await _idbDeleteByYM(sc.scope_key, ym);
+              row.style.opacity = "0.35";
+              countLabel.textContent = "Deleted " + n;
+              delBtn.textContent = "✓";
+            };
+            row.append(ymLabel, countLabel, delBtn);
+            monthTable.appendChild(row);
+          }
+
+          const clearScopeBtn = document.createElement("button");
+          clearScopeBtn.textContent = "Clear this scope";
+          clearScopeBtn.style.cssText = "font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--dmt-danger,#ed4245);background:none;color:var(--dmt-danger,#ed4245);cursor:pointer;";
+          clearScopeBtn.onclick = async () => {
+            if (!await dmtConfirm("Clear all cached messages for this scope?")) return;
+            clearScopeBtn.disabled = true; clearScopeBtn.textContent = "Clearing…";
+            await _idbClearScope(sc.scope_key);
+            scopeBlock.style.opacity = "0.4";
+            clearScopeBtn.textContent = "Cleared ✓";
+          };
+
+          scopeBlock.append(scopeHdr, metaLine, monthTable, clearScopeBtn);
+          body.appendChild(scopeBlock);
+
+          if (sc !== stats.scopes[stats.scopes.length - 1]) {
+            const hr = document.createElement("hr");
+            hr.style.cssText = "border:none;border-top:1px solid var(--dmt-divider,#1e1f22);margin:8px 0 16px;";
+            body.appendChild(hr);
+          }
+        }
+      }
+
+      const footer = document.createElement("div");
+      footer.style.cssText = "padding:10px 16px;border-top:1px solid var(--dmt-divider,#1e1f22);display:flex;justify-content:flex-end;";
+      const clearAllBtn = document.createElement("button");
+      clearAllBtn.textContent = "🗑 Clear all cache";
+      clearAllBtn.style.cssText = "font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--dmt-danger,#ed4245);background:none;color:var(--dmt-danger,#ed4245);cursor:pointer;";
+      clearAllBtn.onclick = async () => {
+        if (!await dmtConfirm("Clear ALL cached messages? This cannot be undone.")) return;
+        clearAllBtn.disabled = true; clearAllBtn.textContent = "Clearing…";
+        await _idbClearAll();
+        overlay.remove();
+      };
+      footer.appendChild(clearAllBtn);
+      panel.appendChild(footer);
+    }
+
     function _buildPanel() {
       if (_panelEl) { if (typeof _panelEl._mpCleanup === "function") _panelEl._mpCleanup(); _panelEl.remove(); _panelEl = null; }
       _injectCSS();
@@ -21351,6 +21827,15 @@ unsafeWindow.fetch = function(...args) {
         _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
       };
       scopeRow.appendChild(timeFmtBtn);
+
+      const cacheBtn = document.createElement("button");
+      cacheBtn.className = "mp-refresh-btn";
+      cacheBtn.title     = "Cache Management";
+      cacheBtn.style.cssText = "font-size:14px;padding:0 5px;min-width:0;";
+      cacheBtn.textContent   = "📦";
+      cacheBtn.onclick = () => _buildCacheModal();
+      scopeRow.appendChild(cacheBtn);
+
       const searchRow = document.createElement("div");
       searchRow.className = "mp-search-row";
       const searchInput = document.createElement("input");
@@ -21522,6 +22007,36 @@ unsafeWindow.fetch = function(...args) {
     async function _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput) {
       const capturedGen = _browseGen;
       msgList.innerHTML = "";
+
+      const scope = _scopeKey();
+      if (scope) {
+        try {
+          const cached = await _idbGetByScope(scope);
+          if (cached.length > 0 && capturedGen === _browseGen) {
+            _browseData   = cached;
+            _browseOffset = cached.length;
+            _browseTotal  = cached.length;
+            _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
+            const meta = await _readSyncMeta(scope);
+            if (_token) {
+              _deltaSync(scope).then(newCount => {
+                if (newCount > 0 && capturedGen === _browseGen) {
+                  _idbGetByScope(scope).then(refreshed => {
+                    if (capturedGen !== _browseGen) return;
+                    _browseData   = refreshed;
+                    _browseOffset = refreshed.length;
+                    _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
+                  });
+                }
+              }).catch(() => {});
+            }
+            return;
+          }
+        } catch (err) {
+          DEBUG && console.warn("[IDB] cache load failed, fallback to API:", err);
+        }
+      }
+
       const skelFrag = document.createDocumentFragment();
       for (let i = 0; i < 5; i++) skelFrag.appendChild(_makeSkeletonRow());
       msgList.appendChild(skelFrag);
@@ -21664,10 +22179,71 @@ unsafeWindow.fetch = function(...args) {
       const msgs = raw.flat().filter(m => m.author?.id === _userId && DELETABLE_TYPES.has(m.type));
       _browseData = _browseData.concat(msgs);
       _browseOffset += raw.length || _getPageSize();
+
+      if (msgs.length > 0) {
+        const scope = _scopeKey();
+        if (scope) {
+          _idbPut(msgs);
+          const meta     = await _readSyncMeta(scope) || {};
+          const isFullySynced = (_browseOffset >= _browseTotal);
+          await _writeSyncMeta(scope, {
+            newestId:      meta.newestId || msgs[0].id,
+            newestTs:      meta.newestTs || msgs[0].timestamp,
+            oldestId:      msgs[msgs.length - 1].id,
+            isFullySynced,
+            fetchedAt:     new Date().toISOString(),
+          });
+        }
+      }
     }
 
     function _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput) {
       const q = (searchInput?.value || "").toLowerCase();
+
+      if (q) {
+        const scope = _scopeKey();
+        if (scope) {
+          _readSyncMeta(scope).then(meta => {
+            if (meta?.isFullySynced) {
+              _idbSearch(scope, q).then(results => {
+                const filtered = results.filter(m => _passesTypeFilter(m) && _passesFavFilter(m));
+                msgList.innerHTML = "";
+                if (filtered.length === 0) {
+                  msgList.appendChild(Object.assign(document.createElement("div"), {
+                    className: "mp-empty", textContent: mp("no_results"),
+                  }));
+                  return;
+                }
+                const outerFrag = document.createDocumentFragment();
+                let rowIdx = 0;
+                _groupByDate(filtered).forEach((msgs, dateKey) => {
+                  const gh = document.createElement("div");
+                  gh.className = "mp-group-header";
+                  gh.append(Object.assign(document.createElement("span"), { className: "mp-chevron", textContent: "▼" }));
+                  gh.append(Object.assign(document.createElement("span"), { textContent: _fmtDateKey(dateKey) }));
+                  const rowsWrap = document.createElement("div");
+                  rowsWrap.className = "mp-rows-wrap"; rowsWrap.dataset.dateKey = dateKey;
+                  const rowFrag = document.createDocumentFragment();
+                  msgs.forEach(msg => rowFrag.appendChild(
+                    _buildMsgRow(msg, rowIdx++, filtered, selCount, createBtn, cancelBtn, () => {})
+                  ));
+                  rowsWrap.appendChild(rowFrag);
+                  outerFrag.append(gh, rowsWrap);
+                });
+                msgList.appendChild(outerFrag);
+              }).catch(() => _renderMessagesFallback(msgList, selCount, createBtn, cancelBtn, q));
+            } else {
+              _renderMessagesFallback(msgList, selCount, createBtn, cancelBtn, q);
+            }
+          }).catch(() => _renderMessagesFallback(msgList, selCount, createBtn, cancelBtn, q));
+          return;
+        }
+      }
+
+      _renderMessagesFallback(msgList, selCount, createBtn, cancelBtn, q);
+    }
+
+    function _renderMessagesFallback(msgList, selCount, createBtn, cancelBtn, q) {
       const filtered = _browseData.filter(m =>
         _passesTypeFilter(m) && _passesFavFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
       );
