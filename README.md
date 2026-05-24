@@ -1,7 +1,6 @@
 # 📮 Message Toolkit for Discord Web Client
 
-
-**A userscript that adds a message utility toolbar, an enhanced forwarding panel, cross-channel shortcuts, an expression collection manager, and header utility controls to the Discord web client.**
+**A userscript that adds a message utility toolbar, an enhanced forwarding panel, cross-channel shortcuts, an expression collection manager, header utility controls, a personal message manager, and more to the Discord web client.**
 
 ---
 
@@ -31,8 +30,9 @@
 | 📄 | Conceal Name Toggle | Injected into the Discord top bar next to the Inbox icon |
 | 🔗 | Webhook Manager | Accessible from the message toolbar menu — send content to Discord webhooks |
 | 🔍 | Duplicate URL Checker | A banner above the chat input — appears automatically when a pasted URL was already shared in the current channel |
-| 🔎 | Channel Scout | Click the floating **🔍** button near the chat input, or use the button anywhere it appears on the page |
+| 🔎 | Channel Scout | Click the floating **🔍** button near the chat input, or press **F2** anywhere outside the input |
 | 🌫️ | Mute User Messages | Right-click any message to mute/unmute a user; press **Alt+B** to open the management panel |
+| 📝 | My Posts Manager | Injected into the Discord top bar; press **Alt+P** to open the panel |
 
 ---
 
@@ -154,7 +154,7 @@ Automatically checks whether a URL you paste into the chat input has already bee
 
 A full-text search panel for the current channel, opened via the **🔍** button.
 
-- **Open the panel**: Click the floating **🔍** button near the chat input when the text box is focused, or click it anywhere else it appears on the page. Click it again, press Esc, or click outside to close.
+- **Open the panel**: Click the floating **🔍** button near the chat input when the text box is focused, or press **F2** anywhere outside the input. Click it again, press Esc, or click outside to close.
 - **Real-time search**: Results update within 150 ms as you type, with the matched keyword highlighted in gold
 - **Quick navigation**: Click any result to scroll directly to that message and briefly highlight it with a colored border
 - **Saved search tags**: Save up to 5 frequently used search terms as quick-launch tabs — left-click to run, right-click to delete
@@ -172,16 +172,35 @@ Visually suppress messages from specific users without blocking them — useful 
   <img src="https://greasyfork.s3.us-east-2.amazonaws.com/5bpzh6k3k806tz7csllpoja2jtj4" alt="Image">
 </details>
 
-- **Mute**: Right-click any message → **🌫️ Mute: {username}**. A style picker appears with three visual options.
+- **Mute**: Right-click any message → **🌫️ Mute: {username}**. A style picker appears with six visual options.
 - **Unmute**: Right-click a muted user's message → **Unmute: {username}**, or open the management panel with **Alt+B** and click the unmute button next to their name. Changes take effect immediately on screen.
+- **Temporary mute**: In the style picker, enable the timer option to automatically unmute after a set duration.
 
 **Visual styles:**
 
 | Badge | Style | What it looks like |
 | --- | --- | --- |
+| 🌫 | Dim | The message fades to very low opacity with reduced saturation. Hovering over the avatar and name for about 1.3 seconds temporarily reveals the message. |
+| 👻 | Ghost | Message body and attachments are hidden; only a small avatar remains. |
 | ━ | Collapse | The entire row is compressed to a thin separator line labeled "muted · click to expand". Click to expand. |
-| 👻 | Ghost | Message body and attachments are hidden; only a small avatar remains. Currently, once fully activated, it becomes completely non-interactive. |
-| 🌫 | Dim | The message fades to very low opacity with reduced saturation. Hovering over the user's avatar and name for about 1.3 seconds will temporarily reveal the message. |
+| 〰 | Fog Strip | A soft horizontal band replaces the message row. |
+| ▬ | Redacted | The message content is replaced by a shimmering redacted bar. |
+| ▎ | Sidebar | Only a thin colored accent bar remains; the message content is hidden. |
+
+### 📝 My Posts Manager
+
+Browse, search, and batch-delete your own messages across Discord — with daily rate-limit controls to protect your account.
+
+> ⚠️ **This module is off by default.** Enable it via the **⚙️ Module Settings** panel. A security notice about credential access will appear when you enable it for the first time.
+
+- **Open the panel**: Click the 📝 icon injected into the Discord top bar, or press **Alt+P**
+- **Browse tab**: View your own messages in the current channel, thread, or server scope. Switch between list view and grid view (media-focused). Filter by message type — text, replies, slash commands, and others
+- **Search**: Filter displayed messages by keyword directly in the panel
+- **Favorites**: Mark messages as favorites to protect them from batch deletion. Favorited messages are skipped when a delete task runs
+- **Single delete with Undo**: Delete a message directly from the panel; a 5-second undo window appears before the deletion is permanent
+- **Batch delete tasks**: Select multiple messages in the Browse tab, then create a delete task. Tasks run in the background with built-in delays to stay within Discord's rate limits
+- **Daily quota control**: Set a daily deletion limit — Conservative (20/day), Balanced (50/day, default), Aggressive (100/day), or a custom value. The quota resets each day and pauses tasks automatically when the limit is reached
+- **Task management**: View active and completed tasks in the Tasks tab. Pause, resume, or cancel any task at any time
 
 ---
 
@@ -190,6 +209,7 @@ Visually suppress messages from specific users without blocking them — useful 
 - **Wormhole Mode A**: Sending via Mode A causes a brief visible page transition to the target channel before returning
 - **Channel Scout**: Only searches messages currently loaded in Discord's DOM — messages that haven't been rendered yet are not reachable
 - **Mute User Messages**: Author identification depends on Discord's current DOM structure. Discord UI updates may temporarily break detection until the script is patched.
+- **My Posts Manager**: Search results depend on Discord's own Search API and are subject to its availability and rate limits. The module reads your session token from browser storage — only enable this on devices you trust.
 - **Third-Party URL Proxies**: URL conversion features depend on external open-source services (vxtwitter, kkinstagram, fxtwitter, phixiv, etc.). These services are independent from this script and not endorsed by its author. Availability depends on the uptime of those domains. Converted links direct users to third-party proxy services, which may inspect or log traffic. Do not use these conversions if you do not trust the respective proxy services. If a proxy service goes offline, previously converted links will break.
 - **Discord UI Compatibility**: This script injects UI elements into Discord's web client. Discord updates may temporarily break injected features until the script is updated
 
@@ -199,7 +219,7 @@ Visually suppress messages from specific users without blocking them — useful 
 
 ### ⚙️ Module Toggle Panel
 
-The script's nine modules can be enabled or disabled individually without reinstalling. Access the panel by opening the **⠿ Message Utility Toolbar** on any message and clicking the **⚙️** icon. If the toolbar itself fails to load, a small **⚙️ rescue button** appears in the bottom-right corner of Discord as a fallback.
+The script's ten modules can be enabled or disabled individually without reinstalling. Access the panel by opening the **⠿ Message Utility Toolbar** on any message and clicking the **⚙️** icon. If the toolbar itself fails to load, a small **⚙️ rescue button** appears in the bottom-right corner of Discord as a fallback.
 
 | Module | Default State |
 |---|---|
@@ -212,6 +232,7 @@ The script's nine modules can be enabled or disabled individually without reinst
 | 🔍 Duplicate URL Checker | On |
 | 🔎 Channel Scout | On |
 | 🌫️ Mute User Messages | On |
+| 📝 My Posts Manager | Off |
 
 The **Message Utility Toolbar** is the primary feature. The remaining modules are bonus additions that may not work reliably in all environments and depend on Discord's internal UI structure. Any problematic module can be disabled here without affecting the others.
 
@@ -227,20 +248,25 @@ The **Message Utility Toolbar** is the primary feature. The remaining modules ar
 
 ## 🔐 Security & Privacy Notice
 
-> ⚠️ **This script includes an opt-in feature that accesses your Discord Authorization Token.**
+> ⚠️ **This script includes opt-in features that access your Discord session credentials.**
 
 | Data Type | Purpose | Storage | Transmitted To |
 |---|---|---|---|
-| Discord Auth Token | Authenticate direct API requests for Wormhole Mode B | Volatile memory (RAM) only — cleared on page close or refresh | `discord.com` official API endpoints only |
+| Discord Auth Token (Wormhole Mode B) | Authenticate direct API requests for sending messages without page navigation | Volatile memory (RAM) only — cleared on page close or refresh | `discord.com` official API endpoints only |
+| Discord Auth Token + User ID (My Posts Manager) | Query and delete your own messages via Discord's Search and Delete APIs | Volatile memory (RAM) only — cleared on page close or refresh | `discord.com` official API endpoints only |
 
 **This script does not collect, share, or transmit your credentials to any external server.**
 
-> 💡 **This feature is opt-in only — no action means no risk.**
-> Token access is triggered exclusively when you manually enable **Wormhole Mode B (Direct API)** by long-pressing the ＋ button for 1 second and confirming the consent prompt.
-> All other features — including Mode A sending, message copying, URL conversion, media downloading, forwarding, expression management, Anti-Hijack, Conceal Name, Channel Scout, Duplicate URL Checker, and Mute User Messages — operate entirely without any credential access.
-> If you enable Mode B, a consent dialog will appear before anything is intercepted. Reviewing the source code beforehand is recommended.
+> 💡 **Both features are opt-in only — no action means no risk.**
 >
-> ⚠️ **Terms of Service Notice**: Using a personal user token to make automated API requests is classified as "self-botting" under Discord's Terms of Service. This carries risk of account flagging or suspension. Users who enable Mode B do so at their own discretion and accept full responsibility for any consequences.
+> **Wormhole Mode B**: Token access is triggered exclusively when you manually enable Mode B by long-pressing the ＋ button for 1 second and confirming the consent prompt. All other Wormhole features operate without any credential access.
+>
+> **My Posts Manager**: The module reads your session token from browser storage when you open the panel. A security notice appears the first time you enable this module. Only enable it on devices you trust.
+>
+> All other features — including Mode A sending, message copying, URL conversion, media downloading, forwarding, expression management, Anti-Hijack, Conceal Name, Channel Scout, Duplicate URL Checker, and Mute User Messages — operate entirely without any credential access.
+> Reviewing the source code before enabling either feature is recommended.
+>
+> ⚠️ **Terms of Service Notice**: Using a personal user token to make automated API requests is classified as "self-botting" under Discord's Terms of Service. This carries risk of account flagging or suspension. Users who enable Wormhole Mode B or My Posts Manager do so at their own discretion and accept full responsibility for any consequences.
 
 ---
 
