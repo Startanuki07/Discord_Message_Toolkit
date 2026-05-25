@@ -9,7 +9,7 @@
 // @name:fr      Discord Message Toolkit
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
-// @version      2.6.3.0
+// @version      2.6.4.1
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -54,7 +54,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "2.6.3.0";
+  const SCRIPT_VERSION = "2.6.3.3";
 
   const GMStore = {
     
@@ -1629,6 +1629,7 @@
       mp_loading:               "載入中…",
       mp_no_results:            "未找到訊息。",
       search_scope_hint:     "搜尋範圍僅限已載入的 {n} 則訊息。",
+      fav_tab_empty_hint:       "尚未載入任何訊息，請先切換到「瀏覽」頁籤。",
       mp_empty_cta_title:       "尚未載入任何訊息",
       mp_empty_cta_sub:         "點擊上方 ↻ 刷新鍵重新載入",
       mp_media_cta_title:       "尚未載入媒體",
@@ -2158,6 +2159,111 @@
       mu_settings_clear_confirm: "确认移除所有静音对象？",
       mu_settings_ghost_delay: "Ghost 飘走延迟（秒）",
       mu_settings_title:       "设置",
+
+      mp_panel_title:           "我的消息",
+      mp_tab_browse:            "浏览",
+      mp_tab_tasks:             "任务",
+      mp_tab_media:             "媒体",
+      mp_scope_server:          "服务器",
+      mp_scope_channel:         "频道",
+      mp_scope_thread:          "帖子",
+      mp_search_placeholder:    "搜索消息内容…",
+      mp_type_text:             "文字",
+      mp_type_reply:            "回复",
+      mp_type_command:          "斜杠命令",
+      mp_type_thread_start:     "帖子起点",
+      mp_type_other:            "其他",
+      mp_load_more:             "加载更多",
+      mp_loading:               "加载中…",
+      mp_no_results:            "未找到消息。",
+      search_scope_hint:     "搜索仅限当前已加载的 {n} 条消息。",
+      fav_tab_empty_hint:       "尚未加载任何消息，请先切换到「浏览」标签页。",
+      mp_empty_cta_title:       "尚未加载任何消息",
+      mp_empty_cta_sub:         "点击上方 ↻ 刷新按钮重新加载",
+      mp_media_cta_title:       "尚未加载任何媒体",
+      mp_media_cta_sub:         "点击上方 ↻ 刷新按钮重新加载媒体",
+      mp_group_select_all:      "全选",
+      mp_group_deselect_all:    "取消全选",
+      mp_jump_to:               "跳转至消息",
+      mp_delete_single:         "删除此消息",
+      mp_undo:                  "撤销",
+      mp_selected_n:            "已选 {n} 条",
+      mp_create_task:           "创建删除任务",
+      mp_cancel_select:         "取消",
+      mp_token_warn:            "⚠️ 此模块将获取您的 API Token，请仅在可信设备上使用。",
+      mp_token_fail:            "无法获取 API Token，请切换频道后重试。",
+      mp_token_fetching:        "正在获取 Token…",
+      mp_userid_fail:           "无法获取用户 ID。",
+      mp_confirm_delete_single: "确认删除此消息？此操作不可撤销。",
+      mp_confirm_delete_batch:  "删除 {n} 条消息？\n{summary}\n此操作不可撤销。",
+      mp_undo_deleted:          "消息已删除。",
+      mp_err_401:               "Token 无效，请刷新页面。",
+      mp_err_403:               "无法删除此消息（权限不足）。",
+      mp_err_net:               "网络错误，正在重试…",
+      mp_quota_label:           "每日上限：",
+      mp_quota_conservative:    "保守 — 20 条/天",
+      mp_quota_balanced:        "均衡 — 50 条/天（默认）",
+      mp_quota_aggressive:      "激进 — 100 条/天",
+      mp_quota_custom:          "自定义",
+      mp_quota_custom_warn:     "⚠️ 高频删除可能触发异常检测。",
+      mp_quota_today:           "今日：{done} / {limit}",
+      mp_tasks_active:          "进行中",
+      mp_tasks_done:            "已完成",
+      mp_tasks_empty:           "暂无任务。",
+      mp_task_progress:         "已删除：{done} / {total}",
+      mp_task_eta:              "约剩 {days} 天",
+      mp_task_resume:           "继续",
+      mp_task_pause:            "暂停",
+      mp_task_cancel:           "取消任务",
+      mp_task_cancel_confirm:   "取消并删除此任务？",
+      mp_quota_reached:         "已达每日上限（{limit}/{limit}）。\n进度：{done} / {total}\n约还需 {days} 天。",
+      mp_quota_continue:        "继续（风险自负）",
+      mp_quota_tomorrow:        "明天继续",
+      mp_task_done_toast:       "任务完成！已删除 {n} 条消息。",
+      mp_task_created:          "删除任务已创建。",
+      mp_task_running:          "已有任务进行中，请先完成或暂停。",
+      mp_refresh:               "刷新",
+      mp_page_size_label:       "每页消息数：",
+      mp_page_size_n:           "{n} 条",
+      mp_tasks_empty_hint:      "在「浏览」标签页选择消息后，点击「创建删除任务」。",
+      mp_view_list:             "切换为列表视图",
+      mp_view_grid:             "切换为媒体网格",
+      mp_no_media:              "此范围内没有媒体消息。",
+      mp_no_content:            "（无内容）",
+      mp_sys_pin:               "置顶消息",
+      mp_sys_channel_rename:    "频道已重命名",
+      mp_sys_command:           "使用了斜杠命令",
+      mp_sys_thread_created:    "帖子已创建",
+      mp_sys_reminder:          "已设置提醒",
+      mp_sys_action:            "系统消息",
+      mp_poll_unknown:          "投票",
+      mp_media_all:             "全部",
+      mp_media_images:          "图片",
+      mp_media_videos:          "视频",
+      mp_att_video:             "视频",
+      mp_att_videos:            "视频",
+      mp_att_image:             "图片",
+      mp_att_images:            "图片",
+      mp_media_loading_start:   "正在加载媒体…",
+      mp_media_loading_more:    "正在加载 {n} / {total}…",
+      mp_media_loaded_count:    "{n} / {total} 已加载",
+      mp_media_loaded_all:      "全部加载完成（{n}）",
+      mp_create_task_title:     "创建删除任务",
+      mp_create_task_scope:     "范围：{scope}",
+      mp_create_task_filters:   "过滤器：{types}",
+      mp_create_task_count:     "已选：{n}",
+      mp_create_task_quota:     "上限：继承全局设置（{limit} 条/天）",
+      mp_create_task_label:     "任务标签（可选）：",
+      mp_create_task_warn:      "⚠️ 此操作不可撤销，任务将加入队列。",
+      mp_create_task_confirm:   "创建任务",
+      mp_img_expired:           "图片链接可能已过期。",
+      mp_attachments_n:         "{n} 个附件",
+      mp_fav_add:               "收藏（受保护，任务不会删除）",
+      mp_fav_remove:            "取消收藏",
+      mp_fav_all_excluded:      "所选消息均已收藏 — 任务未创建。",
+      mp_fav_filter_label:      "收藏",
+      mp_fav_filter_tip:        "仅显示已收藏的消息",
+      mp_copy_link:             "复制消息链接",
     },
 
     ja: {
@@ -2317,6 +2423,7 @@
         "⠿ メッセージユーティリティはこのスクリプトの核心機能です。\\n無効にすると、すべてのメッセージの ⠿ ボタンが消えます。\\n\\n再有効化には：Tampermonkeyアイコンを右クリック → 「⠿ メッセージユーティリティを有効にする」を選択。",
       mod_msg_warn_confirm: "無効にする",
       mod_msg_warn_cancel: "キャンセル",
+      mod_enable_confirm:   "有効にする",
       mod_msg_enable_menu: "⠿ メッセージユーティリティを有効にする",
       rescue_reload_msg: "設定を更新しました。ページをリロードして有効にします。今すぐリロードしますか？",
       rescue_close_btn: "閉じる",
@@ -2588,6 +2695,7 @@
       mp_loading:               "読み込み中…",
       mp_no_results:            "メッセージが見つかりません。",
       search_scope_hint:     "検索は現在読み込まれている {n} 件のメッセージのみ対象です。",
+      fav_tab_empty_hint:       "まだメッセージが読み込まれていません。先に「ブラウズ」タブを開いてください。",
       mp_empty_cta_title:       "まだメッセージが読み込まれていません",
       mp_empty_cta_sub:         "上の ↻ ボタンをクリックして再読み込み",
       mp_media_cta_title:       "メディアはまだ読み込まれていません",
@@ -2832,6 +2940,7 @@
         "⠿ 메시지 유틸리티는 이 스크립트의 핵심 기능입니다.\\n비활성화하면 모든 메시지의 ⠿ 버튼이 사라집니다.\\n\\n다시 활성화하려면: Tampermonkey 아이콘 우클릭 → '⠿ 메시지 유틸리티 활성화' 선택.",
       mod_msg_warn_confirm: "비활성화",
       mod_msg_warn_cancel: "취소",
+      mod_enable_confirm:   "활성화",
       mod_msg_enable_menu: "⠿ 메시지 유틸리티 활성화",
       rescue_reload_msg: "설정을 업데이트했습니다. 페이지를 새로고침해야 적용됩니다. 지금 새로고침하시겠습니까?",
       rescue_close_btn: "닫기",
@@ -3056,6 +3165,9 @@
       mu_remove_toast:  "✅ 해제됨: {name}",
       mu_ctx_mute:      "🌫️ 메시지 약화: {name}",
       mu_ctx_unmute:    "✅ 약화 해제: {name}",
+      mu_footer_left:   "메시지를 우클릭하여 약화 · hover로 미리보기",
+      mu_footer_right:  "GMStore에 저장됨",
+      mu_shortcut:      "Alt+B로 약화 사용자 관리",
       mu_temp_card_name: "임시",
       mu_temp_card_desc: "타이머 종료 후 자동 해제",
       mu_temp_quick:    "빠른 선택",
@@ -3069,6 +3181,17 @@
       mu_settings_clear_confirm: "모든 음소거 대상을 제거할까요?",
       mu_settings_ghost_delay: "Ghost 사라짐 지연 (초)",
       mu_settings_title:       "설정",
+
+      mod_tip_message:    "메시지를 우클릭하여 ⠿ 버튼으로 복사, 북마크 또는 빠른 작업을 수행하세요.",
+      mod_tip_forwarding: "별표 채널 또는 사용자에게 메시지를 전달합니다. 채팅 입력창 위에 전달 툴바가 추가됩니다.",
+      mod_tip_emoji:      "입력 중 검색 가능한 팝업에서 서버 이모지를 탐색하고 삽입합니다.",
+      mod_tip_header:     "미디어 우클릭을 해제하고 파일 다운로드 도우미 및 콘텐츠 하이재킹 방지 기능을 활성화합니다.",
+      mod_tip_wormhole:   "채팅 상단의 칩 단축키로 고정된 채널에 빠르게 이동합니다. VIP, 그룹 및 포커스 모드를 지원합니다.",
+      mod_tip_webhook:    "모든 채널에서 직접 등록된 Webhook으로 메시지를 전송합니다.",
+      mod_tip_urlchecker: "최근 메시지에 이미 공유된 URL을 붙여넣으면 경고합니다. API 토큰 없이도 작동합니다(DOM 모드).",
+      mod_tip_scout:      "입력창 위의 검색 버튼을 누르거나 키보드 단축키를 사용하여 현재 채널 메시지를 키워드로 검색합니다.",
+      mod_tip_blacklist:  "특정 사용자의 메시지를 흐릿하게 표시합니다. 메시지를 우클릭하여 작성자를 추가하세요.",
+      mod_tip_myposts:    "내 메시지를 탐색, 필터링 및 삭제 예약합니다. 패널 열기 시 API 토큰이 자동으로 가져와집니다.",
 
       mp_panel_title:           "내 게시물",
       mp_tab_browse:            "브라우즈",
@@ -3087,6 +3210,7 @@
       mp_loading:               "불러오는 중…",
       mp_no_results:            "메시지를 찾을 수 없습니다.",
       search_scope_hint:     "검색 범위는 현재 로드된 {n}개 메시지로 제한됩니다.",
+      fav_tab_empty_hint:       "아직 메시지가 로드되지 않았습니다. 먼저 「브라우즈」 탭으로 이동하세요.",
       mp_empty_cta_title:       "아직 메시지가 로드되지 않았습니다",
       mp_empty_cta_sub:         "위의 ↻ 버튼을 클릭하여 다시 불러오세요",
       mp_media_cta_title:       "미디어가 아직 로드되지 않았습니다",
@@ -3326,6 +3450,7 @@
         "⠿ La Utilidad de Mensajes es la función principal.\\nSi la deshabilitas, desaparecerá el botón ⠿ en todos los mensajes.",
       mod_msg_warn_confirm: "Deshabilitar",
       mod_msg_warn_cancel: "Cancelar",
+      mod_enable_confirm:   "Habilitar",
       mod_msg_enable_menu: "Habilitar ⠿ Utilidad de Mensajes",
       rescue_reload_msg: "Configuración actualizada. ¿Recargar página para aplicar cambios?",
       rescue_close_btn: "Cerrar",
@@ -3530,10 +3655,17 @@
 
       cs_panel_title:   "⌨ Búsqueda de canal",
       cs_placeholder:   "Escribe una palabra clave para buscar mensajes…",
-      cs_no_results:    "No se encontraron mensajes",
-      cs_empty_hint:    "Escribe una palabra clave o haz clic en una etiqueta",
+      cs_paste_tip:     "Pegar del portapapeles",
+      cs_history_tip:   "Búsquedas recientes",
       cs_no_history:    "Sin historial de búsqueda",
+      cs_empty_hint:    "Escribe una palabra clave o haz clic en una etiqueta",
+      cs_no_results:    "No se encontraron mensajes",
       cs_dom_mode_note: "Modo DOM · busca solo mensajes visibles",
+      cs_right_del_tip: "Clic derecho en etiqueta para eliminar",
+      cs_add_tag:        "+ Nueva etiqueta",
+      cs_add_tag_prompt: "Escribe la nueva etiqueta (clic derecho para eliminar):",
+      cs_float_title:   "Búsqueda de canal (F2)",
+      cs_float_label:   "Búsqueda de canal",
       mu_panel_title:   "🌫️ Atenuar mensajes de usuario",
       mu_empty:         "Sin usuarios atenuados\nClic derecho en mensaje para añadir",
       mu_remove_btn:    "Reactivar",
@@ -3541,6 +3673,9 @@
       mu_remove_toast:  "✅ Reactivado: {name}",
       mu_ctx_mute:      "🌫️ Atenuar mensajes: {name}",
       mu_ctx_unmute:    "✅ Reactivar: {name}",
+      mu_footer_left:   "Clic derecho en mensaje para atenuar · hover para vista previa",
+      mu_footer_right:  "Guardado en GMStore",
+      mu_shortcut:      "Alt+B para gestionar usuarios atenuados",
       mu_temp_card_name: "Temporal",
       mu_temp_card_desc: "Se desactiva al terminar",
       mu_temp_quick:    "Selección rápida",
@@ -3548,6 +3683,134 @@
       mu_temp_confirm:  "⏳ Silenciar temporalmente",
       mu_temp_expired_toast: "⏰ Silencio temporal expirado: {name}",
       mu_temp_badge_label: "⏳",
+      mu_settings_tab_list:    "Lista de atenuados",
+      mu_settings_tab_style:   "Configuración de estilo",
+      mu_settings_clear_all:   "Borrar todo",
+      mu_settings_clear_confirm: "¿Eliminar todos los usuarios atenuados?",
+      mu_settings_ghost_delay: "Retraso de desvanecimiento ghost (segundos)",
+      mu_settings_title:       "Configuración",
+
+      mod_tip_message:    "Haz clic derecho en cualquier mensaje para copiar, marcar o realizar acciones rápidas con el botón ⠿.",
+      mod_tip_forwarding: "Reenvía mensajes a canales o usuarios destacados. Añade una barra de herramientas encima del campo de texto.",
+      mod_tip_emoji:      "Navega e inserta emojis del servidor desde un popup con buscador al escribir.",
+      mod_tip_header:     "Desbloquea el clic derecho en medios y activa el asistente de descarga y la protección antihijack.",
+      mod_tip_wormhole:   "Salta rápidamente a canales anclados desde accesos directos en la parte superior del chat. Soporta VIP, grupos y modo foco.",
+      mod_tip_webhook:    "Envía mensajes a Webhooks registrados directamente desde cualquier canal.",
+      mod_tip_urlchecker: "Avisa cuando una URL pegada ya se compartió en mensajes recientes. Funciona sin token de API (modo DOM).",
+      mod_tip_scout:      "Pulsa el botón de búsqueda sobre el campo de texto o usa el atajo de teclado para buscar mensajes por palabra clave.",
+      mod_tip_blacklist:  "Atenúa los mensajes de usuarios específicos para que no destaquen. Haz clic derecho en un mensaje para añadir al autor.",
+      mod_tip_myposts:    "Navega, filtra y programa la eliminación de tus propios mensajes. Requiere token de API (obtenido automáticamente).",
+
+      wm_send_chat_btn:  "Enviar mensaje",
+      wm_send_cool_warn: "Enfriamiento: {s}s entre mensajes",
+      wm_send_field_add: "+ Añadir campo",
+      wm_send_field_del: "Eliminar campo",
+      wm_send_sending_n: "Enviando {n}/{total}…",
+
+      mp_panel_title:           "Mis publicaciones",
+      mp_tab_browse:            "Explorar",
+      mp_tab_tasks:             "Tareas",
+      mp_tab_media:             "Multimedia",
+      mp_scope_server:          "Servidor",
+      mp_scope_channel:         "Canal",
+      mp_scope_thread:          "Hilo",
+      mp_search_placeholder:    "Buscar en el contenido…",
+      mp_type_text:             "Texto",
+      mp_type_reply:            "Respuesta",
+      mp_type_command:          "Comando de barra",
+      mp_type_thread_start:     "Inicio de hilo",
+      mp_type_other:            "Otro",
+      mp_load_more:             "Cargar más",
+      mp_loading:               "Cargando…",
+      mp_no_results:            "No se encontraron mensajes.",
+      search_scope_hint:     "La búsqueda se limita a los {n} mensajes cargados.",
+      fav_tab_empty_hint:       "Aún no se han cargado mensajes. Ve primero a la pestaña Explorar.",
+      mp_empty_cta_title:       "No hay mensajes cargados",
+      mp_empty_cta_sub:         "Haz clic en el botón ↻ de arriba para recargar",
+      mp_media_cta_title:       "No hay medios cargados",
+      mp_media_cta_sub:         "Haz clic en el botón ↻ de arriba para recargar medios",
+      mp_group_select_all:      "Seleccionar todo",
+      mp_group_deselect_all:    "Deseleccionar todo",
+      mp_jump_to:               "Ir al mensaje",
+      mp_delete_single:         "Eliminar este mensaje",
+      mp_undo:                  "Deshacer",
+      mp_selected_n:            "{n} seleccionado(s)",
+      mp_create_task:           "Crear tarea de eliminación",
+      mp_cancel_select:         "Cancelar",
+      mp_token_warn:            "⚠️ Este módulo obtiene tu token de API. Úsalo solo en dispositivos de confianza.",
+      mp_token_fail:            "No se pudo obtener el token de API. Cambia de canal y vuelve a intentarlo.",
+      mp_token_fetching:        "Obteniendo token…",
+      mp_userid_fail:           "No se pudo obtener el ID de usuario.",
+      mp_confirm_delete_single: "¿Eliminar este mensaje? Esta acción no se puede deshacer.",
+      mp_confirm_delete_batch:  "¿Eliminar {n} mensaje(s)?\n{summary}\nEsta acción no se puede deshacer.",
+      mp_undo_deleted:          "Mensaje eliminado.",
+      mp_err_401:               "Token inválido. Recarga la página.",
+      mp_err_403:               "No se puede eliminar este mensaje (sin permisos).",
+      mp_err_net:               "Error de red, reintentando…",
+      mp_quota_label:           "Límite diario:",
+      mp_quota_conservative:    "Conservador — 20/día",
+      mp_quota_balanced:        "Equilibrado — 50/día (predeterminado)",
+      mp_quota_aggressive:      "Agresivo — 100/día",
+      mp_quota_custom:          "Personalizado",
+      mp_quota_custom_warn:     "⚠️ Una alta frecuencia de eliminación puede activar la detección de anomalías.",
+      mp_quota_today:           "Hoy: {done} / {limit}",
+      mp_tasks_active:          "En curso",
+      mp_tasks_done:            "Completado",
+      mp_tasks_empty:           "Sin tareas.",
+      mp_task_progress:         "Eliminados: {done} / {total}",
+      mp_task_eta:              "~{days} día(s) restante(s)",
+      mp_task_resume:           "Reanudar",
+      mp_task_pause:            "Pausar",
+      mp_task_cancel:           "Cancelar tarea",
+      mp_task_cancel_confirm:   "¿Cancelar y eliminar esta tarea?",
+      mp_quota_reached:         "Límite diario alcanzado ({limit}/{limit}).\nProgreso: {done} / {total}\nFaltan ~{days} días.",
+      mp_quota_continue:        "Continuar (bajo tu responsabilidad)",
+      mp_quota_tomorrow:        "Continuar mañana",
+      mp_task_done_toast:       "¡Tarea completada! {n} mensaje(s) eliminado(s).",
+      mp_task_created:          "Tarea de eliminación creada.",
+      mp_task_running:          "Ya hay una tarea en curso. Complétala o ponla en pausa.",
+      mp_refresh:               "Actualizar",
+      mp_page_size_label:       "Mensajes por página:",
+      mp_page_size_n:           "{n} mensajes",
+      mp_tasks_empty_hint:      "Selecciona mensajes en «Explorar» y pulsa «Crear tarea de eliminación».",
+      mp_view_list:             "Cambiar a vista de lista",
+      mp_view_grid:             "Cambiar a cuadrícula de medios",
+      mp_no_media:              "No hay mensajes multimedia en este ámbito.",
+      mp_no_content:            "(sin contenido)",
+      mp_sys_pin:               "Mensaje fijado",
+      mp_sys_channel_rename:    "Canal renombrado",
+      mp_sys_command:           "Comando de barra usado",
+      mp_sys_thread_created:    "Hilo creado",
+      mp_sys_reminder:          "Recordatorio establecido",
+      mp_sys_action:            "Mensaje del sistema",
+      mp_poll_unknown:          "Encuesta",
+      mp_media_all:             "Todo",
+      mp_media_images:          "Imágenes",
+      mp_media_videos:          "Vídeos",
+      mp_att_video:             "Vídeo",
+      mp_att_videos:            "Vídeos",
+      mp_att_image:             "Imagen",
+      mp_att_images:            "Imágenes",
+      mp_media_loading_start:   "Cargando multimedia…",
+      mp_media_loading_more:    "Cargando {n} / {total}…",
+      mp_media_loaded_count:    "{n} / {total} cargados",
+      mp_media_loaded_all:      "Todo cargado ({n})",
+      mp_create_task_title:     "Crear tarea de eliminación",
+      mp_create_task_scope:     "Ámbito: {scope}",
+      mp_create_task_filters:   "Filtros: {types}",
+      mp_create_task_count:     "Seleccionados: {n}",
+      mp_create_task_quota:     "Límite: hereda configuración global ({limit}/día)",
+      mp_create_task_label:     "Etiqueta de tarea (opcional):",
+      mp_create_task_warn:      "⚠️ Esta acción no se puede deshacer. La tarea se añadirá a la cola.",
+      mp_create_task_confirm:   "Crear tarea",
+      mp_img_expired:           "La URL de la imagen puede haber caducado.",
+      mp_attachments_n:         "{n} adjunto(s)",
+      mp_fav_add:               "Favorito (protegido de eliminación por Tarea)",
+      mp_fav_remove:            "Quitar de favoritos",
+      mp_fav_all_excluded:      "Todos los mensajes seleccionados son favoritos — Tarea no creada.",
+      mp_fav_filter_label:      "Favoritos",
+      mp_fav_filter_tip:        "Mostrar solo mensajes favoritos",
+      mp_copy_link:             "Copiar enlace del mensaje",
     },    "pt-BR": {
       name: "Português (Brasil)",
       fm_pinned_channels: "★ Canais fixados",
@@ -3699,6 +3962,7 @@
         "⠿ O Utilitário de Mensagens é a função principal.\\nSe desativado, o botão ⠿ desaparecerá de todas as mensagens.",
       mod_msg_warn_confirm: "Desativar",
       mod_msg_warn_cancel: "Cancelar",
+      mod_enable_confirm:   "Ativar",
       mod_msg_enable_menu: "Ativar ⠿ Utilitário de Mensagens",
       rescue_reload_msg: "Configurações atualizadas. Recarregar página para aplicar?",
       rescue_close_btn: "Fechar",
@@ -3901,10 +4165,17 @@
 
       cs_panel_title:   "⌨ Pesquisa de canal",
       cs_placeholder:   "Digite uma palavra-chave para pesquisar mensagens…",
-      cs_no_results:    "Nenhuma mensagem encontrada",
-      cs_empty_hint:    "Digite uma palavra-chave ou clique em uma etiqueta",
+      cs_paste_tip:     "Colar da área de transferência",
+      cs_history_tip:   "Pesquisas recentes",
       cs_no_history:    "Sem histórico de pesquisa",
+      cs_empty_hint:    "Digite uma palavra-chave ou clique em uma etiqueta",
+      cs_no_results:    "Nenhuma mensagem encontrada",
       cs_dom_mode_note: "Modo DOM · pesquisa apenas mensagens visíveis",
+      cs_right_del_tip: "Clique com botão direito na etiqueta para remover",
+      cs_add_tag:        "+ Nova etiqueta",
+      cs_add_tag_prompt: "Digite a nova etiqueta (botão direito para excluir):",
+      cs_float_title:   "Pesquisa de canal (F2)",
+      cs_float_label:   "Pesquisa de canal",
       mu_panel_title:   "🌫️ Silenciar mensagens de usuário",
       mu_empty:         "Nenhum usuário silenciado\nClique com botão direito para adicionar",
       mu_remove_btn:    "Reativar",
@@ -3912,6 +4183,9 @@
       mu_remove_toast:  "✅ Reativado: {name}",
       mu_ctx_mute:      "🌫️ Silenciar mensagens: {name}",
       mu_ctx_unmute:    "✅ Reativar: {name}",
+      mu_footer_left:   "Botão direito em mensagem para silenciar · hover para pré-visualizar",
+      mu_footer_right:  "Salvo no GMStore",
+      mu_shortcut:      "Alt+B para gerenciar usuários silenciados",
       mu_temp_card_name: "Temporário",
       mu_temp_card_desc: "Desmuta ao terminar o timer",
       mu_temp_quick:    "Seleção rápida",
@@ -3919,110 +4193,134 @@
       mu_temp_confirm:  "⏳ Silenciar temporariamente",
       mu_temp_expired_toast: "⏰ Silêncio temporário expirado: {name}",
       mu_temp_badge_label: "⏳",
+      mu_settings_tab_list:    "Lista de silenciados",
+      mu_settings_tab_style:   "Configurações de estilo",
+      mu_settings_clear_all:   "Limpar tudo",
+      mu_settings_clear_confirm: "Remover todos os usuários silenciados?",
+      mu_settings_ghost_delay: "Atraso de desvanecimento ghost (segundos)",
+      mu_settings_title:       "Configurações",
 
-      mp_panel_title:           "Mis publicaciones",
+      mod_tip_message:    "Clique com o botão direito em qualquer mensagem para copiar, marcar ou realizar ações rápidas com o botão ⠿.",
+      mod_tip_forwarding: "Encaminhe mensagens para canais ou usuários com estrela. Adiciona uma barra de ferramentas acima do campo de texto.",
+      mod_tip_emoji:      "Navegue e insira emojis do servidor a partir de um popup com busca ao digitar.",
+      mod_tip_header:     "Desbloqueia o clique direito em mídia e ativa o assistente de download e proteção anti-hijack.",
+      mod_tip_wormhole:   "Salte rapidamente para canais fixados via atalhos de chip no topo do chat. Suporta VIP, grupos e modo foco.",
+      mod_tip_webhook:    "Envie mensagens para Webhooks registrados diretamente de qualquer canal.",
+      mod_tip_urlchecker: "Avisa quando uma URL colada já foi compartilhada em mensagens recentes. Funciona sem token de API (modo DOM).",
+      mod_tip_scout:      "Pressione o botão de pesquisa acima do campo de texto ou use o atalho de teclado para pesquisar mensagens por palavra-chave.",
+      mod_tip_blacklist:  "Atenua mensagens de usuários específicos para que se misturem ao fundo. Clique com o botão direito para adicionar o autor.",
+      mod_tip_myposts:    "Navegue, filtre e agende a exclusão de suas próprias mensagens. Requer token de API (obtido automaticamente).",
+
+      wm_send_chat_btn:  "Enviar mensagem",
+      wm_send_cool_warn: "Cooldown: {s}s entre mensagens",
+      wm_send_field_add: "+ Adicionar campo",
+      wm_send_field_del: "Remover campo",
+      wm_send_sending_n: "Enviando {n}/{total}…",
+
+      mp_panel_title:           "Minhas publicações",
       mp_tab_browse:            "Explorar",
-      mp_tab_tasks:             "Tareas",
-      mp_tab_media:             "Multimedia",
+      mp_tab_tasks:             "Tarefas",
+      mp_tab_media:             "Mídia",
       mp_scope_server:          "Servidor",
       mp_scope_channel:         "Canal",
-      mp_scope_thread:          "Hilo",
-      mp_search_placeholder:    "Buscar en el contenido…",
+      mp_scope_thread:          "Tópico",
+      mp_search_placeholder:    "Pesquisar no conteúdo…",
       mp_type_text:             "Texto",
-      mp_type_reply:            "Respuesta",
+      mp_type_reply:            "Resposta",
       mp_type_command:          "Comando",
-      mp_type_thread_start:     "Inicio de hilo",
-      mp_type_other:            "Otro",
-      mp_load_more:             "Cargar más",
-      mp_loading:               "Cargando…",
-      mp_no_results:            "No se encontraron mensajes.",
-      search_scope_hint:     "La búsqueda se limita a los {n} mensajes cargados.",
-      mp_empty_cta_title:       "No hay mensajes cargados",
-      mp_empty_cta_sub:         "Haz clic en el botón ↻ de arriba para recargar",
-      mp_media_cta_title:       "No hay medios cargados",
-      mp_media_cta_sub:         "Haz clic en el botón ↻ de arriba para recargar medios",
-      mp_group_select_all:      "Seleccionar todo",
-      mp_group_deselect_all:    "Deseleccionar todo",
-      mp_jump_to:               "Ir al mensaje",
-      mp_delete_single:         "Eliminar este mensaje",
-      mp_undo:                  "Deshacer",
-      mp_selected_n:            "{n} seleccionado(s)",
-      mp_create_task:           "Crear tarea de eliminación",
+      mp_type_thread_start:     "Início de tópico",
+      mp_type_other:            "Outro",
+      mp_load_more:             "Carregar mais",
+      mp_loading:               "Carregando…",
+      mp_no_results:            "Nenhuma mensagem encontrada.",
+      search_scope_hint:     "A pesquisa é limitada às {n} mensagens atualmente carregadas.",
+      fav_tab_empty_hint:       "Nenhuma mensagem carregada ainda. Vá primeiro para a aba Explorar.",
+      mp_empty_cta_title:       "Nenhuma mensagem carregada",
+      mp_empty_cta_sub:         "Clique no botão ↻ acima para recarregar",
+      mp_media_cta_title:       "Nenhuma mídia carregada",
+      mp_media_cta_sub:         "Clique no botão ↻ acima para recarregar mídia",
+      mp_group_select_all:      "Selecionar tudo",
+      mp_group_deselect_all:    "Desmarcar tudo",
+      mp_jump_to:               "Ir à mensagem",
+      mp_delete_single:         "Excluir esta mensagem",
+      mp_undo:                  "Desfazer",
+      mp_selected_n:            "{n} selecionado(s)",
+      mp_create_task:           "Criar tarefa de exclusão",
       mp_cancel_select:         "Cancelar",
-      mp_token_warn:            "⚠️ Este módulo obtiene tu token de API. Úsalo solo en dispositivos de confianza.",
-      mp_token_fail:            "No se pudo obtener el token de API. Cambia de canal y vuelve a intentarlo.",
-      mp_token_fetching:        "Obteniendo token…",
-      mp_userid_fail:           "No se pudo obtener el ID de usuario.",
-      mp_confirm_delete_single: "¿Eliminar este mensaje? Esta acción no se puede deshacer.",
-      mp_confirm_delete_batch:  "¿Eliminar {n} mensaje(s)?\n{summary}\nEsta acción no se puede deshacer.",
-      mp_undo_deleted:          "Mensaje eliminado.",
-      mp_err_401:               "Token inválido. Recarga la página.",
-      mp_err_403:               "No se puede eliminar este mensaje (sin permisos).",
-      mp_err_net:               "Error de red, reintentando…",
-      mp_quota_label:           "Límite diario:",
-      mp_quota_conservative:    "Conservador — 20/día",
-      mp_quota_balanced:        "Equilibrado — 50/día (predeterminado)",
-      mp_quota_aggressive:      "Agresivo — 100/día",
+      mp_token_warn:            "⚠️ Este módulo obtém seu token de API. Use apenas em dispositivos confiáveis.",
+      mp_token_fail:            "Não foi possível obter o token de API. Troque de canal e tente novamente.",
+      mp_token_fetching:        "Obtendo token…",
+      mp_userid_fail:           "Não foi possível obter o ID do usuário.",
+      mp_confirm_delete_single: "Excluir esta mensagem? Esta ação não pode ser desfeita.",
+      mp_confirm_delete_batch:  "Excluir {n} mensagem(ns)?\n{summary}\nEsta ação não pode ser desfeita.",
+      mp_undo_deleted:          "Mensagem excluída.",
+      mp_err_401:               "Token inválido. Recarregue a página.",
+      mp_err_403:               "Não é possível excluir esta mensagem (sem permissão).",
+      mp_err_net:               "Erro de rede, tentando novamente…",
+      mp_quota_label:           "Limite diário:",
+      mp_quota_conservative:    "Conservador — 20/dia",
+      mp_quota_balanced:        "Equilibrado — 50/dia (padrão)",
+      mp_quota_aggressive:      "Agressivo — 100/dia",
       mp_quota_custom:          "Personalizado",
-      mp_quota_custom_warn:     "⚠️ Una alta frecuencia de eliminación puede activar la detección de anomalías.",
-      mp_quota_today:           "Hoy: {done} / {limit}",
-      mp_tasks_active:          "En curso",
-      mp_tasks_done:            "Completado",
-      mp_tasks_empty:           "Sin tareas.",
-      mp_task_progress:         "Eliminados: {done} / {total}",
-      mp_task_eta:              "~{days} día(s) restante(s)",
-      mp_task_resume:           "Reanudar",
+      mp_quota_custom_warn:     "⚠️ Alta frequência de exclusão pode acionar detecção de anomalias.",
+      mp_quota_today:           "Hoje: {done} / {limit}",
+      mp_tasks_active:          "Em andamento",
+      mp_tasks_done:            "Concluído",
+      mp_tasks_empty:           "Sem tarefas.",
+      mp_task_progress:         "Excluídos: {done} / {total}",
+      mp_task_eta:              "~{days} dia(s) restante(s)",
+      mp_task_resume:           "Retomar",
       mp_task_pause:            "Pausar",
-      mp_task_cancel:           "Cancelar tarea",
-      mp_task_cancel_confirm:   "¿Cancelar y eliminar esta tarea?",
-      mp_quota_reached:         "Límite diario alcanzado ({limit}/{limit}).\nProgreso: {done} / {total}\nFaltan ~{days} días.",
-      mp_quota_continue:        "Continuar (bajo tu responsabilidad)",
-      mp_quota_tomorrow:        "Continuar mañana",
-      mp_task_done_toast:       "¡Tarea completada! {n} mensaje(s) eliminado(s).",
-      mp_task_created:          "Tarea de eliminación creada.",
-      mp_task_running:          "Ya hay una tarea en curso. Complétala o ponla en pausa.",
-      mp_refresh:               "Actualizar",
-      mp_page_size_label:       "Mensajes por página:",
-      mp_page_size_n:           "{n} mensajes",
-      mp_tasks_empty_hint:      "Selecciona mensajes en «Explorar» y pulsa «Crear tarea de eliminación».",
-      mp_view_list:             "Cambiar a vista de lista",
-      mp_view_grid:             "Cambiar a vista de cuadrícula",
-      mp_no_media:              "No hay mensajes multimedia en este ámbito.",
-      mp_no_content:            "(sin contenido)",
-      mp_sys_pin:               "Mensaje fijado",
-      mp_sys_channel_rename:    "Canal renombrado",
-      mp_sys_command:           "Comando de barra usad",
-      mp_sys_thread_created:    "Hilo creado",
-      mp_sys_reminder:          "Recordatorio establecido",
-      mp_sys_action:            "Mensaje del sistema",
-      mp_poll_unknown:          "Encuesta",
-      mp_media_all:             "Todo",
-      mp_media_images:          "Imágenes",
+      mp_task_cancel:           "Cancelar tarefa",
+      mp_task_cancel_confirm:   "Cancelar e excluir esta tarefa?",
+      mp_quota_reached:         "Limite diário atingido ({limit}/{limit}).\nProgresso: {done} / {total}\nFaltam ~{days} dias.",
+      mp_quota_continue:        "Continuar (por sua conta e risco)",
+      mp_quota_tomorrow:        "Continuar amanhã",
+      mp_task_done_toast:       "Tarefa concluída! {n} mensagem(ns) excluída(s).",
+      mp_task_created:          "Tarefa de exclusão criada.",
+      mp_task_running:          "Já há uma tarefa em andamento. Conclua-a ou pause-a.",
+      mp_refresh:               "Atualizar",
+      mp_page_size_label:       "Mensagens por página:",
+      mp_page_size_n:           "{n} mensagens",
+      mp_tasks_empty_hint:      "Selecione mensagens em «Explorar» e clique em «Criar tarefa de exclusão».",
+      mp_view_list:             "Alternar para vista de lista",
+      mp_view_grid:             "Alternar para grade de mídia",
+      mp_no_media:              "Nenhuma mensagem de mídia neste escopo.",
+      mp_no_content:            "(sem conteúdo)",
+      mp_sys_pin:               "Mensagem fixada",
+      mp_sys_channel_rename:    "Canal renomeado",
+      mp_sys_command:           "Comando de barra usado",
+      mp_sys_thread_created:    "Tópico criado",
+      mp_sys_reminder:          "Lembrete definido",
+      mp_sys_action:            "Mensagem do sistema",
+      mp_poll_unknown:          "Enquete",
+      mp_media_all:             "Tudo",
+      mp_media_images:          "Imagens",
       mp_media_videos:          "Vídeos",
       mp_att_video:             "Vídeo",
       mp_att_videos:            "Vídeos",
-      mp_att_image:             "Imagen",
-      mp_att_images:            "Imágenes",
-      mp_media_loading_start:   "Cargando multimedia…",
-      mp_media_loading_more:    "Cargando {n} / {total}…",
-      mp_media_loaded_count:    "{n} / {total} cargados",
-      mp_media_loaded_all:      "Todo cargado ({n})",
-      mp_create_task_title:     "Crear tarea de eliminación",
-      mp_create_task_scope:     "Ámbito: {scope}",
+      mp_att_image:             "Imagem",
+      mp_att_images:            "Imagens",
+      mp_media_loading_start:   "Carregando mídia…",
+      mp_media_loading_more:    "Carregando {n} / {total}…",
+      mp_media_loaded_count:    "{n} / {total} carregados",
+      mp_media_loaded_all:      "Tudo carregado ({n})",
+      mp_create_task_title:     "Criar tarefa de exclusão",
+      mp_create_task_scope:     "Escopo: {scope}",
       mp_create_task_filters:   "Filtros: {types}",
-      mp_create_task_count:     "Seleccionados: {n}",
-      mp_create_task_quota:     "Límite: hereda configuración global ({limit}/día)",
-      mp_create_task_label:     "Etiqueta de tarea (opcional):",
-      mp_create_task_warn:      "⚠️ Esta acción no se puede deshacer. La tarea se añadirá a la cola.",
-      mp_create_task_confirm:   "Crear tarea",
-      mp_img_expired:           "La URL de la imagen puede haber caducado.",
-      mp_attachments_n:         "{n} adjunto(s)",
-      mp_fav_add:               "Favorito (protegido de eliminación por Tarea)",
-      mp_fav_remove:            "Quitar de favoritos",
-      mp_fav_all_excluded:      "Todos los mensajes seleccionados son favoritos — Tarea no creada.",
+      mp_create_task_count:     "Selecionados: {n}",
+      mp_create_task_quota:     "Limite: herda configuração global ({limit}/dia)",
+      mp_create_task_label:     "Rótulo da tarefa (opcional):",
+      mp_create_task_warn:      "⚠️ Esta ação não pode ser desfeita. A tarefa será adicionada à fila.",
+      mp_create_task_confirm:   "Criar tarefa",
+      mp_img_expired:           "A URL da imagem pode ter expirado.",
+      mp_attachments_n:         "{n} anexo(s)",
+      mp_fav_add:               "Favorito (protegido de exclusão por Tarefa)",
+      mp_fav_remove:            "Remover dos favoritos",
+      mp_fav_all_excluded:      "Todas as mensagens selecionadas são favoritas — Tarefa não criada.",
       mp_fav_filter_label:      "Favoritos",
-      mp_fav_filter_tip:        "Mostrar solo mensajes favoritos",
-      mp_copy_link:             "Copiar enlace del mensaje",
+      mp_fav_filter_tip:        "Mostrar apenas mensagens favoritas",
+      mp_copy_link:             "Copiar link da mensagem",
     },
 
     fr: {
@@ -4177,6 +4475,7 @@
         "⠿ L'Utilitaire de Messages est la fonction principale.\\nSi désactivé, le bouton ⠿ disparaîtra de tous les messages.",
       mod_msg_warn_confirm: "Désactiver",
       mod_msg_warn_cancel: "Annuler",
+      mod_enable_confirm:   "Activer",
       mod_msg_enable_menu: "Activer ⠿ Utilitaire de Messages",
       rescue_reload_msg: "Paramètres mis à jour. Recharger la page pour appliquer ?",
       rescue_close_btn: "Fermer",
@@ -4275,6 +4574,11 @@
       wm_send_channel_fail: "❌ Échec du chargement du salon",
       wm_send_editor_missing: "❌ Éditeur introuvable",
       wm_send_uploading: "📎 Envoi de {n} image(s)...",
+      wm_send_chat_btn:  "Envoyer un message",
+      wm_send_cool_warn: "Délai : {s}s entre les messages",
+      wm_send_field_add: "+ Ajouter un champ",
+      wm_send_field_del: "Supprimer le champ",
+      wm_send_sending_n: "Envoi {n}/{total}…",
 
       wm_api_panel_title: "⚗️ Mode API du trou de ver (avancé)",
       wm_api_mode_label_a: "Mode A — Navigation (défaut)",
@@ -4387,6 +4691,47 @@
       mu_temp_confirm:  "⏳ Muet temporaire",
       mu_temp_expired_toast: "⏰ Muet temporaire expiré : {name}",
       mu_temp_badge_label: "⏳",
+      mu_panel_title:   "🌫️ Atténuer les messages utilisateur",
+      mu_empty:         "Aucun utilisateur atténué\nFaites un clic droit sur un message pour en ajouter",
+      mu_remove_btn:    "Réactiver",
+      mu_add_toast:     "🌫️ Atténué : {name}",
+      mu_remove_toast:  "✅ Réactivé : {name}",
+      mu_ctx_mute:      "🌫️ Atténuer les messages : {name}",
+      mu_ctx_unmute:    "✅ Réactiver : {name}",
+      mu_footer_left:   "Clic droit sur message pour atténuer · survoler pour aperçu",
+      mu_footer_right:  "Sauvegardé dans GMStore",
+      mu_shortcut:      "Alt+B pour gérer les utilisateurs atténués",
+      mu_settings_tab_list:    "Liste des atténués",
+      mu_settings_tab_style:   "Paramètres de style",
+      mu_settings_clear_all:   "Tout effacer",
+      mu_settings_clear_confirm: "Supprimer tous les utilisateurs atténués ?",
+      mu_settings_ghost_delay: "Délai de disparition ghost (secondes)",
+      mu_settings_title:       "Paramètres",
+
+      cs_panel_title:   "⌨ Recherche de salon",
+      cs_placeholder:   "Tapez un mot-clé pour rechercher des messages…",
+      cs_paste_tip:     "Coller depuis le presse-papiers",
+      cs_history_tip:   "Recherches récentes",
+      cs_no_history:    "Aucun historique de recherche",
+      cs_empty_hint:    "Tapez un mot-clé ou cliquez sur une étiquette",
+      cs_no_results:    "Aucun message trouvé",
+      cs_dom_mode_note: "Mode DOM · recherche uniquement les messages visibles",
+      cs_right_del_tip: "Clic droit sur l'étiquette pour supprimer",
+      cs_add_tag:        "+ Nouvelle étiquette",
+      cs_add_tag_prompt: "Saisissez la nouvelle étiquette (clic droit pour supprimer) :",
+      cs_float_title:   "Recherche de salon (F2)",
+      cs_float_label:   "Recherche de salon",
+
+      mod_tip_message:    "Faites un clic droit sur n'importe quel message pour copier, marquer ou effectuer des actions rapides avec le bouton ⠿.",
+      mod_tip_forwarding: "Transférez des messages vers des salons ou utilisateurs en favoris. Ajoute une barre d'outils au-dessus du champ de saisie.",
+      mod_tip_emoji:      "Parcourez et insérez des emojis du serveur depuis un popup avec recherche en cours de frappe.",
+      mod_tip_header:     "Déverrouille le clic droit sur les médias et active l'assistant de téléchargement et la protection anti-hijack.",
+      mod_tip_wormhole:   "Accédez rapidement aux salons épinglés via des raccourcis en haut du chat. Supporte VIP, groupes et mode focus.",
+      mod_tip_webhook:    "Envoyez des messages vers des Webhooks enregistrés directement depuis n'importe quel salon.",
+      mod_tip_urlchecker: "Alerte quand une URL collée a déjà été partagée dans les messages récents. Fonctionne sans token API (mode DOM).",
+      mod_tip_scout:      "Appuyez sur le bouton de recherche au-dessus du champ de texte ou utilisez le raccourci clavier pour chercher par mot-clé.",
+      mod_tip_blacklist:  "Atténue les messages d'utilisateurs spécifiques pour qu'ils se fondent dans le fond. Clic droit pour ajouter l'auteur.",
+      mod_tip_myposts:    "Parcourez, filtrez et planifiez la suppression de vos propres messages. Requiert un token API (obtenu automatiquement).",
 
       mp_panel_title:           "Mes publications",
       mp_tab_browse:            "Parcourir",
@@ -4405,6 +4750,7 @@
       mp_loading:               "Chargement…",
       mp_no_results:            "Aucun message trouvé.",
       search_scope_hint:     "La recherche est limitée aux {n} messages chargés.",
+      fav_tab_empty_hint:       "Aucun message chargé pour l'instant. Allez d'abord dans l'onglet Parcourir.",
       mp_empty_cta_title:       "Aucun message chargé",
       mp_empty_cta_sub:         "Cliquez sur le bouton ↻ ci-dessus pour recharger",
       mp_media_cta_title:       "Aucun média chargé",
@@ -4644,6 +4990,7 @@
         "⠿ Утилита сообщений является основной функцией.\\nПри отключении кнопка ⠿ исчезнет со всех сообщений.",
       mod_msg_warn_confirm: "Отключить",
       mod_msg_warn_cancel: "Отмена",
+      mod_enable_confirm:   "Включить",
       mod_msg_enable_menu: "Включить ⠿ утилиту сообщений",
       rescue_reload_msg: "Настройки обновлены. Перезагрузить страницу для применения?",
       rescue_close_btn: "Закрыть",
@@ -4739,6 +5086,11 @@
       wm_send_channel_fail: "❌ Ошибка загрузки канала",
       wm_send_editor_missing: "❌ Редактор не найден",
       wm_send_uploading: "📎 Загрузка {n} изображени(й)...",
+      wm_send_chat_btn:  "Отправить сообщение",
+      wm_send_cool_warn: "Задержка: {s}с между сообщениями",
+      wm_send_field_add: "+ Добавить поле",
+      wm_send_field_del: "Удалить поле",
+      wm_send_sending_n: "Отправка {n}/{total}…",
 
       wm_api_panel_title: "⚗️ Режим API червоточины (расширенный)",
       wm_api_mode_label_a: "Режим A — Навигация (по умолчанию)",
@@ -4846,10 +5198,17 @@
 
       cs_panel_title:   "⌨ Поиск по каналу",
       cs_placeholder:   "Введите ключевое слово для поиска…",
-      cs_no_results:    "Сообщения не найдены",
-      cs_empty_hint:    "Введите ключевое слово или нажмите на тег",
+      cs_paste_tip:     "Вставить из буфера обмена",
+      cs_history_tip:   "Недавние поиски",
       cs_no_history:    "История поиска пуста",
+      cs_empty_hint:    "Введите ключевое слово или нажмите на тег",
+      cs_no_results:    "Сообщения не найдены",
       cs_dom_mode_note: "Режим DOM · поиск только по видимым сообщениям",
+      cs_right_del_tip: "Правый клик по тегу для удаления",
+      cs_add_tag:        "+ Новый тег",
+      cs_add_tag_prompt: "Введите новый тег (правый клик для удаления):",
+      cs_float_title:   "Поиск по каналу (F2)",
+      cs_float_label:   "Поиск по каналу",
       mu_panel_title:   "🌫️ Приглушить сообщения пользователя",
       mu_empty:         "Нет приглушённых пользователей\nПравый клик по сообщению для добавления",
       mu_remove_btn:    "Восстановить",
@@ -4857,6 +5216,9 @@
       mu_remove_toast:  "✅ Восстановлено: {name}",
       mu_ctx_mute:      "🌫️ Приглушить: {name}",
       mu_ctx_unmute:    "✅ Восстановить: {name}",
+      mu_footer_left:   "Правый клик по сообщению для приглушения · наведите для предпросмотра",
+      mu_footer_right:  "Сохранено в GMStore",
+      mu_shortcut:      "Alt+B для управления приглушёнными пользователями",
       mu_temp_card_name: "Временно",
       mu_temp_card_desc: "Авто-отключение по таймеру",
       mu_temp_quick:    "Быстрый выбор",
@@ -4864,6 +5226,23 @@
       mu_temp_confirm:  "⏳ Временно заглушить",
       mu_temp_expired_toast: "⏰ Временное заглушение истекло: {name}",
       mu_temp_badge_label: "⏳",
+      mu_settings_tab_list:    "Список приглушённых",
+      mu_settings_tab_style:   "Настройки стиля",
+      mu_settings_clear_all:   "Очистить всё",
+      mu_settings_clear_confirm: "Удалить всех приглушённых пользователей?",
+      mu_settings_ghost_delay: "Задержка исчезновения ghost (секунды)",
+      mu_settings_title:       "Настройки",
+
+      mod_tip_message:    "Нажмите правой кнопкой мыши на любое сообщение, чтобы скопировать, добавить в закладки или выполнить быстрые действия кнопкой ⠿.",
+      mod_tip_forwarding: "Пересылайте сообщения в избранные каналы или пользователям. Добавляет панель инструментов над полем ввода.",
+      mod_tip_emoji:      "Просматривайте и вставляйте эмодзи сервера из всплывающего окна с поиском при вводе текста.",
+      mod_tip_header:     "Разблокирует правый клик по медиа и активирует помощник загрузки и защиту от угона контента.",
+      mod_tip_wormhole:   "Быстро переходите к закреплённым каналам через ярлыки в верхней части чата. Поддерживает VIP, группы и режим фокуса.",
+      mod_tip_webhook:    "Отправляйте сообщения в зарегистрированные Webhooks прямо из любого канала.",
+      mod_tip_urlchecker: "Предупреждает, когда вставленный URL уже был отправлен в последних сообщениях. Работает без API-токена (режим DOM).",
+      mod_tip_scout:      "Нажмите кнопку поиска над полем ввода или используйте сочетание клавиш для поиска сообщений по ключевому слову.",
+      mod_tip_blacklist:  "Приглушает сообщения конкретных пользователей. Правый клик по сообщению для добавления автора.",
+      mod_tip_myposts:    "Просматривайте, фильтруйте и планируйте удаление своих сообщений. Требует API-токен (получается автоматически).",
 
       mp_panel_title:           "Мои публикации",
       mp_tab_browse:            "Обзор",
@@ -4882,6 +5261,7 @@
       mp_loading:               "Загрузка…",
       mp_no_results:            "Сообщения не найдены.",
       search_scope_hint:     "Поиск ограничен {n} загруженными сообщениями.",
+      fav_tab_empty_hint:       "Сообщения ещё не загружены. Сначала перейдите на вкладку «Обзор».",
       mp_empty_cta_title:       "Сообщения ещё не загружены",
       mp_empty_cta_sub:         "Нажмите кнопку ↻ выше, чтобы перезагрузить",
       mp_media_cta_title:       "Медиа ещё не загружено",
@@ -7002,6 +7382,7 @@
         mod_urlchecker:  localStorage.getItem("mod_urlchecker"),
         mod_scout:       localStorage.getItem("mod_scout"),
         mod_blacklist:   localStorage.getItem("mod_blacklist"),
+        mod_myposts:     localStorage.getItem("mod_myposts"),
       };
 
       const webhookList = GMStore.get("discord_webhook_list", [], true);
@@ -7015,19 +7396,43 @@
 
       const blacklistData = GMStore.get("blacklist_users", [], true);
 
+      const blacklistPrefs = {
+        bl_ghost_delay: GMStore.get("bl_ghost_delay", 4),
+        bl_bot_relay:   GMStore.get("bl_bot_relay",   true),
+      };
+
+      const myPostsPrefs = {
+        mp_quota_level:  GMStore.get("mp_quota_level",  "balanced"),
+        mp_quota_custom: GMStore.get("mp_quota_custom", null),
+      };
+
+      const wormholeMonitorPrefs = {
+        wh_monitor_enabled:    GMStore.get("wh_monitor_enabled",    "false"),
+        wh_monitor_interval:   GMStore.get("wh_monitor_interval",   "30"),
+        wh_monitor_badge_style:GMStore.get("wh_monitor_badge_style","dot"),
+      };
+
+      const wormholeFocusExtra = {
+        wormhole_focus_show_labels: localStorage.getItem("wormhole_focus_show_labels"),
+      };
+
       const data = {
-        ver: "EX3",
+        ver: "EX4",
         config: configData,
         forwardingData: forwardingData,
         forwardingPref: forwardingPref,
         ...moduleCData,
         wormholes: moduleDData,
         wormholePrefs: wormholePrefs,
+        wormholeMonitorPrefs: wormholeMonitorPrefs,
+        wormholeFocusExtra: wormholeFocusExtra,
         headerModPrefs: headerModPrefs,
         moduleToggles: moduleToggles,
         webhookList: webhookList,
         channelScoutData: channelScoutData,
         blacklistData: blacklistData,
+        blacklistPrefs: blacklistPrefs,
+        myPostsPrefs: myPostsPrefs,
       };
 
       const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -7160,6 +7565,7 @@
             "mod_urlchecker",
             "mod_scout",
             "mod_blacklist",
+            "mod_myposts",
           ];
           modKeys.forEach((k) => {
             if (mt[k] != null) localStorage.setItem(k, mt[k]);
@@ -7176,6 +7582,38 @@
 
         if (Array.isArray(data.blacklistData) && data.blacklistData.length > 0) {
           GMStore.set("blacklist_users", data.blacklistData, true);
+        }
+
+        if (data.blacklistPrefs) {
+          const bp = data.blacklistPrefs;
+          if (bp.bl_ghost_delay != null)
+            GMStore.set("bl_ghost_delay", bp.bl_ghost_delay);
+          if (bp.bl_bot_relay != null)
+            GMStore.set("bl_bot_relay", bp.bl_bot_relay);
+        }
+
+        if (data.myPostsPrefs) {
+          const mp = data.myPostsPrefs;
+          if (mp.mp_quota_level != null)
+            GMStore.set("mp_quota_level", mp.mp_quota_level);
+          if (mp.mp_quota_custom != null)
+            GMStore.set("mp_quota_custom", mp.mp_quota_custom);
+        }
+
+        if (data.wormholeMonitorPrefs) {
+          const wmp = data.wormholeMonitorPrefs;
+          if (wmp.wh_monitor_enabled != null)
+            GMStore.set("wh_monitor_enabled", wmp.wh_monitor_enabled);
+          if (wmp.wh_monitor_interval != null)
+            GMStore.set("wh_monitor_interval", wmp.wh_monitor_interval);
+          if (wmp.wh_monitor_badge_style != null)
+            GMStore.set("wh_monitor_badge_style", wmp.wh_monitor_badge_style);
+        }
+
+        if (data.wormholeFocusExtra) {
+          const wfe = data.wormholeFocusExtra;
+          if (wfe.wormhole_focus_show_labels != null)
+            localStorage.setItem("wormhole_focus_show_labels", wfe.wormhole_focus_show_labels);
         }
 
         alert(t("import_success"));
@@ -12806,6 +13244,7 @@
       });
 
       observer.observe(document.body, { childList: true, subtree: true });
+      return observer;
     }
 
     initChatEntitySaver();
@@ -12927,9 +13366,16 @@
         }
       };
       setTimeout(_initialScan, 300);
+      return observer;
     }
 
-    initChatInputButton();
+    const _chatEntitySaverObs  = initChatEntitySaver();
+    const _chatInputButtonObs  = initChatInputButton();
+
+    CleanupRegistry.add(() => {
+      _chatEntitySaverObs?.disconnect();
+      _chatInputButtonObs?.disconnect();
+    });
 
     setupTrigger();
   }
@@ -19049,10 +19495,14 @@ unsafeWindow.fetch = function(...args) {
       }
     }
 
+    let _blListCache = null;
     function blLoad() {
-      return GMStore.get(BL_STORE_KEY, [], true) || [];
+      if (_blListCache !== null) return _blListCache;
+      _blListCache = GMStore.get(BL_STORE_KEY, [], true) || [];
+      return _blListCache;
     }
     function blSave(arr) {
+      _blListCache = arr;
       GMStore.set(BL_STORE_KEY, arr, true);
     }
     function blAdd(name, style = 2, expiresAt = null) {
@@ -19360,8 +19810,10 @@ unsafeWindow.fetch = function(...args) {
     setTimeout(blApplyAll, 2500);
 
     const _blTempInterval = setInterval(() => {
+      const list = blLoad();
+      if (!list.some(u => u.expiresAt)) return;
       const now = Date.now();
-      const expired = blLoad().filter(u => u.expiresAt && now >= new Date(u.expiresAt).getTime());
+      const expired = list.filter(u => u.expiresAt && now >= new Date(u.expiresAt).getTime());
       if (expired.length === 0) return;
       expired.forEach(u => {
         blRemove(u.name);
@@ -19376,6 +19828,7 @@ unsafeWindow.fetch = function(...args) {
 
     CleanupRegistry.add(() => clearInterval(_blTempInterval));
 
+    let _panelTick = null;
     function openBlPanel() {
       if (document.getElementById(BL_PANEL_ID)) {
         closeBlPanel(); return;
@@ -19569,25 +20022,13 @@ unsafeWindow.fetch = function(...args) {
       };
       document.addEventListener("mousedown", _outside, true);
 
-      const _panelTick = setInterval(() => {
-        if (document.getElementById(BL_PANEL_ID)) {
-          renderList();
-        } else {
-          clearInterval(_panelTick);
-        }
-      }, 30000);
-      const _panelTickGuard = new MutationObserver(() => {
-        if (!document.getElementById(BL_PANEL_ID)) {
-          clearInterval(_panelTick);
-          _panelTickGuard.disconnect();
-        }
-      });
-      _panelTickGuard.observe(document.body, { childList: true, subtree: true });
+      _panelTick = setInterval(() => { if (document.getElementById(BL_PANEL_ID)) renderList(); }, 30000);
     }
 
     function closeBlPanel(instant = false) {
       const panel = document.getElementById(BL_PANEL_ID);
       if (!panel) return;
+      clearInterval(_panelTick); _panelTick = null;
       document.querySelectorAll(".bl-style-dropdown").forEach(d => d.remove());
       if (instant) { panel.remove(); return; }
       panel.classList.add("dmt-bl-leaving");
@@ -20209,6 +20650,7 @@ unsafeWindow.fetch = function(...args) {
     }
 
     const _blMenuObserver = new MutationObserver((mutations) => {
+      if (document.hidden) return;
       for (const mut of mutations) {
         for (const node of mut.addedNodes) {
           if (!(node instanceof Element)) continue;
@@ -20308,6 +20750,7 @@ unsafeWindow.fetch = function(...args) {
           });
 
           blockItem.insertAdjacentElement("afterend", injectItem);
+          return;
         }
       }
     });
@@ -21537,7 +21980,7 @@ unsafeWindow.fetch = function(...args) {
       overlay.id = "dmt-cache-modal";
       overlay.style.cssText = [
         "position:fixed;inset:0;z-index:99999;",
-        "background:rgba(0,0,0,.55);backdrop-filter:blur(2px);",
+        "background:rgba(0,0,0,.55);",
         "display:flex;align-items:center;justify-content:center;",
       ].join("");
       overlay.onclick = e => { if (e.target === overlay) overlay.remove(); };
@@ -21669,7 +22112,30 @@ unsafeWindow.fetch = function(...args) {
       }
 
       const footer = document.createElement("div");
-      footer.style.cssText = "padding:10px 16px;border-top:1px solid var(--dmt-divider,#1e1f22);display:flex;justify-content:flex-end;";
+      footer.style.cssText = "padding:10px 16px;border-top:1px solid var(--dmt-divider,#1e1f22);display:flex;gap:8px;justify-content:flex-end;align-items:center;";
+
+      const resyncBtn = document.createElement("button");
+      resyncBtn.textContent = "🔄 Force full resync";
+      resyncBtn.title = "Clear cache for current scope and re-fetch all messages from the API.";
+      resyncBtn.style.cssText = "font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--dmt-text-muted,#949ba4);background:none;color:var(--dmt-text-muted,#949ba4);cursor:pointer;";
+      resyncBtn.onclick = async () => {
+        const scope = _scopeKey();
+        if (!scope) return;
+        if (!await dmtConfirm("Clear cache for this scope and re-fetch all messages from Discord?\nThis may take a while depending on your message count.")) return;
+        resyncBtn.disabled = true; resyncBtn.textContent = "Clearing…";
+        await _idbClearScope(scope);
+        overlay.remove();
+        _browseData = []; _browseOffset = 0; _browseTotal = null;
+        _browseGen++;
+        _stopRequested = false; _prefetchActive = false;
+        const msgList = _panelEl?.querySelector(".mp-body");
+        const selCount   = _panelEl?.querySelector(".mp-sel-count");
+        const createBtn  = _panelEl?.querySelector(".mp-create-btn");
+        const cancelBtn  = _panelEl?.querySelector(".mp-cancel-btn");
+        const searchInput = _panelEl?.querySelector(".mp-search");
+        if (msgList) _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput);
+      };
+
       const clearAllBtn = document.createElement("button");
       clearAllBtn.textContent = "🗑 Clear all cache";
       clearAllBtn.style.cssText = "font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--dmt-danger,#ed4245);background:none;color:var(--dmt-danger,#ed4245);cursor:pointer;";
@@ -21679,7 +22145,7 @@ unsafeWindow.fetch = function(...args) {
         await _idbClearAll();
         overlay.remove();
       };
-      footer.appendChild(clearAllBtn);
+      footer.append(resyncBtn, clearAllBtn);
       panel.appendChild(footer);
     }
 
@@ -23455,6 +23921,45 @@ unsafeWindow.fetch = function(...args) {
         const favMsgs = _browseData.filter(m => _favIds.has(m.id));
 
         if (_browseData.length === 0) {
+          const scope = _scopeKey();
+          if (scope) {
+            _idbGetByScope(scope).then(cached => {
+              if (cached.length > 0) {
+                _browseData = cached;
+                _drawFavs();
+              } else {
+                list.innerHTML = "";
+                const skelFrag = document.createDocumentFragment();
+                for (let i = 0; i < 3; i++) skelFrag.appendChild(_makeSkeletonRow());
+                list.appendChild(skelFrag);
+                titleEl.textContent = "💗 Loading…";
+                let tries = 0;
+                const poll = setInterval(() => {
+                  tries++;
+                  if (_browseData.length > 0 || tries > 50 || _stopRequested) {
+                    clearInterval(poll);
+                    if (_browseData.length > 0) _drawFavs();
+                  }
+                }, 600);
+              }
+            }).catch(() => {
+              list.innerHTML = "";
+              const skelFrag = document.createDocumentFragment();
+              for (let i = 0; i < 3; i++) skelFrag.appendChild(_makeSkeletonRow());
+              list.appendChild(skelFrag);
+              titleEl.textContent = "💗 Loading…";
+              let tries = 0;
+              const poll = setInterval(() => {
+                tries++;
+                if (_browseData.length > 0 || tries > 50 || _stopRequested) {
+                  clearInterval(poll);
+                  if (_browseData.length > 0) _drawFavs();
+                }
+              }, 600);
+            });
+            return;
+          }
+
           const skelFrag = document.createDocumentFragment();
           for (let i = 0; i < 3; i++) skelFrag.appendChild(_makeSkeletonRow());
           list.appendChild(skelFrag);
@@ -24638,16 +25143,20 @@ if (type === "warn" && scanLimit !== null) {
     }
     document.addEventListener("paste", globalPasteHandler, true);
 
-    const _ucObserver = new MutationObserver(() => {
+    let _ucNavLastChannel = getCurrentChannelId();
+    function _ucOnNavChange() {
       if (!document.getElementById(BANNER_ID)) return;
       const channelId = getCurrentChannelId();
-      if (channelId !== _ucObserver._lastChannelId) {
+      if (channelId !== _ucNavLastChannel) {
         removeBanner();
-        _ucObserver._lastChannelId = channelId;
+        _ucNavLastChannel = channelId;
       }
-    });
-    _ucObserver._lastChannelId = getCurrentChannelId();
-    _ucObserver.observe(document.body, { childList: true, subtree: true });
+    }
+    if (typeof navigation !== "undefined") {
+      navigation.addEventListener("navigate", _ucOnNavChange, { passive: true });
+    } else {
+      window.addEventListener("popstate", _ucOnNavChange, { passive: true });
+    }
 
     const _scoutEnabled = isModEnabled("mod_scout");
 
@@ -25094,7 +25603,8 @@ if (type === "warn" && scanLimit !== null) {
     document.addEventListener("keydown",  _onF2Keydown,  true);
 
     CleanupRegistry.add(() => {
-      _ucObserver.disconnect();
+      if (typeof navigation !== "undefined") navigation.removeEventListener("navigate", _ucOnNavChange);
+      else window.removeEventListener("popstate", _ucOnNavChange);
       document.removeEventListener("paste",    globalPasteHandler, true);
       document.removeEventListener("focusin",  _onF2FocusIn,  true);
       document.removeEventListener("focusout", _onF2FocusOut, true);
@@ -25108,7 +25618,8 @@ if (type === "warn" && scanLimit !== null) {
 
     } else {
       CleanupRegistry.add(() => {
-        _ucObserver.disconnect();
+        if (typeof navigation !== "undefined") navigation.removeEventListener("navigate", _ucOnNavChange);
+        else window.removeEventListener("popstate", _ucOnNavChange);
         document.removeEventListener("paste", globalPasteHandler, true);
         clearTimeout(_debounceTimer);
         removeBanner();
