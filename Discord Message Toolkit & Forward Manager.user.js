@@ -9,7 +9,7 @@
 // @name:fr      Discord Message Toolkit
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
-// @version      2.6.4.1
+// @version      2.6.4.2
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -7447,10 +7447,21 @@
     }
 
     function importSettings() {
-      const input = prompt(t("import_prompt"));
-      if (!input) return;
-      try {
-        const data = JSON.parse(input);
+      const fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept = ".json,application/json";
+      fileInput.style.display = "none";
+      document.body.appendChild(fileInput);
+
+      fileInput.addEventListener("change", () => {
+        const file = fileInput.files?.[0];
+        document.body.removeChild(fileInput);
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = JSON.parse(e.target.result);
 
         if (Array.isArray(data.symbols)) {
           localStorage.setItem("copySymbols", JSON.stringify(data.symbols));
@@ -7616,12 +7627,18 @@
             localStorage.setItem("wormhole_focus_show_labels", wfe.wormhole_focus_show_labels);
         }
 
-        alert(t("import_success"));
-        location.reload();
-      } catch (e) {
-        console.error(e);
-        alert(t("import_fail"));
-      }
+            alert(t("import_success"));
+            location.reload();
+          } catch (e) {
+            console.error(e);
+            alert(t("import_fail"));
+          }
+        };
+        reader.onerror = () => alert(t("import_fail"));
+        reader.readAsText(file);
+      });
+
+      fileInput.click();
     }
 
     GM_registerMenuCommand(t("menu_export"), exportSettings);
@@ -13441,7 +13458,7 @@
       const list = getData();
       list.push(entry);
       saveData(list);
-      _fetchWebhookMeta(url).then((meta) => _applyMeta(entry.id, meta));
+      _fetchWebhookMeta(url).then((meta) => _applyMeta(entry.id, meta)).catch(e => DEBUG && console.warn("[Webhook] meta fetch failed:", e));
       return list;
     }
     function removeWebhook(id) {
@@ -13456,7 +13473,7 @@
           : w
       );
       saveData(list);
-      _fetchWebhookMeta(url).then((meta) => _applyMeta(id, meta));
+      _fetchWebhookMeta(url).then((meta) => _applyMeta(id, meta)).catch(e => DEBUG && console.warn("[Webhook] meta fetch failed:", e));
       return list;
     }
 
@@ -13673,7 +13690,7 @@
               await testWebhook(wh.url);
               testBtn.textContent = "✅";
               _showToast(t("wh_test_ok"));
-              _fetchWebhookMeta(wh.url).then((meta) => _applyMeta(wh.id, meta));
+              _fetchWebhookMeta(wh.url).then((meta) => _applyMeta(wh.id, meta)).catch(e => DEBUG && console.warn("[Webhook] meta fetch failed:", e));
             } catch (e) {
               DEBUG && console.error("[Webhook] test failed:", e);
               testBtn.textContent = "❌";
@@ -21938,6 +21955,8 @@ unsafeWindow.fetch = function(...args) {
           }, 300);
         });
         ro.observe(panel);
+        const _prevCleanup = panel._mpCleanup;
+        panel._mpCleanup = () => { _prevCleanup(); ro.disconnect(); clearTimeout(_resizeTimer); };
       }
     }
 
@@ -22173,6 +22192,12 @@ unsafeWindow.fetch = function(...args) {
       closeBtn.className = "mp-close"; closeBtn.textContent = "✕";
       closeBtn.onclick = () => {
         if (_browseObs) { _browseObs.disconnect(); _browseObs = null; }
+        if (_mediaObs) { _mediaObs.disconnect(); _mediaObs = null; }
+        if (_panelEl) {
+          _panelEl.querySelectorAll("[data-has-vid-obs]").forEach(el => {
+            el._vidObs?.disconnect(); el._vidObs = null;
+          });
+        }
         if (typeof panel._mpCleanup === "function") panel._mpCleanup();
         _setupBrowseSentinel = null;
         _mpRefreshBtn = null;
