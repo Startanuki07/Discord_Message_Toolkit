@@ -9,7 +9,7 @@
 // @name:fr      Discord Message Toolkit
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
-// @version      2.6.4.2
+// @version      2.6.4.6
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -11214,7 +11214,7 @@
                   downloadUrl.slice(0, 80),
                 );
               }
-            });
+            }).catch(e => DEBUG && console.warn("[GifCache] fetchAndCacheMedia error:", e));
           }
         }
 
@@ -16477,7 +16477,20 @@ unsafeWindow.fetch = function(...args) {
           #wh-send-field-add:hover{background:rgba(88,101,242,.22);color:#c0c5f7}
           #wh-send-field-add:disabled{opacity:.35;cursor:not-allowed}
           #wh-send-cool-note{font-size:10px;color:rgba(240,178,50,.75);min-height:14px}
-
+          
+          .wh-field-wrap{display:flex;flex-direction:column;flex:1;gap:3px;min-width:0}
+          .wh-fmt-bar{display:flex;align-items:center;gap:1px;padding:2px 4px;
+            background:rgba(255,255,255,.03);border:1px solid rgba(88,101,242,.18);
+            border-bottom:none;border-radius:5px 5px 0 0;}
+          .wh-fmt-btn{display:inline-flex;align-items:center;justify-content:center;
+            width:22px;height:22px;padding:0;border:none;border-radius:4px;
+            background:transparent;color:var(--dmt-text-muted,#949ba4);
+            cursor:pointer;transition:background .12s,color .12s;flex-shrink:0;}
+          .wh-fmt-btn:hover{background:rgba(88,101,242,.18);color:#c0c5f7}
+          .wh-fmt-btn:active{background:rgba(88,101,242,.32);color:#fff}
+          .wh-fmt-sep{width:1px;height:14px;background:rgba(255,255,255,.1);margin:0 3px;flex-shrink:0}
+          
+          .wh-field-wrap .wh-field-textarea{border-radius:0 0 5px 5px !important}
         `;
         document.head.appendChild(s);
       }
@@ -16536,8 +16549,116 @@ unsafeWindow.fetch = function(...args) {
           addFieldBtn.disabled = getFieldCount() >= MAX_FIELDS;
           updateCoolNote.call(this);
         });
+
+        const fmtBar = document.createElement("div");
+        fmtBar.className = "wh-fmt-bar";
+
+        const FMT_BTNS = [
+          [
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z"/></svg>',
+            "Bold  **text**", "**", "**", "bold text", false, false,
+          ],
+          [
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4z"/></svg>',
+            "Italic  *text*", "*", "*", "italic text", false, false,
+          ],
+          [
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M10 19h4v-3h-4v3zM5 4v3h5.5v3h3V7H19V4H5zM9 12v3h6v-3H9z"/></svg>',
+            "Underline  __text__", "__", "__", "underline text", false, false,
+          ],
+          [
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M10 19h4v-3h-4v3zM5 4v3h5.5v3h3V7H19V4H5zM9 12v3h6v-3H9z" opacity=".4"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.2"/></svg>',
+            "Strikethrough  ~~text~~", "~~", "~~", "strikethrough text", false, false,
+          ],
+          [
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8" opacity=".5"/><line x1="7" y1="12" x2="17" y2="12"/></svg>',
+            "Spoiler  ||text||", "||", "||", "spoiler text", false, false,
+          ],
+          ["separator", "", "", "", "", false, false],
+          [
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>',
+            "Inline code  `code`", "`", "`", "code", false, false,
+          ],
+          [
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm4 5h12v2H8zm-4 5h16v2H4z" opacity=".5"/><rect x="2" y="4" width="20" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+            "Code block  ```code```", "```\n", "\n```", "code here", false, false,
+          ],
+          [
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M6 17h3l2-4H7V7H3v6h3zm8 0h3l2-4h-4V7h-4v6h3z"/></svg>',
+            "Blockquote  > text", "> ", "", "", true, false,
+          ],
+          ["separator", "", "", "", "", false, false],
+          [
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/></svg>',
+            "Horizontal rule  ---", "---\n", "", "", false, true,
+          ],
+        ];
+
+        FMT_BTNS.forEach(([svgOrLabel, title, open, close, phText, isLinePrefix, isInsertOnly]) => {
+          if (svgOrLabel === "separator") {
+            const sep = document.createElement("span");
+            sep.className = "wh-fmt-sep";
+            fmtBar.appendChild(sep);
+            return;
+          }
+          const btn = document.createElement("button");
+          btn.className = "wh-fmt-btn";
+          btn.type = "button";
+          btn.title = title;
+          btn.innerHTML = svgOrLabel;
+
+          btn.addEventListener("mousedown", e => {
+            e.preventDefault();
+          });
+          btn.addEventListener("click", () => {
+            ta.focus();
+            const start = ta.selectionStart;
+            const end   = ta.selectionEnd;
+            const val   = ta.value;
+            const sel   = val.slice(start, end);
+
+            let newVal, newStart, newEnd;
+
+            if (isInsertOnly) {
+              newVal   = val.slice(0, start) + open + val.slice(end);
+              newStart = newEnd = start + open.length;
+            } else if (isLinePrefix) {
+              const before = val.slice(0, start);
+              const after  = val.slice(end);
+              const lines  = (sel || "\n").split("\n");
+              const allPrefixed = lines.every(l => l.startsWith(open.trimEnd()));
+              const toggled = allPrefixed
+                ? lines.map(l => l.slice(open.trimEnd().length + (l[open.trimEnd().length] === " " ? 1 : 0)))
+                : lines.map(l => open + l);
+              const replaced = toggled.join("\n");
+              newVal   = before + replaced + after;
+              newStart = start;
+              newEnd   = start + replaced.length;
+            } else if (sel.length > 0) {
+              newVal   = val.slice(0, start) + open + sel + close + val.slice(end);
+              newStart = start + open.length;
+              newEnd   = start + open.length + sel.length;
+            } else {
+              newVal   = val.slice(0, start) + open + phText + close + val.slice(start);
+              newStart = start + open.length;
+              newEnd   = start + open.length + phText.length;
+            }
+
+            ta.value = newVal;
+            ta.setSelectionRange(newStart, newEnd);
+            ta.dispatchEvent(new Event("input", { bubbles: true }));
+          });
+
+          fmtBar.appendChild(btn);
+        });
+
+        const fieldWrap = document.createElement("div");
+        fieldWrap.className = "wh-field-wrap";
+        fieldWrap.appendChild(fmtBar);
+        fieldWrap.appendChild(ta);
+
         row.appendChild(numEl);
-        row.appendChild(ta);
+        row.appendChild(fieldWrap);
         row.appendChild(delBtn);
         fieldsEl.appendChild(row);
         addFieldBtn.disabled = getFieldCount() >= MAX_FIELDS;
@@ -21601,8 +21722,10 @@ unsafeWindow.fetch = function(...args) {
       delBtn2.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
       delBtn2.onclick = async e => {
         e.stopPropagation();
-        const ok = await dmtConfirm(mp("confirm_delete_single"), { danger: true });
-        if (!ok) return;
+        if (!e.shiftKey) {
+          const ok = await dmtConfirm(mp("confirm_delete_single"), { danger: true });
+          if (!ok) return;
+        }
         _stopRequested = false;
         item.style.transition = "opacity .25s"; item.style.opacity = "0";
         const snapshot = _browseData.slice();
@@ -21691,11 +21814,15 @@ unsafeWindow.fetch = function(...args) {
         "background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1);",
         "color:var(--dmt-text-primary,#dcddde);font-size:13px;outline:none;}",
         "#dmt-mp-panel .mp-search:focus{border-color:var(--dmt-accent,#5865f2);}",
-        "#dmt-mp-panel .mp-type-row{display:flex;gap:6px;flex-wrap:wrap;padding:0 12px 6px;flex-shrink:0;}",
+        "#dmt-mp-panel .mp-type-row{display:flex;gap:6px;flex-wrap:nowrap;align-items:center;padding:0 12px 6px;flex-shrink:0;}",
         "#dmt-mp-panel .mp-type-chip{display:flex;align-items:center;gap:4px;font-size:11px;",
         "cursor:pointer;color:var(--dmt-text-muted,#949ba4);transition:color .15s;}",
         "#dmt-mp-panel .mp-type-chip input{accent-color:var(--dmt-accent,#5865f2);cursor:pointer;}",
         "#dmt-mp-panel .mp-type-chip.checked{color:var(--dmt-text-primary,#dcddde);}",
+        "#dmt-mp-panel .mp-type-icon-btn{display:flex;align-items:center;justify-content:center;",
+        "background:none;border:none;color:var(--dmt-text-muted,#949ba4);cursor:pointer;",
+        "border-radius:4px;transition:color .15s,background .15s;}",
+        "#dmt-mp-panel .mp-type-icon-btn:hover{color:var(--dmt-text-primary,#dcddde);background:var(--background-modifier-hover,rgba(79,84,92,.16));}",
         
         "#dmt-mp-panel .mp-body{flex:1;overflow-y:auto;min-height:0;contain:content;}",
         
@@ -21715,11 +21842,11 @@ unsafeWindow.fetch = function(...args) {
         "color:var(--dmt-text-primary,#dcddde);font-size:12px;outline:none;}",
         "#dmt-mp-panel .mp-media-search:focus{border-color:var(--dmt-accent,#5865f2);}",
         
-        "#dmt-mp-panel .mp-masonry{columns:3;column-gap:3px;padding:0 0 4px;}",
-        "#dmt-mp-panel .mp-masonry-item{break-inside:avoid;position:relative;margin-bottom:3px;",
-        "border-radius:4px;overflow:hidden;cursor:pointer;background:rgba(255,255,255,.04);display:block;}",
+        "#dmt-mp-panel .mp-masonry{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:0 0 4px;align-content:start;}",
+        "#dmt-mp-panel .mp-masonry-item{position:relative;aspect-ratio:1/1;",
+        "border-radius:4px;overflow:hidden;cursor:pointer;background:rgba(255,255,255,.04);}",
         "#dmt-mp-panel .mp-masonry-item img,#dmt-mp-panel .mp-masonry-item video{",
-        "width:100%;display:block;border-radius:4px;}",
+        "width:100%;height:100%;object-fit:cover;display:block;border-radius:4px;}",
         "#dmt-mp-panel .mp-masonry-item video{background:#000;}",
         
         "#dmt-mp-panel .mp-masonry-item .mp-grid-overlay{position:absolute;inset:0;",
@@ -21764,7 +21891,7 @@ unsafeWindow.fetch = function(...args) {
         
         "#dmt-mp-panel .mp-media-date-sep{font-size:11px;font-weight:700;",
         "color:var(--dmt-text-muted,#949ba4);padding:8px 4px 4px;",
-        "letter-spacing:.04em;}",
+        "letter-spacing:.04em;grid-column:1/-1;}",
         
         "#dmt-mp-panel .mp-grid-meta{font-size:10px;color:rgba(255,255,255,.85);line-height:1.3;}",
         "#dmt-mp-panel .mp-grid-acts{display:flex;gap:4px;margin-top:4px;}",
@@ -22210,8 +22337,7 @@ unsafeWindow.fetch = function(...args) {
 
       const tabsRow = document.createElement("div");
       tabsRow.className = "mp-tabs";
-      let _activeTab = GMStore.get(SK_LAST_TAB, "browse", true);
-      if (!["browse","favs","media","tasks"].includes(_activeTab)) _activeTab = "browse";
+      let _activeTab = "browse";
 
       const browseArea = document.createElement("div");
       browseArea.style.cssText = "display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;";
@@ -22225,7 +22351,7 @@ unsafeWindow.fetch = function(...args) {
 
       const tabDefs = [
         { key: "browse", labelKey: "tab_browse" },
-        { key: "favs",   label: "💗"             },
+        { key: "favs",   label: "💗 Favs"          },
         { key: "media",  labelKey: "tab_media"  },
         { key: "tasks",  labelKey: "tab_tasks"  },
       ];
@@ -22302,23 +22428,6 @@ unsafeWindow.fetch = function(...args) {
       refreshBtn.onclick = _doRefresh;
       scopeRow.appendChild(refreshBtn);
 
-      const timeFmtBtn = document.createElement("button");
-      timeFmtBtn.className = "mp-refresh-btn";
-      timeFmtBtn.style.cssText = "font-size:11px;font-weight:600;padding:0 6px;min-width:0;letter-spacing:.3px;";
-      const _updateTimeFmtBtn = () => {
-        const fmt = GMStore.get(SK_TIME_FORMAT, "us");
-        timeFmtBtn.textContent = fmt === "asia" ? "ASIA" : "US";
-        timeFmtBtn.title = fmt === "asia" ? "Switch to US time format (M/D HH:mm)" : "Switch to Asia time format (YYYY/MM/DD HH:mm)";
-      };
-      _updateTimeFmtBtn();
-      timeFmtBtn.onclick = () => {
-        const fmt = GMStore.get(SK_TIME_FORMAT, "us");
-        GMStore.set(SK_TIME_FORMAT, fmt === "asia" ? "us" : "asia");
-        _updateTimeFmtBtn();
-        _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
-      };
-      scopeRow.appendChild(timeFmtBtn);
-
       const cacheBtn = document.createElement("button");
       cacheBtn.className = "mp-refresh-btn";
       cacheBtn.title     = "Cache Management";
@@ -22357,6 +22466,91 @@ unsafeWindow.fetch = function(...args) {
         typeRow.appendChild(chip);
       });
 
+      const SVG_DATE_US   = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><rect x="3" y="4" width="18" height="17" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" stroke-width="2"/><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><text x="12" y="18" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">M/D</text></svg>';
+      const SVG_DATE_ASIA = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><rect x="3" y="4" width="18" height="17" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" stroke-width="2"/><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><text x="12" y="17" text-anchor="middle" font-size="4.5" fill="currentColor" font-family="monospace">YMD</text></svg>';
+
+      const timeFmtBtn = document.createElement("button");
+      timeFmtBtn.className = "mp-type-icon-btn";
+      timeFmtBtn.style.cssText = "margin-left:auto;padding:2px 5px;min-width:0;flex-shrink:0;";
+      const _updateTimeFmtBtn = () => {
+        const fmt = GMStore.get(SK_TIME_FORMAT, "us");
+        timeFmtBtn.innerHTML = fmt === "asia" ? SVG_DATE_ASIA : SVG_DATE_US;
+        timeFmtBtn.title = fmt === "asia"
+          ? "Date format: YYYY/MM/DD HH:mm — click to switch to M/D HH:mm"
+          : "Date format: M/D HH:mm — click to switch to YYYY/MM/DD HH:mm";
+      };
+      _updateTimeFmtBtn();
+      timeFmtBtn.onclick = () => {
+        const fmt = GMStore.get(SK_TIME_FORMAT, "us");
+        GMStore.set(SK_TIME_FORMAT, fmt === "asia" ? "us" : "asia");
+        _updateTimeFmtBtn();
+        _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
+      };
+      typeRow.appendChild(timeFmtBtn);
+
+      const helpBtn = document.createElement("button");
+      helpBtn.className = "mp-type-icon-btn";
+      helpBtn.style.cssText = "padding:2px 5px;min-width:0;flex-shrink:0;";
+      helpBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>';
+      helpBtn.title = "Keyboard shortcuts & tips";
+      helpBtn.onclick = e => {
+        e.stopPropagation();
+        const existing = document.getElementById("mp-help-popup");
+        if (existing) { existing.remove(); return; }
+
+        const popup = document.createElement("div");
+        popup.id = "mp-help-popup";
+        popup.style.cssText = [
+          "position:absolute;z-index:9999;background:var(--background-floating,#18191c)",
+          "border:1px solid var(--background-modifier-accent,#4f545c)",
+          "border-radius:8px;padding:12px 14px;font-size:12px;line-height:1.7",
+          "color:var(--text-normal,#dcddde);box-shadow:0 4px 20px rgba(0,0,0,.5)",
+          "min-width:260px;max-width:320px;right:0;top:calc(100% + 4px)",
+          "white-space:pre-line",
+        ].join(";");
+
+        const sections = [
+          ["🖱️ Selection", [
+            "Click row  →  toggle select",
+            "Shift+Click row  →  range select",
+            "Shift+🗑️  →  delete without confirm",
+          ]],
+          ["⌨️ Shortcuts", [
+            "Alt+P  →  open / close panel",
+          ]],
+          ["📅 Date format toggle", [
+            "Calendar icon (right of filters)",
+            "M/D HH:mm  ↔  YYYY/MM/DD HH:mm",
+          ]],
+        ];
+
+        let html = "";
+        sections.forEach(([title, lines]) => {
+          html += `<div style="font-weight:700;color:var(--text-muted,#72767d);font-size:10px;text-transform:uppercase;letter-spacing:.5px;margin-top:8px;margin-bottom:2px">${title}</div>`;
+          lines.forEach(l => {
+            const [key, ...rest] = l.split("→");
+            if (rest.length) {
+              html += `<div><span style="font-family:monospace;background:var(--background-secondary,#2f3136);padding:0 4px;border-radius:3px;font-size:11px">${key.trim()}</span> → ${rest.join("→").trim()}</div>`;
+            } else {
+              html += `<div style="color:var(--text-muted,#72767d)">${l}</div>`;
+            }
+          });
+        });
+
+        popup.innerHTML = html;
+        typeRow.style.position = "relative";
+        typeRow.appendChild(popup);
+
+        const _closeHelp = ev => {
+          if (!popup.contains(ev.target) && ev.target !== helpBtn) {
+            popup.remove();
+            document.removeEventListener("click", _closeHelp, true);
+          }
+        };
+        setTimeout(() => document.addEventListener("click", _closeHelp, true), 0);
+      };
+      typeRow.appendChild(helpBtn);
+
       const msgList = document.createElement("div");
       msgList.className = "mp-body";
 
@@ -22383,6 +22577,9 @@ unsafeWindow.fetch = function(...args) {
                   _appendFilteredRows(msgList, newFiltered, allFiltered, selCount, createBtn, cancelBtn);
                 }
                 if (_browseTotal !== null && _browseOffset < _browseTotal) _setupBrowseSentinel();
+              }).catch(e => {
+                DEBUG && console.warn("[Browse] sentinel _fetchPage failed, re-mounting sentinel:", e);
+                _setupBrowseSentinel();
               });
             }
           }, { threshold: 0.1, rootMargin: "200px" });
@@ -23144,8 +23341,10 @@ unsafeWindow.fetch = function(...args) {
       delBtn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
       delBtn.onclick = async e => {
         e.stopPropagation();
-        const ok = await dmtConfirm(mp("confirm_delete_single"), { danger: true });
-        if (!ok) return;
+        if (!e.shiftKey) {
+          const ok = await dmtConfirm(mp("confirm_delete_single"), { danger: true });
+          if (!ok) return;
+        }
         _stopRequested = false;
         row.style.transition = "opacity .25s";
         row.style.opacity = "0";
@@ -23539,7 +23738,10 @@ unsafeWindow.fetch = function(...args) {
         msgs.forEach(msg => {
           const item = _buildMasonryItem(msg, _mediaData.indexOf(msg), selCount2, createBtn2, cancelBtn2);
           item.classList.add("mp-new");
-          allNewItems.push({ item, section: section, dateKey });
+          const ph = document.createElement("div");
+          ph.className = "mp-skeleton-card";
+          grid.appendChild(ph);
+          allNewItems.push({ item, placeholder: ph, dateKey });
         });
       });
 
@@ -23572,16 +23774,9 @@ unsafeWindow.fetch = function(...args) {
 
         Promise.all(decodePromises).then(() => {
           requestAnimationFrame(() => {
-            batch.forEach(({ item, dateKey }) => {
-              const sep = grid.querySelector("[data-datekey='" + dateKey + "']");
-              if (sep) {
-                let insertBefore = sep.nextSibling;
-                while (insertBefore &&
-                  insertBefore.dataset?.msgId &&
-                  _dateKey(_mediaData.find(m => m.id === insertBefore.dataset.msgId) || {}) === dateKey) {
-                  insertBefore = insertBefore.nextSibling;
-                }
-                grid.insertBefore(item, insertBefore || null);
+            batch.forEach(({ item, placeholder }) => {
+              if (placeholder && placeholder.parentNode) {
+                placeholder.replaceWith(item);
               } else {
                 grid.appendChild(item);
               }
@@ -23589,7 +23784,7 @@ unsafeWindow.fetch = function(...args) {
             });
             requestAnimationFrame(appendBatch);
           });
-        });
+        }).catch(e => { DEBUG && console.warn("[MediaGrid] batch decode error:", e); requestAnimationFrame(appendBatch); });
       };
 
       requestAnimationFrame(appendBatch);
@@ -23681,8 +23876,10 @@ unsafeWindow.fetch = function(...args) {
       db.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
       db.onclick = async e => {
         e.stopPropagation();
-        const ok = await dmtConfirm(mp("confirm_delete_single"), { danger: true });
-        if (!ok) return;
+        if (!e.shiftKey) {
+          const ok = await dmtConfirm(mp("confirm_delete_single"), { danger: true });
+          if (!ok) return;
+        }
         _stopRequested = false;
         item.style.transition = "opacity .25s"; item.style.opacity = "0";
         const snapMedia = _mediaData.slice();
@@ -24429,6 +24626,9 @@ unsafeWindow.fetch = function(...args) {
       if (typeof navigation !== "undefined") navigation.removeEventListener("navigate", _mpOnNavChange);
       else window.removeEventListener("popstate", _mpOnNavChange);
     });
+
+    setTimeout(() => _ensureCredentials().catch(() => {}), 800);
+
     DEBUG && console.log("[MyPosts] Module I initialized.");
   }
 
