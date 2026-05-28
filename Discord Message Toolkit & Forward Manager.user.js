@@ -9,7 +9,7 @@
 // @name:fr      Discord Message Toolkit
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
-// @version      2.6.4.6
+// @version      2.6.5.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -1023,7 +1023,7 @@
       em_col_del_tab_confirm: 'Delete tab "{n}" and all items inside?',
       em_modal_choose_tab: "Save to which collection?",
       em_modal_create_new: "+ Create New...",
-      em_col_refresh_tooltip: "Refresh GIF preview (refresh expired CDN cache)",
+      em_col_refresh_tooltip: "Refresh all GIF previews across all tabs (re-fetch expired CDN cache)",
       em_refresh_no_expired:   "ℹ️ No expired GIFs in this tab",
       em_refresh_consent:      "⚠️ About GIF Refresh\n\nThis feature will use a third-party proxy (fixcdn.hyonsu.com)\nto obtain fresh Discord attachment credentials.\n\nNotes:\n• Your image URLs will be sent to fixcdn.hyonsu.com\n• This is a third-party service, unrelated to Discord or this script\n• Search 'fixcdn hyonsu' to learn more before proceeding\n\nContinue?",
       em_refresh_cancel_tip:   "ℹ️ Cancelled. Manual steps:\n① Find the original GIF on Discord\n② Re-add it to your collection",
@@ -1535,7 +1535,7 @@
       em_col_del_tab_confirm: "刪除分頁「{n}」及其所有項目？",
       em_modal_choose_tab: "儲存到哪個收藏庫？",
       em_modal_create_new: "+ 建立新的...",
-      em_col_refresh_tooltip: "重新整理 GIF 預覽 (刷新過期的 CDN 快取)",
+      em_col_refresh_tooltip: "重新整理所有分頁的 GIF 預覽（刷新過期的 CDN 快取）",
       em_refresh_no_expired:   "ℹ️ 此分頁無過期的 GIF",
       em_refresh_consent:      "⚠️ 關於 GIF 刷新功能\n\n此功能將透過第三方代理伺服器（fixcdn.hyonsu.com）\n重新取得 Discord 附件連結的存取憑證。\n\n注意事項：\n• 你的圖片網址（URL）將傳送至 fixcdn.hyonsu.com\n• 該服務為第三方個人維護，與 Discord 及本腳本無關\n• 建議搜尋「fixcdn hyonsu」了解其運作方式後再決定\n\n是否繼續？",
       em_refresh_cancel_tip:   "ℹ️ 已取消。手動更新步驟：\n① 在 Discord 找到原始 GIF 訊息\n② 重新點選收藏加入蒐藏匣",
@@ -2045,7 +2045,7 @@
       em_col_del_tab_confirm: '删除标签页"{n}"及其所有内容？',
       em_modal_choose_tab: "保存到哪个收藏库？",
       em_modal_create_new: "+ 创建新的...",
-      em_col_refresh_tooltip: "刷新 GIF 预览 (刷新过期的 CDN 缓存)",
+      em_col_refresh_tooltip: "刷新所有标签页的 GIF 预览（刷新过期的 CDN 缓存）",
       em_refresh_no_expired:   "ℹ️ 此分页无过期的 GIF",
       em_refresh_consent:      "⚠️ 关于 GIF 刷新功能\n\n此功能将通过第三方代理服务器（fixcdn.hyonsu.com）\n重新获取 Discord 附件链接的访问凭证。\n\n注意事项：\n• 你的图片网址（URL）将发送至 fixcdn.hyonsu.com\n• 该服务为第三方个人维护，与 Discord 及本脚本无关\n• 建议搜索「fixcdn hyonsu」了解其运作方式后再決定\n\n是否继续？",
       em_refresh_cancel_tip:   "ℹ️ 已取消。手动更新步骤：\n① 在 Discord 找到原始 GIF 消息\n② 重新点选收藏加入收藏库",
@@ -2563,7 +2563,7 @@
       em_col_del_tab_confirm: "タブ「{n}」とその全項目を削除しますか？",
       em_modal_choose_tab: "どのコレクションに保存しますか？",
       em_modal_create_new: "+ 新しく作成...",
-      em_col_refresh_tooltip: "GIF プレビューを更新 (期限切れの CDN キャッシュをリフレッシュ)",
+      em_col_refresh_tooltip: "すべてのタブの GIF プレビューを更新（期限切れの CDN キャッシュをリフレッシュ）",
       em_refresh_no_expired:   "ℹ️ このタブに期限切れのGIFはありません",
       em_refresh_consent:      "⚠️ GIF更新について\n\nこの機能はサードパーティのプロキシ（fixcdn.hyonsu.com）を使用して\nDiscord添付ファイルのアクセス資格情報を更新します。\n\n注意事項：\n• 画像のURLがfixcdn.hyonsu.comに送信されます\n• このサービスはDiscordや本スクリプトと無関係の第三者が運営しています\n• 続行前に「fixcdn hyonsu」を検索して確認することをお勧めします\n\n続行しますか？",
       em_refresh_cancel_tip:   "ℹ️ キャンセルしました。手動更新手順：\n① DiscordでオリジナルGIFメッセージを見つける\n② 再度コレクションに追加する",
@@ -3079,7 +3079,7 @@
       em_col_del_tab_confirm: '탭 "{n}"과 모든 항목을 삭제하시겠습니까?',
       em_modal_choose_tab: "어느 컬렉션에 저장하시겠습니까?",
       em_modal_create_new: "+ 새로 만들기...",
-      em_col_refresh_tooltip: "GIF 미리보기 새로고침 (만료된 CDN 캐시 새로고침)",
+      em_col_refresh_tooltip: "모든 탭의 GIF 미리보기 새로고침 (만료된 CDN 캐시 새로고침)",
       em_refresh_no_expired:   "ℹ️ 이 탭에 만료된 GIF가 없습니다",
       em_refresh_consent:      "⚠️ GIF 새로고침에 대하여\n\n이 기능은 서드파티 프록시(fixcdn.hyonsu.com)를 통해\nDiscord 첨부 파일 접근 자격을 갱신합니다.\n\n주의 사항:\n• 이미지 URL이 fixcdn.hyonsu.com에 전송됩니다\n• 해당 서비스는 Discord 및 이 스크립트와 무관한 제3자가 운영합니다\n• 진행 전 'fixcdn hyonsu'를 검색하여 확인하시기 바랍니다\n\n계속하시겠습니까?",
       em_refresh_cancel_tip:   "ℹ️ 취소됨. 수동 업데이트 방법:\n① Discord에서 원본 GIF 메시지 찾기\n② 다시 콜렉션에 추가하기",
@@ -3625,7 +3625,7 @@
       wh_keep_source: "📎 Incluir enlace de origen",
       wh_keep_source_tip: "Al marcar, se añade el enlace original del mensaje al final del contenido enviado.",
 
-      em_col_refresh_tooltip: "Actualizar vista previa de GIF (recargar caché CDN expirado)",
+      em_col_refresh_tooltip: "Actualizar vista previa de GIF en todas las pestañas (recargar caché CDN expirado)",
       em_refresh_no_expired:   "ℹ️ No hay GIFs expirados en esta pestaña",
       em_refresh_consent:      "⚠️ Acerca de actualizar GIFs\n\nEsta función usará un proxy de terceros (fixcdn.hyonsu.com)\npara obtener credenciales frescas de adjuntos de Discord.\n\nNotas:\n• Las URLs de tus imágenes serán enviadas a fixcdn.hyonsu.com\n• Es un servicio de terceros, sin relación con Discord ni este script\n• Busca 'fixcdn hyonsu' para más información antes de continuar\n\n¿Continuar?",
       em_refresh_cancel_tip:   "ℹ️ Cancelado. Pasos manuales:\n① Busca el GIF original en Discord\n② Añádelo de nuevo a tu colección",
@@ -4135,7 +4135,7 @@
       wh_no_urls: "⚠️ Nenhuma URL nesta mensagem",
       wh_url_invalid: "⚠️ URL de Webhook inválida",
 
-      em_col_refresh_tooltip: "Atualizar prévia de GIF (recarregar cache CDN expirado)",
+      em_col_refresh_tooltip: "Atualizar prévia de GIF em todas as abas (recarregar cache CDN expirado)",
       em_refresh_no_expired:   "ℹ️ Nenhum GIF expirado nesta aba",
       em_refresh_consent:      "⚠️ Sobre atualização de GIFs\n\nEste recurso usará um proxy de terceiros (fixcdn.hyonsu.com)\npara obter novas credenciais de anexos do Discord.\n\nObservações:\n• Suas URLs de imagens serão enviadas ao fixcdn.hyonsu.com\n• Este é um serviço de terceiros, sem relação com Discord ou este script\n• Pesquise 'fixcdn hyonsu' para mais informações antes de continuar\n\nContinuar?",
       em_refresh_cancel_tip:   "ℹ️ Cancelado. Passos manuais:\n① Encontre o GIF original no Discord\n② Adicione-o novamente à sua coleção",
@@ -4657,7 +4657,7 @@
       wh_keep_source: "📎 Inclure le lien source",
       wh_keep_source_tip: "Si coché, le lien original du message est ajouté à la fin du contenu envoyé.",
 
-      em_col_refresh_tooltip: "Actualiser l'aperçu GIF (recharger le cache CDN expiré)",
+      em_col_refresh_tooltip: "Actualiser l'aperçu GIF dans tous les onglets (recharger le cache CDN expiré)",
       em_refresh_no_expired:   "ℹ️ Aucun GIF expiré dans cet onglet",
       em_refresh_consent:      "⚠️ À propos de l'actualisation des GIFs\n\nCette fonctionnalité utilisera un proxy tiers (fixcdn.hyonsu.com)\npour obtenir de nouvelles informations d'identification Discord.\n\nRemarques :\n• Vos URLs d'images seront envoyées à fixcdn.hyonsu.com\n• Il s'agit d'un service tiers, sans lien avec Discord ou ce script\n• Recherchez 'fixcdn hyonsu' pour en savoir plus avant de continuer\n\nContinuer ?",
       em_refresh_cancel_tip:   "ℹ️ Annulé. Étapes manuelles :\n① Trouvez le GIF original sur Discord\n② Ajoutez-le à nouveau à votre collection",
@@ -5168,7 +5168,7 @@
       wh_keep_source: "📎 Включить ссылку на источник",
       wh_keep_source_tip: "При включении ссылка на исходное сообщение добавляется в конец отправляемого контента.",
 
-      em_col_refresh_tooltip: "Обновить превью GIF (сбросить устаревший CDN-кэш)",
+      em_col_refresh_tooltip: "Обновить превью GIF во всех вкладках (сбросить устаревший CDN-кэш)",
       em_refresh_no_expired:   "ℹ️ В этой вкладке нет устаревших GIF",
       em_refresh_consent:      "⚠️ Об обновлении GIF\n\nЭта функция использует сторонний прокси (fixcdn.hyonsu.com)\nдля получения свежих ссылок на вложения Discord.\n\nПримечания:\n• Ваши URL изображений будут отправлены на fixcdn.hyonsu.com\n• Это сторонний сервис, не связанный с Discord или этим скриптом\n• Поищите 'fixcdn hyonsu' для получения дополнительной информации\n\nПродолжить?",
       em_refresh_cancel_tip:   "ℹ️ Отменено. Ручные шаги:\n① Найдите оригинальный GIF в Discord\n② Добавьте его заново в коллекцию",
@@ -12313,14 +12313,20 @@
         refreshBtn.onclick = async (e) => {
           e.stopPropagation();
 
-          const currentItems = cols[currentActiveTab] || [];
+          const expiredByTab = {};
+          let totalExpired = 0;
+          for (const [tabName, items] of Object.entries(cols)) {
+            const expired = (items || []).filter((item) => {
+              const url = typeof item === "object" ? item.url || item.content : item;
+              return url && url.startsWith("http") && isDiscordUrlExpired(url);
+            });
+            if (expired.length > 0) {
+              expiredByTab[tabName] = expired;
+              totalExpired += expired.length;
+            }
+          }
 
-          const expiredItems = currentItems.filter((item) => {
-            const url = typeof item === "object" ? item.url || item.content : item;
-            return url && url.startsWith("http") && isDiscordUrlExpired(url);
-          });
-
-          if (expiredItems.length === 0) {
+          if (totalExpired === 0) {
             showToast(t("em_refresh_no_expired"));
             return;
           }
@@ -12383,7 +12389,7 @@
             labelEl.textContent = t("em_refresh_loading");
             counterEl = document.createElement("span");
             counterEl.className = "dmt-ro-counter";
-            counterEl.textContent = `0 / ${expiredItems.length}`;
+            counterEl.textContent = `0 / ${totalExpired}`;
             overlay.append(iconEl, labelEl, counterEl);
             panelContent.appendChild(overlay);
           }
@@ -12394,67 +12400,71 @@
           let refreshCount = 0;
           let failCount    = 0;
           let doneCount    = 0;
+          const touchedTabs = new Set();
 
-          for (const item of expiredItems) {
-            const url = typeof item === "object" ? item.url || item.content : item;
-            if (!url || !url.startsWith("http")) { doneCount++; continue; }
+          for (const [tabName, expiredItems] of Object.entries(expiredByTab)) {
+            for (const item of expiredItems) {
+              const url = typeof item === "object" ? item.url || item.content : item;
+              if (!url || !url.startsWith("http")) { doneCount++; continue; }
 
-            try {
-              const cacheKey = gifCacheKey(url);
-              try { GMStore.del(GIF_CACHE_PREFIX + cacheKey); } catch (_) {}
-              try { await idbDelete(cacheKey); } catch (_) {}
+              try {
+                const cacheKey = gifCacheKey(url);
+                try { GMStore.del(GIF_CACHE_PREFIX + cacheKey); } catch (_) {}
+                try { await idbDelete(cacheKey); } catch (_) {}
 
-              let freshUrl = null;
-              if (token) {
-                freshUrl = await new Promise((resolve) => {
-                  GM_xmlhttpRequest({
-                    method:  "POST",
-                    url:     "https://discord.com/api/v9/attachments/refresh-urls",
-                    headers: {
-                      "Content-Type":  "application/json",
-                      "Authorization": token,
-                    },
-                    data:    JSON.stringify({ attachment_urls: [url] }),
-                    timeout: 10000,
-                    onload(res) {
-                      if (res.status !== 200) { resolve(null); return; }
-                      try {
-                        const data = JSON.parse(res.responseText);
-                        resolve(data.refreshed_urls?.[0]?.refreshed || null);
-                      } catch (_) { resolve(null); }
-                    },
-                    onerror()  { resolve(null); },
-                    ontimeout(){ resolve(null); },
+                let freshUrl = null;
+                if (token) {
+                  freshUrl = await new Promise((resolve) => {
+                    GM_xmlhttpRequest({
+                      method:  "POST",
+                      url:     "https://discord.com/api/v9/attachments/refresh-urls",
+                      headers: {
+                        "Content-Type":  "application/json",
+                        "Authorization": token,
+                      },
+                      data:    JSON.stringify({ attachment_urls: [url] }),
+                      timeout: 10000,
+                      onload(res) {
+                        if (res.status !== 200) { resolve(null); return; }
+                        try {
+                          const data = JSON.parse(res.responseText);
+                          resolve(data.refreshed_urls?.[0]?.refreshed || null);
+                        } catch (_) { resolve(null); }
+                      },
+                      onerror()  { resolve(null); },
+                      ontimeout(){ resolve(null); },
+                    });
                   });
-                });
-              }
-
-              const downloadUrl = freshUrl || toFixcdnUrl(url);
-
-              const dataUrl = await fetchAndCacheMedia(downloadUrl, (loaded, total) => {
-                if (counterEl && total > 0) {
-                  const pct = Math.round((loaded / total) * 100);
-                  counterEl.textContent = `${doneCount + 1} / ${expiredItems.length}  ${pct}%`;
                 }
-              });
-              if (dataUrl) {
-                if (freshUrl && typeof item === "object") item.url = freshUrl;
-                refreshCount++;
-              } else {
+
+                const downloadUrl = freshUrl || toFixcdnUrl(url);
+
+                const dataUrl = await fetchAndCacheMedia(downloadUrl, (loaded, total) => {
+                  if (counterEl && total > 0) {
+                    const pct = Math.round((loaded / total) * 100);
+                    counterEl.textContent = `${doneCount + 1} / ${totalExpired}  ${pct}%`;
+                  }
+                });
+                if (dataUrl) {
+                  if (freshUrl && typeof item === "object") item.url = freshUrl;
+                  refreshCount++;
+                  touchedTabs.add(tabName);
+                } else {
+                  failCount++;
+                }
+              } catch (err) {
+                DEBUG && console.error("[GifRefresh] Error:", err);
                 failCount++;
               }
-            } catch (err) {
-              DEBUG && console.error("[GifRefresh] Error:", err);
-              failCount++;
-            }
 
-            doneCount++;
-            if (counterEl) counterEl.textContent = `${doneCount} / ${expiredItems.length}`;
+              doneCount++;
+              if (counterEl) counterEl.textContent = `${doneCount} / ${totalExpired}`;
+            }
           }
 
           overlay?.remove();
 
-          if (refreshCount > 0) saveCollections(type, cols);
+          if (touchedTabs.size > 0) saveCollections(type, cols);
 
           refreshBtn.style.opacity       = "0.6";
           refreshBtn.style.pointerEvents = "auto";
@@ -16022,7 +16032,7 @@ unsafeWindow.fetch = function(...args) {
         s.id = "wh-api-styles";
         s.textContent = `
           #wh-api-panel{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center}
-          #wh-api-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px)}
+          #wh-api-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.72)}
           #wh-api-modal{position:relative;background:var(--dmt-bg-primary);border:1px solid rgba(88,101,242,.5);border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.8);padding:20px 24px 18px;width:min(520px,92vw);display:flex;flex-direction:column;gap:16px;animation:wh-in .2s cubic-bezier(.19,1,.22,1)}
           @keyframes wh-in{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}
           #wh-api-header{display:flex;align-items:center;justify-content:space-between}
@@ -16408,8 +16418,8 @@ unsafeWindow.fetch = function(...args) {
         s.id = "wh-send-styles";
         s.textContent = `
           #wh-send-overlay{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center}
-          #wh-send-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(3px)}
-          #wh-send-modal{position:relative;background:var(--dmt-bg-primary);border:1px solid rgba(88,101,242,.35);border-radius:10px;box-shadow:0 16px 48px rgba(0,0,0,.7);padding:18px 20px 14px;width:min(560px,92vw);display:flex;flex-direction:column;gap:12px;animation:wh-in .18s cubic-bezier(.19,1,.22,1)}
+          #wh-send-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.72)}
+          #wh-send-modal{position:relative;background:var(--dmt-bg-primary);border:1px solid rgba(88,101,242,.35);border-radius:10px;box-shadow:0 16px 48px rgba(0,0,0,.7);padding:20px 22px 16px;width:min(660px,94vw);max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:14px;animation:wh-in .18s cubic-bezier(.19,1,.22,1)}
           @keyframes wh-in{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
           #wh-send-header{display:flex;align-items:center;justify-content:space-between}
           #wh-send-title{color:var(--dmt-text-bright);font-size:14px;font-weight:600;display:flex;align-items:center;flex:1}
@@ -16467,8 +16477,8 @@ unsafeWindow.fetch = function(...args) {
 
           #wh-send-fields{display:flex;flex-direction:column;gap:8px}
           .wh-field-row{display:flex;gap:6px;align-items:flex-start}
-          .wh-field-num{font-size:10px;color:rgba(185,187,190,.4);min-width:14px;padding-top:12px;flex-shrink:0;text-align:right}
-          .wh-field-textarea{flex:1;box-sizing:border-box;background:var(--dmt-bg-deep);color:var(--dmt-text-bright);border:1.5px solid rgba(88,101,242,.25);border-radius:6px;padding:8px 10px;font-size:14px;line-height:1.5;resize:vertical;min-height:60px;max-height:160px;outline:none;font-family:inherit;transition:border-color .15s}
+          .wh-field-num{font-size:10px;color:rgba(185,187,190,.4);min-width:14px;padding-top:38px;flex-shrink:0;text-align:right}
+          .wh-field-textarea{flex:1;box-sizing:border-box;background:var(--dmt-bg-deep);color:var(--dmt-text-bright);border:1.5px solid rgba(88,101,242,.25);border-radius:6px;padding:8px 10px;font-size:14px;line-height:1.5;resize:none;min-height:80px;max-height:200px;outline:none;font-family:inherit;transition:border-color .15s}
           .wh-field-textarea:focus{border-color:rgba(88,101,242,.7)}
           .wh-field-textarea:disabled{opacity:.5;cursor:not-allowed}
           .wh-field-del{background:transparent;border:none;color:rgba(237,66,69,.5);cursor:pointer;font-size:14px;padding:8px 2px;flex-shrink:0;transition:color .12s;line-height:1}
@@ -16478,19 +16488,19 @@ unsafeWindow.fetch = function(...args) {
           #wh-send-field-add:disabled{opacity:.35;cursor:not-allowed}
           #wh-send-cool-note{font-size:10px;color:rgba(240,178,50,.75);min-height:14px}
           
-          .wh-field-wrap{display:flex;flex-direction:column;flex:1;gap:3px;min-width:0}
-          .wh-fmt-bar{display:flex;align-items:center;gap:1px;padding:2px 4px;
-            background:rgba(255,255,255,.03);border:1px solid rgba(88,101,242,.18);
-            border-bottom:none;border-radius:5px 5px 0 0;}
+          .wh-field-wrap{display:flex;flex-direction:column;flex:1;gap:0;min-width:0}
+          .wh-fmt-bar{display:flex;align-items:center;gap:2px;padding:4px 6px;
+            background:rgba(255,255,255,.035);border:1.5px solid rgba(88,101,242,.22);
+            border-bottom:none;border-radius:6px 6px 0 0;}
           .wh-fmt-btn{display:inline-flex;align-items:center;justify-content:center;
-            width:22px;height:22px;padding:0;border:none;border-radius:4px;
+            width:26px;height:26px;padding:0;border:none;border-radius:4px;
             background:transparent;color:var(--dmt-text-muted,#949ba4);
             cursor:pointer;transition:background .12s,color .12s;flex-shrink:0;}
-          .wh-fmt-btn:hover{background:rgba(88,101,242,.18);color:#c0c5f7}
-          .wh-fmt-btn:active{background:rgba(88,101,242,.32);color:#fff}
-          .wh-fmt-sep{width:1px;height:14px;background:rgba(255,255,255,.1);margin:0 3px;flex-shrink:0}
+          .wh-fmt-btn:hover{background:rgba(88,101,242,.2);color:#c0c5f7}
+          .wh-fmt-btn:active{background:rgba(88,101,242,.36);color:#fff}
+          .wh-fmt-sep{width:1px;height:16px;background:rgba(255,255,255,.12);margin:0 4px;flex-shrink:0}
           
-          .wh-field-wrap .wh-field-textarea{border-radius:0 0 5px 5px !important}
+          .wh-field-wrap .wh-field-textarea{border:1.5px solid rgba(88,101,242,.22);border-radius:0 0 6px 6px !important}
         `;
         document.head.appendChild(s);
       }
@@ -16555,41 +16565,41 @@ unsafeWindow.fetch = function(...args) {
 
         const FMT_BTNS = [
           [
-            '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z"/></svg>',
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15.6 10.79c.97-.67 1.65-1.77 1.65-2.79 0-2.26-1.75-4-4-4H7v14h7.04c2.09 0 3.71-1.7 3.71-3.79 0-1.52-.86-2.82-2.15-3.42zM10 6.5h3c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-3v-3zm3.5 9H10v-3h3.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5z"/></svg>',
             "Bold  **text**", "**", "**", "bold text", false, false,
           ],
           [
-            '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4z"/></svg>',
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 4v3h2.21l-3.42 8H6v3h8v-3h-2.21l3.42-8H18V4z"/></svg>',
             "Italic  *text*", "*", "*", "italic text", false, false,
           ],
           [
-            '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M10 19h4v-3h-4v3zM5 4v3h5.5v3h3V7H19V4H5zM9 12v3h6v-3H9z"/></svg>',
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 19h4v-3h-4v3zM5 4v3h5.5v3h3V7H19V4H5zM9 12v3h6v-3H9z"/></svg>',
             "Underline  __text__", "__", "__", "underline text", false, false,
           ],
           [
-            '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M10 19h4v-3h-4v3zM5 4v3h5.5v3h3V7H19V4H5zM9 12v3h6v-3H9z" opacity=".4"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.2"/></svg>',
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M10 19h4v-3h-4v3zM5 4v3h5.5v3h3V7H19V4H5zM9 12v3h6v-3H9z" opacity=".4"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.2"/></svg>',
             "Strikethrough  ~~text~~", "~~", "~~", "strikethrough text", false, false,
           ],
           [
-            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8" opacity=".5"/><line x1="7" y1="12" x2="17" y2="12"/></svg>',
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8" opacity=".5"/><line x1="7" y1="12" x2="17" y2="12"/></svg>',
             "Spoiler  ||text||", "||", "||", "spoiler text", false, false,
           ],
           ["separator", "", "", "", "", false, false],
           [
-            '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>',
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>',
             "Inline code  `code`", "`", "`", "code", false, false,
           ],
           [
-            '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm4 5h12v2H8zm-4 5h16v2H4z" opacity=".5"/><rect x="2" y="4" width="20" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M4 6h16v2H4zm4 5h12v2H8zm-4 5h16v2H4z" opacity=".5"/><rect x="2" y="4" width="20" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
             "Code block  ```code```", "```\n", "\n```", "code here", false, false,
           ],
           [
-            '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M6 17h3l2-4H7V7H3v6h3zm8 0h3l2-4h-4V7h-4v6h3z"/></svg>',
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 17h3l2-4H7V7H3v6h3zm8 0h3l2-4h-4V7h-4v6h3z"/></svg>',
             "Blockquote  > text", "> ", "", "", true, false,
           ],
           ["separator", "", "", "", "", false, false],
           [
-            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/></svg>',
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/></svg>',
             "Horizontal rule  ---", "---\n", "", "", false, true,
           ],
         ];
