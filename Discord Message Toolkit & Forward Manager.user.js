@@ -9,7 +9,7 @@
 // @name:fr      Discord Message Toolkit
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
-// @version      2.6.5.0
+// @version      2.6.5.4
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -54,7 +54,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = "2.6.3.3";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.6.5.4";
 
   const GMStore = {
     
@@ -228,6 +228,11 @@
         "zh-CN": "消息工具 (⠿)",
         ja: "メッセージユーティリティ (⠿)",
         ko: "메시지 유틸리티 (⠿)",
+        de: "Nachrichtendienstprogramm (⠿)",
+        es: "Utilidad de mensajes (⠿)",
+        "pt-BR": "Utilitário de mensagens (⠿)",
+        fr: "Utilitaire de messages (⠿)",
+        ru: "Утилита сообщений (⠿)",
       },
     },
     {
@@ -241,6 +246,11 @@
         "zh-CN": "转发管理员",
         ja: "転送マネージャー",
         ko: "전달 관리자",
+        de: "Weiterleitungs-Manager",
+        es: "Administrador de reenvíos",
+        "pt-BR": "Gerenciador de encaminhamentos",
+        fr: "Gestionnaire de transferts",
+        ru: "Менеджер пересылки",
       },
     },
     {
@@ -254,6 +264,11 @@
         "zh-CN": "表情搜索助手",
         ja: "絵文字検索",
         ko: "이모지 검색",
+        de: "Emoji-Suche",
+        es: "Buscador de emojis",
+        "pt-BR": "Pesquisa de emojis",
+        fr: "Recherche d'emojis",
+        ru: "Поиск эмодзи",
       },
     },
     {
@@ -267,6 +282,11 @@
         "zh-CN": "右键解锁",
         ja: "右クリック解除",
         ko: "우클릭 해제",
+        de: "Anti-Hijack & Dateitools",
+        es: "Anti-secuestro y herramientas de archivos",
+        "pt-BR": "Anti-sequestro e ferramentas de arquivos",
+        fr: "Anti-hijack & outils fichiers",
+        ru: "Защита и файловые инструменты",
       },
     },
     {
@@ -280,6 +300,11 @@
         "zh-CN": "虫洞",
         ja: "ワームホール",
         ko: "웜홀",
+        de: "Wurmloch",
+        es: "Agujero de gusano",
+        "pt-BR": "Buraco de minhoca",
+        fr: "Trou de ver",
+        ru: "Червоточина",
       },
     },
     {
@@ -294,6 +319,11 @@
         "zh-CN": "Webhook 管理",
         ja: "Webhook 管理",
         ko: "Webhook 관리",
+        de: "Webhook-Manager",
+        es: "Administrador de webhooks",
+        "pt-BR": "Gerenciador de webhooks",
+        fr: "Gestionnaire de webhooks",
+        ru: "Менеджер вебхуков",
       },
     },
     {
@@ -308,6 +338,11 @@
         "zh-CN": "重复网址检测",
         ja: "URL重複チェッカー",
         ko: "중복 URL 검사기",
+        de: "Doppelte URL-Prüfung",
+        es: "Detector de URLs duplicadas",
+        "pt-BR": "Verificador de URLs duplicadas",
+        fr: "Vérificateur d'URL en double",
+        ru: "Проверка дублирующихся URL",
       },
     },
     {
@@ -322,6 +357,11 @@
         "zh-CN": "频道搜索 Channel Scout",
         ja: "チャンネル検索 Channel Scout",
         ko: "채널 검색 Channel Scout",
+        de: "Kanalsuche",
+        es: "Búsqueda de canales",
+        "pt-BR": "Pesquisa de canais",
+        fr: "Recherche de canaux",
+        ru: "Поиск каналов",
       },
     },
     {
@@ -336,6 +376,11 @@
         "zh-CN": "弱化用户消息",
         ja: "ユーザーメッセージを弱化",
         ko: "사용자 메시지 약화",
+        de: "Nachrichten abdimmen",
+        es: "Atenuar mensajes de usuario",
+        "pt-BR": "Atenuar mensagens de usuário",
+        fr: "Atténuer les messages",
+        ru: "Приглушить сообщения",
       },
     },
     {
@@ -351,6 +396,11 @@
         "zh-CN": "个人消息管理",
         ja: "投稿マネージャー",
         ko: "내 게시물 관리",
+        de: "Meine Nachrichten",
+        es: "Mis publicaciones",
+        "pt-BR": "Meus posts",
+        fr: "Mes messages",
+        ru: "Мои сообщения",
       },
     },
   ];
@@ -608,6 +658,7 @@
       const defaultCancel = { "zh-TW": "取消", "zh-CN": "取消", ja: "キャンセル", ko: "취소" }[lang] || "Cancel";
 
       const { confirmText = defaultOK, cancelText = defaultCancel, danger = false } = opts;
+      const showCancel = cancelText !== null;
 
       const overlay = document.createElement("div");
       overlay.className = "dmt-confirm-overlay";
@@ -622,10 +673,6 @@
       const btns = document.createElement("div");
       btns.className = "dmt-confirm-btns";
 
-      const cancelBtn = document.createElement("button");
-      cancelBtn.className = "dmt-confirm-btn dmt-confirm-btn-cancel";
-      cancelBtn.textContent = cancelText;
-
       const okBtn = document.createElement("button");
       okBtn.className = "dmt-confirm-btn dmt-confirm-btn-ok" + (danger ? " danger" : "");
       okBtn.textContent = confirmText;
@@ -638,12 +685,17 @@
         resolve(result);
       };
 
-      cancelBtn.onclick = () => close(false);
+      if (showCancel) {
+        const cancelBtn = document.createElement("button");
+        cancelBtn.className = "dmt-confirm-btn dmt-confirm-btn-cancel";
+        cancelBtn.textContent = cancelText;
+        cancelBtn.onclick = () => close(false);
+        btns.appendChild(cancelBtn);
+      }
       okBtn.onclick     = () => close(true);
       overlay.addEventListener("click", (e) => { if (e.target === overlay) close(false); });
       document.addEventListener("keydown", onKey);
 
-      btns.appendChild(cancelBtn);
       btns.appendChild(okBtn);
       box.appendChild(msg);
       box.appendChild(btns);
@@ -651,6 +703,88 @@
       document.body.appendChild(overlay);
 
       setTimeout(() => okBtn.focus(), 50);
+    });
+  }
+
+  function dmtPrompt(message, defaultValue = "", opts = {}) {
+    return new Promise((resolve) => {
+      if (!document.getElementById("dmt-prompt-style")) {
+        const s = document.createElement("style");
+        s.id = "dmt-prompt-style";
+        s.textContent = `
+          .dmt-prompt-input {
+            width: 100%; box-sizing: border-box;
+            background: var(--dmt-bg-secondary, #1e1f22);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 6px;
+            color: var(--dmt-text-primary, #dcddde);
+            font-size: 14px; padding: 8px 10px;
+            margin-bottom: 16px; outline: none;
+            transition: border-color 0.15s;
+          }
+          .dmt-prompt-input:focus { border-color: var(--dmt-accent, #5865f2); }
+        `;
+        document.head.appendChild(s);
+      }
+
+      const lang = (typeof getConfig === "function" ? getConfig().lang : null)
+        || navigator.language || "en";
+      const defaultOK     = { "zh-TW": "確認", "zh-CN": "确认", ja: "OK", ko: "확인" }[lang] || "OK";
+      const defaultCancel = { "zh-TW": "取消", "zh-CN": "取消", ja: "キャンセル", ko: "취소" }[lang] || "Cancel";
+      const { confirmText = defaultOK, cancelText = defaultCancel, placeholder = "" } = opts;
+
+      const overlay = document.createElement("div");
+      overlay.className = "dmt-confirm-overlay";
+
+      const box = document.createElement("div");
+      box.className = "dmt-confirm-box";
+
+      const msgEl = document.createElement("div");
+      msgEl.className = "dmt-confirm-msg";
+      msgEl.textContent = message;
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "dmt-prompt-input";
+      input.value = defaultValue;
+      input.placeholder = placeholder;
+
+      const btns = document.createElement("div");
+      btns.className = "dmt-confirm-btns";
+
+      const cancelBtn = document.createElement("button");
+      cancelBtn.className = "dmt-confirm-btn dmt-confirm-btn-cancel";
+      cancelBtn.textContent = cancelText;
+
+      const okBtn = document.createElement("button");
+      okBtn.className = "dmt-confirm-btn dmt-confirm-btn-ok";
+      okBtn.textContent = confirmText;
+
+      const onKey = (e) => {
+        if (e.key === "Escape") close(null);
+        if (e.key === "Enter")  close(input.value);
+      };
+
+      const close = (result) => {
+        document.removeEventListener("keydown", onKey);
+        overlay.remove();
+        resolve(result);
+      };
+
+      cancelBtn.onclick = () => close(null);
+      okBtn.onclick     = () => close(input.value);
+      overlay.addEventListener("click", (e) => { if (e.target === overlay) close(null); });
+      document.addEventListener("keydown", onKey);
+
+      btns.appendChild(cancelBtn);
+      btns.appendChild(okBtn);
+      box.appendChild(msgEl);
+      box.appendChild(input);
+      box.appendChild(btns);
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+
+      setTimeout(() => { input.focus(); input.select(); }, 50);
     });
   }
 
@@ -926,6 +1060,7 @@
 
       wm_group_prompt: "Enter New Group Name:",
       wm_edit_group: "Edit Group Name:",
+      wm_reset_fail: "❌ Reset failed — check console (F12) for details.",
       wm_group_del_confirm:
         "Dissolve group '{n}'? (Wormholes inside will be kept)",
       wm_group_select_prompt:
@@ -1021,6 +1156,7 @@
       em_col_tab_prompt: "New Tab Name:",
       em_col_empty_tab: "This tab is empty.",
       em_col_del_tab_confirm: 'Delete tab "{n}" and all items inside?',
+      em_col_rename_prompt: "Rename Tab",
       em_modal_choose_tab: "Save to which collection?",
       em_modal_create_new: "+ Create New...",
       em_col_refresh_tooltip: "Refresh all GIF previews across all tabs (re-fetch expired CDN cache)",
@@ -1446,6 +1582,7 @@
 
       wm_group_prompt: "請輸入新群組名稱：",
       wm_edit_group: "編輯群組名稱：",
+      wm_reset_fail: "❌ 重置失敗，請查看控制台 (F12) 錯誤訊息。",
       wm_group_del_confirm: "解散群組「{n}」？(內含蟲洞將會保留)",
       wm_group_select_prompt:
         "請輸入數字選擇群組：\n\n0. [根目錄/未分類]\n{list}\n\n留空並按下確認可建立「新群組」：",
@@ -1533,6 +1670,7 @@
       em_col_tab_prompt: "新分頁名稱：",
       em_col_empty_tab: "此分頁尚無內容。",
       em_col_del_tab_confirm: "刪除分頁「{n}」及其所有項目？",
+      em_col_rename_prompt: "重新命名分頁",
       em_modal_choose_tab: "儲存到哪個收藏庫？",
       em_modal_create_new: "+ 建立新的...",
       em_col_refresh_tooltip: "重新整理所有分頁的 GIF 預覽（刷新過期的 CDN 快取）",
@@ -1957,6 +2095,7 @@
 
       wm_group_prompt: "请输入新分组名称：",
       wm_edit_group: "编辑分组名称：",
+      wm_reset_fail: "❌ 重置失败，请查看控制台 (F12) 错误信息。",
       wm_group_del_confirm: '解散分组"{n}"？(内含虫洞将会保留)',
       wm_group_select_prompt:
         '请输入数字选择分组：\n\n0. [根目录/未分类]\n{list}\n\n留空并按下确认可创建"新分组"：',
@@ -2043,6 +2182,7 @@
       em_col_tab_prompt: "新标签页名称：",
       em_col_empty_tab: "此标签页暂无内容。",
       em_col_del_tab_confirm: '删除标签页"{n}"及其所有内容？',
+      em_col_rename_prompt: "重命名标签",
       em_modal_choose_tab: "保存到哪个收藏库？",
       em_modal_create_new: "+ 创建新的...",
       em_col_refresh_tooltip: "刷新所有标签页的 GIF 预览（刷新过期的 CDN 缓存）",
@@ -2471,6 +2611,7 @@
 
       wm_group_prompt: "新しいグループ名を入力してください：",
       wm_edit_group: "グループ名を編集：",
+      wm_reset_fail: "❌ リセット失敗。コンソール (F12) を確認してください。",
       wm_group_del_confirm:
         "グループ「{n}」を解散しますか？(中のワームホールは保持されます)",
       wm_group_select_prompt:
@@ -2561,6 +2702,7 @@
       em_col_tab_prompt: "新しいタブ名：",
       em_col_empty_tab: "このタブは空です。",
       em_col_del_tab_confirm: "タブ「{n}」とその全項目を削除しますか？",
+      em_col_rename_prompt: "タブ名を変更",
       em_modal_choose_tab: "どのコレクションに保存しますか？",
       em_modal_create_new: "+ 新しく作成...",
       em_col_refresh_tooltip: "すべてのタブの GIF プレビューを更新（期限切れの CDN キャッシュをリフレッシュ）",
@@ -2988,6 +3130,7 @@
 
       wm_group_prompt: "새 그룹 이름을 입력하세요:",
       wm_edit_group: "그룹 이름 편집:",
+      wm_reset_fail: "❌ 초기화 실패 — 콘솔 (F12)을 확인하세요.",
       wm_group_del_confirm:
         "그룹 '{n}'을(를) 해체하시겠습니까? (내부 웜홀은 유지됩니다)",
       wm_group_select_prompt:
@@ -3077,6 +3220,7 @@
       em_col_tab_prompt: "새 탭 이름:",
       em_col_empty_tab: "이 탭은 비어 있습니다.",
       em_col_del_tab_confirm: '탭 "{n}"과 모든 항목을 삭제하시겠습니까?',
+      em_col_rename_prompt: "탭 이름 바꾸기",
       em_modal_choose_tab: "어느 컬렉션에 저장하시겠습니까?",
       em_modal_create_new: "+ 새로 만들기...",
       em_col_refresh_tooltip: "모든 탭의 GIF 미리보기 새로고침 (만료된 CDN 캐시 새로고침)",
@@ -3493,6 +3637,7 @@
       wm_menu_move: "📂 Mover al grupo",
       wm_group_prompt: "Introduce el nombre del nuevo grupo:",
       wm_edit_group: "Editar nombre del grupo:",
+      wm_reset_fail: "❌ Error al restablecer — revisa la consola (F12).",
       wm_group_del_confirm:
         "¿Disolver el grupo «{n}»? (los agujeros se conservarán)",
       wm_group_select_prompt:
@@ -3578,6 +3723,7 @@
       em_col_empty_tab: "Esta pestaña está vacía.",
       em_col_del_tab_confirm:
         '¿Eliminar la pestaña "{n}" y todos sus elementos?',
+      em_col_rename_prompt: "Renombrar pestaña",
       em_modal_choose_tab: "¿En qué colección guardar?",
       em_modal_create_new: "+ Crear nueva...",
       em_tip_pick: "Establecer imagen de portada",
@@ -4004,6 +4150,7 @@
       wm_menu_move: "📂 Mover para grupo",
       wm_group_prompt: "Digite o nome do novo grupo:",
       wm_edit_group: "Editar nome do grupo:",
+      wm_reset_fail: "❌ Falha ao redefinir — verifique o console (F12).",
       wm_group_del_confirm:
         "Dissolver o grupo «{n}»? (os buracos serão mantidos)",
       wm_group_select_prompt:
@@ -4088,6 +4235,7 @@
       em_col_tab_prompt: "Nome da nova aba:",
       em_col_empty_tab: "Esta aba está vazia.",
       em_col_del_tab_confirm: 'Excluir a aba "{n}" e todos os itens?',
+      em_col_rename_prompt: "Renomear aba",
       em_modal_choose_tab: "Salvar em qual coleção?",
       em_modal_create_new: "+ Criar nova...",
       em_tip_pick: "Definir imagem de capa",
@@ -4519,6 +4667,7 @@
       wm_menu_move: "📂 Déplacer vers le groupe",
       wm_group_prompt: "Entrez le nom du nouveau groupe :",
       wm_edit_group: "Modifier le nom du groupe :",
+      wm_reset_fail: "❌ Échec de la réinitialisation — vérifiez la console (F12).",
       wm_group_del_confirm:
         "Dissoudre le groupe « {n} » ? (les trous seront conservés)",
       wm_group_select_prompt:
@@ -4610,6 +4759,7 @@
       em_col_empty_tab: "Cet onglet est vide.",
       em_col_del_tab_confirm:
         "Supprimer l'onglet « {n} » et tous ses éléments ?",
+      em_col_rename_prompt: "Renommer l'onglet",
       em_modal_choose_tab: "Enregistrer dans quelle collection ?",
       em_modal_create_new: "+ Créer une nouvelle...",
       em_tip_pick: "Définir l'image de couverture",
@@ -5032,6 +5182,7 @@
       wm_menu_move: "📂 Переместить в группу",
       wm_group_prompt: "Введите название новой группы:",
       wm_edit_group: "Изменить название группы:",
+      wm_reset_fail: "❌ Ошибка сброса — проверьте консоль (F12).",
       wm_group_del_confirm:
         "Расформировать группу «{n}»? (червоточины сохранятся)",
       wm_group_select_prompt:
@@ -5121,6 +5272,7 @@
       em_col_tab_prompt: "Название новой вкладки:",
       em_col_empty_tab: "Эта вкладка пуста.",
       em_col_del_tab_confirm: "Удалить вкладку «{n}» со всеми элементами?",
+      em_col_rename_prompt: "Переименовать вкладку",
       em_modal_choose_tab: "В какую коллекцию сохранить?",
       em_modal_create_new: "+ Создать новую...",
       em_tip_pick: "Установить обложку",
@@ -5348,6 +5500,508 @@
       mp_fav_filter_label:      "Избранное",
       mp_fav_filter_tip:        "Показывать только избранные сообщения",
       mp_copy_link:             "Скопировать ссылку на сообщение",
+    },
+
+    de: {
+      name: "Deutsch",
+      fm_pinned_channels: "★ Angeheftete Kanäle",
+      fm_toggle_flat: "Wechseln zu: Flache Ansicht",
+      fm_toggle_drop: "Wechseln zu: Dropdown",
+      fm_help: "Hilfe",
+      fm_prompt_channel: "Kanal-Stichwort eingeben:",
+      fm_prompt_user: "Benutzer-ID oder Stichwort eingeben (z. B. mighty):",
+      fm_user_zone: "Benutzerzone",
+      fm_no_users: "Keine angehefteten Benutzer",
+      fm_add_user: "+ Benutzer hinzufügen",
+      fm_fuzzy: "Unscharfe Suche",
+      fm_remove_confirm: "{target} entfernen?",
+      fm_tooltip_channel: "Kanal: {c}\nServer: {s}",
+      fm_tooltip_user_add: "Zur Benutzerzone hinzufügen (👤)",
+      fm_tooltip_star_add: "Zu Favoriten hinzufügen (★)",
+      fm_manual_title: "📚 Weiterleitungs-Manager Handbuch",
+      fm_sec_star: "★ Favoriten & Verwaltung",
+      fm_sec_star_content:
+        "• Klicke <span class='help-key'>★</span> oder <span class='help-key'>👤+</span> zum Anheften.<br>• Rechtsklick zum Entfernen.<br>• <span class='help-key'>Shift+Rechtsklick</span> zum Schnellentfernen (ohne Bestätigung).",
+      fm_sec_search: "🔍 Zweistufige Suche (Standard)",
+      fm_sec_search_content:
+        "• Ein Klick auf einen Pin führt automatisch 'Warmup → Eingabe → Sperren' aus.<br>• Behebt Discords Fehler bei direkter Eingabe.<br>• Verwendet <span style='color:#2dc770'>Exakte Übereinstimmung</span> zur Vermeidung falscher Weiterleitungen.",
+      fm_sec_fuzzy: "⏎ Unscharfe Suche",
+      fm_sec_fuzzy_content:
+        "• Klicke den <span class='help-key'>⏎</span>-Pfeil innerhalb der Schaltfläche.<br>• Gibt nur die ersten 2 Zeichen oder das erste Wort ein.",
+      fm_sec_user: "👤 Benutzerzone",
+      fm_sec_user_content:
+        "• Klicke die <span class='help-key'>👤</span>-Schaltfläche zum Ausklappen.<br>• Unterstützt manuelle ID-Eingabe.",
+      fm_sec_misc_title: "⚙️ Tipps & Anzeige",
+      fm_sec_misc:
+        "• Oben-links-Schaltfläche wechselt zwischen <b>Flach</b>- und <b>Dropdown</b>-Modus.<br>• <b>Verlauf</b> (lila Badges) speichert zuletzt besuchte Kanäle automatisch.",
+      fm_sec_wormhole: "🌀 Wurmloch — Grundlagen",
+      fm_sec_wormhole_content:
+        "• Klicke <span class='help-key'>＋</span> und füge eine Discord-Kanal-URL ein.<br>" +
+        "• <b>Klick</b> auf ein Wurmloch → sofort zu diesem Kanal springen.<br>" +
+        "• <b>Rechtsklick</b> → Kontextmenü: Umbenennen, Löschen, Symbol, Gruppe oder VIP.<br>" +
+        "• <b>VIP (★)</b>: angeheftete Wurmlöcher schweben automatisch nach oben.<br>" +
+        "• <b>Gruppen</b>: in benannte Ordner organisieren.<br>" +
+        "• <b>Fokusmodus</b>: Nur-Symbol-Kompaktansicht.",
+      fm_sec_wm_send: "✉️ Wurmloch — Nachricht senden",
+      fm_sec_wm_send_content:
+        "• <b>Rechtsklick</b> → <b>Nachricht hierhin senden</b>.<br>" +
+        "• <b>Modus A (Navigieren)</b>: wechselt zum Zielkanal, fügt Text ein und kehrt zurück.<br>" +
+        "• <b>Shift+Klick</b> → öffnet Overlay im aktuellen Kanal.<br>" +
+        "• Unterstützt <b>Strg+V Bild-Einfügen</b>.<br>" +
+        "• Optionen: <b>Automatisch schließen</b> / <b>Zum Kanal wechseln</b> / <b>Benachrichtigung</b>.",
+      fm_sec_wm_api: "⚡ Wurmloch — API-Modus (erweitert)",
+      fm_sec_wm_api_content:
+        "• <b>＋-Schaltfläche 3 Sekunden gedrückt halten</b> zum Entsperren des API-Modus.<br>" +
+        "• <b>Modus B (direkte API)</b>: sendet via Discord REST API ohne Seitenwechsel.<br>" +
+        "• Token wird nur im Speicher gehalten — <b>nie gespeichert oder übertragen</b>.<br>" +
+        "• Beim Schließen der Seite gelöscht.",
+      welcome_title: "Willkommen bei {script}",
+      select_lang_subtitle: "Bitte wähle die Sprache der Benutzeroberfläche",
+      help_btn: "📖 Handbuch",
+      cancel_btn: "✕ Schließen",
+      security_notice_title: "⚠️ Sicherheitshinweis",
+      security_notice_content:
+        "Die URL-Konvertierungsfunktionen (vxtwitter, kkinstagram usw.) hängen von Drittanbieterdiensten ab.\nNutze sie nur, wenn du diesen Diensten vertraust.\nNutzer müssen URL-Sicherheit selbst beurteilen können.",
+      manual_content:
+        "【Symbol-Leitfaden】\n• ◫/≡ : Menüstil wechseln (Flach/Gruppe)\n• ⇄ : Klick-Logik umkehren (Kopieren/Einfügen)\n• ␣ : Leerzeichen am Ende hinzufügen\n• ↵ : Zeilenumbruch am Ende hinzufügen\n• ☆ : Benutzerdefinierte Zeichenketten\n• 🖱️ : Aktivierungsmodus (Hover/Klick)\n• 🌐 : Sprache wechseln\n\n【Aktionen】\n• **Klick** : Kopieren (Standard)\n• **Lang drücken (0,5s)** : In Textfeld einfügen\n• **Shift+Klick** : Kopieren und einfügen",
+      manual_content_sections:
+        "<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Schnellstart</div><div class='mm-content'>Hover über eine Discord-Nachricht → Kopier-Schaltfläche erscheint oben rechts.<br><b>Klick</b> zum Kopieren · <b>Lang drücken 0,5s</b> zum Einfügen · <b>Shift+Klick</b> zum Kopieren und Einfügen.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Kopiermenü</div><div class='mm-content'>• Text, Medien-URL, ersten Link, alle Links, Markdown, versteckten Text kopieren.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 URL-Konvertierung</div><div class='mm-content'>Twitter/X, Instagram, Bilibili, Pixiv — gegenseitige Konvertierung für Discord-Vorschauen.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Wurmloch</div><div class='mm-content'>Kanal-Schnellzugriff per Klick in der Discord-Seitenleiste.</div></div>",
+      reload_confirm:
+        "Einstellungen gespeichert!\nSeite jetzt neu laden?",
+      copy_text: "📋 Text kopieren",
+      copy_media_url: "🖼️ Medien-URL kopieren",
+      no_content: "⚠️ Kein Inhalt",
+      copy_first_link: "🔗 Ersten Link kopieren (bereinigt)",
+      copy_markdown: "🧾 Als Markdown kopieren",
+      copy_all_links: "📎 Alle Links kopieren",
+      insert_format_link: "📌 [{t}](URL) einfügen",
+      copy_hidden_format: "🙈 Versteckter Text (|| ... ||)",
+      download_images: "⬇️ Bilder/Medien herunterladen",
+      download_zip: "📦 Als ZIP herunterladen",
+      download_start: "🚀 Download läuft...",
+      download_zip_start: "📦 {n} Datei(en) werden komprimiert...",
+      download_fail: "❌ Download fehlgeschlagen",
+      download_cors_fail:
+        "⚠️ CORS verhindert direkten Download. URL kopieren und im Browser öffnen.",
+      original_url: "🔗 Original-URL",
+      convert_all: "⚡ Alle konvertieren ({n})",
+      convert_imgur: "🖼️ Zu i.imgur.com konvertieren",
+      to_twitter: "🐦 twitter.com",
+      to_x: "❌ x.com",
+      to_vxtwitter: "🔁 vxtwitter",
+      to_fixupx: "🛠️ fixupx",
+      to_fxtwitter: "🔧 fxtwitter",
+      to_cunnyx: "🍑 cunnyx",
+      to_fixvx: "🧩 fixvx",
+      to_reddit: "👽 reddit.com",
+      to_old_reddit: "📜 old.reddit",
+      to_rxddit: "🔁 rxddit",
+      to_vxreddit: "🛠️ vxreddit",
+      to_instagram: "📷 instagram.com",
+      to_kkinstagram: "🔁 kkinstagram",
+      to_vxinstagram: "🔁 vxinstagram",
+      to_ddinstagram: "🔁 ddinstagram",
+      to_uuinstagram: "🔁 uuinstagram",
+      to_facebed: "🔁 facebed.com",
+      to_tiktok: "🎵 tiktok.com",
+      to_vxtiktok: "🔁 vxtiktok",
+      to_tnktok: "🛠️ tnktok",
+      to_threads: "🧵 threads.com",
+      to_fixthreads: "🔁 fixthreads",
+      to_fx_bilibili: "📺 FX Bilibili",
+      to_vx_bilibili: "📼 VX Bilibili",
+      to_b23: "🔗 b23.tv",
+      to_vxb23: "🔗 vxb23.tv",
+      to_phixiv: "🔙 phixiv.net",
+      to_pixiv: "🎨 pixiv.net",
+      yt_shorts_to_watch: "▶️ YT Shorts → normaler Link",
+      restore_pixiv_img: "📖 Pixiv aus Bild wiederherstellen",
+      insert_symbol: "✳️ Einfügen → {s}",
+      delete_symbol: "❌",
+      delete_confirm: "Gelöscht: {s}",
+      add_symbol: "➕ Hinzufügen",
+      add_symbol_prompt: "Hinzuzufügenden Text eingeben:",
+      add_success: "Hinzugefügt",
+      remove_symbol: "➖ Entfernen",
+      remove_symbol_prompt: "Zu entfernenden Text eingeben:",
+      remove_empty: "Liste ist leer",
+      mode_hover: "🔄 Hover",
+      mode_click: "🖱️ Klick",
+      mode_desc: "Modus: {mode} (klicken zum Wechseln)",
+      mode_changed: "Modus geändert: {mode}",
+      export_success:
+        "✅ Einstellungen exportiert!\n\nIn Zwischenablage kopiert.",
+      import_prompt: "⬇️ Sicherungscode (JSON) einfügen:",
+      import_success: "✅ Import erfolgreich!\nSeite wird neu geladen.",
+      import_fail: "❌ Import fehlgeschlagen: Ungültiges JSON.",
+      insert_success: "Eingefügt",
+      copy_success: "Kopiert",
+      copy_fail: "Kopieren fehlgeschlagen",
+      input_not_found: "Textfeld nicht gefunden",
+      edit_link_text: "Link-Präfix bearbeiten",
+      enter_link_text: "Link-Präfix eingeben (leer zum Löschen):",
+      tip_style: "Menüstil: Flach / Gruppe",
+      tip_trigger: "Aktivierung: Hover / Klick",
+      tip_logic: "Klick-Logik: Kopieren / Einfügen",
+      tip_space: "Leerzeichen hinzufügen",
+      tip_newline: "Zeilenumbruch hinzufügen",
+      tip_symbols: "Benutzerdefinierte Zeichenketten",
+      tip_lang: "Sprache wechseln",
+      tip_manual: "Handbuch",
+      mod_msg_warn_title: "⚠️ Nachrichtendienstprogramm deaktivieren?",
+      mod_msg_warn_body:
+        "⠿ Das Nachrichtendienstprogramm ist die Kernfunktion.\\nWenn deaktiviert, verschwindet die ⠿-Schaltfläche von allen Nachrichten.",
+      mod_msg_warn_confirm: "Deaktivieren",
+      mod_msg_warn_cancel: "Abbrechen",
+      mod_enable_confirm:   "Aktivieren",
+      mod_msg_enable_menu: "⠿ Nachrichtendienstprogramm aktivieren",
+      rescue_reload_msg: "Einstellungen aktualisiert. Seite neu laden?",
+      rescue_close_btn: "Schließen",
+      grp_copy: "📝 Kopieren >",
+      grp_convert: "🔄 Konvertieren >",
+      grp_download: "⬇️ Herunterladen >",
+      grp_system: "⚙️ System & Symbole >",
+      grp_webhook: "🔗 Webhook >",
+      view_main: "Hauptmenü",
+      view_symbols: "Benutzerdefinierte Zeichenketten",
+      em_title: "😊 Emoji/GIF-Sammlungsverwaltung",
+      em_content:
+        "• <b>Leiste</b>: [📁] Sammlung | [🎯] Zielfernrohrmodus | [★] Schlüsselwörter.<br>• <b>Zielfernrohrmodus</b>: GIFs oder Emojis direkt auf dem Bildschirm auswählen.<br>• <b>Shift+Klick</b>: nacheinander senden ohne Panel zu schließen.",
+      em_picker_tip: "🔍 Auf GIF/Emoji klicken (Hintergrundklick zum Abbrechen)",
+      em_err_no_list:
+        "Listencontainer nicht gefunden. Emoji- oder GIF-Fenster zuerst öffnen!",
+      em_btn_add_title: "Suchschlüsselwort speichern",
+      em_btn_active_title: "Klick: Schlüsselwort eintragen (umschalten)",
+      em_btn_target_title: "Zielfernrohrmodus: auf GIF/Emoji klicken zum Speichern",
+      em_btn_save_this: "Dieses Element zur Sammlung hinzufügen",
+      em_no_favs: "Noch keine Favoriten",
+      em_del_confirm: "\"{k}\" löschen?",
+      em_note_prompt: "Notiz:",
+      em_set_cover_success: "Titelbild gesetzt!",
+      wm_nav_fail: "Navigation fehlgeschlagen. URL prüfen.",
+      wm_alert_invalid_url:
+        "Ungültige URL! Bitte eine Discord-Kanal-URL einfügen (mit /channels/).",
+      wm_default_channel_name: "Kanal",
+      wm_refresh_confirm:
+        "Wurmloch erstellt, Oberfläche kann sich nicht sofort aktualisieren.\n\nSeite jetzt neu laden?",
+      wm_root_group: "Unkategorisiert",
+      wm_menu_edit: "✎ Namen bearbeiten",
+      wm_menu_del: "🗑️ Wurmloch schließen",
+      wm_menu_vip_add: "★ Als VIP anheften",
+      wm_menu_vip_remove: "☆ VIP entfernen",
+      wm_menu_move: "📂 In Gruppe verschieben",
+      wm_group_prompt: "Neuen Gruppennamen eingeben:",
+      wm_edit_group: "Gruppenname bearbeiten:",
+      wm_reset_fail: "❌ Zurücksetzen fehlgeschlagen — Konsole (F12) prüfen.",
+      wm_group_del_confirm:
+        "Gruppe \"{n}\" auflösen? (Wurmlöcher bleiben erhalten)",
+      wm_group_select_prompt:
+        "Nummer zum Auswählen der Gruppe eingeben:\n\n0. [Root/Unkategorisiert]\n{list}\n\nLeer lassen für 'Neue Gruppe':",
+      wm_group_invalid: "Ungültige Gruppenauswahl!",
+      wm_move_prompt:
+        "In welche Gruppe verschieben? (Nummer eingeben)\n\n{list}",
+      wm_icon_picker_title: "Symbol für {name} wählen",
+      wm_icon_set_success: "✅ Symbol von {name} gesetzt",
+      wm_icon_empty: "Zuerst ein Emoji im Sammlungsmodul hinzufügen",
+      wm_title:
+        "Wurmloch-Steuerung\n• Klick: Neues erstellen\n• Lang drücken 1s: Einstellungsmenü",
+      wm_settings_menu_title: "🌀 Wurmloch-Einstellungen",
+      wm_settings_create: "Neues Wurmloch erstellen",
+      wm_settings_send_mode: "Sendemethode & API-Modus",
+      wm_settings_more: "Weitere Einstellungen (demnächst)",
+      wm_settings_position: "Position wechseln",
+      wm_settings_position_navbar: "Navigationsleiste",
+      wm_settings_position_titlebar: "Kanal-Titelleiste",
+      wm_settings_position_input: "Über Chat-Eingabe",
+      wm_settings_position_topleft: "Oben links (fest)",
+      wm_focus_on: "Fokusmodus deaktivieren",
+      wm_focus_off: "Fokusmodus aktivieren (nur Symbole)",
+      wm_focus_size: "Symbolgröße",
+      wm_focus_size_s: "S  · Klein",
+      wm_focus_size_m: "M  · Mittel",
+      wm_focus_size_l: "L  · Groß",
+      wm_menu_send: "✉️ Nachricht hierhin senden",
+      wm_send_placeholder: "Nachricht für #{name} eingeben...",
+      wm_send_btn: "Senden",
+      wm_send_cancel: "Abbrechen",
+      wm_send_waiting: "Warte auf Editor...",
+      wm_send_injecting: "Wird gesendet...",
+      wm_send_success: "✅ An #{name} gesendet!",
+      wm_send_toast_title: "✅ An #{name} gesendet",
+      wm_send_toast_hint: "Klicken um zum Kanal zu wechseln",
+      wm_send_waiting_token: "⏳ Warte auf Token…",
+      wm_send_fail: "❌ Fehlgeschlagen — Editor nicht bereit.",
+      wm_send_empty: "Nachricht darf nicht leer sein.",
+      wm_send_returning: "Kehre zurück...",
+      wm_send_hint: "Shift+Klick zum Senden ohne Kanalwechsel",
+      wm_send_mode_api: "⚡ API-Modus",
+      wm_send_mode_nav: "🔀 Navigationsmodus",
+      wm_send_mode_desc_api: "Direktes Senden ohne Kanalwechsel",
+      wm_send_mode_desc_nav: "Zu Zielkanal wechseln, dann senden",
+      wm_send_autoclose: "Nach Senden automatisch schließen",
+      wm_send_show_toast: "Sendebenachrichtigung anzeigen",
+      wm_send_goto_channel: "Nach Senden zum Kanal wechseln",
+      wm_send_paste_hint: "📋 Strg+V zum Bild einfügen",
+      wm_send_token_warn:
+        "⚠️ Token abgelaufen. API-Panel erneut öffnen. Diesmal Modus A verwendet.",
+      wm_send_channel_fail: "❌ Kanal konnte nicht geladen werden",
+      wm_send_editor_missing: "❌ Editor nicht gefunden",
+      wm_send_uploading: "📎 {n} Bild(er) werden hochgeladen...",
+      wm_send_chat_btn:  "Nachricht senden",
+      wm_send_cool_warn: "Wartezeit: {s}s zwischen Nachrichten",
+      wm_send_field_add: "+ Feld hinzufügen",
+      wm_send_field_del: "Feld entfernen",
+      wm_send_sending_n: "Sende {n}/{total}…",
+      wm_api_panel_title: "⚗️ Wurmloch API-Modus (Erweitert)",
+      wm_api_mode_label_a: "Modus A — Navigation (Standard)",
+      wm_api_mode_label_b: "Modus B — Direkte API (ohne Seitenwechsel)",
+      wm_api_warning_title: "⚠️ Risikohinweis",
+      wm_api_warning_body:
+        "Die Verwendung eines Benutzer-Tokens für Discord-API-Aufrufe verstößt gegen die Nutzungsbedingungen. Dein Konto kann gesperrt werden. Verwendung auf eigene Gefahr.",
+      wm_api_token_status_none: "Token: Nicht erkannt",
+      wm_api_token_status_ready: "Token: Bereit (nur Speicher)",
+      wm_api_detect_btn: "Mein Token erkennen",
+      wm_api_detect_confirm:
+        "【Token-Abfang-Einwilligung】\n\nMit OK erlaubst du diesem Skript, deinen Discord-Token für diese Sitzung abzufangen.\n\n🔒 Sicherheitsgarantien:\n• Nur Speicher — nie auf Festplatte geschrieben\n• Beim Schließen oder Neuladen gelöscht\n• Nie an externe Server übertragen\n• Ausschließlich für das Senden von Nachrichten in deinem Namen\n\n⚠️ Bestätigung:\n• Du verstehst, dass dieser Token Nachrichtensendezugriff gewährt\n• Du übernimmst die volle Verantwortung für alle gesendeten Nachrichten\n\nNur fortfahren, wenn du diesem Skript vertraust.",
+      wm_api_detect_waiting:
+        "⬆️ Wechsle einmal den Kanal, um den Token zu erfassen",
+      wm_api_enable_btn: "API-Modus aktivieren",
+      wm_api_disable_btn: "API-Modus deaktivieren (zurück zu Modus A)",
+      wm_api_enabled_toast: "✅ API-Modus aktiviert",
+      wm_api_disabled_toast: "↩️ Zurück zum Navigationsmodus",
+      wm_api_view_code: "Token-Abfangcode anzeigen",
+      wm_api_clear_token: "🗑 Token löschen",
+      wm_api_reset_all: "🗑️ Alle Wurmloch-Daten zurücksetzen",
+      wm_api_plan_b_first: "Bitte zuerst Plan B auswählen",
+      wm_api_send_fail: "❌ API fehlgeschlagen — Konsole prüfen",
+      em_col_title: "Meine Sammlungen",
+      em_col_add_success: "In \"{g}\" gespeichert!",
+      em_col_tab_new: "Neuer Tab",
+      em_col_tab_prompt: "Name des neuen Tabs:",
+      em_col_empty_tab: "Dieser Tab ist leer.",
+      em_col_del_tab_confirm:
+        "Tab \"{n}\" und alle Elemente löschen?",
+      em_col_rename_prompt: "Tab umbenennen",
+      em_modal_choose_tab: "In welche Sammlung speichern?",
+      em_modal_create_new: "+ Neue erstellen...",
+      em_tip_pick: "Titelbild festlegen",
+      em_tip_edit: "Notiz bearbeiten",
+      em_tip_delete: "Löschen",
+      em_menu_emoji: "Emojis",
+      em_menu_sticker: "Sticker",
+      em_menu_gif: "GIFs",
+      menu_export: "📤 Einstellungen exportieren (Sicherung)",
+      menu_import: "⬇️ Einstellungen importieren (Wiederherstellen)",
+      menu_change_lang: "🌐 Sprache wechseln",
+      custom_lang_desc:
+        "Klicke auf 「📤 Text exportieren」 um den englischen Quell-JSON zu erhalten. Übersetze ihn und verwende 「📥 Text importieren」 zum Anwenden.",
+      custom_lang_export: "📤 Text exportieren",
+      custom_lang_import: "📥 Text importieren",
+      custom_lang_apply: "✅ Anwenden und neu laden",
+      custom_lang_loaded: "✅ Geladen: {name}",
+      custom_lang_activate: "🌐 \"{name}\" anwenden",
+      custom_lang_json_error: "⚠️ JSON-Fehler: {msg}",
+      custom_lang_paste_hint: "Übersetzten JSON hier einfügen …",
+      copy_media_prefixed: "✅ {n} Medienlink(s) mit Präfix kopiert",
+      copy_media_urls: "✅ {n} Medienlink(s) kopiert",
+      wormhole_reset_success: "✅ Daten gelöscht, lade neu…",
+      wh_panel_title: "🔗 Webhook-Verwaltung",
+      wh_enable: "Webhook aktivieren",
+      wh_tip: "Webhook-Verwaltung",
+      wh_add_name_ph: "Label (z. B. Tiere)",
+      wh_add_url_ph: "https://discord.com/api/webhooks/…",
+      wh_btn_add: "＋ Hinzufügen",
+      wh_btn_test: "Testen",
+      wh_btn_delete: "Löschen",
+      wh_test_ok: "✅ Test gesendet!",
+      wh_test_fail: "❌ Test fehlgeschlagen",
+      wh_send_content: "📨 Nachricht an Webhook senden ▶",
+      wh_send_urls: "🔗 URLs an Webhook senden ▶",
+      wh_no_webhooks: "Keine Webhooks konfiguriert",
+      wh_send_ok: "✅ An [{name}] gesendet",
+      wh_send_fail: "❌ Senden an [{name}] fehlgeschlagen",
+      wh_no_urls: "⚠️ Keine URLs in dieser Nachricht",
+      wh_url_invalid: "⚠️ Ungültige Webhook-URL",
+      wh_btn_edit: "Bearbeiten",
+      wh_btn_save: "Speichern",
+      wh_btn_cancel: "Abbrechen",
+      wh_keep_source: "📎 Quelllink einbeziehen",
+      wh_keep_source_tip: "Falls aktiviert, wird der Original-Nachrichtenlink am Ende des gesendeten Inhalts hinzugefügt.",
+      em_col_refresh_tooltip: "GIF-Vorschauen in allen Tabs aktualisieren (abgelaufenen CDN-Cache erneuern)",
+      em_refresh_no_expired:   "ℹ️ Keine abgelaufenen GIFs in diesem Tab",
+      em_refresh_consent:      "⚠️ Über GIF-Aktualisierung\n\nDiese Funktion verwendet einen Drittanbieter-Proxy (fixcdn.hyonsu.com)\num neue Discord-Anmeldeinformationen zu erhalten.\n\nHinweise:\n• Deine Bild-URLs werden an fixcdn.hyonsu.com gesendet\n• Dies ist ein Drittanbieterdienst, nicht mit Discord oder diesem Skript verbunden\n• Suche 'fixcdn hyonsu' für mehr Informationen\n\nFortfahren?",
+      em_refresh_cancel_tip:   "ℹ️ Abgebrochen. Manuelle Schritte:\n① Originales GIF auf Discord finden\n② Erneut zur Sammlung hinzufügen",
+      em_refresh_loading:      "Aktualisiere...",
+      em_refresh_ok:           "✨ {n} GIF(s) aktualisiert{fail} {track}",
+      em_refresh_partial_fail: " ({f} Fehler)",
+      em_refresh_fail:         "⚠️ GIFs dieses Tabs konnten nicht aktualisiert werden",
+      em_refresh_track_api:    "(Discord API)",
+      em_refresh_track_cdn:    "(fixcdn)",
+      em_save_success: "Gespeichert: {k}",
+      uc_duplicate_found: "⚠️ Diese URL wurde bereits gepostet — {count}× in den letzten {limit} Nachrichten",
+      uc_duplicate_found_plural: "⚠️ {n} doppelte URLs — bis zu {count}× in den letzten {limit} Nachrichten",
+      uc_dom_found: "⚠️ Diese URL erschien {count}× in {limit} sichtbaren Nachrichten (DOM-Modus · ohne API)",
+      uc_no_token: "🔍 Doppelte URL-Prüfung benötigt Wurmloch-API-Modus — in Wurmloch-Einstellungen aktivieren (＋ 1s gedrückt halten)",
+      uc_token_waiting: "⏳ Warte auf API-Token… einmal den Kanal wechseln",
+      uc_fetching: "🔄 Suche nach doppelten URLs…",
+      uc_dismiss: "✕",
+      uc_limit_label: "Scan-Umfang:",
+      uc_limit_suffix: "Nachrichten",
+      wm_url_prompt: "Vollständige Discord-Kanal-URL eingeben:",
+      wm_name_prompt: "Wurmloch-Namen eingeben (z. B. Allgemein):",
+      wm_edit_title: "Wurmloch bearbeiten: {n}",
+      wm_created: "Wurmloch erstellt!",
+      wm_deleted: "Wurmloch geschlossen.",
+      mu_temp_card_name: "Temporär",
+      mu_temp_card_desc: "Hebt Stummschaltung nach Timer auf",
+      mu_temp_quick:    "Schnellauswahl",
+      mu_temp_placeholder: "z. B. 3H, 1T 6H, 27H 20M",
+      mu_temp_confirm:  "⏳ Temporär stummschalten",
+      mu_temp_expired_toast: "⏰ Temporäre Stummschaltung abgelaufen: {name}",
+      mu_temp_badge_label: "⏳",
+      mu_panel_title:   "🌫️ Benutzernachrichten abdimmen",
+      mu_empty:         "Keine abgedimmten Benutzer\nRechtsklick auf Nachricht zum Hinzufügen",
+      mu_remove_btn:    "Reaktivieren",
+      mu_add_toast:     "🌫️ Abgedimmt: {name}",
+      mu_remove_toast:  "✅ Reaktiviert: {name}",
+      mu_ctx_mute:      "🌫️ Nachrichten abdimmen: {name}",
+      mu_ctx_unmute:    "✅ Reaktivieren: {name}",
+      mu_footer_left:   "Rechtsklick auf Nachricht zum Abdimmen · Hover für Vorschau",
+      mu_footer_right:  "In GMStore gespeichert",
+      mu_shortcut:      "Alt+B zum Verwalten abgedimmter Benutzer",
+      mu_settings_tab_list:    "Abdimmliste",
+      mu_settings_tab_style:   "Stileinstellungen",
+      mu_settings_clear_all:   "Alle löschen",
+      mu_settings_clear_confirm: "Alle abgedimmten Benutzer entfernen?",
+      mu_settings_ghost_delay: "Ghost-Verschwinde-Verzögerung (Sekunden)",
+      mu_settings_title:       "Einstellungen",
+      cs_panel_title:   "⌨ Kanalsuche",
+      cs_placeholder:   "Stichwort eingeben...",
+      cs_paste_tip:     "Aus Zwischenablage einfügen",
+      cs_history_tip:   "Letzte Suchanfragen",
+      cs_no_history:    "Kein Suchverlauf",
+      cs_empty_hint:    "Stichwort eingeben oder Label anklicken",
+      cs_no_results:    "Keine Nachrichten gefunden",
+      cs_dom_mode_note: "DOM-Modus · sucht nur sichtbare Nachrichten",
+      cs_right_del_tip: "Rechtsklick auf Label zum Löschen",
+      cs_add_tag:        "+ Neues Label",
+      cs_add_tag_prompt: "Neues Label eingeben (Rechtsklick zum Löschen):",
+      cs_float_title:   "Kanalsuche (F2)",
+      cs_float_label:   "Kanalsuche",
+      mod_tip_message:    "Rechtsklick auf beliebige Nachricht zum Kopieren, Markieren oder Schnellaktionen mit der ⠿-Schaltfläche.",
+      mod_tip_forwarding: "Nachrichten an favorisierte Kanäle oder Benutzer weiterleiten. Fügt Werkzeugleiste über Eingabefeld hinzu.",
+      mod_tip_emoji:      "Server-Emojis in einem Popup mit Live-Suche durchsuchen und einfügen.",
+      mod_tip_header:     "Entsperrt Rechtsklick auf Medien, aktiviert Download-Assistent und Anti-Hijack-Schutz.",
+      mod_tip_wormhole:   "Schnellzugriff auf angeheftete Kanäle über Shortcuts oben im Chat. Unterstützt VIP, Gruppen und Fokusmodus.",
+      mod_tip_webhook:    "Nachrichten direkt aus jedem Kanal an gespeicherte Webhooks senden.",
+      mod_tip_urlchecker: "Warnt, wenn eine eingefügte URL bereits in letzten Nachrichten geteilt wurde. Funktioniert ohne API-Token (DOM-Modus).",
+      mod_tip_scout:      "Such-Schaltfläche über Textfeld oder Tastenkürzel für Stichwortsuche.",
+      mod_tip_blacklist:  "Nachrichten bestimmter Benutzer abdimmen. Rechtsklick zum Hinzufügen des Autors.",
+      mod_tip_myposts:    "Eigene Nachrichten durchsuchen, filtern und planmäßig löschen. Benötigt API-Token (automatisch abgerufen).",
+      mp_panel_title:           "Meine Nachrichten",
+      mp_tab_browse:            "Durchsuchen",
+      mp_tab_tasks:             "Aufgaben",
+      mp_tab_media:             "Medien",
+      mp_scope_server:          "Server",
+      mp_scope_channel:         "Kanal",
+      mp_scope_thread:          "Thread",
+      mp_search_placeholder:    "Inhalt durchsuchen…",
+      mp_type_text:             "Text",
+      mp_type_reply:            "Antwort",
+      mp_type_command:          "Befehl",
+      mp_type_thread_start:     "Thread-Start",
+      mp_type_other:            "Sonstige",
+      mp_load_more:             "Mehr laden",
+      mp_loading:               "Lädt…",
+      mp_no_results:            "Keine Nachrichten gefunden.",
+      search_scope_hint:        "Suche beschränkt auf {n} geladene Nachrichten.",
+      fav_tab_empty_hint:       "Noch keine Nachrichten geladen. Zuerst zum Durchsuchen-Tab wechseln.",
+      mp_empty_cta_title:       "Keine Nachrichten geladen",
+      mp_empty_cta_sub:         "Klicke oben auf ↻ zum Neu laden",
+      mp_media_cta_title:       "Keine Medien geladen",
+      mp_media_cta_sub:         "Klicke oben auf ↻ zum Neu laden der Medien",
+      mp_group_select_all:      "Alle auswählen",
+      mp_group_deselect_all:    "Auswahl aufheben",
+      mp_jump_to:               "Zur Nachricht springen",
+      mp_delete_single:         "Diese Nachricht löschen",
+      mp_undo:                  "Rückgängig",
+      mp_selected_n:            "{n} ausgewählt",
+      mp_create_task:           "Löschaufgabe erstellen",
+      mp_cancel_select:         "Abbrechen",
+      mp_token_warn:            "⚠️ Dieses Modul ruft deinen API-Token ab. Nur auf vertrauenswürdigen Geräten verwenden.",
+      mp_token_fail:            "API-Token konnte nicht abgerufen werden. Kanal wechseln und erneut versuchen.",
+      mp_token_fetching:        "Token wird abgerufen…",
+      mp_userid_fail:           "Benutzer-ID konnte nicht abgerufen werden.",
+      mp_confirm_delete_single: "Diese Nachricht löschen? Nicht rückgängig zu machen.",
+      mp_confirm_delete_batch:  "{n} Nachricht(en) löschen?\n{summary}\nNicht rückgängig zu machen.",
+      mp_undo_deleted:          "Nachricht gelöscht.",
+      mp_err_401:               "Ungültiger Token. Seite neu laden.",
+      mp_err_403:               "Nachricht kann nicht gelöscht werden (unzureichende Berechtigungen).",
+      mp_err_net:               "Netzwerkfehler, neuer Versuch…",
+      mp_quota_label:           "Tageslimit:",
+      mp_quota_conservative:    "Konservativ — 20/Tag",
+      mp_quota_balanced:        "Ausgewogen — 50/Tag (Standard)",
+      mp_quota_aggressive:      "Aggressiv — 100/Tag",
+      mp_quota_custom:          "Benutzerdefiniert",
+      mp_quota_custom_warn:     "⚠️ Hohe Löschhäufigkeit kann Anomalieerkennung auslösen.",
+      mp_quota_today:           "Heute: {done} / {limit}",
+      mp_tasks_active:          "Aktiv",
+      mp_tasks_done:            "Fertig",
+      mp_tasks_empty:           "Keine Aufgaben.",
+      mp_task_progress:         "Gelöscht: {done} / {total}",
+      mp_task_eta:              "~{days} Tag(e) verbleibend",
+      mp_task_resume:           "Fortsetzen",
+      mp_task_pause:            "Pausieren",
+      mp_task_cancel:           "Aufgabe abbrechen",
+      mp_task_cancel_confirm:   "Aufgabe abbrechen und löschen?",
+      mp_quota_reached:         "Tageslimit erreicht ({limit}/{limit}).\nFortschritt: {done} / {total}\nNoch ~{days} Tag(e).",
+      mp_quota_continue:        "Trotzdem fortfahren (auf eigene Gefahr)",
+      mp_quota_tomorrow:        "Morgen fortfahren",
+      mp_task_done_toast:       "Aufgabe abgeschlossen! {n} Nachricht(en) gelöscht.",
+      mp_task_created:          "Löschaufgabe erstellt.",
+      mp_task_running:          "Eine Aufgabe läuft bereits. Beenden oder pausieren.",
+      mp_refresh:               "Aktualisieren",
+      mp_page_size_label:       "Nachrichten pro Seite:",
+      mp_page_size_n:           "{n} Nachrichten",
+      mp_tasks_empty_hint:      "Nachrichten unter 'Durchsuchen' auswählen, dann 'Löschaufgabe erstellen'.",
+      mp_view_list:             "Zur Listenansicht wechseln",
+      mp_view_grid:             "Zur Rasteransicht wechseln",
+      mp_no_media:              "Keine Mediannachrichten in diesem Bereich.",
+      mp_no_content:            "(kein Inhalt)",
+      mp_sys_pin:               "Nachricht angeheftet",
+      mp_sys_channel_rename:    "Kanal umbenannt",
+      mp_sys_command:           "Slash-Befehl verwendet",
+      mp_sys_thread_created:    "Thread erstellt",
+      mp_sys_reminder:          "Erinnerung gesetzt",
+      mp_sys_action:            "Systemnachricht",
+      mp_poll_unknown:          "Umfrage",
+      mp_media_all:             "Alle",
+      mp_media_images:          "Bilder",
+      mp_media_videos:          "Videos",
+      mp_att_video:             "Video",
+      mp_att_videos:            "Videos",
+      mp_att_image:             "Bild",
+      mp_att_images:            "Bilder",
+      mp_media_loading_start:   "Medien werden geladen…",
+      mp_media_loading_more:    "Lade {n} / {total}…",
+      mp_media_loaded_count:    "{n} / {total} geladen",
+      mp_media_loaded_all:      "Alle geladen ({n})",
+      mp_create_task_title:     "Löschaufgabe erstellen",
+      mp_create_task_scope:     "Bereich: {scope}",
+      mp_create_task_filters:   "Filter: {types}",
+      mp_create_task_count:     "Ausgewählt: {n}",
+      mp_create_task_quota:     "Limit: übernimmt globale Konfiguration ({limit}/Tag)",
+      mp_create_task_label:     "Aufgaben-Label (optional):",
+      mp_create_task_warn:      "⚠️ Diese Aktion ist nicht rückgängig zu machen. Aufgabe wird in die Warteschlange gestellt.",
+      mp_create_task_confirm:   "Aufgabe erstellen",
+      mp_img_expired:           "Bild-URL ist möglicherweise abgelaufen.",
+      mp_attachments_n:         "{n} Anhang/Anhänge",
+      mp_fav_add:               "Favorit (vor Aufgaben-Löschen geschützt)",
+      mp_fav_remove:            "Aus Favoriten entfernen",
+      mp_fav_all_excluded:      "Alle ausgewählten Nachrichten sind Favoriten — Aufgabe nicht erstellt.",
+      mp_fav_filter_label:      "Favoriten",
+      mp_fav_filter_tip:        "Nur favorisierte Nachrichten anzeigen",
+      mp_copy_link:             "Nachrichtenlink kopieren",
     },
   };
 
@@ -5917,9 +6571,10 @@
       addBtn.innerText = "＋";
       addBtn.onclick = (e) => {
         e.stopPropagation();
-        const term = prompt(t("fm_prompt_channel"));
-        if (term && term.trim())
-          upsertData(term.trim(), "", { updateTime: true }, "channel");
+        dmtPrompt(t("fm_prompt_channel")).then((term) => {
+          if (term && term.trim())
+            upsertData(term.trim(), "", { updateTime: true }, "channel");
+        });
       };
       container.appendChild(addBtn);
 
@@ -5971,14 +6626,15 @@
       addUserRow.innerHTML = `<span style="color:#2dc770">${t("fm_add_user")}</span>`;
       addUserRow.onclick = (e) => {
         e.stopPropagation();
-        const term = prompt(t("fm_prompt_user"));
-        if (term && term.trim())
-          upsertData(
-            term.trim(),
-            "",
-            { updateTime: true, forceStar: true },
-            "user",
-          );
+        dmtPrompt(t("fm_prompt_user")).then((term) => {
+          if (term && term.trim())
+            upsertData(
+              term.trim(),
+              "",
+              { updateTime: true, forceStar: true },
+              "user",
+            );
+        });
       };
       userMenu.appendChild(addUserRow);
       userContainer.appendChild(userBtn);
@@ -7627,14 +8283,14 @@
             localStorage.setItem("wormhole_focus_show_labels", wfe.wormhole_focus_show_labels);
         }
 
-            alert(t("import_success"));
-            location.reload();
+            dmtShowToast(t("import_success"), { duration: 1500 });
+            setTimeout(() => location.reload(), 800);
           } catch (e) {
             console.error(e);
-            alert(t("import_fail"));
+            dmtShowToast(t("import_fail"), { duration: 3000 });
           }
         };
-        reader.onerror = () => alert(t("import_fail"));
+        reader.onerror = () => dmtShowToast(t("import_fail"), { duration: 3000 });
         reader.readAsText(file);
       });
 
@@ -9447,35 +10103,37 @@
         const addBtn = document.createElement("button");
         addBtn.textContent = t("add_symbol");
         addBtn.onclick = () => {
-          const val = prompt(t("add_symbol_prompt"))?.trim();
-          if (val && !config.symbols.includes(val)) {
-            config.symbols = [...config.symbols, val];
-            const newTotal = Math.max(
-              1,
-              Math.ceil(config.symbols.length / PAGE_SIZE),
-            );
-            refreshCallback(true, newTotal - 1);
-            showToast(t("add_success"));
-          }
+          dmtPrompt(t("add_symbol_prompt")).then((val) => {
+            const v = val?.trim();
+            if (v && !config.symbols.includes(v)) {
+              config.symbols = [...config.symbols, v];
+              const newTotal = Math.max(
+                1,
+                Math.ceil(config.symbols.length / PAGE_SIZE),
+              );
+              refreshCallback(true, newTotal - 1);
+              showToast(t("add_success"));
+            }
+          });
         };
         const removeBtn = document.createElement("button");
         removeBtn.textContent = t("remove_symbol");
         removeBtn.onclick = () => {
           if (config.symbols.length === 0) return showToast(t("remove_empty"));
-          const val = prompt(
-            `${t("remove_symbol_prompt")}\n${config.symbols.join("\n")}`,
-          )?.trim();
-          if (val && config.symbols.includes(val)) {
-            config.symbols = config.symbols.filter((s) => s !== val);
-            saveSymbols();
-            const newTotal = Math.max(
-              1,
-              Math.ceil(config.symbols.length / PAGE_SIZE),
-            );
-            const newPage = Math.min(currentPage, newTotal - 1);
-            refreshCallback(true, newPage);
-            showToast(t("delete_confirm", { s: val }));
-          }
+          dmtPrompt(`${t("remove_symbol_prompt")}\n${config.symbols.join("\n")}`).then((val) => {
+            const v = val?.trim();
+            if (v && config.symbols.includes(v)) {
+              config.symbols = config.symbols.filter((s) => s !== v);
+              saveSymbols();
+              const newTotal = Math.max(
+                1,
+                Math.ceil(config.symbols.length / PAGE_SIZE),
+              );
+              const newPage = Math.min(currentPage, newTotal - 1);
+              refreshCallback(true, newPage);
+              showToast(t("delete_confirm", { s: v }));
+            }
+          });
         };
         manageDiv.appendChild(addBtn);
         manageDiv.appendChild(removeBtn);
@@ -9504,12 +10162,13 @@
             editBtn.onclick = (e) => {
               e.stopPropagation();
               cancelCloseGlobalMenu();
-              const newVal = prompt(t("enter_link_text"), config.linkText);
-              if (newVal !== null) {
-                const finalVal = newVal.trim() === "" ? "" : newVal.trim();
-                localStorage.setItem("copyLinkText", finalVal);
-                refreshCallback(false);
-              }
+              dmtPrompt(t("enter_link_text"), config.linkText).then((newVal) => {
+                if (newVal !== null) {
+                  const finalVal = newVal.trim() === "" ? "" : newVal.trim();
+                  localStorage.setItem("copyLinkText", finalVal);
+                  refreshCallback(false);
+                }
+              });
             };
             btn.appendChild(editBtn);
           }
@@ -9855,12 +10514,13 @@
           editBtn.onclick = (e) => {
             e.stopPropagation();
             cancelCloseGlobalMenu();
-            const newVal = prompt(t("enter_link_text"), config.linkText);
-            if (newVal !== null) {
-              const finalVal = newVal.trim() === "" ? "" : newVal.trim();
-              localStorage.setItem("copyLinkText", finalVal);
-              refreshCallback(false);
-            }
+            dmtPrompt(t("enter_link_text"), config.linkText).then((newVal) => {
+              if (newVal !== null) {
+                const finalVal = newVal.trim() === "" ? "" : newVal.trim();
+                localStorage.setItem("copyLinkText", finalVal);
+                refreshCallback(false);
+              }
+            });
           };
           btn.appendChild(editBtn);
           sections.copy.push(btn);
@@ -11168,6 +11828,14 @@
       const newCols = Object.fromEntries(entries);
       saveCollections(type, newCols);
     }
+    
+    function renameCollection(type, oldName, newName) {
+      const cols = getCollections(type);
+      const entries = Object.entries(cols).map(([k, v]) =>
+        k === oldName ? [newName, v] : [k, v]
+      );
+      saveCollections(type, Object.fromEntries(entries));
+    }
     function addToCollection(type, colName, content) {
       const cols = getCollections(type);
       if (!cols[colName]) cols[colName] = [];
@@ -11744,7 +12412,7 @@
       activeTrigger = null;
     }
 
-    document.addEventListener("mousedown", (e) => {
+    function _onDocMousedown(e) {
       if (!activeDropdown) return;
       if (e.target.closest(".my-save-modal")) return;
       if (e.target.closest(".my-popover-menu")) return;
@@ -11754,7 +12422,9 @@
       )
         return;
       closeAllMenus();
-    });
+    }
+    document.addEventListener("mousedown", _onDocMousedown);
+    CleanupRegistry.add(() => document.removeEventListener("mousedown", _onDocMousedown));
 
     function startTargetSelection(type, onUrlSelected, continuous = false) {
       closeAllMenus();
@@ -11769,7 +12439,7 @@
         );
 
       if (!scroller) {
-        alert(t("em_err_no_list"));
+        dmtShowToast(t("em_err_no_list"), { duration: 3000 });
         return;
       }
       if (continuous) showEmojiToast("連續模式已開啟 (Esc 退出)", null);
@@ -11965,11 +12635,12 @@
       createBtn.className = "my-save-item create";
       createBtn.innerText = t("em_modal_create_new");
       createBtn.onclick = () => {
-        const newName = prompt(t("em_col_tab_prompt"));
-        if (newName && newName.trim()) {
-          onSelect(newName.trim());
-          modal.remove();
-        }
+        dmtPrompt(t("em_col_tab_prompt")).then((newName) => {
+          if (newName && newName.trim()) {
+            onSelect(newName.trim());
+            modal.remove();
+          }
+        });
       };
       list.appendChild(createBtn);
       modal.appendChild(list);
@@ -12064,15 +12735,16 @@
           editBtn.innerHTML = "✎";
           editBtn.onclick = (ev) => {
             ev.stopPropagation();
-            const newNote = prompt(t("em_note_prompt"), item.note || "");
-            if (newNote !== null) {
-              item.note = newNote.trim();
-              saveFavs(type, list);
-              if (btn) {
-                btn.click();
-                btn.click();
+            dmtPrompt(t("em_note_prompt"), item.note || "").then((newNote) => {
+              if (newNote !== null) {
+                item.note = newNote.trim();
+                saveFavs(type, list);
+                if (btn) {
+                  btn.click();
+                  btn.click();
+                }
               }
-            }
+            });
           };
           actionsDiv.appendChild(editBtn);
 
@@ -12186,13 +12858,67 @@
 
         tab.addEventListener("contextmenu", (ev) => {
           ev.preventDefault();
+          ev.stopPropagation();
           if (name === "General") return;
-          dmtConfirm(t("em_col_del_tab_confirm", { n: name }), { danger: true }).then((ok) => {
-            if (!ok) return;
-            delete cols[name];
-            saveCollections(type, cols);
-            renderTabsView(input, type);
-          });
+
+          document.querySelectorAll(".my-tab-ctx-menu").forEach((el) => el.remove());
+
+          const menu = document.createElement("div");
+          menu.className = "my-tab-ctx-menu my-popover-menu show";
+          menu.style.cssText = `
+            position:fixed; z-index:2147483647;
+            left:${ev.clientX}px; top:${ev.clientY}px;
+            min-width:130px;
+          `;
+
+          const renameItem = document.createElement("div");
+          renameItem.className = "my-menu-item";
+          renameItem.textContent = `✏️ ${t("em_col_rename_prompt")}`;
+          renameItem.onclick = (e) => {
+            e.stopPropagation();
+            menu.remove();
+            dmtPrompt(t("em_col_rename_prompt"), name).then((newName) => {
+              const trimmed = newName?.trim();
+              if (!trimmed || trimmed === name) return;
+              const cols = getCollections(type);
+              if (cols[trimmed]) {
+                dmtShowToast(`⚠️ "${trimmed}" already exists`, { duration: 2500 });
+                return;
+              }
+              renameCollection(type, name, trimmed);
+              currentActiveTab = trimmed;
+              renderTabsView(input, type);
+            });
+          };
+
+          const delItem = document.createElement("div");
+          delItem.className = "my-menu-item";
+          delItem.style.color = "#ed4245";
+          delItem.textContent = `🗑️ ${t("btn_delete")}`;
+          delItem.onclick = (e) => {
+            e.stopPropagation();
+            menu.remove();
+            dmtConfirm(t("em_col_del_tab_confirm", { n: name }), { danger: true }).then((ok) => {
+              if (!ok) return;
+              const cols = getCollections(type);
+              delete cols[name];
+              saveCollections(type, cols);
+              if (currentActiveTab === name) currentActiveTab = "General";
+              renderTabsView(input, type);
+            });
+          };
+
+          menu.appendChild(renameItem);
+          menu.appendChild(delItem);
+          document.body.appendChild(menu);
+
+          const onOutside = (e) => {
+            if (!menu.contains(e.target)) {
+              menu.remove();
+              document.removeEventListener("mousedown", onOutside, true);
+            }
+          };
+          setTimeout(() => document.addEventListener("mousedown", onOutside, true), 0);
         });
 
         tab.addEventListener("dragstart", (ev) => {
@@ -12256,16 +12982,17 @@
       addTabBtn.addEventListener("mousedown", (ev) => ev.stopPropagation());
       addTabBtn.onclick = (ev) => {
         ev.stopPropagation();
-        const newName = prompt(t("em_col_tab_prompt"));
-        if (newName && newName.trim()) {
-          const finalName = newName.trim();
-          if (!cols[finalName]) {
-            cols[finalName] = [];
-            saveCollections(type, cols);
-            currentActiveTab = finalName;
-            renderTabsView(input, type);
+        dmtPrompt(t("em_col_tab_prompt")).then((newName) => {
+          if (newName && newName.trim()) {
+            const finalName = newName.trim();
+            if (!cols[finalName]) {
+              cols[finalName] = [];
+              saveCollections(type, cols);
+              currentActiveTab = finalName;
+              renderTabsView(input, type);
+            }
           }
-        }
+        });
       };
       controls.appendChild(addTabBtn);
 
@@ -12862,6 +13589,11 @@
         }
         return origSend.call(this, ...args);
       };
+
+      CleanupRegistry.add(() => {
+        XMLHttpRequest.prototype.open = origOpen;
+        XMLHttpRequest.prototype.send = origSend;
+      });
     })();
 
     function getKlipyPageUrl(mediaEl) {
@@ -13233,6 +13965,7 @@
     injectIntoPopout(popoutContainer);
   };
       document.addEventListener("mouseover", _hoverInjectHandler, true);
+      CleanupRegistry.add(() => document.removeEventListener("mouseover", _hoverInjectHandler, true));
 
       let _entitySaverDebounce = null;
       let _pendingNodes = [];
@@ -14379,13 +15112,16 @@
           setTimeout(() => window.location.reload(), 1000);
         } catch (error) {
           console.error("[Wormhole] Reset failed:", error);
-          alert("❌ 重置失敗，請查看控制台 (F12) 錯誤訊息。");
+          dmtShowToast(
+            this.t("wm_reset_fail") || "❌ Reset failed — check console (F12) for details.",
+            { duration: 4000 }
+          );
         }
       }
     }
 
     setupGlobalListeners() {
-      document.addEventListener("click", (e) => {
+      this._onDocClick = (e) => {
         if (
           !e.target.closest(".my-wormhole-dropdown") &&
           !e.target.closest(".my-wormhole-group-chip")
@@ -14399,7 +15135,9 @@
             menu.classList.remove("show");
           }
         }
-      });
+      };
+      document.addEventListener("click", this._onDocClick);
+      CleanupRegistry.add(() => document.removeEventListener("click", this._onDocClick));
     }
 
     getDefaultData() {
@@ -14622,12 +15360,12 @@
       this.renderWormholes(wrapper);
     }
 
-    createNewWormhole() {
-      const url = prompt(this.t("wm_url_prompt"));
+    async createNewWormhole() {
+      const url = await dmtPrompt(this.t("wm_url_prompt"));
       if (!url) return;
 
       if (!this.validateUrl(url)) {
-        alert(this.t("wm_alert_invalid_url"));
+        dmtConfirm(this.t("wm_alert_invalid_url"), { cancelText: null }).then(() => {});
         return;
       }
 
@@ -14642,7 +15380,7 @@
         groupOptions = "(無現有群組 / No existing groups)";
       }
 
-      let groupChoice = prompt(
+      const groupChoice = await dmtPrompt(
         this.t("wm_group_select_prompt").replace("{list}", groupOptions),
       );
 
@@ -14655,7 +15393,7 @@
       const index = parseInt(choice);
 
       if (choice === "") {
-        const newGroupName = prompt(this.t("wm_group_prompt"));
+        const newGroupName = await dmtPrompt(this.t("wm_group_prompt"));
         if (newGroupName) {
           const newGroup = {
             id: Date.now(),
@@ -14675,7 +15413,7 @@
           targetGroup = data.groups[index - 1];
           targetList = targetGroup.wormholes;
         } else {
-          alert(this.t("wm_group_invalid"));
+          dmtConfirm(this.t("wm_group_invalid"), { cancelText: null }).then(() => {});
           return;
         }
       } else {
@@ -14690,7 +15428,7 @@
       }
 
       const defaultName = `${this.t("wm_default_channel_name")} ${targetList.length + 1}`;
-      const name = prompt(this.t("wm_name_prompt"), defaultName);
+      const name = await dmtPrompt(this.t("wm_name_prompt"), defaultName);
       if (!name) return;
 
       const serverIcon = this.getCurrentServerIcon();
@@ -17320,8 +18058,8 @@ unsafeWindow.fetch = function(...args) {
       });
     }
 
-    editWormhole(wormhole) {
-      const newName = prompt(
+    async editWormhole(wormhole) {
+      const newName = await dmtPrompt(
         this.t("wm_edit_title", { n: wormhole.name }),
         wormhole.name,
       );
@@ -17351,13 +18089,13 @@ unsafeWindow.fetch = function(...args) {
       this.refreshDisplay();
     }
 
-    moveWormhole(wormhole) {
+    async moveWormhole(wormhole) {
       const data = this.getData();
       let groupOptions = "0. [根目錄]";
       data.groups.forEach((g, i) => {
         groupOptions += `\n${i + 1}. ${g.name}`;
       });
-      const choice = prompt(this.t("wm_move_prompt", { list: groupOptions }));
+      const choice = await dmtPrompt(this.t("wm_move_prompt", { list: groupOptions }));
       if (!choice) return;
       const index = parseInt(choice);
       if (isNaN(index)) return;
@@ -17395,8 +18133,8 @@ unsafeWindow.fetch = function(...args) {
       this.refreshDisplay();
     }
 
-    editGroup(group) {
-      const newName = prompt("編輯群組名稱:", group.name);
+    async editGroup(group) {
+      const newName = await dmtPrompt(this.t("wm_edit_group") || "編輯群組名稱:", group.name);
       if (newName && newName.trim() !== group.name) {
         const data = this.getData();
         const target = data.groups.find((g) => g.id === group.id);
@@ -17816,7 +18554,7 @@ unsafeWindow.fetch = function(...args) {
 
     showToast(msg, emoji = "✅") {
       if (typeof showEmojiToast === "function") showEmojiToast(msg);
-      else alert(emoji + " " + msg);
+      else dmtShowToast(emoji + " " + msg, { duration: 2500 });
     }
 
     _showSendToast(wormhole) {
@@ -19860,6 +20598,8 @@ unsafeWindow.fetch = function(...args) {
     };
     let _blLastChannelId = _blGetChannel();
     const _blObserver = new MutationObserver((mutations) => {
+      if (document.hidden) return;
+
       const currentChannel = _blGetChannel();
       if (currentChannel !== _blLastChannelId) {
         _blLastChannelId = currentChannel;
@@ -19873,8 +20613,9 @@ unsafeWindow.fetch = function(...args) {
           if (!(node instanceof Element)) continue;
           if (node.matches(MSG_SEL)) {
             blApplyNode(node);
+          } else {
+            node.querySelectorAll?.(MSG_SEL).forEach(blApplyNode);
           }
-          node.querySelectorAll?.(MSG_SEL).forEach(blApplyNode);
         }
       }
     });
@@ -19924,7 +20665,7 @@ unsafeWindow.fetch = function(...args) {
       });
     }
 
-    document.addEventListener("click", (e) => {
+    function _onDocClickCollapse(e) {
       const container = e.target.closest(MSG_SEL);
       if (!container) return;
       if (!container.classList.contains("dmt-bl-s2")) return;
@@ -19950,7 +20691,9 @@ unsafeWindow.fetch = function(...args) {
         container.classList.add("dmt-bl-open");
         delete container.dataset.dmtCount;
       }
-    }, true);
+    }
+    document.addEventListener("click", _onDocClickCollapse, true);
+    CleanupRegistry.add(() => document.removeEventListener("click", _onDocClickCollapse, true));
 
     blApplyAll();
     setTimeout(blApplyAll, 400);
@@ -21355,7 +22098,7 @@ unsafeWindow.fetch = function(...args) {
       return newMsgs.length;
     }
 
-    const API_BASE       = "https://discord.com/api/v9";
+    const API_BASE       = "https://discord.com/api/v10";
     const SEARCH_PAGE_OPTIONS = [25, 50, 100];
     function _fmtTs(date, includeDate = true, dateOnly = false) {
       const fmt = GMStore.get(SK_TIME_FORMAT, "us");
@@ -25231,16 +25974,17 @@ if (type === "warn" && scanLimit !== null) {
   limitBtn.textContent = `⚙ ${scanLimit}`;
   limitBtn.title = "Click to adjust scan limit (50–1000)";
   limitBtn.onclick = () => {
-    const input = prompt(
+    dmtPrompt(
       `Adjust scan limit (current: ${scanLimit}, range: 50–1000):`,
       String(scanLimit)
-    );
-    if (!input) return;
-    const v = parseInt(input, 10);
-    if (Number.isFinite(v) && v >= 50 && v <= 1000) {
-      GMStore.set(SCAN_LIMIT_KEY, String(v));
-      showToast(`✅ Scan limit updated to ${v}`);
-    }
+    ).then((input) => {
+      if (!input) return;
+      const v = parseInt(input, 10);
+      if (Number.isFinite(v) && v >= 50 && v <= 1000) {
+        GMStore.set(SCAN_LIMIT_KEY, String(v));
+        showToast(`✅ Scan limit updated to ${v}`);
+      }
+    });
   };
   body.appendChild(limitBtn);
 }
@@ -25683,13 +26427,14 @@ if (type === "warn" && scanLimit !== null) {
           addBtn.className = "cs-tag cs-tag-edit";
           addBtn.textContent = t("cs_add_tag") || "+ New Tag";
           addBtn.onclick = () => {
-            const val = prompt(t("cs_add_tag_prompt") || "Enter new tag (right-click to delete):", "");
-            if (val?.trim()) {
-              const arr = _csGetTags();
-              arr.push(val.trim());
-              _csSetTags(arr);
-              _renderTags(input.value);
-            }
+            dmtPrompt(t("cs_add_tag_prompt") || "Enter new tag (right-click to delete):", "").then((val) => {
+              if (val?.trim()) {
+                const arr = _csGetTags();
+                arr.push(val.trim());
+                _csSetTags(arr);
+                _renderTags(input.value);
+              }
+            });
           };
           tagsRow.appendChild(addBtn);
         }
@@ -26049,7 +26794,7 @@ if (type === "warn" && scanLimit !== null) {
       const msg = !current
         ? "[Discord Utilities] Debug mode enabled. Please reload the page."
         : "[Discord Utilities] Debug mode disabled. Please reload the page.";
-      alert(msg);
+      dmtShowToast(msg, { duration: 3500 });
       console.log(msg);
     }
   );
@@ -26061,7 +26806,7 @@ if (type === "warn" && scanLimit !== null) {
         (m) => `${m.icon}${isModEnabled(m.storageKey) ? "✓" : "✗"}`
       ).join(" ");
       console.log("[Discord Utilities] Module Status:", status);
-      alert(`Module Status:\n${status}`);
+      dmtShowToast(`Module Status: ${status}`, { duration: 4000 });
     }
   );
 
@@ -26072,7 +26817,7 @@ if (type === "warn" && scanLimit !== null) {
         event.error
       );
       if (DEBUG) {
-        alert(`[Error] ${event.message}\n\nCheck console for details.`);
+        dmtShowToast(`[Error] ${event.message} — check console for details.`, { duration: 5000 });
       }
     }
   });
