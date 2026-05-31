@@ -9,7 +9,8 @@
 // @name:fr      Discord Message Toolkit
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
-// @version      2.6.5.4
+// @homepageURL  https://github.com/Startanuki07
+// @version      2.6.0.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -54,7 +55,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.6.5.4";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.6.0.0";
 
   const GMStore = {
     
@@ -94,6 +95,7 @@
     "mod_scout":      "2.2.9",
     "mod_blacklist":  "2.2.9",
     "mod_myposts":    "2.5.3",
+    "bl_hide_notices": "2.6.5.8",
   };
 
   function isFeatureNew(featureKey) {
@@ -105,6 +107,21 @@
   function markFeatureSeen(featureKey) {
     if (!(featureKey in NEW_FEATURES)) return;
     GMStore.set("newFeatureSeen_" + featureKey, NEW_FEATURES[featureKey]);
+  }
+
+  function dmtGetPortal() {
+    let p = document.getElementById("dmt-portal-root");
+    if (!p) {
+      p = document.createElement("div");
+      p.id = "dmt-portal-root";
+      p.style.cssText = [
+        "position:fixed", "inset:0",
+        "pointer-events:none",
+        "z-index:2147483647",
+      ].join(";");
+      document.documentElement.appendChild(p);
+    }
+    return p;
   }
 
   function renderNewBadge(featureKey) {
@@ -654,27 +671,50 @@
 
       const lang = (typeof getConfig === "function" ? getConfig().lang : null)
         || navigator.language || "en";
-      const defaultOK = { "zh-TW": "確認", "zh-CN": "确认", ja: "OK", ko: "확인" }[lang] || "OK";
-      const defaultCancel = { "zh-TW": "取消", "zh-CN": "取消", ja: "キャンセル", ko: "취소" }[lang] || "Cancel";
+      const _okMap     = { "zh-TW": "確認", "zh-CN": "确认", ja: "OK", ko: "확인", de: "OK", es: "Aceptar", "pt-BR": "Confirmar", fr: "OK", ru: "ОК" };
+      const _cancelMap = { "zh-TW": "取消", "zh-CN": "取消", ja: "キャンセル", ko: "취소", de: "Abbrechen", es: "Cancelar", "pt-BR": "Cancelar", fr: "Annuler", ru: "Отмена" };
+      const _langKey   = lang.split("-")[0];
+      const defaultOK     = _okMap[lang]     || _okMap[_langKey]     || "OK";
+      const defaultCancel = _cancelMap[lang] || _cancelMap[_langKey] || "Cancel";
 
       const { confirmText = defaultOK, cancelText = defaultCancel, danger = false } = opts;
       const showCancel = cancelText !== null;
 
       const overlay = document.createElement("div");
-      overlay.className = "dmt-confirm-overlay";
+      overlay.style.cssText = [
+        "position:fixed", "inset:0", "z-index:2147483647",
+        "background:rgba(0,0,0,0.6)", "backdrop-filter:blur(4px)",
+        "display:flex", "align-items:center", "justify-content:center",
+        "pointer-events:auto", "box-sizing:border-box",
+        "animation:dmt-cfm-in 0.15s ease",
+      ].join(";");
 
       const box = document.createElement("div");
-      box.className = "dmt-confirm-box";
+      box.style.cssText = [
+        "background:#2b2d31", "border:1px solid rgba(255,255,255,0.1)",
+        "border-radius:12px", "padding:22px 24px 18px",
+        "max-width:min(420px,90vw)", "width:420px",
+        "color:#dcddde", "font-family:sans-serif",
+        "font-size:14px", "line-height:1.55",
+        "box-shadow:0 16px 48px rgba(0,0,0,0.7)",
+        "box-sizing:border-box", "animation:dmt-cfm-slide 0.18s cubic-bezier(.19,1,.22,1)",
+      ].join(";");
 
       const msg = document.createElement("div");
-      msg.className = "dmt-confirm-msg";
+      msg.style.cssText = "white-space:pre-wrap;margin-bottom:18px;color:#dcddde;font-size:14px;line-height:1.55;";
       msg.textContent = message;
 
       const btns = document.createElement("div");
-      btns.className = "dmt-confirm-btns";
+      btns.style.cssText = "display:flex;justify-content:flex-end;gap:8px;";
 
       const okBtn = document.createElement("button");
-      okBtn.className = "dmt-confirm-btn dmt-confirm-btn-ok" + (danger ? " danger" : "");
+      okBtn.style.cssText = [
+        "padding:7px 18px", "border-radius:6px",
+        "font-size:13px", "font-weight:500", "cursor:pointer",
+        "border:none", "transition:background 0.15s",
+        "background:" + (danger ? "#ed4245" : "#5865f2"), "color:#fff",
+        "font-family:sans-serif",
+      ].join(";");
       okBtn.textContent = confirmText;
 
       const onKey = (e) => { if (e.key === "Escape") close(false); };
@@ -687,7 +727,12 @@
 
       if (showCancel) {
         const cancelBtn = document.createElement("button");
-        cancelBtn.className = "dmt-confirm-btn dmt-confirm-btn-cancel";
+        cancelBtn.style.cssText = [
+          "padding:7px 18px", "border-radius:6px",
+          "font-size:13px", "font-weight:500", "cursor:pointer",
+          "background:transparent", "border:1px solid rgba(255,255,255,0.15)",
+          "color:#dcddde", "font-family:sans-serif",
+        ].join(";");
         cancelBtn.textContent = cancelText;
         cancelBtn.onclick = () => close(false);
         btns.appendChild(cancelBtn);
@@ -700,7 +745,7 @@
       box.appendChild(msg);
       box.appendChild(btns);
       overlay.appendChild(box);
-      document.body.appendChild(overlay);
+      dmtGetPortal().appendChild(overlay);
 
       setTimeout(() => okBtn.focus(), 50);
     });
@@ -729,35 +774,66 @@
 
       const lang = (typeof getConfig === "function" ? getConfig().lang : null)
         || navigator.language || "en";
-      const defaultOK     = { "zh-TW": "確認", "zh-CN": "确认", ja: "OK", ko: "확인" }[lang] || "OK";
-      const defaultCancel = { "zh-TW": "取消", "zh-CN": "取消", ja: "キャンセル", ko: "취소" }[lang] || "Cancel";
+      const _okMap2     = { "zh-TW": "確認", "zh-CN": "确认", ja: "OK", ko: "확인", de: "OK", es: "Aceptar", "pt-BR": "Confirmar", fr: "OK", ru: "ОК" };
+      const _cancelMap2 = { "zh-TW": "取消", "zh-CN": "取消", ja: "キャンセル", ko: "취소", de: "Abbrechen", es: "Cancelar", "pt-BR": "Cancelar", fr: "Annuler", ru: "Отмена" };
+      const _langKey2   = lang.split("-")[0];
+      const defaultOK     = _okMap2[lang]     || _okMap2[_langKey2]     || "OK";
+      const defaultCancel = _cancelMap2[lang] || _cancelMap2[_langKey2] || "Cancel";
       const { confirmText = defaultOK, cancelText = defaultCancel, placeholder = "" } = opts;
 
       const overlay = document.createElement("div");
-      overlay.className = "dmt-confirm-overlay";
+      overlay.style.cssText = [
+        "position:fixed", "inset:0", "z-index:2147483647",
+        "background:rgba(0,0,0,0.6)", "backdrop-filter:blur(4px)",
+        "display:flex", "align-items:center", "justify-content:center",
+        "pointer-events:auto", "box-sizing:border-box",
+        "animation:dmt-cfm-in 0.15s ease",
+      ].join(";");
 
       const box = document.createElement("div");
-      box.className = "dmt-confirm-box";
+      box.style.cssText = [
+        "background:#2b2d31", "border:1px solid rgba(255,255,255,0.1)",
+        "border-radius:12px", "padding:22px 24px 18px",
+        "max-width:min(420px,90vw)", "width:420px",
+        "color:#dcddde", "font-family:sans-serif",
+        "font-size:14px", "line-height:1.55",
+        "box-shadow:0 16px 48px rgba(0,0,0,0.7)",
+        "box-sizing:border-box", "animation:dmt-cfm-slide 0.18s cubic-bezier(.19,1,.22,1)",
+      ].join(";");
 
       const msgEl = document.createElement("div");
-      msgEl.className = "dmt-confirm-msg";
+      msgEl.style.cssText = "white-space:pre-wrap;margin-bottom:12px;color:#dcddde;font-size:14px;line-height:1.55;";
       msgEl.textContent = message;
 
       const input = document.createElement("input");
       input.type = "text";
-      input.className = "dmt-prompt-input";
       input.value = defaultValue;
       input.placeholder = placeholder;
+      input.style.cssText = [
+        "width:100%", "box-sizing:border-box",
+        "background:#1e1f22", "border:1px solid rgba(255,255,255,0.15)",
+        "border-radius:6px", "color:#dcddde",
+        "font-size:14px", "padding:8px 10px",
+        "margin-bottom:16px", "outline:none",
+        "font-family:sans-serif", "display:block",
+      ].join(";");
+      input.addEventListener("focus", () => { input.style.borderColor = "#5865f2"; });
+      input.addEventListener("blur",  () => { input.style.borderColor = "rgba(255,255,255,0.15)"; });
 
       const btns = document.createElement("div");
-      btns.className = "dmt-confirm-btns";
+      btns.style.cssText = "display:flex;justify-content:flex-end;gap:8px;";
 
+      const _btnBase = [
+        "padding:7px 18px", "border-radius:6px",
+        "font-size:13px", "font-weight:500", "cursor:pointer",
+        "font-family:sans-serif",
+      ].join(";");
       const cancelBtn = document.createElement("button");
-      cancelBtn.className = "dmt-confirm-btn dmt-confirm-btn-cancel";
+      cancelBtn.style.cssText = _btnBase + ";background:transparent;border:1px solid rgba(255,255,255,0.15);color:#dcddde;";
       cancelBtn.textContent = cancelText;
 
       const okBtn = document.createElement("button");
-      okBtn.className = "dmt-confirm-btn dmt-confirm-btn-ok";
+      okBtn.style.cssText = _btnBase + ";background:#5865f2;border:none;color:#fff;";
       okBtn.textContent = confirmText;
 
       const onKey = (e) => {
@@ -782,7 +858,7 @@
       box.appendChild(input);
       box.appendChild(btns);
       overlay.appendChild(box);
-      document.body.appendChild(overlay);
+      dmtGetPortal().appendChild(overlay);
 
       setTimeout(() => { input.focus(); input.select(); }, 50);
     });
@@ -832,7 +908,7 @@
 
     const paramKeys = Object.keys(params);
     const cacheKey = paramKeys.length
-      ? `${lang}:${key}:${JSON.stringify(params)}`
+      ? `${lang}:${key}:${paramKeys.sort().map(k => `${k}=${params[k]}`).join(",")}`
       : `${lang}:${key}`;
 
     const cached = TranslationCache.get(cacheKey);
@@ -1379,6 +1455,10 @@
       mu_settings_clear_all:   "Clear All",
       mu_settings_clear_confirm: "Remove all muted users?",
       mu_settings_ghost_delay: "Ghost vanish delay (seconds)",
+      mu_settings_hide_blocked: "Hide Discord blocked notices",
+      mu_settings_hide_blocked_desc: "Hide \"N blocked messages — Show\" rows",
+      mu_settings_hide_ignored: "Hide Discord ignored notices",
+      mu_settings_hide_ignored_desc: "Hide \"N ignored messages — Show\" rows",
       mu_settings_title:       "Settings",
     },
 
@@ -1892,6 +1972,10 @@
       mu_settings_clear_all:   "全部清除",
       mu_settings_clear_confirm: "確認移除所有靜音對象？",
       mu_settings_ghost_delay: "Ghost 飄走延遲（秒）",
+      mu_settings_hide_blocked: "隱藏 Discord 封鎖通知",
+      mu_settings_hide_blocked_desc: "隱藏「N 則已封鎖的訊息 — 顯示」列",
+      mu_settings_hide_ignored: "隱藏 Discord 忽略通知",
+      mu_settings_hide_ignored_desc: "隱藏「N 則已忽略訊息 — 顯示」列",
       mu_settings_title:       "設定",
     },    "zh-CN": {
       name: "简体中文",
@@ -2298,6 +2382,10 @@
       mu_settings_clear_all:   "全部清除",
       mu_settings_clear_confirm: "确认移除所有静音对象？",
       mu_settings_ghost_delay: "Ghost 飘走延迟（秒）",
+      mu_settings_hide_blocked: "隐藏 Discord 屏蔽通知",
+      mu_settings_hide_blocked_desc: "隐藏「N 条已屏蔽消息 — 显示」行",
+      mu_settings_hide_ignored: "隐藏 Discord 忽略通知",
+      mu_settings_hide_ignored_desc: "隐藏「N 条已忽略消息 — 显示」行",
       mu_settings_title:       "设置",
 
       mp_panel_title:           "我的消息",
@@ -2818,6 +2906,10 @@
       mu_settings_clear_all:   "すべて削除",
       mu_settings_clear_confirm: "ミュートユーザーをすべて削除しますか？",
       mu_settings_ghost_delay: "Ghost 消去ディレイ（秒）",
+      mu_settings_hide_blocked: "Discordのブロック通知を非表示",
+      mu_settings_hide_blocked_desc: "「N件のブロックされたメッセージ — 表示」行を非表示",
+      mu_settings_hide_ignored: "Discordの無視通知を非表示",
+      mu_settings_hide_ignored_desc: "「N件の無視されたメッセージ — 表示」行を非表示",
       mu_settings_title:       "設定",
 
       mp_panel_title:           "マイ投稿",
@@ -3324,6 +3416,10 @@
       mu_settings_clear_all:   "전체 삭제",
       mu_settings_clear_confirm: "모든 음소거 대상을 제거할까요?",
       mu_settings_ghost_delay: "Ghost 사라짐 지연 (초)",
+      mu_settings_hide_blocked: "Discord 차단 알림 숨기기",
+      mu_settings_hide_blocked_desc: "'차단된 메시지 N개 — 표시' 행 숨기기",
+      mu_settings_hide_ignored: "Discord 무시 알림 숨기기",
+      mu_settings_hide_ignored_desc: "'무시된 메시지 N개 — 표시' 행 숨기기",
       mu_settings_title:       "설정",
 
       mod_tip_message:    "메시지를 우클릭하여 ⠿ 버튼으로 복사, 북마크 또는 빠른 작업을 수행하세요.",
@@ -3834,6 +3930,10 @@
       mu_settings_clear_all:   "Borrar todo",
       mu_settings_clear_confirm: "¿Eliminar todos los usuarios atenuados?",
       mu_settings_ghost_delay: "Retraso de desvanecimiento ghost (segundos)",
+      mu_settings_hide_blocked: "Ocultar avisos de bloqueados de Discord",
+      mu_settings_hide_blocked_desc: "Ocultar filas 'N mensajes bloqueados — Mostrar'",
+      mu_settings_hide_ignored: "Ocultar avisos de ignorados de Discord",
+      mu_settings_hide_ignored_desc: "Ocultar filas 'N mensajes ignorados — Mostrar'",
       mu_settings_title:       "Configuración",
 
       mod_tip_message:    "Haz clic derecho en cualquier mensaje para copiar, marcar o realizar acciones rápidas con el botón ⠿.",
@@ -4346,6 +4446,10 @@
       mu_settings_clear_all:   "Limpar tudo",
       mu_settings_clear_confirm: "Remover todos os usuários silenciados?",
       mu_settings_ghost_delay: "Atraso de desvanecimento ghost (segundos)",
+      mu_settings_hide_blocked: "Ocultar avisos de bloqueados do Discord",
+      mu_settings_hide_blocked_desc: "Ocultar linhas 'N mensagens bloqueadas — Mostrar'",
+      mu_settings_hide_ignored: "Ocultar avisos de ignorados do Discord",
+      mu_settings_hide_ignored_desc: "Ocultar linhas 'N mensagens ignoradas — Mostrar'",
       mu_settings_title:       "Configurações",
 
       mod_tip_message:    "Clique com o botão direito em qualquer mensagem para copiar, marcar ou realizar ações rápidas com o botão ⠿.",
@@ -4856,6 +4960,10 @@
       mu_settings_clear_all:   "Tout effacer",
       mu_settings_clear_confirm: "Supprimer tous les utilisateurs atténués ?",
       mu_settings_ghost_delay: "Délai de disparition ghost (secondes)",
+      mu_settings_hide_blocked: "Masquer les avis de blocage Discord",
+      mu_settings_hide_blocked_desc: "Masquer les lignes 'N messages bloqués — Afficher'",
+      mu_settings_hide_ignored: "Masquer les avis d'ignorés Discord",
+      mu_settings_hide_ignored_desc: "Masquer les lignes 'N messages ignorés — Afficher'",
       mu_settings_title:       "Paramètres",
 
       cs_panel_title:   "⌨ Recherche de salon",
@@ -5383,6 +5491,10 @@
       mu_settings_clear_all:   "Очистить всё",
       mu_settings_clear_confirm: "Удалить всех приглушённых пользователей?",
       mu_settings_ghost_delay: "Задержка исчезновения ghost (секунды)",
+      mu_settings_hide_blocked: "Скрыть уведомления о заблокированных",
+      mu_settings_hide_blocked_desc: "Скрыть строки 'N заблокированных — Показать'",
+      mu_settings_hide_ignored: "Скрыть уведомления об игнорируемых",
+      mu_settings_hide_ignored_desc: "Скрыть строки 'N игнорируемых — Показать'",
       mu_settings_title:       "Настройки",
 
       mod_tip_message:    "Нажмите правой кнопкой мыши на любое сообщение, чтобы скопировать, добавить в закладки или выполнить быстрые действия кнопкой ⠿.",
@@ -5874,6 +5986,10 @@
       mu_settings_clear_all:   "Alle löschen",
       mu_settings_clear_confirm: "Alle abgedimmten Benutzer entfernen?",
       mu_settings_ghost_delay: "Ghost-Verschwinde-Verzögerung (Sekunden)",
+      mu_settings_hide_blocked: "Discord-Blockierungshinweise ausblenden",
+      mu_settings_hide_blocked_desc: "Zeilen 'N blockierte Nachrichten — Anzeigen' ausblenden",
+      mu_settings_hide_ignored: "Discord-Ignorierthinweise ausblenden",
+      mu_settings_hide_ignored_desc: "Zeilen 'N ignorierte Nachrichten — Anzeigen' ausblenden",
       mu_settings_title:       "Einstellungen",
       cs_panel_title:   "⌨ Kanalsuche",
       cs_placeholder:   "Stichwort eingeben...",
@@ -6469,7 +6585,7 @@
                     </div>
                 </div>
             `;
-      document.body.appendChild(overlay);
+      dmtGetPortal().appendChild(overlay);
       document.getElementById("my-help-close-btn").onclick = () =>
         overlay.remove();
       overlay.onclick = () => overlay.remove();
@@ -7455,7 +7571,7 @@
 
         manualOverlay.appendChild(modal);
         document.head.appendChild(style);
-        document.body.appendChild(manualOverlay);
+        dmtGetPortal().appendChild(manualOverlay);
 
         const close = () => {
           manualOverlay.remove();
@@ -7475,7 +7591,8 @@
           animStyle.remove();
         }
       });
-      document.body.appendChild(overlay);
+      dmtGetPortal().appendChild(overlay);
+      overlay.style.pointerEvents = "auto";
     }
 
     GM_addStyle(`
@@ -9377,7 +9494,8 @@
       const submenu = document.createElement("div");
       submenu.className = "msg-copy-portal-menu";
       items.forEach((el) => submenu.appendChild(el));
-      document.body.appendChild(submenu);
+      dmtGetPortal().appendChild(submenu);
+      submenu.style.pointerEvents = "auto";
 
       let left = parentRect.right + 2;
       let top = parentRect.top;
@@ -9567,7 +9685,7 @@
             box.appendChild(warnBody);
             box.appendChild(btnRow);
             dlg.appendChild(box);
-            document.body.appendChild(dlg);
+            dmtGetPortal().appendChild(dlg);
             dlg.addEventListener("click", (e) => {
               if (e.target === dlg) dlg.remove();
             });
@@ -9627,7 +9745,7 @@
             warnBox.appendChild(warnBody);
             warnBox.appendChild(warnBtns);
             warnDlg.appendChild(warnBox);
-            document.body.appendChild(warnDlg);
+            dmtGetPortal().appendChild(warnDlg);
             warnDlg.addEventListener("click", e => { if (e.target === warnDlg) warnDlg.remove(); });
             return;
           }
@@ -9687,7 +9805,8 @@
       };
       panel.appendChild(manualBtn);
 
-      document.body.appendChild(panel);
+      dmtGetPortal().appendChild(panel);
+      panel.style.pointerEvents = "auto";
       const rect = anchorEl.getBoundingClientRect();
       const pw = panel.offsetWidth;
       const ph = panel.offsetHeight;
@@ -9775,7 +9894,7 @@
       box.appendChild(head);
       box.appendChild(body);
       overlay.appendChild(box);
-      document.body.appendChild(overlay);
+      dmtGetPortal().appendChild(overlay);
 
       const close = () => { overlay.remove(); mmStyle.remove(); };
       overlay.addEventListener("click", (e) => {
@@ -10716,7 +10835,8 @@
           };
           panel.appendChild(resetBtn);
 
-          document.body.appendChild(panel);
+          dmtGetPortal().appendChild(panel);
+          panel.style.pointerEvents = "auto";
           const rect = anchorEl.getBoundingClientRect();
           const pw = panel.offsetWidth || 240;
           const ph = panel.offsetHeight || 300;
@@ -11215,7 +11335,8 @@
           (c, p) => renderMenuInternal(c, p),
           _symbolsPage,
         );
-        document.body.appendChild(dropdown);
+        dmtGetPortal().appendChild(dropdown);
+        dropdown.style.pointerEvents = "auto";
         globalActiveDropdown = dropdown;
         dropdown.style.display = "flex";
         _calcDropdownPos(btn, dropdown);
@@ -11241,7 +11362,8 @@
           _symbolsPage,
         );
 
-        document.body.appendChild(dropdown);
+        dmtGetPortal().appendChild(dropdown);
+        dropdown.style.pointerEvents = "auto";
         globalActiveDropdown = dropdown;
         dropdown.style.display = "flex";
         _calcDropdownPos(btn, dropdown);
@@ -11487,7 +11609,7 @@
             .my-overlay-btn { width: 22px; height: 22px; color: var(--dmt-text-bright); border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s; }
             .my-overlay-btn:hover { background: var(--dmt-accent); }
 
-            .my-popover-menu { position: fixed; background: var(--dmt-bg-primary); border: 1px solid var(--dmt-bg-deep); border-radius: 4px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); padding: 0; display: none; flex-direction: column; z-index: 2147483647; min-width: 340px; max-width: 620px; max-height: 550px; overflow: hidden; }
+            .my-popover-menu { position: fixed; background: var(--dmt-bg-primary); border: 1px solid var(--dmt-bg-deep); border-radius: 4px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); padding: 0; display: none; flex-direction: column; z-index: 2147483647; min-width: 340px; max-width: 620px; max-height: min(550px, 90vh); overflow: hidden; pointer-events: auto; }
             .my-popover-menu.show { display: flex; }
 
             .my-menu-item { padding: 6px 10px; color: var(--dmt-text-primary); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.03); }
@@ -11527,7 +11649,7 @@
             .my-tab.dragging { opacity: 0.5; background: rgba(255,255,255,0.1); }
 
             .my-popover-menu.collection-mode { flex-direction: row; align-items: stretch; min-width: 420px; max-width: 720px; }
-            .my-col-main { display: flex; flex-direction: column; flex: 1; min-width: 0; overflow: hidden; }
+            .my-col-main { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; overflow: hidden; }
             
             .my-tab-controls { flex-shrink: 0 !important; }
 
@@ -11626,7 +11748,7 @@
                 100% { opacity: 0; transform: scale(0.5) rotate(30deg); }
             }
 
-            .my-tab-content { padding: 8px; overflow-y: auto; max-height: 400px; min-height: 180px; background: var(--dmt-bg-surface); position: relative; }
+.my-tab-content { padding: 8px; overflow-y: auto; flex: 1; min-height: 0; max-height: clamp(200px, 60vh, 400px); min-height: 120px; background: var(--dmt-bg-surface); position: relative; }
 
             .my-col-grid { display: grid; gap: 8px; width: 100%; box-sizing: border-box; }
             .my-col-grid.emoji { grid-template-columns: repeat(auto-fill, 58px); gap: 4px; justify-content: start; }
@@ -12644,7 +12766,8 @@
       };
       list.appendChild(createBtn);
       modal.appendChild(list);
-      document.body.appendChild(modal);
+      dmtGetPortal().appendChild(modal);
+      modal.style.pointerEvents = "auto";
       setTimeout(() => {
         const closeFn = (e) => {
           if (!modal.contains(e.target)) {
@@ -12874,9 +12997,12 @@
           const renameItem = document.createElement("div");
           renameItem.className = "my-menu-item";
           renameItem.textContent = `✏️ ${t("em_col_rename_prompt")}`;
-          renameItem.onclick = (e) => {
+          renameItem.addEventListener("mousedown", (e) => {
+            e.preventDefault();
             e.stopPropagation();
+            e.stopImmediatePropagation();
             menu.remove();
+            document.removeEventListener("mousedown", onOutside, true);
             dmtPrompt(t("em_col_rename_prompt"), name).then((newName) => {
               const trimmed = newName?.trim();
               if (!trimmed || trimmed === name) return;
@@ -12889,12 +13015,12 @@
               currentActiveTab = trimmed;
               renderTabsView(input, type);
             });
-          };
+          });
 
           const delItem = document.createElement("div");
           delItem.className = "my-menu-item";
           delItem.style.color = "#ed4245";
-          delItem.textContent = `🗑️ ${t("btn_delete")}`;
+          delItem.textContent = `🗑️ ${t("wh_btn_delete")}`;
           delItem.onclick = (e) => {
             e.stopPropagation();
             menu.remove();
@@ -12910,7 +13036,8 @@
 
           menu.appendChild(renameItem);
           menu.appendChild(delItem);
-          document.body.appendChild(menu);
+          dmtGetPortal().appendChild(menu);
+          menu.style.pointerEvents = "auto";
 
           const onOutside = (e) => {
             if (!menu.contains(e.target)) {
@@ -13675,7 +13802,7 @@
     dropdown.addEventListener("mousedown", (e) => {
       e.stopPropagation();
     });
-    document.body.appendChild(dropdown);
+    dmtGetPortal().appendChild(dropdown);
 
     const injectEmojiInputTools = function (pickerContainer) {
       if (!pickerContainer) return;
@@ -14569,7 +14696,9 @@
       panel.appendChild(form);
 
       overlay.appendChild(panel);
-      document.body.appendChild(overlay);
+      dmtGetPortal().appendChild(overlay);
+      overlay.style.pointerEvents = "auto";
+      panel.style.pointerEvents = "auto";
       _overlay = overlay;
       nameInput.focus();
     }
@@ -16625,7 +16754,8 @@
         document.head.appendChild(s);
       }
 
-      document.body.appendChild(menu);
+      dmtGetPortal().appendChild(menu);
+      menu.style.pointerEvents = "auto";
 
       const rect = anchorEl.getBoundingClientRect();
       const mw = 220;
@@ -16827,7 +16957,8 @@ unsafeWindow.fetch = function(...args) {
         document.head.appendChild(s);
       }
 
-      document.body.appendChild(panel);
+      dmtGetPortal().appendChild(panel);
+      panel.style.pointerEvents = "auto";
 
       const closePanel = () => panel.remove();
 
@@ -17243,7 +17374,8 @@ unsafeWindow.fetch = function(...args) {
         document.head.appendChild(s);
       }
 
-      document.body.appendChild(overlay);
+      dmtGetPortal().appendChild(overlay);
+      overlay.style.pointerEvents = "auto";
 
       const fieldsEl   = overlay.querySelector("#wh-send-fields");
       const addFieldBtn = overlay.querySelector("#wh-send-field-add");
@@ -17559,7 +17691,8 @@ unsafeWindow.fetch = function(...args) {
             opacity:0; transition:opacity 0.18s, transform 0.18s, border-color 0.2s, background 0.2s;
             pointer-events:auto; white-space:nowrap;
           `;
-          document.body.appendChild(pill);
+          dmtGetPortal().appendChild(pill);
+          pill.style.pointerEvents = "auto";
           requestAnimationFrame(() => {
             pill.style.opacity = "1";
             pill.style.transform = "translateX(-50%) translateY(0)";
@@ -18213,7 +18346,8 @@ unsafeWindow.fetch = function(...args) {
         document.head.appendChild(style);
       }
 
-      document.body.appendChild(modal);
+      dmtGetPortal().appendChild(modal);
+      modal.style.pointerEvents = "auto";
 
       const close = () => {
         modal.remove();
@@ -18451,7 +18585,8 @@ unsafeWindow.fetch = function(...args) {
         document.head.appendChild(s);
       }
 
-      document.body.appendChild(menu);
+      dmtGetPortal().appendChild(menu);
+      menu.style.pointerEvents = "auto";
 
       const rect = anchorEl.getBoundingClientRect();
       const mw = 140;
@@ -20063,6 +20198,23 @@ unsafeWindow.fetch = function(...args) {
           background: rgba(88,101,242,0.22); color: #a5adfa;
           transform: rotate(90deg);
         }
+        
+        #dmt-bl-picker .picker-gear-btn { position: relative; }
+        #dmt-bl-picker .picker-gear-dot {
+          position: absolute; top: 3px; right: 3px;
+          width: 7px; height: 7px; border-radius: 50%;
+          background: #ed4245; border: 1.5px solid var(--dmt-bg-primary, #2b2d31);
+          pointer-events: none;
+        }
+        
+        #dmt-bl-picker .pset-new-tag {
+          display: inline-block; margin-left: 6px;
+          padding: 1px 5px; border-radius: 3px;
+          background: #23a55a; color: #fff;
+          font-size: 9px; font-weight: 700;
+          vertical-align: middle; line-height: 1.5;
+          pointer-events: none; flex-shrink: 0;
+        }
 
         #dmt-bl-picker .picker-settings {
           display: none; flex-direction: column; gap: 0;
@@ -20080,6 +20232,13 @@ unsafeWindow.fetch = function(...args) {
           text-align: center; border-radius: 5px; cursor: pointer;
           color: rgba(185,187,190,0.5);
           transition: background 0.15s, color 0.15s;
+          position: relative;
+        }
+        
+        #dmt-bl-picker .pset-tab-dot {
+          position: absolute; top: 2px; right: 4px;
+          width: 6px; height: 6px; border-radius: 50%;
+          background: #ed4245; pointer-events: none;
         }
         #dmt-bl-picker .pset-tab.active {
           background: rgba(88,101,242,0.35); color: #c0c5f7;
@@ -20554,6 +20713,26 @@ unsafeWindow.fetch = function(...args) {
       }
     }
 
+    function _blHideNativeNotices() {
+      const hideBlocked = GMStore.get("bl_hide_discord_blocked", false);
+      const hideIgnored = GMStore.get("bl_hide_discord_ignored", false);
+      if (!hideBlocked && !hideIgnored) return;
+
+      document.querySelectorAll("[class*=\"blockedSystemMessage\"]").forEach(el => {
+        const wrapper = el.closest("[role=\"article\"]");
+        if (!wrapper) return;
+        const text = el.querySelector("[class*=\"blockedMessageText\"]")?.textContent ?? "";
+        const isIgnored = text.includes("忽略") || (/^\d+\s*[—–]\s*顯示/.test(text.trim()));
+        if (isIgnored && hideIgnored) {
+          wrapper.style.display = "none";
+        } else if (!isIgnored && hideBlocked) {
+          wrapper.style.display = "none";
+        } else {
+          wrapper.style.display = "";
+        }
+      });
+    }
+
     function blApplyAll() {
       const list = blLoad();
       const nameMap = new Map(list.map(u => [u.name, u.style ?? 2]));
@@ -20572,6 +20751,7 @@ unsafeWindow.fetch = function(...args) {
         }
       });
       _mergeCollapseGroups();
+      _blHideNativeNotices();
     }
 
     function blApplyNode(container) {
@@ -20608,6 +20788,7 @@ unsafeWindow.fetch = function(...args) {
         setTimeout(blApplyAll, 2500);
         return;
       }
+      let hasNewNotice = false;
       for (const mut of mutations) {
         for (const node of mut.addedNodes) {
           if (!(node instanceof Element)) continue;
@@ -20616,8 +20797,13 @@ unsafeWindow.fetch = function(...args) {
           } else {
             node.querySelectorAll?.(MSG_SEL).forEach(blApplyNode);
           }
+          if (node.querySelector?.("[class*=\"blockedSystemMessage\"]") ||
+              node.matches?.("[class*=\"blockedSystemMessage\"]")) {
+            hasNewNotice = true;
+          }
         }
       }
+      if (hasNewNotice) _blHideNativeNotices();
     });
     _blObserver.observe(document.body, { childList: true, subtree: true });
 
@@ -20720,6 +20906,7 @@ unsafeWindow.fetch = function(...args) {
     CleanupRegistry.add(() => clearInterval(_blTempInterval));
 
     let _panelTick = null;
+    CleanupRegistry.add(() => { if (_panelTick) { clearInterval(_panelTick); _panelTick = null; } });
     function openBlPanel() {
       if (document.getElementById(BL_PANEL_ID)) {
         closeBlPanel(); return;
@@ -20808,7 +20995,8 @@ unsafeWindow.fetch = function(...args) {
                 });
                 dd.appendChild(opt);
               });
-              document.body.appendChild(dd);
+              dmtGetPortal().appendChild(dd);
+              dd.style.pointerEvents = "auto";
               requestAnimationFrame(() => {
                 const r = badge.getBoundingClientRect();
                 const ddH = dd.offsetHeight || 220;
@@ -20841,7 +21029,8 @@ unsafeWindow.fetch = function(...args) {
                 });
                 dd.appendChild(opt);
               });
-              document.body.appendChild(dd);
+              dmtGetPortal().appendChild(dd);
+              dd.style.pointerEvents = "auto";
               requestAnimationFrame(() => {
                 const r = badge.getBoundingClientRect();
                 const ddH = dd.offsetHeight || 220;
@@ -20989,6 +21178,12 @@ unsafeWindow.fetch = function(...args) {
 
       headerEl.appendChild(titleEl);
       headerEl.appendChild(gearBtn);
+
+      if (isFeatureNew("bl_hide_notices")) {
+        const _gearDot = document.createElement("span");
+        _gearDot.className = "picker-gear-dot";
+        gearBtn.appendChild(_gearDot);
+      }
 
       const cardsEl = document.createElement("div");
       cardsEl.className = "picker-cards";
@@ -21291,6 +21486,11 @@ unsafeWindow.fetch = function(...args) {
       const tabStyle = document.createElement("div");
       tabStyle.className = "pset-tab";
       tabStyle.textContent = t("mu_settings_tab_style") || "Style Settings";
+      if (isFeatureNew("bl_hide_notices")) {
+        const _tabDot = document.createElement("span");
+        _tabDot.className = "pset-tab-dot";
+        tabStyle.appendChild(_tabDot);
+      }
       tabsEl.appendChild(tabList);
       tabsEl.appendChild(tabStyle);
 
@@ -21368,7 +21568,8 @@ unsafeWindow.fetch = function(...args) {
               });
               dd.appendChild(opt);
             });
-            document.body.appendChild(dd);
+            dmtGetPortal().appendChild(dd);
+            dd.style.pointerEvents = "auto";
             requestAnimationFrame(() => {
               const rect = badgeEl.getBoundingClientRect();
               const ddH  = dd.offsetHeight || 220;
@@ -21486,6 +21687,72 @@ unsafeWindow.fetch = function(...args) {
       botRelayRow.appendChild(botRelayLeft);
       botRelayRow.appendChild(botRelayToggle);
       pageStyle.appendChild(botRelayRow);
+
+      const hideBlockedRow = document.createElement("div");
+      hideBlockedRow.className = "pset-setting-row";
+      const hideBlockedLeft = document.createElement("div");
+      hideBlockedLeft.style.cssText = "display:flex;flex-direction:column;flex:1;min-width:0;";
+      const hideBlockedLabel = document.createElement("div");
+      hideBlockedLabel.className = "pset-setting-label";
+      hideBlockedLabel.style.cssText = "display:flex;align-items:center;gap:0;";
+      hideBlockedLabel.textContent = t("mu_settings_hide_blocked") || "Hide Discord blocked notices";
+      if (isFeatureNew("bl_hide_notices")) {
+        const _blTag = document.createElement("span");
+        _blTag.className = "pset-new-tag";
+        _blTag.textContent = "New";
+        hideBlockedLabel.appendChild(_blTag);
+      }
+      const hideBlockedDesc = document.createElement("div");
+      hideBlockedDesc.className = "pset-setting-desc";
+      hideBlockedDesc.textContent = t("mu_settings_hide_blocked_desc") || "Hide \"N blocked messages — Show\" rows";
+      hideBlockedDesc.style.cssText = "font-size:10px;color:rgba(185,187,190,0.5);margin-top:2px;";
+      const hideBlockedToggle = document.createElement("input");
+      hideBlockedToggle.type = "checkbox";
+      hideBlockedToggle.className = "pset-setting-toggle";
+      hideBlockedToggle.checked = GMStore.get("bl_hide_discord_blocked", false);
+      hideBlockedToggle.style.cssText = "margin-left:auto;width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:rgba(88,101,242,0.9);";
+      hideBlockedToggle.addEventListener("change", () => {
+        GMStore.set("bl_hide_discord_blocked", hideBlockedToggle.checked);
+        _blHideNativeNotices();
+      });
+      hideBlockedLeft.appendChild(hideBlockedLabel);
+      hideBlockedLeft.appendChild(hideBlockedDesc);
+      hideBlockedRow.appendChild(hideBlockedLeft);
+      hideBlockedRow.appendChild(hideBlockedToggle);
+      pageStyle.appendChild(hideBlockedRow);
+
+      const hideIgnoredRow = document.createElement("div");
+      hideIgnoredRow.className = "pset-setting-row";
+      const hideIgnoredLeft = document.createElement("div");
+      hideIgnoredLeft.style.cssText = "display:flex;flex-direction:column;flex:1;min-width:0;";
+      const hideIgnoredLabel = document.createElement("div");
+      hideIgnoredLabel.className = "pset-setting-label";
+      hideIgnoredLabel.style.cssText = "display:flex;align-items:center;gap:0;";
+      hideIgnoredLabel.textContent = t("mu_settings_hide_ignored") || "Hide Discord ignored notices";
+      if (isFeatureNew("bl_hide_notices")) {
+        const _igTag = document.createElement("span");
+        _igTag.className = "pset-new-tag";
+        _igTag.textContent = "New";
+        hideIgnoredLabel.appendChild(_igTag);
+      }
+      const hideIgnoredDesc = document.createElement("div");
+      hideIgnoredDesc.className = "pset-setting-desc";
+      hideIgnoredDesc.textContent = t("mu_settings_hide_ignored_desc") || "Hide \"N ignored messages — Show\" rows";
+      hideIgnoredDesc.style.cssText = "font-size:10px;color:rgba(185,187,190,0.5);margin-top:2px;";
+      const hideIgnoredToggle = document.createElement("input");
+      hideIgnoredToggle.type = "checkbox";
+      hideIgnoredToggle.className = "pset-setting-toggle";
+      hideIgnoredToggle.checked = GMStore.get("bl_hide_discord_ignored", false);
+      hideIgnoredToggle.style.cssText = "margin-left:auto;width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:rgba(88,101,242,0.9);";
+      hideIgnoredToggle.addEventListener("change", () => {
+        GMStore.set("bl_hide_discord_ignored", hideIgnoredToggle.checked);
+        _blHideNativeNotices();
+      });
+      hideIgnoredLeft.appendChild(hideIgnoredLabel);
+      hideIgnoredLeft.appendChild(hideIgnoredDesc);
+      hideIgnoredRow.appendChild(hideIgnoredLeft);
+      hideIgnoredRow.appendChild(hideIgnoredToggle);
+      pageStyle.appendChild(hideIgnoredRow);
       tabList.addEventListener("click", () => {
         tabList.classList.add("active");
         tabStyle.classList.remove("active");
@@ -21497,6 +21764,12 @@ unsafeWindow.fetch = function(...args) {
         tabList.classList.remove("active");
         pageStyle.classList.add("active");
         pageList.classList.remove("active");
+        if (isFeatureNew("bl_hide_notices")) {
+          markFeatureSeen("bl_hide_notices");
+          gearBtn.querySelector(".picker-gear-dot")?.remove();
+          tabStyle.querySelector(".pset-tab-dot")?.remove();
+          picker.querySelectorAll(".pset-new-tag").forEach(el => el.remove());
+        }
       });
 
       settingsEl.appendChild(tabsEl);
@@ -21521,7 +21794,8 @@ unsafeWindow.fetch = function(...args) {
         }
       });
 
-      document.body.appendChild(picker);
+      dmtGetPortal().appendChild(picker);
+      picker.style.pointerEvents = "auto";
       _clampPickerPos();
       setTimeout(() => {
         const dismiss = (e) => {
@@ -21952,7 +22226,9 @@ unsafeWindow.fetch = function(...args) {
       try {
         const db   = await _idbOpen();
         const from = ym + "-01T00:00:00.000Z";
-        const to   = ym + "-31T23:59:59.999Z";
+        const [_y, _m] = ym.split("-").map(Number);
+        const _lastDay = new Date(Date.UTC(_y, _m, 0)).getUTCDate();
+        const to   = `${ym}-${String(_lastDay).padStart(2, "0")}T23:59:59.999Z`;
         return await new Promise((resolve, reject) => {
           let count = 0;
           const tx  = db.transaction("messages", "readwrite");
@@ -22081,7 +22357,7 @@ unsafeWindow.fetch = function(...args) {
           newMsgs.push(m);
         }
         if (batch.length < DELTA_PAGE) break;
-        offset += data.messages.length;
+        offset += data.messages.flat().length;
         if (offset > 200) break;
       }
 
@@ -22846,7 +23122,8 @@ unsafeWindow.fetch = function(...args) {
       const img = document.createElement("img");
       img.src = url; lb.appendChild(img);
       lb.onclick = () => lb.remove();
-      document.body.appendChild(lb);
+      dmtGetPortal().appendChild(lb);
+      lb.style.pointerEvents = "auto";
     }
 
     function _updateSB(selCount, createBtn, cancelBtn) {
@@ -22909,7 +23186,8 @@ unsafeWindow.fetch = function(...args) {
       body.textContent = "Loading…";
       panel.append(hdr, body);
       overlay.appendChild(panel);
-      document.body.appendChild(overlay);
+      dmtGetPortal().appendChild(overlay);
+      overlay.style.pointerEvents = "auto";
 
       const stats = await _idbGetStats();
 
@@ -24722,7 +25000,8 @@ unsafeWindow.fetch = function(...args) {
           } else { item.style.opacity = "1"; }
         }, true));
 
-        document.body.appendChild(menu);
+        dmtGetPortal().appendChild(menu);
+        menu.style.pointerEvents = "auto";
 
         requestAnimationFrame(() => {
           const r = menu.getBoundingClientRect();
@@ -24792,7 +25071,8 @@ unsafeWindow.fetch = function(...args) {
       infoEl.className = "lb-info";
 
       lb.append(closeEl, prev, mediaWrap, infoEl, next);
-      document.body.appendChild(lb);
+      dmtGetPortal().appendChild(lb);
+      lb.style.pointerEvents = "auto";
 
       function _calcOrigin(el) {
         if (!el) return null;
@@ -26778,12 +27058,18 @@ if (type === "warn" && scanLimit !== null) {
       overlay.addEventListener("click", (e) => {
         if (e.target === overlay) overlay.remove();
       });
-      document.body.appendChild(overlay);
+      dmtGetPortal().appendChild(overlay);
+      overlay.style.pointerEvents = "auto";
     };
-    document.addEventListener("DOMContentLoaded", () =>
-      document.body.appendChild(rescueBtn),
-    );
-    if (document.body) document.body.appendChild(rescueBtn);
+    const _mountRescueBtn = () => {
+      if (!document.getElementById("dmt-rescue-btn"))
+        document.body.appendChild(rescueBtn);
+    };
+    if (document.body) {
+      _mountRescueBtn();
+    } else {
+      document.addEventListener("DOMContentLoaded", _mountRescueBtn);
+    }
   }
 
   GM_registerMenuCommand(
