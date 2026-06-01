@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.6.0.0
+// @version      2.6.0.1
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -55,7 +55,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.6.0.0";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.6.0.1";
 
   const GMStore = {
     
@@ -1459,6 +1459,8 @@
       mu_settings_hide_blocked_desc: "Hide \"N blocked messages — Show\" rows",
       mu_settings_hide_ignored: "Hide Discord ignored notices",
       mu_settings_hide_ignored_desc: "Hide \"N ignored messages — Show\" rows",
+      mu_settings_bot_relay: "Auto-mute bot relay",
+      mu_settings_bot_relay_desc: "Dim BOT messages that reply to muted users",
       mu_settings_title:       "Settings",
     },
 
@@ -1976,6 +1978,8 @@
       mu_settings_hide_blocked_desc: "隱藏「N 則已封鎖的訊息 — 顯示」列",
       mu_settings_hide_ignored: "隱藏 Discord 忽略通知",
       mu_settings_hide_ignored_desc: "隱藏「N 則已忽略訊息 — 顯示」列",
+      mu_settings_bot_relay: "自動靜音 BOT 轉發",
+      mu_settings_bot_relay_desc: "讓轉發被靜音使用者訊息的 BOT 訊息也變暗",
       mu_settings_title:       "設定",
     },    "zh-CN": {
       name: "简体中文",
@@ -2386,6 +2390,8 @@
       mu_settings_hide_blocked_desc: "隐藏「N 条已屏蔽消息 — 显示」行",
       mu_settings_hide_ignored: "隐藏 Discord 忽略通知",
       mu_settings_hide_ignored_desc: "隐藏「N 条已忽略消息 — 显示」行",
+      mu_settings_bot_relay: "自动屏蔽 BOT 转发",
+      mu_settings_bot_relay_desc: "让转发被屏蔽用户消息的 BOT 消息也变暗",
       mu_settings_title:       "设置",
 
       mp_panel_title:           "我的消息",
@@ -2910,6 +2916,8 @@
       mu_settings_hide_blocked_desc: "「N件のブロックされたメッセージ — 表示」行を非表示",
       mu_settings_hide_ignored: "Discordの無視通知を非表示",
       mu_settings_hide_ignored_desc: "「N件の無視されたメッセージ — 表示」行を非表示",
+      mu_settings_bot_relay: "BOTリレーを自動ミュート",
+      mu_settings_bot_relay_desc: "ミュートユーザーに返信するBOTのメッセージも薄く表示",
       mu_settings_title:       "設定",
 
       mp_panel_title:           "マイ投稿",
@@ -3420,6 +3428,8 @@
       mu_settings_hide_blocked_desc: "'차단된 메시지 N개 — 표시' 행 숨기기",
       mu_settings_hide_ignored: "Discord 무시 알림 숨기기",
       mu_settings_hide_ignored_desc: "'무시된 메시지 N개 — 표시' 행 숨기기",
+      mu_settings_bot_relay: "BOT 릴레이 자동 음소거",
+      mu_settings_bot_relay_desc: "음소거 사용자에게 답장하는 BOT 메시지도 흐리게 표시",
       mu_settings_title:       "설정",
 
       mod_tip_message:    "메시지를 우클릭하여 ⠿ 버튼으로 복사, 북마크 또는 빠른 작업을 수행하세요.",
@@ -3934,6 +3944,8 @@
       mu_settings_hide_blocked_desc: "Ocultar filas 'N mensajes bloqueados — Mostrar'",
       mu_settings_hide_ignored: "Ocultar avisos de ignorados de Discord",
       mu_settings_hide_ignored_desc: "Ocultar filas 'N mensajes ignorados — Mostrar'",
+      mu_settings_bot_relay: "Silenciar automáticamente relés de BOT",
+      mu_settings_bot_relay_desc: "Atenuar mensajes de BOT que responden a usuarios silenciados",
       mu_settings_title:       "Configuración",
 
       mod_tip_message:    "Haz clic derecho en cualquier mensaje para copiar, marcar o realizar acciones rápidas con el botón ⠿.",
@@ -4450,6 +4462,8 @@
       mu_settings_hide_blocked_desc: "Ocultar linhas 'N mensagens bloqueadas — Mostrar'",
       mu_settings_hide_ignored: "Ocultar avisos de ignorados do Discord",
       mu_settings_hide_ignored_desc: "Ocultar linhas 'N mensagens ignoradas — Mostrar'",
+      mu_settings_bot_relay: "Silenciar automaticamente relés de BOT",
+      mu_settings_bot_relay_desc: "Escurecer mensagens de BOT que respondem a usuários silenciados",
       mu_settings_title:       "Configurações",
 
       mod_tip_message:    "Clique com o botão direito em qualquer mensagem para copiar, marcar ou realizar ações rápidas com o botão ⠿.",
@@ -4964,6 +4978,8 @@
       mu_settings_hide_blocked_desc: "Masquer les lignes 'N messages bloqués — Afficher'",
       mu_settings_hide_ignored: "Masquer les avis d'ignorés Discord",
       mu_settings_hide_ignored_desc: "Masquer les lignes 'N messages ignorés — Afficher'",
+      mu_settings_bot_relay: "Muet automatique relais BOT",
+      mu_settings_bot_relay_desc: "Atténuer les messages BOT répondant aux utilisateurs mis en sourdine",
       mu_settings_title:       "Paramètres",
 
       cs_panel_title:   "⌨ Recherche de salon",
@@ -5495,6 +5511,8 @@
       mu_settings_hide_blocked_desc: "Скрыть строки 'N заблокированных — Показать'",
       mu_settings_hide_ignored: "Скрыть уведомления об игнорируемых",
       mu_settings_hide_ignored_desc: "Скрыть строки 'N игнорируемых — Показать'",
+      mu_settings_bot_relay: "Автоглушение BOT-ретрансляции",
+      mu_settings_bot_relay_desc: "Затемнять сообщения BOT, отвечающих заглушённым пользователям",
       mu_settings_title:       "Настройки",
 
       mod_tip_message:    "Нажмите правой кнопкой мыши на любое сообщение, чтобы скопировать, добавить в закладки или выполнить быстрые действия кнопкой ⠿.",
@@ -5990,6 +6008,8 @@
       mu_settings_hide_blocked_desc: "Zeilen 'N blockierte Nachrichten — Anzeigen' ausblenden",
       mu_settings_hide_ignored: "Discord-Ignorierthinweise ausblenden",
       mu_settings_hide_ignored_desc: "Zeilen 'N ignorierte Nachrichten — Anzeigen' ausblenden",
+      mu_settings_bot_relay: "BOT-Weiterleitung automatisch stummschalten",
+      mu_settings_bot_relay_desc: "BOT-Nachrichten als Antwort auf stumm geschaltete Nutzer abdunkeln",
       mu_settings_title:       "Einstellungen",
       cs_panel_title:   "⌨ Kanalsuche",
       cs_placeholder:   "Stichwort eingeben...",
@@ -8108,14 +8128,18 @@
       const forwardingData = GMStore.get("discord_forward_v8", []);
 
       const configData = {
-        lang: localStorage.getItem("copyMenuLanguage"),
-        triggerMode: localStorage.getItem("copyTriggerMode"),
-        menuStyle: localStorage.getItem("copyMenuStyle"),
-        swapLogic: localStorage.getItem("copySwapLogic"),
-        appendSpace: localStorage.getItem("copyAppendSpace"),
-        appendNewLine: localStorage.getItem("copyAppendNewLine"),
-        linkText: localStorage.getItem("copyLinkText"),
-        symbols: JSON.parse(localStorage.getItem("copySymbols") || "[]"),
+        lang:                localStorage.getItem("copyMenuLanguage"),
+        lang_custom:         localStorage.getItem("copyMenuLanguage_custom"),
+        triggerMode:         localStorage.getItem("copyTriggerMode"),
+        menuStyle:           localStorage.getItem("copyMenuStyle"),
+        swapLogic:           localStorage.getItem("copySwapLogic"),
+        appendSpace:         localStorage.getItem("copyAppendSpace"),
+        appendNewLine:       localStorage.getItem("copyAppendNewLine"),
+        linkText:            localStorage.getItem("copyLinkText"),
+        ioMargin:            localStorage.getItem("copyIOMargin"),
+        transCacheSize:      localStorage.getItem("copyTransCacheSize"),
+        dmtGifCacheMax:      localStorage.getItem("dmtGifCacheMax"),
+        symbols:             JSON.parse(localStorage.getItem("copySymbols") || "[]"),
       };
 
       const moduleCData = {
@@ -8170,8 +8194,10 @@
       const blacklistData = GMStore.get("blacklist_users", [], true);
 
       const blacklistPrefs = {
-        bl_ghost_delay: GMStore.get("bl_ghost_delay", 4),
-        bl_bot_relay:   GMStore.get("bl_bot_relay",   true),
+        bl_ghost_delay:          GMStore.get("bl_ghost_delay",          4),
+        bl_bot_relay:            GMStore.get("bl_bot_relay",            true),
+        bl_hide_discord_blocked: GMStore.get("bl_hide_discord_blocked", false),
+        bl_hide_discord_ignored: GMStore.get("bl_hide_discord_ignored", false),
       };
 
       const myPostsPrefs = {
@@ -8190,7 +8216,7 @@
       };
 
       const data = {
-        ver: "EX4",
+        ver: "EX5",
         config: configData,
         forwardingData: forwardingData,
         forwardingPref: forwardingPref,
@@ -8271,6 +8297,14 @@
             localStorage.setItem("copySymbols", JSON.stringify(c.symbols));
             config.symbols = c.symbols;
           }
+          if (c.lang_custom != null)
+            localStorage.setItem("copyMenuLanguage_custom", c.lang_custom);
+          if (c.ioMargin != null)
+            localStorage.setItem("copyIOMargin", c.ioMargin);
+          if (c.transCacheSize != null)
+            localStorage.setItem("copyTransCacheSize", c.transCacheSize);
+          if (c.dmtGifCacheMax != null)
+            localStorage.setItem("dmtGifCacheMax", c.dmtGifCacheMax);
         }
 
         if (data.forwardingData) {
@@ -8374,6 +8408,10 @@
             GMStore.set("bl_ghost_delay", bp.bl_ghost_delay);
           if (bp.bl_bot_relay != null)
             GMStore.set("bl_bot_relay", bp.bl_bot_relay);
+          if (bp.bl_hide_discord_blocked != null)
+            GMStore.set("bl_hide_discord_blocked", bp.bl_hide_discord_blocked);
+          if (bp.bl_hide_discord_ignored != null)
+            GMStore.set("bl_hide_discord_ignored", bp.bl_hide_discord_ignored);
         }
 
         if (data.myPostsPrefs) {
@@ -21666,10 +21704,10 @@ unsafeWindow.fetch = function(...args) {
       botRelayRow.className = "pset-setting-row";
       const botRelayLabel = document.createElement("div");
       botRelayLabel.className = "pset-setting-label";
-      botRelayLabel.textContent = "Auto-mute bot relay";
+      botRelayLabel.textContent = t("mu_settings_bot_relay") || "Auto-mute bot relay";
       const botRelayDesc = document.createElement("div");
       botRelayDesc.className = "pset-setting-desc";
-      botRelayDesc.textContent = "Dim BOT messages that reply to muted users";
+      botRelayDesc.textContent = t("mu_settings_bot_relay_desc") || "Dim BOT messages that reply to muted users";
       botRelayDesc.style.cssText = "font-size:10px;color:rgba(185,187,190,0.5);margin-top:2px;";
       const botRelayToggle = document.createElement("input");
       botRelayToggle.type = "checkbox";
