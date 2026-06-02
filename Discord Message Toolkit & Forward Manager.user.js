@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.6.0.1
+// @version      2.6.0.2
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -55,7 +55,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.6.0.1";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.6.0.2";
 
   const GMStore = {
     
@@ -547,7 +547,8 @@
     if (!stack) {
       stack = document.createElement("div");
       stack.id = "dmt-toast-stack";
-      document.body.appendChild(stack);
+      stack.style.pointerEvents = "auto";
+      dmtGetPortal().appendChild(stack);
     }
 
     const toast = document.createElement("div");
@@ -1339,6 +1340,20 @@
       mp_group_deselect_all:    "Deselect all",
       mp_jump_to:               "Jump to message",
       mp_delete_single:         "Delete this message",
+      mp_cache_title:           "📦 Cache Management",
+      mp_cache_empty:           "No cached messages yet. Browse your posts to build the cache.",
+      mp_cache_last_sync:       "Last sync: ",
+      mp_cache_msgs:            " msgs",
+      mp_cache_delete:          "Delete",
+      mp_cache_deleting:        "…",
+      mp_cache_deleted:         "Deleted ",
+      mp_cache_clear_scope:     "Clear this scope",
+      mp_cache_clearing:        "Clearing…",
+      mp_cache_cleared:         "Cleared ✓",
+      mp_cache_resync:          "🔄 Force full resync",
+      mp_cache_clear_all:       "🗑 Clear all cache",
+      mu_settings_preview:      "Preview",
+      wm_focus_label_section:   "Label",
       mp_undo:                  "Undo",
       mp_selected_n:            "{n} selected",
       mp_create_task:           "Create delete task",
@@ -1858,6 +1873,20 @@
       mp_group_deselect_all:    "取消全選",
       mp_jump_to:               "跳轉至訊息",
       mp_delete_single:         "刪除此訊息",
+      mp_cache_title:           "📦 快取管理",
+      mp_cache_empty:           "尚無快取訊息，請瀏覽您的貼文以建立快取。",
+      mp_cache_last_sync:       "上次同步：",
+      mp_cache_msgs:            " 則",
+      mp_cache_delete:          "刪除",
+      mp_cache_deleting:        "…",
+      mp_cache_deleted:         "已刪除 ",
+      mp_cache_clear_scope:     "清除此範圍",
+      mp_cache_clearing:        "清除中…",
+      mp_cache_cleared:         "已清除 ✓",
+      mp_cache_resync:          "🔄 強制完整重新同步",
+      mp_cache_clear_all:       "🗑 清除全部快取",
+      mu_settings_preview:      "預覽",
+      wm_focus_label_section:   "標籤",
       mp_undo:                  "復原",
       mp_selected_n:            "已選 {n} 則",
       mp_create_task:           "建立刪除任務",
@@ -2420,6 +2449,20 @@
       mp_group_deselect_all:    "取消全选",
       mp_jump_to:               "跳转至消息",
       mp_delete_single:         "删除此消息",
+      mp_cache_title:           "📦 缓存管理",
+      mp_cache_empty:           "暂无缓存消息，请浏览您的帖子以建立缓存。",
+      mp_cache_last_sync:       "上次同步：",
+      mp_cache_msgs:            " 条",
+      mp_cache_delete:          "删除",
+      mp_cache_deleting:        "…",
+      mp_cache_deleted:         "已删除 ",
+      mp_cache_clear_scope:     "清除此范围",
+      mp_cache_clearing:        "清除中…",
+      mp_cache_cleared:         "已清除 ✓",
+      mp_cache_resync:          "🔄 强制完整重新同步",
+      mp_cache_clear_all:       "🗑 清除全部缓存",
+      mu_settings_preview:      "预览",
+      wm_focus_label_section:   "标签",
       mp_undo:                  "撤销",
       mp_selected_n:            "已选 {n} 条",
       mp_create_task:           "创建删除任务",
@@ -2946,6 +2989,20 @@
       mp_group_deselect_all:    "選択解除",
       mp_jump_to:               "メッセージへジャンプ",
       mp_delete_single:         "このメッセージを削除",
+      mp_cache_title:           "📦 キャッシュ管理",
+      mp_cache_empty:           "キャッシュなし。投稿を閲覧してキャッシュを構築してください。",
+      mp_cache_last_sync:       "最終同期：",
+      mp_cache_msgs:            " 件",
+      mp_cache_delete:          "削除",
+      mp_cache_deleting:        "…",
+      mp_cache_deleted:         "削除済み ",
+      mp_cache_clear_scope:     "このスコープをクリア",
+      mp_cache_clearing:        "クリア中…",
+      mp_cache_cleared:         "クリア済み ✓",
+      mp_cache_resync:          "🔄 完全再同期を強制",
+      mp_cache_clear_all:       "🗑 全キャッシュをクリア",
+      mu_settings_preview:      "プレビュー",
+      wm_focus_label_section:   "ラベル",
       mp_undo:                  "元に戻す",
       mp_selected_n:            "{n} 件選択中",
       mp_create_task:           "削除タスクを作成",
@@ -3469,6 +3526,20 @@
       mp_group_deselect_all:    "선택 해제",
       mp_jump_to:               "메시지로 이동",
       mp_delete_single:         "이 메시지 삭제",
+      mp_cache_title:           "📦 캐시 관리",
+      mp_cache_empty:           "캐시된 메시지가 없습니다. 게시물을 탐색하여 캐시를 구축하세요.",
+      mp_cache_last_sync:       "마지막 동기화: ",
+      mp_cache_msgs:            " 개",
+      mp_cache_delete:          "삭제",
+      mp_cache_deleting:        "…",
+      mp_cache_deleted:         "삭제됨 ",
+      mp_cache_clear_scope:     "이 범위 지우기",
+      mp_cache_clearing:        "지우는 중…",
+      mp_cache_cleared:         "지워짐 ✓",
+      mp_cache_resync:          "🔄 전체 재동기화 강제",
+      mp_cache_clear_all:       "🗑 전체 캐시 지우기",
+      mu_settings_preview:      "미리보기",
+      wm_focus_label_section:   "레이블",
       mp_undo:                  "실행 취소",
       mp_selected_n:            "{n}개 선택됨",
       mp_create_task:           "삭제 작업 만들기",
@@ -3991,6 +4062,20 @@
       mp_group_deselect_all:    "Deseleccionar todo",
       mp_jump_to:               "Ir al mensaje",
       mp_delete_single:         "Eliminar este mensaje",
+      mp_cache_title:           "📦 Gestión de caché",
+      mp_cache_empty:           "Sin mensajes en caché. Navega tus publicaciones para construir el caché.",
+      mp_cache_last_sync:       "Última sincronización: ",
+      mp_cache_msgs:            " msgs",
+      mp_cache_delete:          "Eliminar",
+      mp_cache_deleting:        "…",
+      mp_cache_deleted:         "Eliminados ",
+      mp_cache_clear_scope:     "Limpiar este ámbito",
+      mp_cache_clearing:        "Limpiando…",
+      mp_cache_cleared:         "Limpiado ✓",
+      mp_cache_resync:          "🔄 Forzar resincronización completa",
+      mp_cache_clear_all:       "🗑 Limpiar todo el caché",
+      mu_settings_preview:      "Vista previa",
+      wm_focus_label_section:   "Etiqueta",
       mp_undo:                  "Deshacer",
       mp_selected_n:            "{n} seleccionado(s)",
       mp_create_task:           "Crear tarea de eliminación",
@@ -4509,6 +4594,20 @@
       mp_group_deselect_all:    "Desmarcar tudo",
       mp_jump_to:               "Ir à mensagem",
       mp_delete_single:         "Excluir esta mensagem",
+      mp_cache_title:           "📦 Gerenciamento de cache",
+      mp_cache_empty:           "Sem mensagens em cache. Navegue pelas suas postagens para criar o cache.",
+      mp_cache_last_sync:       "Última sincronização: ",
+      mp_cache_msgs:            " msgs",
+      mp_cache_delete:          "Excluir",
+      mp_cache_deleting:        "…",
+      mp_cache_deleted:         "Excluídos ",
+      mp_cache_clear_scope:     "Limpar este escopo",
+      mp_cache_clearing:        "Limpando…",
+      mp_cache_cleared:         "Limpo ✓",
+      mp_cache_resync:          "🔄 Forçar ressincronização completa",
+      mp_cache_clear_all:       "🗑 Limpar todo o cache",
+      mu_settings_preview:      "Pré-visualização",
+      wm_focus_label_section:   "Rótulo",
       mp_undo:                  "Desfazer",
       mp_selected_n:            "{n} selecionado(s)",
       mp_create_task:           "Criar tarefa de exclusão",
@@ -5033,6 +5132,20 @@
       mp_group_deselect_all:    "Tout désélectionner",
       mp_jump_to:               "Aller au message",
       mp_delete_single:         "Supprimer ce message",
+      mp_cache_title:           "📦 Gestion du cache",
+      mp_cache_empty:           "Aucun message en cache. Parcourez vos publications pour créer le cache.",
+      mp_cache_last_sync:       "Dernière sync : ",
+      mp_cache_msgs:            " msgs",
+      mp_cache_delete:          "Supprimer",
+      mp_cache_deleting:        "…",
+      mp_cache_deleted:         "Supprimés ",
+      mp_cache_clear_scope:     "Effacer cette portée",
+      mp_cache_clearing:        "Effacement…",
+      mp_cache_cleared:         "Effacé ✓",
+      mp_cache_resync:          "🔄 Forcer la resynchronisation complète",
+      mp_cache_clear_all:       "🗑 Effacer tout le cache",
+      mu_settings_preview:      "Aperçu",
+      wm_focus_label_section:   "Étiquette",
       mp_undo:                  "Annuler",
       mp_selected_n:            "{n} sélectionné(s)",
       mp_create_task:           "Créer une tâche de suppression",
@@ -5552,6 +5665,20 @@
       mp_group_deselect_all:    "Снять выбор",
       mp_jump_to:               "Перейти к сообщению",
       mp_delete_single:         "Удалить это сообщение",
+      mp_cache_title:           "📦 Управление кэшем",
+      mp_cache_empty:           "Нет кэшированных сообщений. Просмотрите свои посты для создания кэша.",
+      mp_cache_last_sync:       "Последняя синхр.: ",
+      mp_cache_msgs:            " сообщ.",
+      mp_cache_delete:          "Удалить",
+      mp_cache_deleting:        "…",
+      mp_cache_deleted:         "Удалено ",
+      mp_cache_clear_scope:     "Очистить эту область",
+      mp_cache_clearing:        "Очистка…",
+      mp_cache_cleared:         "Очищено ✓",
+      mp_cache_resync:          "🔄 Принудительная полная синхронизация",
+      mp_cache_clear_all:       "🗑 Очистить весь кэш",
+      mu_settings_preview:      "Предпросмотр",
+      wm_focus_label_section:   "Метка",
       mp_undo:                  "Отменить",
       mp_selected_n:            "Выбрано: {n}",
       mp_create_task:           "Создать задачу удаления",
@@ -6060,6 +6187,20 @@
       mp_group_deselect_all:    "Auswahl aufheben",
       mp_jump_to:               "Zur Nachricht springen",
       mp_delete_single:         "Diese Nachricht löschen",
+      mp_cache_title:           "📦 Cache-Verwaltung",
+      mp_cache_empty:           "Kein Cache vorhanden. Durchsuche deine Beiträge, um den Cache aufzubauen.",
+      mp_cache_last_sync:       "Letzte Sync: ",
+      mp_cache_msgs:            " Nachr.",
+      mp_cache_delete:          "Löschen",
+      mp_cache_deleting:        "…",
+      mp_cache_deleted:         "Gelöscht ",
+      mp_cache_clear_scope:     "Diesen Bereich leeren",
+      mp_cache_clearing:        "Leeren…",
+      mp_cache_cleared:         "Geleert ✓",
+      mp_cache_resync:          "🔄 Vollständige Neusynchronisierung erzwingen",
+      mp_cache_clear_all:       "🗑 Gesamten Cache leeren",
+      mu_settings_preview:      "Vorschau",
+      wm_focus_label_section:   "Label",
       mp_undo:                  "Rückgängig",
       mp_selected_n:            "{n} ausgewählt",
       mp_create_task:           "Löschaufgabe erstellen",
@@ -16751,7 +16892,7 @@
 
         const labelHeader = document.createElement("div");
         labelHeader.className = "wh-sm-section";
-        labelHeader.textContent = "Label";
+        labelHeader.textContent = this.t("wm_focus_label_section") || "Label";
         menu.appendChild(labelHeader);
 
         const showLabels = this.getFocusShowLabels();
@@ -21391,7 +21532,7 @@ unsafeWindow.fetch = function(...args) {
 
       const pvLabel = document.createElement("div");
       pvLabel.className = "picker-preview-label";
-      pvLabel.textContent = "Preview";
+      pvLabel.textContent = t("mu_settings_preview") || "Preview";
       previewEl.appendChild(pvLabel);
 
       const PV_AV_COLOR = "#5865f2";
@@ -23210,7 +23351,7 @@ unsafeWindow.fetch = function(...args) {
       const hdr = document.createElement("div");
       hdr.style.cssText = "display:flex;align-items:center;padding:14px 16px 10px;border-bottom:1px solid var(--dmt-divider,#1e1f22);";
       const hdrTitle = document.createElement("span");
-      hdrTitle.textContent = "📦 Cache Management";
+      hdrTitle.textContent = t("mp_cache_title") || "📦 Cache Management";
       hdrTitle.style.cssText = "font-size:15px;font-weight:600;color:var(--dmt-text,#dbdee1);flex:1;";
       const closeBtn = document.createElement("button");
       closeBtn.textContent = "✕";
@@ -23221,7 +23362,7 @@ unsafeWindow.fetch = function(...args) {
       const body = document.createElement("div");
       body.style.cssText = "flex:1;overflow-y:auto;padding:12px 16px;";
 
-      body.textContent = "Loading…";
+      body.textContent = t("mp_loading") || "Loading…";
       panel.append(hdr, body);
       overlay.appendChild(panel);
       dmtGetPortal().appendChild(overlay);
@@ -23233,7 +23374,7 @@ unsafeWindow.fetch = function(...args) {
 
       if (stats.totalCount === 0) {
         const empty = document.createElement("p");
-        empty.textContent = "No cached messages yet. Browse your posts to build the cache.";
+        empty.textContent = t("mp_cache_empty") || "No cached messages yet. Browse your posts to build the cache.";
         empty.style.cssText = "color:var(--dmt-text-muted,#949ba4);font-size:13px;text-align:center;margin:24px 0;";
         body.appendChild(empty);
       } else {
@@ -23276,7 +23417,7 @@ unsafeWindow.fetch = function(...args) {
 
           const metaLine = document.createElement("div");
           metaLine.style.cssText = "font-size:11px;color:var(--dmt-text-muted,#949ba4);margin-bottom:8px;";
-          metaLine.textContent = "Last sync: " + lastSync;
+          metaLine.textContent = (t("mp_cache_last_sync") || "Last sync: ") + lastSync;
 
           const monthTable = document.createElement("div");
           monthTable.style.cssText = "display:flex;flex-direction:column;gap:3px;margin-bottom:8px;";
@@ -23288,16 +23429,16 @@ unsafeWindow.fetch = function(...args) {
             ymLabel.textContent = ym;
             ymLabel.style.cssText = "font-size:12px;color:var(--dmt-text,#dbdee1);flex:1;font-variant-numeric:tabular-nums;";
             const countLabel = document.createElement("span");
-            countLabel.textContent = count.toLocaleString() + " msgs";
+            countLabel.textContent = count.toLocaleString() + (t("mp_cache_msgs") || " msgs");
             countLabel.style.cssText = "font-size:11px;color:var(--dmt-text-muted,#949ba4);";
             const delBtn = document.createElement("button");
-            delBtn.textContent = "Delete";
+            delBtn.textContent = t("mp_cache_delete") || "Delete";
             delBtn.style.cssText = "font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid var(--dmt-danger,#ed4245);background:none;color:var(--dmt-danger,#ed4245);cursor:pointer;";
             delBtn.onclick = async () => {
-              delBtn.disabled = true; delBtn.textContent = "…";
+              delBtn.disabled = true; delBtn.textContent = t("mp_cache_deleting") || "…";
               const n = await _idbDeleteByYM(sc.scope_key, ym);
               row.style.opacity = "0.35";
-              countLabel.textContent = "Deleted " + n;
+              countLabel.textContent = (t("mp_cache_deleted") || "Deleted ") + n;
               delBtn.textContent = "✓";
             };
             row.append(ymLabel, countLabel, delBtn);
@@ -23305,14 +23446,14 @@ unsafeWindow.fetch = function(...args) {
           }
 
           const clearScopeBtn = document.createElement("button");
-          clearScopeBtn.textContent = "Clear this scope";
+          clearScopeBtn.textContent = t("mp_cache_clear_scope") || "Clear this scope";
           clearScopeBtn.style.cssText = "font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--dmt-danger,#ed4245);background:none;color:var(--dmt-danger,#ed4245);cursor:pointer;";
           clearScopeBtn.onclick = async () => {
             if (!await dmtConfirm("Clear all cached messages for this scope?")) return;
-            clearScopeBtn.disabled = true; clearScopeBtn.textContent = "Clearing…";
+            clearScopeBtn.disabled = true; clearScopeBtn.textContent = t("mp_cache_clearing") || "Clearing…";
             await _idbClearScope(sc.scope_key);
             scopeBlock.style.opacity = "0.4";
-            clearScopeBtn.textContent = "Cleared ✓";
+            clearScopeBtn.textContent = t("mp_cache_cleared") || "Cleared ✓";
           };
 
           scopeBlock.append(scopeHdr, metaLine, monthTable, clearScopeBtn);
@@ -23330,14 +23471,14 @@ unsafeWindow.fetch = function(...args) {
       footer.style.cssText = "padding:10px 16px;border-top:1px solid var(--dmt-divider,#1e1f22);display:flex;gap:8px;justify-content:flex-end;align-items:center;";
 
       const resyncBtn = document.createElement("button");
-      resyncBtn.textContent = "🔄 Force full resync";
+      resyncBtn.textContent = t("mp_cache_resync") || "🔄 Force full resync";
       resyncBtn.title = "Clear cache for current scope and re-fetch all messages from the API.";
       resyncBtn.style.cssText = "font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--dmt-text-muted,#949ba4);background:none;color:var(--dmt-text-muted,#949ba4);cursor:pointer;";
       resyncBtn.onclick = async () => {
         const scope = _scopeKey();
         if (!scope) return;
         if (!await dmtConfirm("Clear cache for this scope and re-fetch all messages from Discord?\nThis may take a while depending on your message count.")) return;
-        resyncBtn.disabled = true; resyncBtn.textContent = "Clearing…";
+        resyncBtn.disabled = true; resyncBtn.textContent = t("mp_cache_clearing") || "Clearing…";
         await _idbClearScope(scope);
         overlay.remove();
         _browseData = []; _browseOffset = 0; _browseTotal = null;
@@ -23352,11 +23493,11 @@ unsafeWindow.fetch = function(...args) {
       };
 
       const clearAllBtn = document.createElement("button");
-      clearAllBtn.textContent = "🗑 Clear all cache";
+      clearAllBtn.textContent = t("mp_cache_clear_all") || "🗑 Clear all cache";
       clearAllBtn.style.cssText = "font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--dmt-danger,#ed4245);background:none;color:var(--dmt-danger,#ed4245);cursor:pointer;";
       clearAllBtn.onclick = async () => {
         if (!await dmtConfirm("Clear ALL cached messages? This cannot be undone.")) return;
-        clearAllBtn.disabled = true; clearAllBtn.textContent = "Clearing…";
+        clearAllBtn.disabled = true; clearAllBtn.textContent = t("mp_cache_clearing") || "Clearing…";
         await _idbClearAll();
         overlay.remove();
       };
