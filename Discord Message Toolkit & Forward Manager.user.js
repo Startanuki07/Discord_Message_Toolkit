@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.6.0.2
+// @version      2.6.0.4
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -55,7 +55,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.6.0.2";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.6.0.4";
 
   const GMStore = {
     
@@ -747,6 +747,7 @@
       box.appendChild(btns);
       overlay.appendChild(box);
       dmtGetPortal().appendChild(overlay);
+      overlay.style.pointerEvents = "auto";
 
       setTimeout(() => okBtn.focus(), 50);
     });
@@ -860,6 +861,7 @@
       box.appendChild(btns);
       overlay.appendChild(box);
       dmtGetPortal().appendChild(overlay);
+      overlay.style.pointerEvents = "auto";
 
       setTimeout(() => { input.focus(); input.select(); }, 50);
     });
@@ -6543,7 +6545,7 @@
 
         setTimeout(() => {
           observer.disconnect();
-          console.warn(`[waitForElement] Timeout: ${selector} not found`);
+          DEBUG && console.warn(`[waitForElement] Timeout: ${selector} not found`);
           resolve(null);
         }, timeout);
       });
@@ -6595,7 +6597,7 @@
         listObserver.observe(modal, { childList: true, subtree: true });
         activeObservers.set(modal, listObserver);
         DEBUG &&
-          console.log("[ForwardingManager] Local Observer attached to modal.");
+          DEBUG && console.log("[ForwardingManager] Local Observer attached to modal.");
 
         const removeObserver = new MutationObserver((mutations, obs) => {
           if (!document.body.contains(modal)) {
@@ -6747,6 +6749,7 @@
                 </div>
             `;
       dmtGetPortal().appendChild(overlay);
+      overlay.style.pointerEvents = "auto";
       document.getElementById("my-help-close-btn").onclick = () =>
         overlay.remove();
       overlay.onclick = () => overlay.remove();
@@ -7041,7 +7044,7 @@
         'input[placeholder="搜尋"], input[placeholder="Search"], input[placeholder*="Search"], input[placeholder*="検索"]',
       );
       if (!searchInput) {
-        console.warn("[Search] Input not found");
+        DEBUG && console.warn("[Search] Input not found");
         return;
       }
 
@@ -7680,6 +7683,7 @@
           position:fixed; inset:0; z-index:2147483647;
           background:rgba(0,0,0,.82);
           display:flex; align-items:center; justify-content:center;
+          pointer-events:auto;
         `;
 
         const modal = document.createElement("div");
@@ -7692,13 +7696,13 @@
 
         const style = document.createElement("style");
         style.textContent = `
-          #msg-manual-overlay [data-ss-preserve]{will-change:transform!important;transform:translateZ(0)!important;contain:paint style!important}
+          
           @keyframes mmIn{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
           #msg-manual-overlay .mm-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
           #msg-manual-overlay .mm-title{color:#e3e5e8;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
           #msg-manual-overlay .mm-close{background:transparent;border:none;color:#72767d;font-size:20px;cursor:pointer;padding:2px 7px;border-radius:4px;line-height:1}
           #msg-manual-overlay .mm-close:hover{color:#fff;background:rgba(255,255,255,.08)}
-          #msg-manual-overlay .mm-body{overflow-y:scroll;padding:16px 18px;display:flex;flex-direction:column;gap:14px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;transform:translateZ(0);will-change:transform;contain:paint style}
+          #msg-manual-overlay .mm-body{overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:14px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
           #msg-manual-overlay .mm-section{border-radius:7px;padding:11px 14px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.025)}
           #msg-manual-overlay .mm-section.accent-blue{background:rgba(88,101,242,.07);border-color:rgba(88,101,242,.22)}
           #msg-manual-overlay .mm-section.accent-green{background:rgba(35,165,90,.06);border-color:rgba(35,165,90,.22)}
@@ -7727,12 +7731,13 @@
             <div class="mm-title">📖 ${t("help_btn")}</div>
             <button class="mm-close" id="mm-close-btn">✕</button>
           </div>
-          <div class="mm-body" data-ss-preserve="1">${sections}</div>
+          <div class="mm-body">${sections}</div>
         `;
 
         manualOverlay.appendChild(modal);
         document.head.appendChild(style);
         dmtGetPortal().appendChild(manualOverlay);
+        manualOverlay.style.pointerEvents = "auto";
 
         const close = () => {
           manualOverlay.remove();
@@ -8836,7 +8841,7 @@
           }
 
           DEBUG &&
-            console.log("[Filename] Final content snippet:", contentSnippet);
+            DEBUG && console.log("[Filename] Final content snippet:", contentSnippet);
 
           let mediaId = "";
           try {
@@ -8912,7 +8917,7 @@
               )?.[1] || "jpg";
             const filename = `@${username}_${tweetId}_${index + 1}.${ext}`;
             DEBUG &&
-              console.log("[Filename] Using username+tweetId:", filename);
+              DEBUG && console.log("[Filename] Using username+tweetId:", filename);
             return filename;
           }
 
@@ -8923,7 +8928,7 @@
               )?.[1] || "jpg";
             const filename = `@${username}_${contentSnippet}_${index + 1}.${ext}`;
             DEBUG &&
-              console.log("[Filename] Using username+content:", filename);
+              DEBUG && console.log("[Filename] Using username+content:", filename);
             return filename;
           }
 
@@ -9865,6 +9870,7 @@
             box.appendChild(btnRow);
             dlg.appendChild(box);
             dmtGetPortal().appendChild(dlg);
+            dlg.style.pointerEvents = "auto";
             dlg.addEventListener("click", (e) => {
               if (e.target === dlg) dlg.remove();
             });
@@ -9925,6 +9931,7 @@
             warnBox.appendChild(warnBtns);
             warnDlg.appendChild(warnBox);
             dmtGetPortal().appendChild(warnDlg);
+            warnDlg.style.pointerEvents = "auto";
             warnDlg.addEventListener("click", e => { if (e.target === warnDlg) warnDlg.remove(); });
             return;
           }
@@ -10074,6 +10081,7 @@
       box.appendChild(body);
       overlay.appendChild(box);
       dmtGetPortal().appendChild(overlay);
+      overlay.style.pointerEvents = "auto";
 
       const close = () => { overlay.remove(); mmStyle.remove(); };
       overlay.addEventListener("click", (e) => {
@@ -13982,6 +13990,7 @@
       e.stopPropagation();
     });
     dmtGetPortal().appendChild(dropdown);
+    dropdown.style.pointerEvents = "auto";
 
     const injectEmojiInputTools = function (pickerContainer) {
       if (!pickerContainer) return;
@@ -14087,6 +14096,7 @@
 
     function waitForPicker() {
       const observer = new MutationObserver((mutations, obs) => {
+        if (document.hidden) return;
         const input = document.querySelector(
           'input[placeholder^="Search"], input[placeholder^="搜尋"], input[placeholder^="尋找"]',
         );
@@ -19687,11 +19697,11 @@ unsafeWindow.fetch = function(...args) {
 
       if (DEBUG) {
         window.testWormhole = () => {
-          console.log("=== Wormhole Pro Debug ===");
+          DEBUG && console.log("=== Wormhole Pro Debug ===");
           const data = window.wormholeModule.getData();
-          console.log("Groups:", data.groups);
-          console.log("VIP Wormholes:", data.vipWormholes);
-          console.log(
+          DEBUG && console.log("Groups:", data.groups);
+          DEBUG && console.log("VIP Wormholes:", data.vipWormholes);
+          DEBUG && console.log(
             "Total Wormholes:",
             window.wormholeModule.getAllWormholes().length,
           );
@@ -20956,15 +20966,18 @@ unsafeWindow.fetch = function(...args) {
       return m ? m[1] : location.pathname;
     };
     let _blLastChannelId = _blGetChannel();
+    const _blScanTimers = new Set();
     const _blObserver = new MutationObserver((mutations) => {
       if (document.hidden) return;
 
       const currentChannel = _blGetChannel();
       if (currentChannel !== _blLastChannelId) {
         _blLastChannelId = currentChannel;
-        setTimeout(blApplyAll, 400);
-        setTimeout(blApplyAll, 1200);
-        setTimeout(blApplyAll, 2500);
+        _blScanTimers.forEach(clearTimeout);
+        _blScanTimers.clear();
+        _blScanTimers.add(setTimeout(() => { blApplyAll(); _blScanTimers.delete(_blScanTimers.values().next().value); }, 400));
+        _blScanTimers.add(setTimeout(() => { blApplyAll(); _blScanTimers.delete(_blScanTimers.values().next().value); }, 1200));
+        _blScanTimers.add(setTimeout(() => { blApplyAll(); _blScanTimers.delete(_blScanTimers.values().next().value); }, 2500));
         return;
       }
       let hasNewNotice = false;
@@ -27251,29 +27264,31 @@ if (type === "warn" && scanLimit !== null) {
     }
   }
 
-  GM_registerMenuCommand(
-    `🐛 Toggle Debug Mode (${DEBUG ? "ON" : "OFF"})`,
-    () => {
-      const current = GMStore.get("debugModeEnabled", false);
-      GMStore.set("debugModeEnabled", !current);
-      const msg = !current
-        ? "[Discord Utilities] Debug mode enabled. Please reload the page."
-        : "[Discord Utilities] Debug mode disabled. Please reload the page.";
-      dmtShowToast(msg, { duration: 3500 });
-      console.log(msg);
-    }
-  );
+  if (DEBUG) {
+    GM_registerMenuCommand(
+      `🐛 Toggle Debug Mode (ON)`,
+      () => {
+        const current = GMStore.get("debugModeEnabled", false);
+        GMStore.set("debugModeEnabled", !current);
+        const msg = !current
+          ? "[Discord Utilities] Debug mode enabled. Please reload the page."
+          : "[Discord Utilities] Debug mode disabled. Please reload the page.";
+        dmtShowToast(msg, { duration: 3500 });
+        DEBUG && console.log(msg);
+      }
+    );
 
-  GM_registerMenuCommand(
-    "📊 Show Module Status",
-    () => {
-      const status = MODULE_DEFS.map(
-        (m) => `${m.icon}${isModEnabled(m.storageKey) ? "✓" : "✗"}`
-      ).join(" ");
-      console.log("[Discord Utilities] Module Status:", status);
-      dmtShowToast(`Module Status: ${status}`, { duration: 4000 });
-    }
-  );
+    GM_registerMenuCommand(
+      "📊 Show Module Status",
+      () => {
+        const status = MODULE_DEFS.map(
+          (m) => `${m.icon}${isModEnabled(m.storageKey) ? "✓" : "✗"}`
+        ).join(" ");
+        DEBUG && console.log("[Discord Utilities] Module Status:", status);
+        dmtShowToast(`Module Status: ${status}`, { duration: 4000 });
+      }
+    );
+  }
 
   window.addEventListener("error", (event) => {
     if (event.filename && event.filename.includes("greasyfork")) {
