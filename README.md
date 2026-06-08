@@ -1,6 +1,8 @@
 # 📮 Message Toolkit for Discord Web Client
 
-**A userscript that adds a message utility toolbar, an enhanced forwarding panel, cross-channel shortcuts, an expression collection manager, header utility controls, a personal message manager, and more to the Discord web client.**
+📍 **[Author GitHub](https://github.com/Startanuki07?tab=repositories)** | **[Script Repository](https://github.com/Startanuki07/Discord_Message_Toolkit)**
+
+**A userscript that adds a message utility toolbar, an enhanced forwarding panel, cross-channel shortcuts, an expression collection manager, header utility controls, a server media gallery, a personal message manager, and more to the Discord web client.**
 
 ---
 
@@ -14,25 +16,29 @@
 </details>
 
 > 💡 **Overview**
-> The core of this script is the **Message Utility Toolbar** — a per-message toolbar for copying text, downloading media, and converting social media URLs. All other modules are supplementary additions. These bonus features may be less stable or less suited to every workflow. Each module can be individually enabled or disabled at any time via the **⚙️ Module Settings** panel accessible from the toolbar.
+> This script consists of **11 independent modules** that extend Discord's web client. The core is the **Message Utility Toolbar** — a per-message toolbar for copying text, downloading media, and converting social media URLs. Supplementary modules add forwarding shortcuts, a server media gallery, personal message management, and more. Each module can be individually enabled or disabled at any time via the **⚙️ Module Settings** panel.
 
 ---
 
 ## 🎛 UI Entry Points
 
-| Icon | Feature Name | Where It Appears |
-|---|---|---|
-| ⠿ | Message Utility Toolbar | Top-right corner of any message on hover (or click, if configured) |
-| 📋 | Forwarding Manager | Inside Discord's native Forward modal — adds pinned channels, history, and fuzzy search |
-| 😀 | Expression Manager | Inside the emoji/GIF picker panel — manages saved collections |
-| 🌀 | Wormhole Panel | Persistent shortcut panel in the Discord sidebar |
-| 🖱️ | Anti-Hijack Toggle | Injected into the Discord top bar next to the Inbox icon |
-| 📄 | Conceal Name Toggle | Injected into the Discord top bar next to the Inbox icon |
-| 🔗 | Webhook Manager | Accessible from the message toolbar menu — send content to Discord webhooks |
-| 🔍 | Duplicate URL Checker | A banner above the chat input — appears automatically when a pasted URL was already shared in the current channel |
-| 🔎 | Channel Scout | Click the floating **🔍** button near the chat input, or press **F2** anywhere outside the input |
-| 🌫️ | Mute User Messages | Right-click any message to mute/unmute a user; press **Alt+B** to open the management panel |
-| 📝 | My Posts Manager | Injected into the Discord top bar; press **Alt+P** to open the panel |
+| Icon | Module | Feature | Where It Appears |
+|------|--------|---------|-----------------|
+| ⠿ | Message Utility Toolbar | Per-message action toolbar | Top-right corner of any message on hover (or click, if configured) |
+| ⚙️ | Module Settings | Toggle individual modules on/off | Inside the ⠿ toolbar — click the ⚙️ icon |
+| 📋 | Forwarding Manager | Enhanced forward panel | Inside Discord's native Forward modal |
+| 😀 | Expression Manager | Saved emoji/GIF/sticker collections | Inside the emoji/GIF picker panel |
+| 🌀 | Wormhole Panel | Channel shortcut sidebar | Persistent panel in the Discord sidebar |
+| 🖱️ | Anti-Hijack Toggle | Right-click menu restore | Discord top bar, next to the Inbox icon |
+| 📄 | Conceal Name Toggle | Upload filename masking | Discord top bar, next to the Inbox icon |
+| 🔗 | Webhook Manager | Send content to webhooks | Message toolbar menu |
+| 🔍 | Duplicate URL Checker | Detects re-shared links | Banner above the chat input — appears automatically |
+| 🔎 | Channel Scout | Full-text channel search | Floating **🔍** button near the chat input, or press **F2** |
+| 🌫️ | Mute User Messages | Visually suppress messages | Right-click any message; manage panel via **Alt+B** |
+| 📝 | My Posts Manager | Browse and delete your own messages | Discord top bar icon, or press **Alt+P** |
+| 🖼 | Mosaic — Server Media Gallery | Scan and browse all channel media | Lightly tinted **🖼** button near the chat input |
+
+> 💡 Each module operates independently. You do not need to enable all of them.
 
 ---
 
@@ -62,7 +68,7 @@ Appears when you hover over (or click on) any Discord message.
 > - Understand that the third party may log, inspect, or modify content passing through their service
 > - Check the uptime and reliability of the service — if the proxy domain goes offline, converted links will break
 > - Be aware that Discord users who click converted links will visit the third-party proxy URL, not the original social media site
-> 
+>
 > Use URL conversion responsibly and only with links you trust. If you have concerns about any proxy service, do not use that conversion option.
 
 ### 📋 Forwarding Manager
@@ -72,6 +78,20 @@ Accessible when opening Discord's native Forward panel.
 - **Pinned Channels**: Save frequently used channels or users to a persistent quick-access bar at the top
 - **Fuzzy Search**: Click the ⏎ icon to search using partial keywords or abbreviations, bypassing Discord's exact-match search
 - **History Log**: Automatically tracks recently forwarded destinations for quick re-selection
+
+### 🖼 Mosaic — Server Media Gallery
+
+A dedicated media gallery panel for browsing all images and videos shared in a channel or server. Open it via the lightly tinted **🖼** button near the chat input.
+
+- **Scan for media**: Click **Scan** to collect media from messages within a chosen time range — Last 1 day, 1 week, or 1 month. Results are saved locally and reused on subsequent visits until you rescan
+- **Filter by type**: Switch between All, Images, Videos, and GIFs using the type selector
+- **Scope**: Toggle between the current channel and the entire server using the scope selector
+- **Browse grid**: Media is displayed in a scrollable mosaic grid. The layout adjusts automatically as you resize the panel
+- **View and download**: Click any thumbnail to open a full-size lightbox viewer. Right-click to download the file or copy its source URL
+- **Dock to edge**: Click the **⇤** button in the panel header to slide the panel to the nearest screen edge — only a thin indicator line remains visible. Hover over the indicator to expand the panel back; move away to retract it. Click **⇥** to undock and restore the panel to its previous position
+- **Panel controls**: Drag the panel header or either side edge to reposition it. Drag the corner handle to resize. Press Esc or click **✕** to close
+
+> ⚠️ **Scan coverage is subject to Discord's search limits.** A single scan retrieves up to approximately 5,000 messages. For busy servers or longer time ranges, some older media may not appear. Reducing the time range (e.g. Last 1 day) gives more complete results within the limit. YouTube and other external video links are excluded from the gallery, as they do not produce previewable media files.
 
 ### 🌀 Wormhole Shortcuts
 
@@ -83,7 +103,7 @@ Accessible when opening Discord's native Forward panel.
 A persistent shortcut panel in the Discord sidebar.
 
 - **Channel Shortcuts**: Paste any Discord channel URL into the Wormhole panel (click ＋) to create one-click navigation shortcuts
-- **Organization**: Right-click any Wormhole to rename, delete, set a custom icon, assign to a named group folder, or mark as VIP (auto-pinned to top). VIP entries in their original list position are visually dimmed so the pinned area stays in focus.
+- **Organization**: Right-click any Wormhole to rename, delete, set a custom icon, assign to a named group folder, or mark as VIP (auto-pinned to top). VIP entries in their original list position are visually dimmed so the pinned area stays in focus
 - **Focus Mode**: Toggle the panel to icon-only compact view using the button at the top-right of the Wormhole panel
 - **Send Message Overlay**: Right-click a Wormhole → **Send Message Here** to open a send overlay without navigating away
   - Supports pasting images directly via Ctrl+V
@@ -154,7 +174,7 @@ Automatically checks whether a URL you paste into the chat input has already bee
 
 A full-text search panel for the current channel, opened via the **🔍** button.
 
-- **Open the panel**: Click the floating **🔍** button near the chat input when the text box is focused, or press **F2** anywhere outside the input. Click it again, press Esc, or click outside to close.
+- **Open the panel**: Click the floating **🔍** button near the chat input when the text box is focused, or press **F2** anywhere outside the input. Click it again, press Esc, or click outside to close
 - **Real-time search**: Results update within 150 ms as you type, with the matched keyword highlighted in gold
 - **Quick navigation**: Click any result to scroll directly to that message and briefly highlight it with a colored border
 - **Saved search tags**: Save up to 5 frequently used search terms as quick-launch tabs — left-click to run, right-click to delete
@@ -172,9 +192,14 @@ Visually suppress messages from specific users without blocking them — useful 
   <img src="https://greasyfork.s3.us-east-2.amazonaws.com/5bpzh6k3k806tz7csllpoja2jtj4" alt="Image">
 </details>
 
-- **Mute**: Right-click any message → **🌫️ Mute: {username}**. A style picker appears with six visual options.
-- **Unmute**: Right-click a muted user's message → **Unmute: {username}**, or open the management panel with **Alt+B** and click the unmute button next to their name. Changes take effect immediately on screen.
-- **Temporary mute**: In the style picker, enable the timer option to automatically unmute after a set duration.
+<details open>
+  <summary><small style="color: #666;">Hide image</small></summary>
+  <img src="https://greasyfork.s3.us-east-2.amazonaws.com/gvqrcylt8viywo6lkr1q0p1je7vb" alt="Image">
+</details>
+
+- **Mute**: Right-click any message → **🌫️ Mute: {username}**. A style picker appears with six visual options
+- **Unmute**: Right-click a muted user's message → **Unmute: {username}**, or open the management panel with **Alt+B** and click the unmute button next to their name. Changes take effect immediately on screen
+- **Temporary mute**: In the style picker, enable the timer option to automatically unmute after a set duration
 
 **Visual styles:**
 
@@ -207,10 +232,11 @@ Browse, search, and batch-delete your own messages across Discord — with daily
 ## 🧪 Experimental Features & Known Limitations
 
 - **Wormhole Mode A**: Sending via Mode A causes a brief visible page transition to the target channel before returning
+- **Mosaic — Scan Coverage**: Discord's search API limits each scan to approximately 5,000 messages. On busy servers or with longer time ranges selected, scans may stop before reaching the oldest content. Using a shorter time range improves completeness
 - **Channel Scout**: Only searches messages currently loaded in Discord's DOM — messages that haven't been rendered yet are not reachable
-- **Mute User Messages**: Author identification depends on Discord's current DOM structure. Discord UI updates may temporarily break detection until the script is patched.
-- **My Posts Manager**: Search results depend on Discord's own Search API and are subject to its availability and rate limits. The module reads your session token from browser storage — only enable this on devices you trust.
-- **Third-Party URL Proxies**: URL conversion features depend on external open-source services (vxtwitter, kkinstagram, fxtwitter, phixiv, etc.). These services are independent from this script and not endorsed by its author. Availability depends on the uptime of those domains. Converted links direct users to third-party proxy services, which may inspect or log traffic. Do not use these conversions if you do not trust the respective proxy services. If a proxy service goes offline, previously converted links will break.
+- **Mute User Messages**: Author identification depends on Discord's current DOM structure. Discord UI updates may temporarily break detection until the script is patched
+- **My Posts Manager**: Search results depend on Discord's own Search API and are subject to its availability and rate limits. The module reads your session token from browser storage — only enable this on devices you trust
+- **Third-Party URL Proxies**: URL conversion features depend on external open-source services (vxtwitter, kkinstagram, fxtwitter, phixiv, etc.). These services are independent from this script and not endorsed by its author. Availability depends on the uptime of those domains. Converted links direct users to third-party proxy services, which may inspect or log traffic. Do not use these conversions if you do not trust the respective proxy services. If a proxy service goes offline, previously converted links will break
 - **Discord UI Compatibility**: This script injects UI elements into Discord's web client. Discord updates may temporarily break injected features until the script is updated
 
 ---
@@ -219,7 +245,7 @@ Browse, search, and batch-delete your own messages across Discord — with daily
 
 ### ⚙️ Module Toggle Panel
 
-The script's ten modules can be enabled or disabled individually without reinstalling. Access the panel by opening the **⠿ Message Utility Toolbar** on any message and clicking the **⚙️** icon. If the toolbar itself fails to load, a small **⚙️ rescue button** appears in the bottom-right corner of Discord as a fallback.
+The script's eleven modules can be enabled or disabled individually without reinstalling. Access the panel by opening the **⠿ Message Utility Toolbar** on any message and clicking the **⚙️** icon. If the toolbar itself fails to load, a small **⚙️ rescue button** appears in the bottom-right corner of Discord as a fallback.
 
 | Module | Default State |
 |---|---|
@@ -227,12 +253,15 @@ The script's ten modules can be enabled or disabled individually without reinsta
 | 📋 Forwarding Manager | On |
 | 😀 Expression Manager | On |
 | 📌 Header Mods (Anti-Hijack + Conceal Name) | On |
-| 🌀 Wormhole Shortcuts | On |
+| 🌀 Wormhole Shortcuts | **Off** |
 | 🔗 Webhook Manager | Off |
-| 🔍 Duplicate URL Checker | On |
-| 🔎 Channel Scout | On |
-| 🌫️ Mute User Messages | On |
+| 🔍 Duplicate URL Checker | **Off** |
+| 🔎 Channel Scout | **Off** |
+| 🌫️ Mute User Messages | **Off** |
 | 📝 My Posts Manager | Off |
+| 🖼 Mosaic — Server Media Gallery | Off |
+
+> 💡 Default states apply to **new installations only**. If you have previously used this script, your existing per-module settings are preserved and are not affected by default state changes between versions.
 
 The **Message Utility Toolbar** is the primary feature. The remaining modules are bonus additions that may not work reliably in all environments and depend on Discord's internal UI structure. Any problematic module can be disabled here without affecting the others.
 
@@ -263,7 +292,7 @@ The **Message Utility Toolbar** is the primary feature. The remaining modules ar
 >
 > **My Posts Manager**: The module reads your session token from browser storage when you open the panel. A security notice appears the first time you enable this module. Only enable it on devices you trust.
 >
-> All other features — including Mode A sending, message copying, URL conversion, media downloading, forwarding, expression management, Anti-Hijack, Conceal Name, Channel Scout, Duplicate URL Checker, and Mute User Messages — operate entirely without any credential access.
+> All other features — including Mode A sending, message copying, URL conversion, media downloading, forwarding, expression management, Anti-Hijack, Conceal Name, Channel Scout, Duplicate URL Checker, Mute User Messages, and Mosaic — operate entirely without any credential access.
 > Reviewing the source code before enabling either feature is recommended.
 >
 > ⚠️ **Terms of Service Notice**: Using a personal user token to make automated API requests is classified as "self-botting" under Discord's Terms of Service. This carries risk of account flagging or suspension. Users who enable Wormhole Mode B or My Posts Manager do so at their own discretion and accept full responsibility for any consequences.
