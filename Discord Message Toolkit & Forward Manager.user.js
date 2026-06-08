@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.6.0.4
+// @version      2.7.0.1
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -55,7 +55,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.6.0.4";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.0.0";
 
   const GMStore = {
     
@@ -227,6 +227,7 @@
         modBlacklist: "mod_blacklist",
         modWebhook: "mod_webhook",
         modMyPosts: "mod_myposts",
+        modMosaic:  "mod_mosaic",
       };
       return keyMap[prop] || prop;
     },
@@ -310,6 +311,7 @@
       key: "modWormhole",
       storageKey: "mod_wormhole",
       icon: "🌀",
+      defaultEnabled: false,
       tip: "mod_tip_wormhole",
       label: {
         "en-US": "Wormhole",
@@ -347,7 +349,7 @@
       key: "modUrlChecker",
       storageKey: "mod_urlchecker",
       icon: "🔍",
-      defaultEnabled: true,
+      defaultEnabled: false,
       tip: "mod_tip_urlchecker",
       label: {
         "en-US": "Duplicate URL Checker",
@@ -366,7 +368,7 @@
       key: "modScout",
       storageKey: "mod_scout",
       icon: "🔎",
-      defaultEnabled: true,
+      defaultEnabled: false,
       tip: "mod_tip_scout",
       label: {
         "en-US": "Channel Scout (Search)",
@@ -385,7 +387,7 @@
       key: "modBlacklist",
       storageKey: "mod_blacklist",
       icon: "🌫️",
-      defaultEnabled: true,
+      defaultEnabled: false,
       tip: "mod_tip_blacklist",
       label: {
         "en-US": "Mute User Messages",
@@ -418,6 +420,26 @@
         "pt-BR": "Meus posts",
         fr: "Mes messages",
         ru: "Мои сообщения",
+      },
+    },
+    {
+      key:            "modMosaic",
+      storageKey:     "mod_mosaic",
+      icon:           "🖼",
+      defaultEnabled: false,
+      enableWarn:     "ms_token_warn",
+      tip:            "mod_tip_mosaic",
+      label: {
+        "en-US": "Mosaic · Server Media Gallery",
+        "zh-TW": "Mosaic · 伺服器媒體圖庫",
+        "zh-CN": "Mosaic · 服务器媒体图库",
+        ja:      "Mosaic · サーバーメディアギャラリー",
+        ko:      "Mosaic · 서버 미디어 갤러리",
+        de:      "Mosaic · Server Mediengalerie",
+        es:      "Mosaic · Galería de medios del servidor",
+        "pt-BR": "Mosaic · Galeria de mídia do servidor",
+        fr:      "Mosaic · Galerie médias du serveur",
+        ru:      "Mosaic · Медиагалерея сервера",
       },
     },
   ];
@@ -1316,6 +1338,40 @@
       mod_tip_scout:      "Press the search button above the input box or use the keyboard shortcut to search current channel messages by keyword.",
       mod_tip_blacklist:  "Dim messages from specific users so they fade into the background. Right-click any message to add the author.",
       mod_tip_myposts:    "Browse, filter, and schedule deletion of your own messages. Requires API token (fetched automatically on panel open).",
+      mod_tip_mosaic:     "Browse all media in the current server or channel. Requires API token (same as My Posts).",
+
+      ms_token_warn:      "⚠️ Mosaic uses your API token to scan media. Use only on trusted devices.",
+      ms_scope_server:    "Server",
+      ms_scope_channel:   "Channel",
+      ms_filter_all:      "All",
+      ms_filter_images:   "Images",
+      ms_filter_videos:   "Videos",
+      ms_items:           "items",
+      ms_empty:           "No media scanned yet",
+      ms_last_scan:       "Last scan",
+      ms_scanning:        "Scanning",
+      ms_btn_scan:        "Scan",
+      ms_btn_pause:       "Pause",
+      ms_btn_resume:      "Resume",
+      ms_btn_jump:        "Jump to message",
+      ms_btn_download:    "Download",
+      ms_err_forbidden:   "Permission denied for this scope",
+      ms_no_token_warn:   "⚠️ Requires API Mode — enable in Wormhole settings",
+      ms_range_1h:        "Last 1 hour",
+      ms_range_6h:        "Last 6 hours",
+      ms_range_12h:       "Last 12 hours",
+      ms_range_1d:        "Last 1 day",
+      ms_range_3d:        "Last 3 days",
+      ms_range_1w:        "Last 1 week",
+      ms_range_3w:        "Last 3 weeks",
+      ms_range_1m:        "Last 1 month",
+      ms_range_custom:    "Custom range…",
+      ms_range_from:      "From",
+      ms_range_to:        "To",
+      ms_range_apply:     "Apply",
+      ms_cap_warn:        "⚠️ Stopped at 5,000 items — narrow the time range for complete results",
+      ms_stats_title:     "Cache Statistics",
+      ms_stats_clear:     "Clear cached media for this scope",
 
       mp_panel_title:           "My Posts",
       mp_tab_browse:            "Browse",
@@ -1849,6 +1905,40 @@
       mod_tip_scout:      "點擊輸入框上方的搜尋按鈕，或使用快捷鍵，以關鍵字搜尋目前頻道的訊息。",
       mod_tip_blacklist:  "將特定使用者的訊息弱化至背景，讓它們不再吸引注意。對任何訊息按右鍵即可新增。",
       mod_tip_myposts:    "瀏覽、篩選並排程刪除自己的發文。開啟面板時自動取得 API Token，使用內建排程功能可限制每日刪除則數。",
+      mod_tip_mosaic:     "瀏覽目前伺服器或頻道的所有媒體。需要 API Token（與個人訊息管理相同）。",
+
+      ms_token_warn:      "⚠️ Mosaic 使用你的 API Token 掃描媒體，請僅在可信任的裝置上使用。",
+      ms_scope_server:    "伺服器",
+      ms_scope_channel:   "頻道",
+      ms_filter_all:      "全部",
+      ms_filter_images:   "圖片",
+      ms_filter_videos:   "影片",
+      ms_items:           "個媒體",
+      ms_empty:           "尚未掃描任何媒體",
+      ms_last_scan:       "上次掃描",
+      ms_scanning:        "掃描中",
+      ms_btn_scan:        "掃描",
+      ms_btn_pause:       "暫停",
+      ms_btn_resume:      "繼續",
+      ms_btn_jump:        "跳至訊息",
+      ms_btn_download:    "下載",
+      ms_err_forbidden:   "此範圍無存取權限",
+      ms_no_token_warn:   "⚠️ 需要 API 模式 — 請在蟲洞設定中啟用",
+      ms_range_1h:        "1 小時內",
+      ms_range_6h:        "6 小時內",
+      ms_range_12h:       "12 小時內",
+      ms_range_1d:        "1 日內",
+      ms_range_3d:        "3 日內",
+      ms_range_1w:        "1 禮拜內",
+      ms_range_3w:        "3 禮拜內",
+      ms_range_1m:        "1 個月內",
+      ms_range_custom:    "自訂範圍…",
+      ms_range_from:      "從",
+      ms_range_to:        "到",
+      ms_range_apply:     "套用",
+      ms_cap_warn:        "⚠️ 已掃描 5,000 筆上限 — 縮小時間範圍可取得完整結果",
+      ms_stats_title:     "快取統計",
+      ms_stats_clear:     "清除此範圍的快取媒體",
 
       mp_panel_title:           "個人發文",
       mp_tab_browse:            "瀏覽",
@@ -2380,6 +2470,40 @@
       mod_tip_scout:      "点击输入框上方的搜索按钮，或使用快捷键，按关键字搜索当前频道的消息。",
       mod_tip_blacklist:  "将特定用户的消息弱化至背景，让其不再引人注意。右键任意消息即可添加。",
       mod_tip_myposts:    "浏览、筛选并安排删除自己的消息。打开面板时自动获取 API Token，内置配额功能可限制每日删除数量。",
+      mod_tip_mosaic:     "浏览当前服务器或频道的所有媒体。需要 API Token（与个人消息管理相同）。",
+
+      ms_token_warn:      "⚠️ Mosaic 使用你的 API Token 扫描媒体，请仅在可信任的设备上使用。",
+      ms_scope_server:    "服务器",
+      ms_scope_channel:   "频道",
+      ms_filter_all:      "全部",
+      ms_filter_images:   "图片",
+      ms_filter_videos:   "视频",
+      ms_items:           "个媒体",
+      ms_empty:           "尚未扫描任何媒体",
+      ms_last_scan:       "上次扫描",
+      ms_scanning:        "扫描中",
+      ms_btn_scan:        "扫描",
+      ms_btn_pause:       "暂停",
+      ms_btn_resume:      "继续",
+      ms_btn_jump:        "跳转到消息",
+      ms_btn_download:    "下载",
+      ms_err_forbidden:   "无此范围访问权限",
+      ms_no_token_warn:   "⚠️ 需要 API 模式 — 请在虫洞设置中启用",
+      ms_range_1h:        "1小时内",
+      ms_range_6h:        "6小时内",
+      ms_range_12h:       "12小时内",
+      ms_range_1d:        "1天内",
+      ms_range_3d:        "3天内",
+      ms_range_1w:        "1周内",
+      ms_range_3w:        "3周内",
+      ms_range_1m:        "1个月内",
+      ms_range_custom:    "自定义范围…",
+      ms_range_from:      "从",
+      ms_range_to:        "到",
+      ms_range_apply:     "应用",
+      ms_cap_warn:        "⚠️ 已达到5000条上限 — 缩小时间范围以获取完整结果",
+      ms_stats_title:     "缓存统计",
+      ms_stats_clear:     "清除此范围的缓存媒体",
 
       cs_panel_title:   "⌨ 频道搜索",
       cs_placeholder:   "输入关键字搜索频道消息…",
@@ -2920,6 +3044,34 @@
       mod_tip_scout:      "入力欄上の検索ボタンまたはショートカットで現在のチャンネルをキーワード検索。",
       mod_tip_blacklist:  "特定ユーザーのメッセージを薄く表示して目立たなくする。右クリックから追加可能。",
       mod_tip_myposts:    "自分の投稿を閲覧・絞り込み・制限削除。パネルを開くと自動で API Token を取得します。",
+      mod_tip_mosaic:     "現在のサーバーまたはチャンネルのメディアを一覧表示します。My Posts と同じ API トークンが必要です。",
+
+      ms_token_warn:      "⚠️ Mosaic は API トークンを使用してメディアをスキャンします。信頼できるデバイスでのみ使用してください。",
+      ms_scope_server:    "サーバー",
+      ms_scope_channel:   "チャンネル",
+      ms_filter_all:      "すべて",
+      ms_filter_images:   "画像",
+      ms_filter_videos:   "動画",
+      ms_items:           "件",
+      ms_empty:           "まだメディアはスキャンされていません",
+      ms_last_scan:       "最終スキャン",
+      ms_scanning:        "スキャン中",
+      ms_btn_scan:        "スキャン",
+      ms_btn_pause:       "一時停止",
+      ms_btn_resume:      "再開",
+      ms_btn_jump:        "メッセージに移動",
+      ms_btn_download:    "ダウンロード",
+      ms_err_forbidden:   "このスコープへのアクセスが拒否されました",
+      ms_no_token_warn:   "⚠️ API モードが必要です — ワームホール設定で有効にしてください",
+      ms_range_1h:        "1時間以内", ms_range_6h:   "6時間以内",
+      ms_range_12h:       "12時間以内", ms_range_1d:  "1日以内",
+      ms_range_3d:        "3日以内",    ms_range_1w:  "1週間以内",
+      ms_range_3w:        "3週間以内",  ms_range_1m:  "1ヶ月以内",
+      ms_range_custom:    "カスタム範囲…",
+      ms_range_from:      "開始", ms_range_to: "終了", ms_range_apply: "適用",
+      ms_cap_warn:        "⚠️ 5,000件の上限に達しました — 時間範囲を絞ってください",
+      ms_stats_title:     "キャッシュ統計",
+      ms_stats_clear:     "このスコープのキャッシュをクリア",
 
       cs_panel_title:   "⌨ チャンネル検索",
       cs_placeholder:   "キーワードでチャンネルメッセージを検索…",
@@ -3501,6 +3653,34 @@
       mod_tip_scout:      "입력창 위의 검색 버튼을 누르거나 키보드 단축키를 사용하여 현재 채널 메시지를 키워드로 검색합니다.",
       mod_tip_blacklist:  "특정 사용자의 메시지를 흐릿하게 표시합니다. 메시지를 우클릭하여 작성자를 추가하세요.",
       mod_tip_myposts:    "내 메시지를 탐색, 필터링 및 삭제 예약합니다. 패널 열기 시 API 토큰이 자동으로 가져와집니다.",
+      mod_tip_mosaic:     "현재 서버 또는 채널의 미디어를 열람합니다. My Posts와 동일한 API 토큰이 필요합니다.",
+
+      ms_token_warn:      "⚠️ Mosaic은 API 토큰을 사용하여 미디어를 스캔합니다. 신뢰할 수 있는 기기에서만 사용하세요.",
+      ms_scope_server:    "서버",
+      ms_scope_channel:   "채널",
+      ms_filter_all:      "전체",
+      ms_filter_images:   "이미지",
+      ms_filter_videos:   "동영상",
+      ms_items:           "개",
+      ms_empty:           "아직 스캔된 미디어가 없습니다",
+      ms_last_scan:       "마지막 스캔",
+      ms_scanning:        "스캔 중",
+      ms_btn_scan:        "스캔",
+      ms_btn_pause:       "일시 정지",
+      ms_btn_resume:      "재개",
+      ms_btn_jump:        "메시지로 이동",
+      ms_btn_download:    "다운로드",
+      ms_err_forbidden:   "이 범위에 대한 접근이 거부되었습니다",
+      ms_no_token_warn:   "⚠️ API 모드가 필요합니다 — 웜홀 설정에서 활성화하세요",
+      ms_range_1h:        "1시간 이내", ms_range_6h:   "6시간 이내",
+      ms_range_12h:       "12시간 이내", ms_range_1d:  "1일 이내",
+      ms_range_3d:        "3일 이내",    ms_range_1w:  "1주일 이내",
+      ms_range_3w:        "3주일 이내",  ms_range_1m:  "1개월 이내",
+      ms_range_custom:    "사용자 정의 범위…",
+      ms_range_from:      "시작", ms_range_to: "종료", ms_range_apply: "적용",
+      ms_cap_warn:        "⚠️ 5,000개 제한에 도달했습니다 — 시간 범위를 좁혀보세요",
+      ms_stats_title:     "캐시 통계",
+      ms_stats_clear:     "이 범위의 캐시 지우기",
 
       mp_panel_title:           "내 게시물",
       mp_tab_browse:            "브라우즈",
@@ -6529,7 +6709,8 @@
       return item ? item.isStarred : false;
     }
 
-    function waitForElement(selector, parent = document.body, timeout = 3000) {
+    function waitForElement(selector, parent, timeout = 3000) {
+      parent = parent || document.body || document.documentElement;
       return new Promise((resolve) => {
         const element = parent.querySelector(selector);
         if (element) return resolve(element);
@@ -6551,7 +6732,7 @@
       });
     }
 
-    const activeObservers = new WeakMap();
+    const activeObservers = new Map();
     const _injectTimers = new WeakMap();
 
     async function handleForwardOpen() {
@@ -6707,8 +6888,12 @@
       );
       if (bar && searchInput) {
         const modal = searchInput.closest('div[role="dialog"]');
-        bar.innerHTML = "";
-        renderBarButtons(bar, modal);
+        try {
+          bar.innerHTML = "";
+          renderBarButtons(bar, modal);
+        } catch (e) {
+          DEBUG && console.error("[refreshUI] renderBarButtons failed:", e);
+        }
       }
     }
 
@@ -8326,6 +8511,7 @@
         mod_scout:       localStorage.getItem("mod_scout"),
         mod_blacklist:   localStorage.getItem("mod_blacklist"),
         mod_myposts:     localStorage.getItem("mod_myposts"),
+        mod_mosaic:      localStorage.getItem("mod_mosaic"),
       };
 
       const webhookList = GMStore.get("discord_webhook_list", [], true);
@@ -8361,8 +8547,12 @@
         wormhole_focus_show_labels: localStorage.getItem("wormhole_focus_show_labels"),
       };
 
+      const mosaicPrefs = {
+        ms_last_scan_scope: GMStore.get("ms_last_scan_scope", null),
+      };
+
       const data = {
-        ver: "EX5",
+        ver: "EX6",
         config: configData,
         forwardingData: forwardingData,
         forwardingPref: forwardingPref,
@@ -8378,6 +8568,7 @@
         blacklistData: blacklistData,
         blacklistPrefs: blacklistPrefs,
         myPostsPrefs: myPostsPrefs,
+        mosaicPrefs: mosaicPrefs,
       };
 
       const blob = new Blob([JSON.stringify(data, null, 2)], {
@@ -8530,6 +8721,7 @@
             "mod_scout",
             "mod_blacklist",
             "mod_myposts",
+            "mod_mosaic",
           ];
           modKeys.forEach((k) => {
             if (mt[k] != null) localStorage.setItem(k, mt[k]);
@@ -8582,6 +8774,12 @@
           const wfe = data.wormholeFocusExtra;
           if (wfe.wormhole_focus_show_labels != null)
             localStorage.setItem("wormhole_focus_show_labels", wfe.wormhole_focus_show_labels);
+        }
+
+        if (data.mosaicPrefs) {
+          const mp = data.mosaicPrefs;
+          if (mp.ms_last_scan_scope != null)
+            GMStore.set("ms_last_scan_scope", mp.ms_last_scan_scope);
         }
 
             dmtShowToast(t("import_success"), { duration: 1500 });
@@ -9915,7 +10113,7 @@
               markFeatureSeen(mod.storageKey);
               const existingBadge = label.querySelector(".dmt-new-badge");
               if (existingBadge) existingBadge.remove();
-              if (mod.enableWarn === "mp_token_warn") {
+              if (mod.enableWarn) {
                 setTimeout(() => {
                   dmtConfirm(
                     t("reload_confirm") || "Reload page now to apply changes?",
@@ -16613,7 +16811,8 @@
       const d = document.createElement("div");
       d.className = "my-popover-menu";
       d.style.padding = "4px";
-      document.body.appendChild(d);
+      d.style.pointerEvents = "auto";
+      dmtGetPortal().appendChild(d);
       return d;
     }
 
@@ -17963,14 +18162,14 @@ unsafeWindow.fetch = function(...args) {
               remaining--;
               if (remaining <= 0) {
                 clearInterval(coolTick);
-                setPill(self.t("wm_send_toast_title").replace("#{name}", wormhole.name), "ok");
+                setPill(self.t("wm_send_toast_title").replace("#{name}", escHtml(wormhole.name)), "ok");
                 dismissPill(3000);
               } else {
                 setPill(coolLabel(remaining), "cool");
               }
             }, 1000);
           } else {
-            setPill(self.t("wm_send_toast_title").replace("#{name}", wormhole.name), "ok");
+            setPill(self.t("wm_send_toast_title").replace("#{name}", escHtml(wormhole.name)), "ok");
             dismissPill(3000);
           }
         } catch (err) {
@@ -21814,11 +22013,12 @@ unsafeWindow.fetch = function(...args) {
         clearBtn.className = "pset-clear-btn";
         clearBtn.textContent = t("mu_settings_clear_all") || "Clear All";
         clearBtn.addEventListener("click", () => {
-          if (confirm(t("mu_settings_clear_confirm") || "Remove all muted users?")) {
+          dmtConfirm(t("mu_settings_clear_confirm") || "Remove all muted users?", { danger: true }).then(ok => {
+            if (!ok) return;
             blSave([]);
             blApplyAll();
             _renderSettingsList();
-          }
+          });
         });
         pageList.appendChild(clearBtn);
 
@@ -22243,7 +22443,7 @@ unsafeWindow.fetch = function(...args) {
     const SK_TIME_FORMAT = "mp_time_fmt";
 
     const IDB_NAME = "dmt_cache";
-    const IDB_VER  = 1;
+    const IDB_VER  = 2;
     let _idbInstance      = null;
     let _idbReadyPromise  = null;
 
@@ -22261,6 +22461,20 @@ unsafeWindow.fetch = function(...args) {
           }
           if (!db.objectStoreNames.contains("sync_meta")) {
             db.createObjectStore("sync_meta", { keyPath: "scope_key" });
+          }
+          if (!db.objectStoreNames.contains("media_items")) {
+            const ms = db.createObjectStore("media_items", { keyPath: "url" });
+            ms.createIndex("scope",         "scope",                  { unique: false });
+            ms.createIndex("scope_ts",      ["scope","timestamp"],    { unique: false });
+            ms.createIndex("scope_author",  ["scope","author_id"],    { unique: false });
+            ms.createIndex("scope_type",    ["scope","media_type"],   { unique: false });
+            ms.createIndex("scope_channel", ["scope","channel_id"],   { unique: false });
+          }
+          if (!db.objectStoreNames.contains("media_sync")) {
+            db.createObjectStore("media_sync",  { keyPath: "scope_key" });
+          }
+          if (!db.objectStoreNames.contains("media_stats")) {
+            db.createObjectStore("media_stats", { keyPath: "scope_key" });
           }
         };
         req.onsuccess = e => { _idbInstance = e.target.result; resolve(_idbInstance); };
@@ -23062,8 +23276,8 @@ unsafeWindow.fetch = function(...args) {
         "background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);",
         "color:var(--dmt-text-primary,#dcddde);font-size:12px;outline:none;}",
         "#dmt-mp-panel .mp-media-search:focus{border-color:var(--dmt-accent,#5865f2);}",
-        
-        "#dmt-mp-panel .mp-masonry{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:0 0 4px;align-content:start;}",
+
+        "#dmt-mp-panel .mp-masonry{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:0 0 4px;align-content:start;contain:layout style;}",
         "#dmt-mp-panel .mp-masonry-item{position:relative;aspect-ratio:1/1;",
         "border-radius:4px;overflow:hidden;cursor:pointer;background:rgba(255,255,255,.04);}",
         "#dmt-mp-panel .mp-masonry-item img,#dmt-mp-panel .mp-masonry-item video{",
@@ -24730,13 +24944,18 @@ unsafeWindow.fetch = function(...args) {
       }
       rBtn.onclick = _doMediaRefresh;
 
+      const SVG_DATE_US_M   = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><rect x="3" y="4" width="18" height="17" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" stroke-width="2"/><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><text x="12" y="18" text-anchor="middle" font-size="6" fill="currentColor" font-family="monospace">M/D</text></svg>';
+      const SVG_DATE_ASIA_M = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><rect x="3" y="4" width="18" height="17" rx="2" ry="2" fill="none" stroke="currentColor" stroke-width="2"/><line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" stroke-width="2"/><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><text x="12" y="17" text-anchor="middle" font-size="4.5" fill="currentColor" font-family="monospace">YMD</text></svg>';
+
       const mediaTimeFmtBtn = document.createElement("button");
-      mediaTimeFmtBtn.className = "mp-refresh-btn";
-      mediaTimeFmtBtn.style.cssText = "font-size:11px;font-weight:600;padding:0 6px;min-width:0;letter-spacing:.3px;";
+      mediaTimeFmtBtn.className = "mp-type-icon-btn";
+      mediaTimeFmtBtn.style.cssText = "margin-left:auto;padding:2px 5px;min-width:0;flex-shrink:0;";
       const _updateMediaTimeFmtBtn = () => {
         const fmt = GMStore.get(SK_TIME_FORMAT, "us");
-        mediaTimeFmtBtn.textContent = fmt === "asia" ? "ASIA" : "US";
-        mediaTimeFmtBtn.title = fmt === "asia" ? "Switch to US time format" : "Switch to Asia time format (YYYY/MM/DD HH:mm)";
+        mediaTimeFmtBtn.innerHTML = fmt === "asia" ? SVG_DATE_ASIA_M : SVG_DATE_US_M;
+        mediaTimeFmtBtn.title = fmt === "asia"
+          ? "Date format: YYYY/MM/DD HH:mm — click to switch to M/D HH:mm"
+          : "Date format: M/D HH:mm — click to switch to YYYY/MM/DD HH:mm";
       };
       _updateMediaTimeFmtBtn();
       mediaTimeFmtBtn.onclick = () => {
@@ -25017,8 +25236,10 @@ unsafeWindow.fetch = function(...args) {
       if (_mediaObs) _mediaObs.disconnect();
       if (_mediaTotal !== null && _mediaOffset < _mediaTotal) {
         _mediaObs = new IntersectionObserver(entries => {
-          if (entries[0].isIntersecting)
-            _loadMediaPage(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
+          if (!entries[0].isIntersecting) return;
+          requestAnimationFrame(() =>
+            _loadMediaPage(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText)
+          );
         }, { threshold: 0.1, rootMargin: "0px" });
         _mediaObs.observe(sentinel);
       }
@@ -27080,6 +27301,1445 @@ if (type === "warn" && scanLimit !== null) {
 
     DEBUG && console.log("[URLChecker] Module G initialized, scan limit:", getScanLimit());
   }
+
+  function initMosaicGallery() {
+
+    const MS_SCAN_DELAY   = 350;
+    const MS_RETRY_DELAY  = 2000;
+    const MS_MAX_RETRY    = 5;
+    const MS_CELL_W       = 160;
+    const MS_CELL_H       = 160;
+    let   MS_COLS         = 5;
+    const MS_BUFFER       = 4;
+    const MS_PAGE_SIZE    = 80;
+    const MS_API_BASE     = "https://discord.com/api/v10";
+    const MS_IDB_NAME     = "dmt_cache";
+    const MS_IDB_VER      = 2;
+    const MS_SCAN_ITEM_CAP = 5000;
+
+    const MS_TIME_RANGES = {
+      "1h":     1 * 60 * 60 * 1000,
+      "6h":     6 * 60 * 60 * 1000,
+      "12h":   12 * 60 * 60 * 1000,
+      "1d":     1 * 24 * 60 * 60 * 1000,
+      "3d":     3 * 24 * 60 * 60 * 1000,
+      "1w":     7 * 24 * 60 * 60 * 1000,
+      "3w":    21 * 24 * 60 * 60 * 1000,
+      "1m":    30 * 24 * 60 * 60 * 1000,
+      "custom": null,
+    };
+
+    function _msTimestampToSnowflake(ms) {
+      if (!ms || ms <= 1420070400000) return null;
+      return String((BigInt(Math.floor(ms)) - 1420070400000n) << 22n);
+    }
+
+    let _msScanState = {
+      phase:        "idle",
+      scope:        null,
+      scopeType:    "guild",
+      offset:       0,
+      scanned:      0,
+      total:        null,
+      error:        null,
+      statusDetail: null,
+    };
+    let _msToken        = null;
+    let _msScanAbort    = false;
+    let _msPanelEl      = null;
+    let _msGridItems    = [];
+    let _msGridCursor   = null;
+    let _msGridAll      = false;
+    let _msGridFilter   = "all";
+    let _msGridScope    = null;
+    let _msGridRendered = new Map();
+    let _msScrollTimer  = null;
+    let _msMutObs       = null;
+
+    let _msScopeSelEl  = null;
+    let _msTypeSelEl   = null;
+    let _msScanBtnEl   = null;
+    let _msStatusBarEl = null;
+    let _msProgressEl  = null;
+    let _msGridContEl  = null;
+    let _msRangeSelEl  = null;
+    let _msCustomRowEl = null;
+    let _msRangeKey    = "1d";
+    let _msCustomStart = null;
+    let _msCustomEnd   = null;
+    let _msGridLoading = false;
+    let _msDocked          = false;
+    let _msDockSide        = null;
+    let _msDockTabEl       = null;
+    let _msDockPeeked      = false;
+    let _msDockRetractTimer = null;
+    let _msDockSnapshot    = null;
+
+    let _msIdbInstance = null;
+    let _msIdbReady    = null;
+
+    function _msIdbOpen() {
+      if (_msIdbReady) return _msIdbReady;
+      _msIdbReady = new Promise((resolve, reject) => {
+        const req = indexedDB.open(MS_IDB_NAME, MS_IDB_VER);
+        req.onupgradeneeded = e => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains("messages")) {
+            const s = db.createObjectStore("messages", { keyPath: "id" });
+            s.createIndex("scope",    "scope",               { unique: false });
+            s.createIndex("ts",       "timestamp",           { unique: false });
+            s.createIndex("scope_ts", ["scope","timestamp"], { unique: false });
+          }
+          if (!db.objectStoreNames.contains("sync_meta")) {
+            db.createObjectStore("sync_meta", { keyPath: "scope_key" });
+          }
+          if (!db.objectStoreNames.contains("media_items")) {
+            const ms = db.createObjectStore("media_items", { keyPath: "url" });
+            ms.createIndex("scope",         "scope",                  { unique: false });
+            ms.createIndex("scope_ts",      ["scope","timestamp"],    { unique: false });
+            ms.createIndex("scope_author",  ["scope","author_id"],    { unique: false });
+            ms.createIndex("scope_type",    ["scope","media_type"],   { unique: false });
+            ms.createIndex("scope_channel", ["scope","channel_id"],   { unique: false });
+          }
+          if (!db.objectStoreNames.contains("media_sync")) {
+            db.createObjectStore("media_sync",  { keyPath: "scope_key" });
+          }
+          if (!db.objectStoreNames.contains("media_stats")) {
+            db.createObjectStore("media_stats", { keyPath: "scope_key" });
+          }
+        };
+        req.onsuccess = e => { _msIdbInstance = e.target.result; resolve(_msIdbInstance); };
+        req.onerror   = e => { DEBUG && console.warn("[Mosaic] IDB open failed:", e.target.error); reject(e.target.error); };
+      });
+      return _msIdbReady;
+    }
+
+    function _msSlimMedia(msg, src, type) {
+      return {
+        url:          src.url,
+        proxy_url:    src.proxy_url || src.url,
+        media_type:   type,
+        content_type: src.content_type || "",
+        width:        src.width  || 0,
+        height:       src.height || 0,
+        filename:     src.filename || "",
+        msg_id:       msg.id,
+        timestamp:    msg.timestamp,
+        channel_id:   msg.channel_id,
+        guild_id:     msg.guild_id || null,
+        scope:        msg.guild_id ? ("g:" + msg.guild_id) : ("c:" + msg.channel_id),
+        author_id:    msg.author?.id   || "",
+        author_name:  msg.author?.global_name || msg.author?.username || "",
+      };
+    }
+
+    function _msExtractMedia(msg) {
+      const items = [];
+      for (const att of (msg.attachments || [])) {
+        if (!att.url) continue;
+        const ct = (att.content_type || "").toLowerCase();
+        let type = null;
+        if (ct.startsWith("image/"))      type = ct.includes("gif") ? "gif" : "image";
+        else if (ct.startsWith("video/")) type = "video";
+        if (type) items.push(_msSlimMedia(msg, att, type));
+      }
+      for (const emb of (msg.embeds || [])) {
+        const _msIsNoPreviewDomain = url => {
+          if (!url) return false;
+          try {
+            const host = new URL(url).hostname.replace(/^www\./, "");
+            return /^(youtube\.com|youtu\.be|bilibili\.com|tiktok\.com|twitch\.tv|twitter\.com|x\.com|vt\.tiktok\.com)$/.test(host);
+          } catch (_) { return false; }
+        };
+        if (emb.type === "image" && emb.url) {
+          const proxy = emb.thumbnail?.proxy_url || emb.url;
+          items.push(_msSlimMedia(msg, { url: emb.url, proxy_url: proxy, width: emb.thumbnail?.width || 0, height: emb.thumbnail?.height || 0, filename: "" }, "image"));
+        } else if (emb.type === "gifv" && emb.video?.url) {
+          items.push(_msSlimMedia(msg, { url: emb.video.url, proxy_url: emb.video.proxy_url || emb.video.url, width: emb.video.width || 0, height: emb.video.height || 0, filename: "" }, "gif"));
+        } else if (emb.type === "video" && emb.video?.url) {
+          if (_msIsNoPreviewDomain(emb.url || emb.video?.url)) break;
+          items.push(_msSlimMedia(msg, { url: emb.video.url, proxy_url: emb.video.proxy_url || emb.video.url, width: emb.video.width || 0, height: emb.video.height || 0, filename: "" }, "video"));
+        } else if (emb.type === "rich" && emb.thumbnail?.url) {
+          if (_msIsNoPreviewDomain(emb.url)) break;
+          items.push(_msSlimMedia(msg, { url: emb.thumbnail.url, proxy_url: emb.thumbnail.proxy_url || emb.thumbnail.url, width: emb.thumbnail.width || 0, height: emb.thumbnail.height || 0, filename: "" }, "image"));
+        }
+      }
+      return items;
+    }
+
+    async function _msWriteItems(mediaItems, scopeKey) {
+      if (!mediaItems.length) return 0;
+      try {
+        const db = await _msIdbOpen();
+        return await new Promise((resolve, reject) => {
+          const tx    = db.transaction(["media_items","media_stats"], "readwrite");
+          const iStore = tx.objectStore("media_items");
+          const sStore = tx.objectStore("media_stats");
+          let dImg = 0, dVid = 0, dGif = 0;
+          for (const item of mediaItems) {
+            iStore.put(item);
+            if      (item.media_type === "image") dImg++;
+            else if (item.media_type === "video") dVid++;
+            else if (item.media_type === "gif")   dGif++;
+          }
+          const sr = sStore.get(scopeKey);
+          sr.onsuccess = () => {
+            const ex = sr.result || { scope_key: scopeKey, image_count: 0, video_count: 0, gif_count: 0, total_count: 0 };
+            ex.image_count += dImg;
+            ex.video_count += dVid;
+            ex.gif_count   += dGif;
+            ex.total_count  = ex.image_count + ex.video_count + ex.gif_count;
+            sStore.put(ex);
+          };
+          tx.oncomplete = () => resolve(mediaItems.length);
+          tx.onerror    = e  => reject(e.target.error);
+        });
+      } catch (err) {
+        DEBUG && console.warn("[Mosaic] _msWriteItems:", err);
+        return 0;
+      }
+    }
+
+    async function _msWriteSyncMeta(scopeKey, patch) {
+      try {
+        const db = await _msIdbOpen();
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction("media_sync", "readwrite");
+          const st = tx.objectStore("media_sync");
+          const r  = st.get(scopeKey);
+          r.onsuccess = () => st.put({ ...(r.result || { scope_key: scopeKey }), ...patch });
+          tx.oncomplete = resolve;
+          tx.onerror    = e => reject(e.target.error);
+        });
+      } catch (err) {
+        DEBUG && console.warn("[Mosaic] _msWriteSyncMeta:", err);
+      }
+    }
+
+    async function _msGetStats(scopeKey) {
+      if (!scopeKey) return { stats: null, sync: null };
+      try {
+        const db = await _msIdbOpen();
+        return await new Promise((resolve, reject) => {
+          const tx  = db.transaction(["media_stats","media_sync"], "readonly");
+          let statsVal = null, syncVal = null, done = 0;
+          const check = () => { if (++done === 2) resolve({ stats: statsVal, sync: syncVal }); };
+          const sr = tx.objectStore("media_stats").get(scopeKey);
+          const sy = tx.objectStore("media_sync").get(scopeKey);
+          sr.onsuccess = () => { statsVal = sr.result || null; check(); };
+          sy.onsuccess = () => { syncVal  = sy.result || null; check(); };
+          tx.onerror   = e => reject(e.target.error);
+        });
+      } catch (_) { return { stats: null, sync: null }; }
+    }
+
+    async function _msReadPage(scope, filter, cursorPos, pageSize) {
+      pageSize = pageSize || MS_PAGE_SIZE;
+      try {
+        const db = await _msIdbOpen();
+        return await new Promise((resolve, reject) => {
+          const tx    = db.transaction("media_items", "readonly");
+          const idx   = tx.objectStore("media_items").index("scope_ts");
+          const upper = cursorPos ? cursorPos[1] : "\uffff";
+          const range = IDBKeyRange.bound([scope,""], [scope, upper]);
+          const req   = idx.openCursor(range, "prev");
+          const items = [];
+          let skipped = !cursorPos;
+          req.onsuccess = e => {
+            const cur = e.target.result;
+            if (!cur || items.length >= pageSize) { resolve(items); return; }
+            const v = cur.value;
+            if (!skipped && cursorPos && v.timestamp === cursorPos[1] && v.url === cursorPos[2]) {
+              skipped = true;
+              cur.continue();
+              return;
+            }
+            if (filter === "all" || v.media_type === filter) items.push(v);
+            cur.continue();
+          };
+          req.onerror = e => reject(e.target.error);
+        });
+      } catch (err) {
+        DEBUG && console.warn("[Mosaic] _msReadPage:", err);
+        return [];
+      }
+    }
+
+    let _msTokenFetchedAt = 0;
+    const MS_TOKEN_TTL = 15 * 60 * 1000;
+
+    async function _msEnsureToken() {
+      const now = Date.now();
+      if (_msToken && (now - _msTokenFetchedAt) < MS_TOKEN_TTL) return _msToken;
+
+      const tok1 = await new Promise(resolve => {
+        const f = document.createElement("iframe");
+        f.style.cssText = "display:none;position:absolute;width:0;height:0;";
+        document.body.appendChild(f);
+        requestAnimationFrame(() => {
+          try {
+            const raw = f.contentWindow.localStorage?.getItem("token");
+            resolve(raw ? raw.replace(/^"|"$/g, "") : null);
+          } catch (_) { resolve(null); }
+          finally { try { document.body.removeChild(f); } catch (_) {} }
+        });
+      });
+      if (tok1) { _msToken = tok1; _msTokenFetchedAt = now; return tok1; }
+
+      try {
+        let wpTok = null;
+        window.webpackChunkdiscord_app?.push?.([[Symbol()], {},
+          r => {
+            for (const m of Object.values(r.c || {})) {
+              const e = m?.exports;
+              const t2 = e?.default?.getToken?.() ?? e?.getToken?.();
+              if (t2) { wpTok = t2; break; }
+            }
+          }
+        ]);
+        if (wpTok) { _msToken = wpTok; _msTokenFetchedAt = now; return wpTok; }
+      } catch (_) {}
+
+      throw new Error(t("ms_no_token_warn") || "Token not found — enable API Mode in Wormhole settings");
+    }
+
+    async function _msFetchPage(endpoint, offset, minId, maxId) {
+      const token = await _msEnsureToken();
+      let url = `${MS_API_BASE}/${endpoint}/messages/search?has=image&has=video&limit=25&offset=${offset}`;
+      if (minId) url += `&min_id=${minId}`;
+      if (maxId) url += `&max_id=${maxId}`;
+      return new Promise((resolve, reject) => {
+        GM_xmlhttpRequest({
+          method:  "GET",
+          url,
+          headers: { Authorization: token, "Content-Type": "application/json" },
+          onload:  r => {
+            if (r.status === 200) {
+              try { resolve({ ok: true, data: JSON.parse(r.responseText) }); }
+              catch (_) { reject(new Error("parse error")); }
+            } else if (r.status === 202) {
+              resolve({ status: 202 });
+            } else if (r.status === 400) {
+              resolve({ status: 400, body: r.responseText });
+            } else if (r.status === 429) {
+              let ra = 5;
+              try { ra = JSON.parse(r.responseText).retry_after || 5; } catch (_) {}
+              resolve({ status: 429, retry_after: ra });
+            } else if (r.status === 403) {
+              resolve({ status: 403 });
+            } else {
+              reject(new Error("HTTP " + r.status));
+            }
+          },
+          onerror: () => reject(new Error("network error")),
+        });
+      });
+    }
+
+    const _msSleep = ms => new Promise(r => setTimeout(r, ms));
+
+    async function _msFullScan(scope, scopeType) {
+      const isGuild  = scopeType === "guild";
+      const id       = scope.slice(2);
+      const endpoint = isGuild ? `guilds/${id}` : `channels/${id}`;
+
+      let minId = null, maxId = null;
+      if (_msRangeKey === "custom") {
+        if (_msCustomStart) minId = _msTimestampToSnowflake(_msCustomStart.getTime());
+        if (_msCustomEnd)   maxId = _msTimestampToSnowflake(_msCustomEnd.getTime() + 86399999);
+      } else {
+        const durMs = MS_TIME_RANGES[_msRangeKey];
+        if (durMs != null) {
+          const rangeStart = Date.now() - durMs;
+          const { sync } = await _msGetStats(scope);
+          const lastTs = sync?.newest_timestamp
+            ? new Date(sync.newest_timestamp).getTime() - 60000
+            : 0;
+          minId = _msTimestampToSnowflake(Math.max(rangeStart, lastTs));
+        }
+      }
+
+      Object.assign(_msScanState, {
+        phase: "scanning", scope, scopeType,
+        offset: 0, scanned: 0, total: null, error: null, statusDetail: null,
+      });
+      _msScanAbort = false;
+      GMStore.set("ms_last_scan_scope", scope);
+      _msUpdateStatusBar(); _msUpdateProgressBar(); _msUpdateScanBtn();
+
+      let retryCount = 0, newestTs = null;
+
+      while (!_msScanAbort) {
+        if (_msScanState.phase === "paused") { await _msSleep(300); continue; }
+
+        if (_msScanState.scanned >= MS_SCAN_ITEM_CAP) {
+          _msScanState.phase = "complete";
+          _msScanState.error = t("ms_cap_warn") || "⚠️ Stopped at 5,000 items — narrow the time range";
+          await _msWriteSyncMeta(scope, { scanned_count: _msScanState.scanned, last_scan_at: new Date().toISOString(), newest_timestamp: newestTs, is_complete: false });
+          _msUpdateStatusBar(); _msUpdateScanBtn();
+          if (_msPanelEl && _msGridScope === scope) _msReloadGrid().catch(() => {});
+          return;
+        }
+
+        _msScanState.statusDetail = t("ms_fetching") || "Fetching…";
+        _msUpdateStatusBar();
+        let res;
+        try { res = await _msFetchPage(endpoint, _msScanState.offset, minId, maxId); }
+        catch (err) {
+          _msScanState.phase = "error";
+          _msScanState.error = err.message;
+          _msScanState.statusDetail = null;
+          _msUpdateStatusBar(); _msUpdateScanBtn();
+          return;
+        }
+        _msScanState.statusDetail = null;
+
+        if (res.status === 202) {
+          if (++retryCount > MS_MAX_RETRY) {
+            _msScanState.phase = "error";
+            _msScanState.error = "Indexing timeout";
+            _msScanState.statusDetail = null;
+            _msUpdateStatusBar(); _msUpdateScanBtn();
+            return;
+          }
+          _msScanState.statusDetail = `⏳ ${t("ms_indexing") || "Indexing"}… (${retryCount}/${MS_MAX_RETRY})`;
+          _msUpdateStatusBar();
+          await _msSleep(MS_RETRY_DELAY);
+          _msScanState.statusDetail = null;
+          continue;
+        }
+        retryCount = 0;
+
+        if (res.status === 429) {
+          const waitSec = Math.ceil(res.retry_after || 5);
+          let cdSec = waitSec;
+          const updateCd = () => {
+            _msScanState.statusDetail = cdSec > 0
+              ? `⏳ ${t("ms_rate_limited") || "Rate limited"} — ${cdSec}s`
+              : `⏳ ${t("ms_resuming") || "Resuming…"}`;
+            _msUpdateStatusBar();
+          };
+          updateCd();
+          const cdTimer = setInterval(() => { cdSec--; updateCd(); }, 1000);
+          await _msSleep(waitSec * 1000);
+          clearInterval(cdTimer);
+          _msScanState.statusDetail = null;
+          continue;
+        }
+        if (res.status === 400) {
+          if (_msScanState.scanned > 0) {
+            _msScanState.phase = "complete";
+            await _msWriteSyncMeta(scope, { scanned_count: _msScanState.scanned, last_scan_at: new Date().toISOString(), newest_timestamp: newestTs, is_complete: false });
+          } else {
+            _msScanState.phase = "error";
+            _msScanState.error = "HTTP 400 — " + (t("ms_err_forbidden") || "Check scope permissions or narrow time range");
+          }
+          _msUpdateStatusBar(); _msUpdateProgressBar(); _msUpdateScanBtn();
+          if (_msPanelEl && _msGridScope === scope) _msReloadGrid().catch(() => {});
+          return;
+        }
+        if (res.status === 403) {
+          _msScanState.phase = "error";
+          _msScanState.error = t("ms_err_forbidden") || "Permission denied";
+          _msUpdateStatusBar(); _msUpdateScanBtn();
+          return;
+        }
+
+        const { data } = res;
+        if (_msScanState.total === null) _msScanState.total = data.total_results || 0;
+        const msgs = (data.messages || []).flat();
+
+        const mediaItems = msgs.flatMap(m => _msExtractMedia(m)).map(item => ({ ...item, scope }));
+        if (mediaItems.length) {
+          await _msWriteItems(mediaItems, scope);
+          _msScanState.scanned += mediaItems.length;
+          if (!newestTs || mediaItems[0].timestamp > newestTs) newestTs = mediaItems[0].timestamp;
+        }
+
+        _msScanState.offset += 25;
+        _msUpdateStatusBar(); _msUpdateProgressBar();
+        if (_msPanelEl && _msGridScope === scope) _msReloadGrid().catch(() => {});
+
+        if (_msScanState.offset >= (_msScanState.total || 0) || msgs.length === 0) {
+          _msScanState.phase = "complete";
+          await _msWriteSyncMeta(scope, {
+            total_remote: _msScanState.total, scanned_count: _msScanState.scanned,
+            last_scan_at: new Date().toISOString(), newest_timestamp: newestTs, is_complete: true,
+          });
+          _msUpdateStatusBar(); _msUpdateScanBtn();
+          if (_msPanelEl && _msGridScope === scope) _msReloadGrid().catch(() => {});
+          return;
+        }
+        await _msSleep(MS_SCAN_DELAY);
+      }
+      _msScanState.phase = "idle";
+      _msUpdateStatusBar(); _msUpdateScanBtn();
+    }
+
+    function _msStop() {
+      _msScanAbort = true;
+      _msScanState.phase = "idle";
+      _msUpdateStatusBar(); _msUpdateScanBtn();
+    }
+
+    function _msDetectScope() {
+      const m = location.pathname.match(/\/channels\/(\d+|@me)\/(\d+)/);
+      if (!m) return { scope: null, scopeType: "guild", guildId: null, channelId: null };
+      const guildId   = m[1] === "@me" ? null : m[1];
+      const channelId = m[2];
+      return {
+        scope:     guildId ? `g:${guildId}` : `c:${channelId}`,
+        scopeType: guildId ? "guild" : "channel",
+        guildId, channelId,
+      };
+    }
+
+    function _msGetChannelName() {
+      return document.querySelector('[class*="channelName"]')?.textContent?.trim()
+          || document.querySelector('[class*="name_"]')?.textContent?.trim()
+          || "channel";
+    }
+
+    function _msRelTime(iso) {
+      if (!iso) return "";
+      const s = (Date.now() - new Date(iso).getTime()) / 1000;
+      if (s < 60)    return "just now";
+      if (s < 3600)  return `${Math.floor(s/60)}m ago`;
+      if (s < 86400) return `${Math.floor(s/3600)}h ago`;
+      return `${Math.floor(s/86400)}d ago`;
+    }
+
+    function _msFmtDate(iso) {
+      if (!iso) return "";
+      const d = new Date(iso);
+      return d.toLocaleDateString() + " " + d.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+    }
+
+    function _msUpdateStatusBar() {
+      if (!_msStatusBarEl) return;
+      const { phase, scanned, error, statusDetail } = _msScanState;
+      if (phase === "scanning" || phase === "paused") {
+        const base = `${scanned.toLocaleString()} ${t("ms_items") || "items"} found`;
+        _msStatusBarEl.textContent = statusDetail
+          ? `${base}  ·  ${statusDetail}`
+          : `${t("ms_scanning") || "Scanning"}… ${base}`;
+        return;
+      }
+      if (phase === "error") { _msStatusBarEl.textContent = "⚠️ " + error; return; }
+      _msGetStats(_msGridScope || "").then(({ stats, sync }) => {
+        if (!_msStatusBarEl) return;
+        const total   = stats?.total_count ?? 0;
+        const lastScan = sync?.last_scan_at ? _msRelTime(sync.last_scan_at) : "";
+        let text = total
+          ? `${total.toLocaleString()} ${t("ms_items") || "items"}`
+          : (t("ms_empty") || "No media scanned yet");
+        if (lastScan) text += ` · ${t("ms_last_scan") || "Last scan"}: ${lastScan}`;
+        _msStatusBarEl.textContent = text;
+      }).catch(() => {});
+    }
+
+    function _msUpdateProgressBar() {
+      if (!_msProgressEl) return;
+      const { phase, scanned, total } = _msScanState;
+      const show = phase === "scanning" || phase === "paused";
+      _msProgressEl.style.display = show ? "flex" : "none";
+      if (!show || !total) return;
+      const pct = Math.min(100, Math.round(scanned / total * 100));
+      _msProgressEl.querySelector(".ms-prog-bar").style.width  = pct + "%";
+      _msProgressEl.querySelector(".ms-prog-text").textContent =
+        `${pct}% (${scanned.toLocaleString()} / ${total.toLocaleString()})`;
+    }
+
+    function _msUpdateScanBtn() {
+      if (!_msScanBtnEl) return;
+      const phase = _msScanState.phase;
+      if      (phase === "scanning") _msScanBtnEl.textContent = "⏸ " + (t("ms_btn_pause")  || "Pause");
+      else if (phase === "paused")   _msScanBtnEl.textContent = "▶ " + (t("ms_btn_resume") || "Resume");
+      else                           _msScanBtnEl.textContent = "⟳ " + (t("ms_btn_scan")   || "Scan");
+    }
+
+    function _msBuildCell(item, idx) {
+      const col  = idx % MS_COLS;
+      const row  = Math.floor(idx / MS_COLS);
+      const cell = document.createElement("div");
+      cell.className = "ms-cell";
+      cell.style.cssText = `position:absolute;top:${row*MS_CELL_H}px;left:${col*MS_CELL_W}px;width:${MS_CELL_W}px;height:${MS_CELL_H}px;overflow:hidden;border-radius:4px;cursor:pointer;background:#1e1f22;`;
+
+      const img = document.createElement("img");
+      img.className  = "ms-thumb";
+      img.loading    = "lazy";
+      img.decoding   = "async";
+      const base = item.proxy_url || item.url;
+      img.src = base.includes("?") ? base + `&width=${MS_CELL_W}&height=${MS_CELL_H}` : base + `?width=${MS_CELL_W}&height=${MS_CELL_H}`;
+      img.alt = item.filename || "";
+      img.style.cssText = "width:100%;height:100%;object-fit:cover;transition:opacity 0.2s;";
+      cell.appendChild(img);
+
+      if (item.media_type === "video" || item.media_type === "gif") {
+        const badge = document.createElement("div");
+        badge.className   = "ms-badge";
+        badge.textContent = item.media_type === "gif" ? "GIF" : "▶";
+        cell.appendChild(badge);
+      }
+
+      const hover = document.createElement("div");
+      hover.className = "ms-hover-info";
+      const author = document.createElement("span");
+      author.className = "ms-author";
+      author.textContent = item.author_name || "";
+      const date = document.createElement("span");
+      date.className   = "ms-date";
+      date.textContent = _msFmtDate(item.timestamp);
+      hover.appendChild(author);
+      hover.appendChild(date);
+      cell.appendChild(hover);
+
+      const jumpCorner = document.createElement("a");
+      jumpCorner.className = "ms-cell-jump";
+      const gid = item.guild_id
+          || (item.scope?.startsWith("g:") ? item.scope.slice(2) : _getCtx()?.guildId)
+          || "@me";
+      jumpCorner.href  = `/channels/${gid}/${item.channel_id}/${item.msg_id}`;
+      jumpCorner.title = t("ms_btn_jump") || "Jump to message";
+      jumpCorner.addEventListener("click", e => {
+        e.preventDefault();
+        e.stopPropagation();
+        _msJumpToMsg(gid, item.channel_id, item.msg_id);
+      });
+      jumpCorner.style.cssText = [
+        "position:absolute","top:0","right:0",
+        "width:0","height:0",
+        "border-top:26px solid rgba(88,101,242,0.72)",
+        "border-left:26px solid transparent",
+        "z-index:3","cursor:pointer",
+        "transition:border-top-color 0.15s",
+      ].join(";");
+      const jumpIcon = document.createElement("span");
+      jumpIcon.textContent = "↗";
+      jumpIcon.style.cssText = "position:absolute;top:-24px;right:2px;font-size:10px;color:#fff;line-height:1;pointer-events:none;";
+      jumpCorner.appendChild(jumpIcon);
+      jumpCorner.addEventListener("mouseenter", () => { jumpCorner.style.borderTopColor = "rgba(88,101,242,1)"; });
+      jumpCorner.addEventListener("mouseleave", () => { jumpCorner.style.borderTopColor = "rgba(88,101,242,0.72)"; });
+      cell.appendChild(jumpCorner);
+
+      cell.addEventListener("click", () => {
+        const realIdx = _msGridItems.indexOf(item);
+        _msLightbox(_msGridItems, realIdx >= 0 ? realIdx : idx);
+      });
+      return cell;
+    }
+
+    function _msRenderGrid() {
+      if (!_msGridContEl) return;
+      const items     = _msGridItems;
+      const totalRows = Math.ceil(items.length / MS_COLS);
+      _msGridContEl.style.height = (totalRows * MS_CELL_H) + "px";
+
+      const scroll  = _msGridContEl.parentElement;
+      if (!scroll) return;
+      const viewH   = scroll.clientHeight || 460;
+      const top     = scroll.scrollTop    || 0;
+
+      const firstRow = Math.max(0, Math.floor(top / MS_CELL_H) - MS_BUFFER);
+      const lastRow  = Math.min(totalRows, Math.ceil((top + viewH) / MS_CELL_H) + MS_BUFFER);
+      const visStart = firstRow * MS_COLS;
+      const visEnd   = Math.min(items.length, lastRow * MS_COLS);
+
+      const visSet = new Set();
+      for (let i = visStart; i < visEnd; i++) visSet.add(i);
+
+      for (const i of visSet) {
+        if (!_msGridRendered.has(i) && items[i]) {
+          const cell = _msBuildCell(items[i], i);
+          _msGridContEl.appendChild(cell);
+          _msGridRendered.set(i, cell);
+        }
+      }
+      for (const [i, el] of _msGridRendered) {
+        if (!visSet.has(i)) { el.remove(); _msGridRendered.delete(i); }
+      }
+    }
+
+    async function _msReloadGrid() {
+      if (_msGridLoading || !_msGridScope || !_msGridContEl) return;
+      _msGridLoading = true;
+      try {
+        const items = await _msReadPage(_msGridScope, _msGridFilter, null, MS_PAGE_SIZE);
+        _msGridItems   = items;
+        _msGridCursor  = items.length ? [_msGridScope, items[items.length-1].timestamp, items[items.length-1].url] : null;
+        _msGridAll     = items.length < MS_PAGE_SIZE;
+        _msGridRendered.clear();
+        if (_msGridContEl) _msGridContEl.innerHTML = "";
+        _msRenderGrid();
+      } finally {
+        _msGridLoading = false;
+      }
+    }
+
+    async function _msLoadMoreItems() {
+      if (_msGridAll || !_msGridScope || !_msGridCursor) return;
+      const more = await _msReadPage(_msGridScope, _msGridFilter, _msGridCursor, MS_PAGE_SIZE);
+      if (!more.length) { _msGridAll = true; return; }
+      _msGridItems  = _msGridItems.concat(more);
+      _msGridCursor = [_msGridScope, more[more.length-1].timestamp, more[more.length-1].url];
+      _msGridAll    = more.length < MS_PAGE_SIZE;
+      _msRenderGrid();
+    }
+
+    function _msJumpToMsg(guildId, channelId, msgId) {
+      const safeGid = (guildId && guildId !== "@me") ? guildId : (_getCtx()?.guildId || "@me");
+      const path    = `/channels/${safeGid}/${channelId}/${msgId}`;
+      const fullUrl = "https://discord.com" + path;
+
+      try {
+        const fiberKey = Object.keys(document.querySelector("div") || {})
+          .find(k => k.startsWith("__reactFiber"));
+        if (fiberKey) {
+          const roots = [
+            document.querySelector('div[class*="appMount"]'),
+            document.body,
+          ];
+          for (const root of roots) {
+            if (!root) continue;
+            let fiber = root[fiberKey];
+            let depth = 50;
+            while (fiber && depth-- > 0) {
+              const h = fiber.memoizedProps?.history || fiber.memoizedProps?.navigator;
+              if (h?.push) { h.push(path); return; }
+              if (fiber.stateNode?.history?.push) { fiber.stateNode.history.push(path); return; }
+              fiber = fiber.child || fiber.return;
+            }
+          }
+        }
+      } catch (_) {}
+
+      try {
+        window.history.pushState(null, "", path);
+        window.dispatchEvent(new PopStateEvent("popstate", { state: null }));
+        return;
+      } catch (_) {}
+
+      try {
+        window.history.replaceState(window.history.state, "", path);
+        window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }));
+        return;
+      } catch (_) {}
+
+      window.location.href = fullUrl;
+    }
+
+    function _msLightbox(items, startIdx) {
+      let cur = Math.max(0, Math.min(startIdx, items.length - 1));
+
+      const ov = document.createElement("div");
+      ov.style.cssText = "position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;background:rgba(0,0,0,0.93);pointer-events:auto;";
+
+      const hdr = document.createElement("div");
+      hdr.style.cssText = "display:flex;align-items:center;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.08);gap:8px;flex-shrink:0;";
+      const prevBtn = document.createElement("button");
+      prevBtn.textContent = "◀";
+      prevBtn.style.cssText = "background:rgba(255,255,255,0.1);border:none;color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:16px;flex-shrink:0;";
+      const fnEl = document.createElement("div");
+      fnEl.style.cssText = "flex:1;text-align:center;color:#dbdee1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;";
+      const nextBtn = document.createElement("button");
+      nextBtn.textContent = "▶";
+      nextBtn.style.cssText = prevBtn.style.cssText;
+      hdr.appendChild(prevBtn); hdr.appendChild(fnEl); hdr.appendChild(nextBtn);
+
+      const mediaArea = document.createElement("div");
+      mediaArea.style.cssText = "flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:12px;";
+
+      const ftr = document.createElement("div");
+      ftr.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid rgba(255,255,255,0.08);flex-shrink:0;gap:8px;";
+      const metaEl = document.createElement("div");
+      metaEl.style.cssText = "font-size:12px;color:#949ba4;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;";
+      const actEl = document.createElement("div");
+      actEl.style.cssText = "display:flex;gap:8px;flex-shrink:0;";
+      const btnStyle = "background:rgba(88,101,242,0.2);border:1px solid rgba(88,101,242,0.4);color:#dbdee1;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;text-decoration:none;display:flex;align-items:center;";
+      const jumpBtn = document.createElement("a");
+      jumpBtn.style.cssText = btnStyle;
+      jumpBtn.textContent = "↗ " + (t("ms_btn_jump") || "Jump to message");
+      const dlBtn = document.createElement("a");
+      dlBtn.style.cssText = btnStyle;
+      dlBtn.textContent   = "⬇ " + (t("ms_btn_download") || "Download");
+      actEl.appendChild(jumpBtn); actEl.appendChild(dlBtn);
+      ftr.appendChild(metaEl); ftr.appendChild(actEl);
+
+      ov.appendChild(hdr); ov.appendChild(mediaArea); ov.appendChild(ftr);
+
+      const render = idx => {
+        cur = Math.max(0, Math.min(idx, items.length - 1));
+        const item = items[cur];
+        fnEl.textContent = `🖼 ${item.filename || item.url.split("/").pop().split("?")[0]}  (${cur+1}/${items.length})`;
+        mediaArea.innerHTML = "";
+        if (item.media_type === "video" || item.media_type === "gif") {
+          const v = document.createElement("video");
+          v.src       = item.url;
+          v.controls  = true;
+          v.autoplay  = true;
+          v.loop      = item.media_type === "gif";
+          v.style.cssText = "max-width:90vw;max-height:70vh;object-fit:contain;border-radius:4px;";
+          mediaArea.appendChild(v);
+        } else {
+          const img = document.createElement("img");
+          img.src = item.url;
+          img.alt = item.filename || "";
+          img.style.cssText = "max-width:90vw;max-height:70vh;object-fit:contain;border-radius:4px;";
+          mediaArea.appendChild(img);
+        }
+        metaEl.textContent = [item.author_name, _msGetChannelName(), _msFmtDate(item.timestamp)].filter(Boolean).join("  ·  ");
+        const gid = item.guild_id
+            || (item.scope?.startsWith("g:") ? item.scope.slice(2) : _getCtx()?.guildId)
+            || "@me";
+        const msgPath = `/channels/${gid}/${item.channel_id}/${item.msg_id}`;
+        jumpBtn.href = msgPath;
+        jumpBtn.onclick = e => {
+          e.preventDefault();
+          close();
+          _msJumpToMsg(gid, item.channel_id, item.msg_id);
+        };
+        dlBtn.href   = item.url;
+        dlBtn.download = item.filename || item.url.split("/").pop().split("?")[0];
+        prevBtn.disabled = cur === 0;
+        nextBtn.disabled = cur === items.length - 1;
+        prevBtn.style.opacity = cur === 0 ? "0.3" : "1";
+        nextBtn.style.opacity = cur === items.length - 1 ? "0.3" : "1";
+      };
+
+      const close = () => { ov.remove(); document.removeEventListener("keydown", onKey); };
+      const onKey = e => {
+        if      (e.key === "Escape")      close();
+        else if (e.key === "ArrowLeft")   render(cur - 1);
+        else if (e.key === "ArrowRight")  render(cur + 1);
+      };
+      prevBtn.addEventListener("click", e => { e.stopPropagation(); render(cur - 1); });
+      nextBtn.addEventListener("click", e => { e.stopPropagation(); render(cur + 1); });
+      ov.addEventListener("click", e => { if (e.target === ov || e.target === mediaArea) close(); });
+      document.addEventListener("keydown", onKey);
+      render(startIdx);
+      dmtGetPortal().appendChild(ov);
+    }
+
+    function _msOpenPanel() {
+      if (_msPanelEl) {
+        _msPanelEl.remove(); _msPanelEl = null;
+        _msScanBtnEl = _msStatusBarEl = _msProgressEl = _msGridContEl = null;
+        _msScopeSelEl = _msTypeSelEl = null;
+        return;
+      }
+      const { scope, scopeType, guildId, channelId } = _msDetectScope();
+      _msGridScope  = scope;
+      _msGridFilter = "all";
+      _msGridItems  = [];
+      _msGridRendered.clear();
+
+      const panel = document.createElement("div");
+      panel.id = "ms-panel";
+      panel.style.cssText = [
+        "position:fixed","top:50%","left:50%",
+        "transform:translate(-50%,-50%)",
+        "width:min(900px,96vw)",
+        "height:min(780px,92vh)",
+        "background:#2b2d31",
+        "border:1px solid rgba(255,255,255,0.1)",
+        "border-radius:12px",
+        "box-shadow:0 20px 60px rgba(0,0,0,0.65)",
+        "z-index:2147483646","display:flex","flex-direction:column",
+        "overflow:hidden",
+        "resize:both",
+        "min-width:480px","min-height:400px",
+        "pointer-events:auto","user-select:none",
+        "box-sizing:border-box",
+        "transition:transform 0.28s cubic-bezier(0.4,0,0.2,1)",
+      ].join(";");
+
+      const toolbar = document.createElement("div");
+      toolbar.style.cssText = "display:flex;align-items:center;gap:6px;padding:8px 44px 8px 12px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;background:#313338;cursor:grab;min-width:0;overflow:hidden;";
+
+      const titleEl = document.createElement("span");
+      titleEl.textContent = "🖼 Mosaic";
+      titleEl.style.cssText = "font-size:14px;font-weight:700;color:#dbdee1;flex-shrink:0;pointer-events:none;";
+      toolbar.appendChild(titleEl);
+
+      const _msGetSrvName = () => {
+        const parts = document.title.split(/\s[—\-]\s/);
+        if (parts.length >= 2) return parts[parts.length - 2].trim();
+        return document.querySelector('[class*="guildName_"]')?.textContent?.trim() || null;
+      };
+      const srvName = guildId ? (_msGetSrvName() || (t("ms_scope_server") || "Server")) : null;
+      _msScopeSelEl = document.createElement("select");
+      _msScopeSelEl.style.cssText = "background:#1e1f22;border:1px solid rgba(255,255,255,0.12);color:#dbdee1;border-radius:6px;padding:3px 6px;font-size:12px;cursor:pointer;";
+      const optSrv = document.createElement("option");
+      optSrv.value       = scope || "";
+      optSrv.textContent = guildId ? `🌐 ${srvName}` : `# ${_msGetChannelName()}`;
+      _msScopeSelEl.appendChild(optSrv);
+      _msScopeSelEl.addEventListener("change", () => {
+        _msGridScope = _msScopeSelEl.value;
+        _msGridItems = []; _msGridRendered.clear();
+        if (_msGridContEl) _msGridContEl.innerHTML = "";
+        _msReloadGrid().catch(() => {});
+        _msUpdateStatusBar();
+      });
+      toolbar.appendChild(_msScopeSelEl);
+
+      _msTypeSelEl = document.createElement("select");
+      _msTypeSelEl.style.cssText = _msScopeSelEl.style.cssText;
+      [["all","All"],["image","Images"],["video","Videos"],["gif","GIF"]].forEach(([v,lbl]) => {
+        const o = document.createElement("option");
+        o.value = v; o.textContent = t("ms_filter_" + (v === "all" ? "all" : v === "image" ? "images" : "videos")) || lbl;
+        if (v === "gif") o.textContent = "GIF";
+        _msTypeSelEl.appendChild(o);
+      });
+      _msTypeSelEl.addEventListener("change", () => {
+        _msGridFilter = _msTypeSelEl.value;
+        _msGridItems  = []; _msGridRendered.clear();
+        if (_msGridContEl) _msGridContEl.innerHTML = "";
+        _msReloadGrid().catch(() => {});
+      });
+      toolbar.appendChild(_msTypeSelEl);
+
+      _msRangeSelEl = document.createElement("select");
+      _msRangeSelEl.style.cssText = _msTypeSelEl.style.cssText;
+      const rangeOptions = [
+        ["1h","ms_range_1h"], ["6h","ms_range_6h"], ["12h","ms_range_12h"],
+        ["1d","ms_range_1d"], ["3d","ms_range_3d"], ["1w","ms_range_1w"],
+        ["3w","ms_range_3w"], ["1m","ms_range_1m"], ["custom","ms_range_custom"],
+      ];
+      rangeOptions.forEach(([v, tk]) => {
+        const o = document.createElement("option");
+        o.value = v; o.textContent = t(tk) || v;
+        if (v === _msRangeKey) o.selected = true;
+        _msRangeSelEl.appendChild(o);
+      });
+      _msRangeSelEl.addEventListener("change", () => {
+        _msRangeKey = _msRangeSelEl.value;
+        if (_msCustomRowEl) _msCustomRowEl.style.display = _msRangeKey === "custom" ? "flex" : "none";
+      });
+      toolbar.appendChild(_msRangeSelEl);
+
+      const spacer = document.createElement("div");
+      spacer.style.cssText = "flex:1;min-width:0;";
+      toolbar.appendChild(spacer);
+
+      const dockBtnEl = document.createElement("button");
+      dockBtnEl.title = "Dock to edge";
+      dockBtnEl.textContent = "⇤";
+      dockBtnEl.style.cssText = "background:none;border:none;cursor:pointer;font-size:14px;padding:3px 5px;border-radius:4px;flex-shrink:0;opacity:0.55;transition:opacity 0.15s;color:#dbdee1;";
+      dockBtnEl.addEventListener("mouseenter", () => { dockBtnEl.style.opacity = "1"; });
+      dockBtnEl.addEventListener("mouseleave", () => { dockBtnEl.style.opacity = _msDocked ? "1" : "0.55"; });
+      toolbar.appendChild(dockBtnEl);
+
+      const statsBtnEl = document.createElement("button");
+      statsBtnEl.textContent = "📊";
+      statsBtnEl.title = t("ms_stats_title") || "Cache statistics";
+      statsBtnEl.style.cssText = "background:none;border:none;cursor:pointer;font-size:16px;padding:4px 6px;border-radius:4px;flex-shrink:0;opacity:0.7;transition:opacity 0.15s;";
+      statsBtnEl.addEventListener("mouseenter", () => { statsBtnEl.style.opacity = "1"; });
+      statsBtnEl.addEventListener("mouseleave", () => { statsBtnEl.style.opacity = "0.7"; });
+      let statsVisible = false;
+      statsBtnEl.addEventListener("click", () => {
+        statsVisible = !statsVisible;
+        statsOverlay.style.display = statsVisible ? "flex" : "none";
+        if (statsVisible) _msRefreshStats();
+      });
+      toolbar.appendChild(statsBtnEl);
+
+      _msScanBtnEl = document.createElement("button");
+      _msScanBtnEl.style.cssText = "background:rgba(88,101,242,0.25);border:1px solid rgba(88,101,242,0.4);color:#dbdee1;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;flex-shrink:0;";
+      _msUpdateScanBtn();
+      _msScanBtnEl.addEventListener("click", () => {
+        const sc = _msScopeSelEl.value;
+        const st = sc.startsWith("g:") ? "guild" : "channel";
+        if      (_msScanState.phase === "scanning") { _msScanState.phase = "paused"; _msUpdateScanBtn(); _msUpdateStatusBar(); }
+        else if (_msScanState.phase === "paused")   { _msScanState.phase = "scanning"; _msUpdateScanBtn(); }
+        else { _msFullScan(sc, st).catch(err => { _msScanState.phase = "error"; _msScanState.error = err.message; _msUpdateStatusBar(); _msUpdateScanBtn(); }); }
+      });
+      toolbar.appendChild(_msScanBtnEl);
+
+      const closeBtn = document.createElement("button");
+      closeBtn.textContent = "✕";
+      closeBtn.style.cssText = "position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.25);border:none;color:#72767d;font-size:14px;cursor:pointer;padding:3px 7px;border-radius:4px;line-height:1;z-index:2;";
+      closeBtn.addEventListener("mouseenter", () => { closeBtn.style.color = "#dbdee1"; closeBtn.style.background = "rgba(237,66,69,0.3)"; });
+      closeBtn.addEventListener("mouseleave", () => { closeBtn.style.color = "#72767d"; closeBtn.style.background = "rgba(0,0,0,0.25)"; });
+      closeBtn.addEventListener("click", () => {
+        clearTimeout(_msDockRetractTimer);
+        _msDockRetractTimer = null;
+        if (_msDockTabEl) { _msDockTabEl.remove(); _msDockTabEl = null; }
+        _msDocked = false; _msDockSide = null; _msDockPeeked = false; _msDockSnapshot = null;
+        panel.remove(); _msPanelEl = null;
+        _msScanBtnEl = _msStatusBarEl = _msProgressEl = _msGridContEl = null;
+        _msScopeSelEl = _msTypeSelEl = null;
+        document.removeEventListener("keydown", panelEsc);
+      });
+      panel.appendChild(closeBtn);
+      panel.appendChild(toolbar);
+
+      let _dragOffX = 0, _dragOffY = 0;
+
+      const _msStartDrag = (e, onEndCb) => {
+        const rect = panel.getBoundingClientRect();
+        _dragOffX = e.clientX - rect.left;
+        _dragOffY = e.clientY - rect.top;
+        panel.style.transition = "none";
+        panel.style.top  = rect.top  + "px";
+        panel.style.left = rect.left + "px";
+        panel.offsetWidth;
+        panel.style.transform = "none";
+        const onMove = ev => {
+          panel.style.top  = (ev.clientY - _dragOffY) + "px";
+          panel.style.left = (ev.clientX - _dragOffX) + "px";
+        };
+        const onUp = () => {
+          panel.style.transition = "transform 0.28s cubic-bezier(0.4,0,0.2,1)";
+          document.removeEventListener("mousemove", onMove);
+          document.removeEventListener("mouseup",   onUp);
+          onEndCb?.();
+        };
+        document.addEventListener("mousemove", onMove);
+        document.addEventListener("mouseup",   onUp);
+      };
+
+      const _msAttachDrag = (handle, cursorStyle) => {
+        handle.addEventListener("mousedown", e => {
+          if (_msDocked) return;
+          e.preventDefault();
+          handle.style.cursor = "grabbing";
+          _msStartDrag(e, () => { handle.style.cursor = cursorStyle; });
+        });
+      };
+
+      toolbar.addEventListener("mousedown", e => {
+        if (e.target === _msScanBtnEl || e.target === closeBtn || e.target === _msScopeSelEl || e.target === _msTypeSelEl || e.target === _msRangeSelEl || e.target === dockBtnEl) return;
+        if (_msDocked) return;
+        toolbar.style.cursor = "grabbing";
+        _msStartDrag(e, () => { toolbar.style.cursor = "grab"; });
+      });
+
+      const _mkSideBar = side => {
+        const bar = document.createElement("div");
+        bar.style.cssText = [
+          `position:absolute;${side}:0;top:0;bottom:0;width:6px`,
+          "cursor:grab;z-index:1",
+          "background:transparent",
+          "transition:background 0.15s",
+        ].join(";");
+        bar.addEventListener("mouseenter", () => { bar.style.background = "rgba(255,255,255,0.06)"; });
+        bar.addEventListener("mouseleave", () => { bar.style.background = "transparent"; });
+        _msAttachDrag(bar, "grabbing");
+        return bar;
+      };
+      panel.appendChild(_mkSideBar("left"));
+      panel.appendChild(_mkSideBar("right"));
+
+      const statusWrap = document.createElement("div");
+      statusWrap.style.cssText = "padding:6px 12px 4px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.06);";
+
+      _msStatusBarEl = document.createElement("div");
+      _msStatusBarEl.style.cssText = "font-size:12px;color:#949ba4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;";
+      statusWrap.appendChild(_msStatusBarEl);
+
+      _msProgressEl = document.createElement("div");
+      _msProgressEl.style.cssText = "display:none;align-items:center;gap:8px;margin-top:4px;";
+      const progTrack = document.createElement("div");
+      progTrack.style.cssText = "flex:1;height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden;";
+      const progBar = document.createElement("div");
+      progBar.className = "ms-prog-bar";
+      progBar.style.cssText = "height:100%;width:0%;background:#5865f2;border-radius:3px;transition:width 0.3s;";
+      progTrack.appendChild(progBar);
+      const progText = document.createElement("div");
+      progText.className = "ms-prog-text";
+      progText.style.cssText = "font-size:10px;color:#949ba4;white-space:nowrap;flex-shrink:0;";
+      _msProgressEl.appendChild(progTrack);
+      _msProgressEl.appendChild(progText);
+      statusWrap.appendChild(_msProgressEl);
+      panel.appendChild(statusWrap);
+
+      _msCustomRowEl = document.createElement("div");
+      _msCustomRowEl.style.cssText = [
+        "display:none","align-items:center","gap:8px","padding:6px 12px",
+        "border-bottom:1px solid rgba(255,255,255,0.06)","flex-shrink:0",
+        "background:rgba(0,0,0,0.15)","font-size:12px","color:#b5bac1",
+      ].join(";");
+
+      const _mkDateLbl = txt => {
+        const s = document.createElement("span");
+        s.textContent = txt; s.style.flexShrink = "0";
+        return s;
+      };
+      const startInput = document.createElement("input");
+      startInput.type  = "date";
+      startInput.style.cssText = "background:#1e1f22;border:1px solid rgba(255,255,255,0.15);color:#dbdee1;border-radius:6px;padding:3px 6px;font-size:12px;cursor:pointer;";
+      startInput.addEventListener("change", () => {
+        _msCustomStart = startInput.value ? new Date(startInput.value) : null;
+      });
+      const endInput = document.createElement("input");
+      endInput.type  = "date";
+      endInput.style.cssText = startInput.style.cssText;
+      endInput.addEventListener("change", () => {
+        _msCustomEnd = endInput.value ? new Date(endInput.value) : null;
+      });
+      const applyBtn = document.createElement("button");
+      applyBtn.textContent  = t("ms_range_apply") || "Apply";
+      applyBtn.style.cssText = "background:rgba(88,101,242,0.25);border:1px solid rgba(88,101,242,0.4);color:#dbdee1;padding:3px 8px;border-radius:6px;font-size:12px;cursor:pointer;flex-shrink:0;";
+      applyBtn.addEventListener("click", () => {
+        _msGridItems = []; _msGridRendered.clear();
+        if (_msGridContEl) _msGridContEl.innerHTML = "";
+        _msReloadGrid().catch(() => {});
+      });
+
+      if (_msCustomStart) startInput.valueAsDate = _msCustomStart;
+      if (_msCustomEnd)   endInput.valueAsDate   = _msCustomEnd;
+      if (_msRangeKey === "custom") _msCustomRowEl.style.display = "flex";
+
+      _msCustomRowEl.appendChild(_mkDateLbl(t("ms_range_from") || "From"));
+      _msCustomRowEl.appendChild(startInput);
+      _msCustomRowEl.appendChild(_mkDateLbl(t("ms_range_to") || "To"));
+      _msCustomRowEl.appendChild(endInput);
+      _msCustomRowEl.appendChild(applyBtn);
+      panel.appendChild(_msCustomRowEl);
+
+      const statsOverlay = document.createElement("div");
+      statsOverlay.style.cssText = "display:none;flex-direction:column;gap:10px;padding:14px 16px;flex:1;overflow-y:auto;background:#2b2d31;";
+
+      const statsTitle = document.createElement("div");
+      statsTitle.style.cssText = "font-size:13px;font-weight:700;color:#dbdee1;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:8px;";
+      statsTitle.textContent = "📊 " + (t("ms_stats_title") || "Cache Statistics");
+      statsOverlay.appendChild(statsTitle);
+
+      const statsBody = document.createElement("div");
+      statsBody.style.cssText = "display:flex;flex-direction:column;gap:6px;font-size:12px;color:#b5bac1;";
+      statsOverlay.appendChild(statsBody);
+
+      const clearCacheBtn = document.createElement("button");
+      clearCacheBtn.textContent = "🗑 " + (t("ms_stats_clear") || "Clear cached media for this scope");
+      clearCacheBtn.style.cssText = "margin-top:8px;background:rgba(237,66,69,0.15);border:1px solid rgba(237,66,69,0.3);color:#f38ba8;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;align-self:flex-start;";
+      clearCacheBtn.addEventListener("click", async () => {
+        if (!_msGridScope) return;
+        try {
+          const db = await _msIdbOpen();
+          await new Promise((res, rej) => {
+            const tx = db.transaction(["media_items","media_stats","media_sync"], "readwrite");
+            const idx = tx.objectStore("media_items").index("scope");
+            const r   = idx.openCursor(IDBKeyRange.only(_msGridScope));
+            r.onsuccess = e => { const c = e.target.result; if (c) { c.delete(); c.continue(); } };
+            tx.objectStore("media_stats").delete(_msGridScope);
+            tx.objectStore("media_sync").delete(_msGridScope);
+            tx.oncomplete = res; tx.onerror = e => rej(e.target.error);
+          });
+          _msGridItems = []; _msGridRendered.clear();
+          if (_msGridContEl) _msGridContEl.innerHTML = "";
+          _msReloadGrid().catch(() => {});
+          _msRefreshStats();
+          dmtShowToast?.("🗑 " + (_msGridScope) + " cache cleared", { duration: 1500 });
+        } catch (err) { DEBUG && console.warn("[Mosaic] clear cache failed:", err); }
+      });
+      statsOverlay.appendChild(clearCacheBtn);
+
+      const _msRefreshStats = async () => {
+        if (!_msGridScope) return;
+        statsBody.innerHTML = "";
+        const { stats, sync } = await _msGetStats(_msGridScope);
+        const rows = [
+          ["🖼 " + (t("ms_filter_images") || "Images"),   stats?.image_count ?? 0],
+          ["🎬 " + (t("ms_filter_videos") || "Videos"),   stats?.video_count ?? 0],
+          ["🎞 GIF",                                        stats?.gif_count   ?? 0],
+          ["📦 " + (t("ms_items") || "Total"),             stats?.total_count ?? 0],
+        ];
+        rows.forEach(([label, val]) => {
+          const row = document.createElement("div");
+          row.style.cssText = "display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.05);";
+          const lbl = document.createElement("span"); lbl.textContent = label;
+          const cnt = document.createElement("span");
+          cnt.style.cssText = "color:#dbdee1;font-weight:600;";
+          cnt.textContent = val.toLocaleString();
+          row.appendChild(lbl); row.appendChild(cnt);
+          statsBody.appendChild(row);
+        });
+        if (sync?.last_scan_at) {
+          const info = document.createElement("div");
+          info.style.cssText = "color:#72767d;font-size:11px;margin-top:4px;";
+          info.textContent = (t("ms_last_scan") || "Last scan") + ": " + new Date(sync.last_scan_at).toLocaleString();
+          statsBody.appendChild(info);
+        }
+      };
+
+      panel.appendChild(statsOverlay);
+
+      const gridScroll = document.createElement("div");
+      gridScroll.id = "ms-grid-scroll";
+      gridScroll.style.cssText = "flex:1;overflow-y:auto;position:relative;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent;";
+      if (!document.getElementById("ms-scrollbar-style")) {
+        const ss = document.createElement("style");
+        ss.id = "ms-scrollbar-style";
+        ss.textContent = "#ms-grid-scroll::-webkit-scrollbar{width:6px}#ms-grid-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}#ms-grid-scroll::-webkit-scrollbar-track{background:transparent}";
+        document.head.appendChild(ss);
+      }
+
+      _msGridContEl = document.createElement("div");
+      _msGridContEl.style.cssText = `position:relative;width:${MS_COLS * MS_CELL_W}px;min-height:100%;margin:8px auto;`;
+      gridScroll.appendChild(_msGridContEl);
+      panel.appendChild(gridScroll);
+
+      gridScroll.addEventListener("scroll", () => {
+        clearTimeout(_msScrollTimer);
+        _msScrollTimer = setTimeout(() => {
+          _msRenderGrid();
+          const { scrollTop, scrollHeight, clientHeight } = gridScroll;
+          if (scrollTop + clientHeight >= scrollHeight - MS_CELL_H * 6) {
+            _msLoadMoreItems().catch(() => {});
+          }
+        }, 50);
+      });
+
+      const _msRecalcCols = () => {
+        if (!_msGridContEl || !gridScroll) return;
+        const availW = gridScroll.clientWidth || panel.clientWidth || 900;
+        const newCols = Math.max(1, Math.floor((availW - 16) / MS_CELL_W));
+        if (newCols !== MS_COLS) {
+          MS_COLS = newCols;
+          _msGridContEl.style.width = (MS_COLS * MS_CELL_W) + "px";
+          _msGridRendered.clear();
+          if (_msGridContEl) _msGridContEl.innerHTML = "";
+          _msRenderGrid();
+        }
+      };
+      const _msPanelRO = new ResizeObserver(_msRecalcCols);
+      _msPanelRO.observe(panel);
+
+      const footerBar = document.createElement("div");
+      footerBar.style.cssText = [
+        "flex-shrink:0","height:10px",
+        "background:linear-gradient(to right,rgba(88,101,242,0.15),rgba(88,101,242,0.05) 60%,rgba(88,101,242,0.15))",
+        "border-top:1px solid rgba(255,255,255,0.05)",
+        "border-radius:0 0 12px 12px",
+        "pointer-events:none",
+      ].join(";");
+      panel.appendChild(footerBar);
+
+      const PEEK_PX = 8;
+
+      function _msDockFn(side) {
+        if (_msDocked) return;
+        const r   = panel.getBoundingClientRect();
+        const vpW = window.innerWidth;
+        _msDockSnapshot = { left: r.left, top: r.top, width: r.width, height: r.height };
+        _msDocked   = true;
+        _msDockSide = side;
+
+        const peekLeft = side === "left" ? 0 : (vpW - r.width);
+        panel.style.transition = "none";
+        panel.style.left      = peekLeft + "px";
+        panel.style.top       = r.top    + "px";
+        panel.style.transform = `translateX(${r.left - peekLeft}px)`;
+        panel.offsetWidth;
+
+        panel.style.transition = "transform 0.28s cubic-bezier(0.4,0,0.2,1)";
+        const offX = side === "left" ? -(r.width - PEEK_PX) : (r.width - PEEK_PX);
+        panel.style.transform = `translateX(${offX}px)`;
+        panel.classList.add("ms-docked");
+
+        dockBtnEl.textContent = "⇥";
+        dockBtnEl.title = "Undock";
+        dockBtnEl.style.opacity = "1";
+
+        if (_msDockTabEl) _msDockTabEl.remove();
+        _msDockTabEl = document.createElement("div");
+        const tabH   = Math.min(r.height * 0.5, 160);
+        const tabTop = r.top + (r.height - tabH) / 2;
+        const isLeft = side === "left";
+        _msDockTabEl.style.cssText = [
+          "position:fixed",
+          isLeft ? "left:0" : "right:0",
+          `top:${tabTop}px`,
+          `height:${tabH}px`,
+          "width:20px",
+          "background:transparent",
+          isLeft
+            ? "border-right:4px solid rgba(255,255,255,0.15)"
+            : "border-left:4px solid rgba(255,255,255,0.15)",
+          "box-sizing:border-box",
+          "border-radius:" + (isLeft ? "0 4px 4px 0" : "4px 0 0 4px"),
+          "cursor:pointer",
+          `z-index:${2147483645}`,
+          "transition:border-color 0.2s",
+        ].join(";");
+
+        const _tabEnter = () => {
+          const borderProp = isLeft ? "borderRight" : "borderLeft";
+          _msDockTabEl.style[borderProp] = "4px solid rgba(88,101,242,0.65)";
+          clearTimeout(_msDockRetractTimer);
+          _msDockRetractTimer = null;
+          if (!_msDockPeeked) _msPeekOutFn();
+        };
+        const _tabLeave = () => {
+          const borderProp = isLeft ? "borderRight" : "borderLeft";
+          _msDockTabEl.style[borderProp] = "4px solid rgba(255,255,255,0.15)";
+          if (_msDockPeeked) {
+            clearTimeout(_msDockRetractTimer);
+            _msDockRetractTimer = setTimeout(() => _msRetractFn(), 600);
+          }
+        };
+        _msDockTabEl.addEventListener("mouseenter", _tabEnter);
+        _msDockTabEl.addEventListener("mouseleave", _tabLeave);
+        document.documentElement.appendChild(_msDockTabEl);
+      }
+
+      function _msUndockFn() {
+        if (!_msDocked) return;
+        clearTimeout(_msDockRetractTimer);
+        _msDockRetractTimer = null;
+        _msDocked  = false;
+        _msDockPeeked = false;
+        const snap = _msDockSnapshot;
+        panel.style.transition = "none";
+        panel.style.transform  = "translate(-50%,-50%)";
+        panel.style.left       = snap ? snap.left + snap.width  / 2 + "px" : "50%";
+        panel.style.top        = snap ? snap.top  + snap.height / 2 + "px" : "50%";
+        panel.offsetWidth;
+        panel.style.transition = "transform 0.28s cubic-bezier(0.4,0,0.2,1)";
+        panel.classList.remove("ms-docked");
+        if (_msDockTabEl) { _msDockTabEl.remove(); _msDockTabEl = null; }
+        _msDockSide = null;
+        _msDockSnapshot = null;
+        dockBtnEl.textContent = "⇤";
+        dockBtnEl.title = "Dock to edge";
+        dockBtnEl.style.opacity = "0.55";
+      }
+
+      function _msPeekOutFn() {
+        if (!_msDocked || _msDockPeeked) return;
+        _msDockPeeked = true;
+        panel.style.transform = "translateX(0)";
+        panel.classList.remove("ms-docked");
+      }
+
+      function _msRetractFn() {
+        if (!_msDocked || !_msDockPeeked) return;
+        _msDockPeeked = false;
+        const pw  = panel.offsetWidth;
+        const offX = _msDockSide === "left" ? -(pw - PEEK_PX) : (pw - PEEK_PX);
+        panel.style.transform = `translateX(${offX}px)`;
+        panel.classList.add("ms-docked");
+      }
+
+      dockBtnEl.addEventListener("click", () => {
+        if (_msDocked) { _msUndockFn(); return; }
+        const r   = panel.getBoundingClientRect();
+        const vpW = window.innerWidth;
+        const side = (r.left + r.width / 2) < vpW / 2 ? "left" : "right";
+        _msDockFn(side);
+      });
+
+      panel.addEventListener("mouseleave", e => {
+        if (!_msDocked || !_msDockPeeked) return;
+        if (_msDockTabEl && _msDockTabEl.contains(e.relatedTarget)) return;
+        clearTimeout(_msDockRetractTimer);
+        _msDockRetractTimer = setTimeout(() => _msRetractFn(), 600);
+      });
+      panel.addEventListener("mouseenter", () => {
+        clearTimeout(_msDockRetractTimer);
+        _msDockRetractTimer = null;
+      });
+
+      const panelEsc = e => { if (e.key === "Escape") closeBtn.click(); };
+      document.addEventListener("keydown", panelEsc);
+
+      _msPanelEl = panel;
+      dmtGetPortal().appendChild(panel);
+
+      _msReloadGrid().catch(() => {});
+      _msUpdateStatusBar();
+      _msUpdateProgressBar();
+      _msUpdateScanBtn();
+      requestAnimationFrame(_msRecalcCols);
+    }
+
+    const MS_BTN_SEL = 'div[class*="buttons__"], div[class*="buttonsInner_"]';
+    let _msInjectDebounce = null;
+
+    function _msInjectOneContainer(container) {
+      if (!container.closest('[class*="channelTextArea"], [class*="channelTextarea"]')) return;
+
+      const hasInputBtns =
+        container.querySelector('[class*="emojiButton"], [class*="emoji_button"]') ||
+        container.querySelector(
+          'button[aria-label*="moji"], button[aria-label*="GIF"],' +
+          'button[aria-label*="ticker"], button[aria-label*="表情"],' +
+          'button[aria-label*="スタンプ"], button[aria-label*="스티커"]'
+        );
+      if (!hasInputBtns) return;
+
+      const existing = container.querySelector(".dmt-mosaic-btn-wrap");
+      if (existing) return;
+
+      const wrap = document.createElement("div");
+      wrap.className = "dmt-mosaic-btn-wrap";
+      wrap.style.cssText = "display:inline-flex;align-items:center;";
+
+      const btn = document.createElement("button");
+      btn.type  = "button";
+      btn.title = "Mosaic · " + (t("mod_tip_mosaic") || "Server Media Gallery");
+      btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="pointer-events:none;display:block;"><path d="M4 4h4.5v4.5H4V4zm5.75 0h4.5v4.5h-4.5V4zM15.5 4H20v4.5h-4.5V4zM4 9.75h4.5v4.5H4v-4.5zm5.75 0h4.5v4.5h-4.5v-4.5zm5.75 0H20v4.5h-4.5v-4.5zM4 15.5h4.5V20H4v-4.5zm5.75 0h4.5V20h-4.5v-4.5zm5.75 0H20V20h-4.5v-4.5z"/></svg>';
+      btn.style.cssText = [
+        "border:none","cursor:pointer",
+        "color:rgba(88,101,242,0.45)",
+        "background:rgba(88,101,242,0.06)",
+        "padding:4px","border-radius:5px",
+        "display:flex","align-items:center","justify-content:center",
+        "transition:color 0.18s,background 0.18s,transform 0.18s,box-shadow 0.18s",
+        "box-shadow:0 0 0 1px rgba(88,101,242,0.1)",
+      ].join(";");
+      btn.addEventListener("mouseenter", () => {
+        btn.style.color      = "rgba(88,101,242,0.85)";
+        btn.style.background = "rgba(88,101,242,0.13)";
+        btn.style.transform  = "scale(1.1)";
+        btn.style.boxShadow  = "0 0 0 1.5px rgba(88,101,242,0.3)";
+      });
+      btn.addEventListener("mouseleave", () => {
+        btn.style.color      = "rgba(88,101,242,0.45)";
+        btn.style.background = "rgba(88,101,242,0.06)";
+        btn.style.transform  = "";
+        btn.style.boxShadow  = "0 0 0 1px rgba(88,101,242,0.1)";
+      });
+      btn.addEventListener("click", e => { e.stopPropagation(); _msOpenPanel(); });
+
+      wrap.appendChild(btn);
+      container.prepend(wrap);
+    }
+
+    function _msInjectAll() {
+      document.querySelectorAll(MS_BTN_SEL).forEach(_msInjectOneContainer);
+    }
+
+    _msMutObs = new MutationObserver(() => {
+      if (document.hidden) return;
+      clearTimeout(_msInjectDebounce);
+      _msInjectDebounce = setTimeout(_msInjectAll, 100);
+    });
+    _msMutObs.observe(document.body, { childList: true, subtree: true });
+
+    let _msRetryCount = 0;
+    const _msScanInit = () => {
+      const found = document.querySelectorAll(MS_BTN_SEL);
+      if (found.length > 0) {
+        found.forEach(_msInjectOneContainer);
+      } else if (_msRetryCount < 5) {
+        _msRetryCount++;
+        setTimeout(_msScanInit, 500);
+      }
+    };
+    setTimeout(_msScanInit, 300);
+
+    CleanupRegistry.add(() => {
+      _msMutObs?.disconnect();
+      clearTimeout(_msInjectDebounce);
+      _msPanelEl?.remove();
+      _msStop();
+      clearTimeout(_msScrollTimer);
+    });
+
+    DEBUG && console.log("[Mosaic] Module J initialized");
+  }
+
   const initModules = [
     { name: "Forwarding", fn: initForwardingManager, key: "mod_forwarding" },
     { name: "Message", fn: initMessageUtility, key: "mod_message" },
@@ -27089,6 +28749,7 @@ if (type === "warn" && scanLimit !== null) {
     { name: "URLChecker", fn: initURLChecker, key: "mod_urlchecker" },
     { name: "Blacklist",  fn: initBlacklist,  key: "mod_blacklist"  },
     { name: "MyPosts",   fn: initMyPostsManager, key: "mod_myposts" },
+    { name: "Mosaic",    fn: initMosaicGallery,  key: "mod_mosaic"  },
   ];
 
   initModules.forEach(({ name, fn, key }) => {
@@ -27291,9 +28952,12 @@ if (type === "warn" && scanLimit !== null) {
   }
 
   window.addEventListener("error", (event) => {
-    if (event.filename && event.filename.includes("greasyfork")) {
+    const src = event.filename || "";
+    const isOurScript = src.includes("greasyfork") || src.includes("tampermonkey") ||
+                        src.includes("violentmonkey") || src.includes(SCRIPT_NAME) || !src;
+    if (isOurScript) {
       console.error(
-        `[Discord Utilities] Uncaught error at ${event.filename}:${event.lineno}:${event.colno}`,
+        `[Discord Utilities] Uncaught error at ${src}:${event.lineno}:${event.colno}`,
         event.error
       );
       if (DEBUG) {
