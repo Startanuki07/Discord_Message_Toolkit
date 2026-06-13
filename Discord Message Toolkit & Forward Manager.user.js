@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.0.1
+// @version      2.7.0.2
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -27307,8 +27307,9 @@ if (type === "warn" && scanLimit !== null) {
     const MS_SCAN_DELAY   = 350;
     const MS_RETRY_DELAY  = 2000;
     const MS_MAX_RETRY    = 5;
-    const MS_CELL_W       = 160;
-    const MS_CELL_H       = 160;
+    const MS_CELL_TARGET  = 160;
+    let   MS_CELL_W       = 160;
+    let   MS_CELL_H       = 160;
     let   MS_COLS         = 5;
     const MS_BUFFER       = 4;
     const MS_PAGE_SIZE    = 80;
@@ -27858,6 +27859,70 @@ if (type === "warn" && scanLimit !== null) {
       else                           _msScanBtnEl.textContent = "⟳ " + (t("ms_btn_scan")   || "Scan");
     }
 
+    function _msStripQuery(u) {
+      if (!u) return "";
+      const i = u.indexOf("?");
+      return i === -1 ? u : u.slice(0, i);
+    }
+
+    function _msRefreshMediaUrl(item) {
+      if (item._msDead) return Promise.resolve(false);
+      if (item._msRefreshPromise) return item._msRefreshPromise;
+      item._msRetryCount = (item._msRetryCount || 0) + 1;
+      if (item._msRetryCount > 2) { item._msDead = true; return Promise.resolve(false); }
+      item._msRefreshPromise = (async () => {
+        try {
+          const token    = await _msEnsureToken();
+          const endpoint = `${MS_API_BASE}/channels/${item.channel_id}/messages/${item.msg_id}`;
+          const msg = await new Promise((resolve, reject) => {
+            GM_xmlhttpRequest({
+              method:  "GET", url: endpoint,
+              headers: { Authorization: token, "Content-Type": "application/json" },
+              onload:  r => {
+                if (r.status === 200) {
+                  try { resolve(JSON.parse(r.responseText)); }
+                  catch (_) { reject(new Error("parse error")); }
+                } else reject(new Error("HTTP " + r.status));
+              },
+              onerror: () => reject(new Error("network error")),
+            });
+          });
+          const target = _msStripQuery(item.proxy_url || item.url);
+          const fresh  = _msExtractMedia(msg).find(m => _msStripQuery(m.proxy_url || m.url) === target);
+          if (!fresh) { item._msDead = true; return false; }
+          item.url       = fresh.url;
+          item.proxy_url = fresh.proxy_url;
+          return true;
+        } catch (err) {
+          DEBUG && console.warn("[Mosaic] _msRefreshMediaUrl:", err);
+          item._msDead = true;
+          return false;
+        } finally {
+          item._msRefreshPromise = null;
+        }
+      })();
+      return item._msRefreshPromise;
+    }
+
+    function _msBuildDeadPlaceholder(size) {
+      const ph = document.createElement("div");
+      ph.className = "ms-dead";
+      const icon = document.createElement("div");
+      icon.className = "ms-dead-icon";
+      icon.textContent = "🚫";
+      const label = document.createElement("div");
+      label.className = "ms-dead-label";
+      label.textContent = t("ms_expired") || "Link expired";
+      if (size === "full") {
+        ph.style.cssText    = "display:flex;flex-direction:column;align-items:center;gap:8px;color:#72767d;";
+        icon.style.cssText  = "font-size:48px;opacity:0.6;";
+        label.style.cssText = "font-size:13px;";
+      }
+      ph.appendChild(icon);
+      ph.appendChild(label);
+      return ph;
+    }
+
     function _msBuildCell(item, idx) {
       const col  = idx % MS_COLS;
       const row  = Math.floor(idx / MS_COLS);
@@ -27869,10 +27934,24 @@ if (type === "warn" && scanLimit !== null) {
       img.className  = "ms-thumb";
       img.loading    = "lazy";
       img.decoding   = "async";
-      const base = item.proxy_url || item.url;
-      img.src = base.includes("?") ? base + `&width=${MS_CELL_W}&height=${MS_CELL_H}` : base + `?width=${MS_CELL_W}&height=${MS_CELL_H}`;
       img.alt = item.filename || "";
       img.style.cssText = "width:100%;height:100%;object-fit:cover;transition:opacity 0.2s;";
+      const _msSetThumbSrc = () => {
+        const base = item.proxy_url || item.url;
+        img.src = base.includes("?") ? base + `&width=${MS_CELL_W}&height=${MS_CELL_H}` : base + `?width=${MS_CELL_W}&height=${MS_CELL_H}`;
+      };
+      if (item._msDead) {
+        img.style.display = "none";
+        cell.appendChild(_msBuildDeadPlaceholder("cell"));
+      } else {
+        img.addEventListener("error", () => {
+          _msRefreshMediaUrl(item).then(ok => {
+            if (ok) { _msSetThumbSrc(); }
+            else { img.style.display = "none"; cell.appendChild(_msBuildDeadPlaceholder("cell")); }
+          });
+        });
+        _msSetThumbSrc();
+      }
       cell.appendChild(img);
 
       if (item.media_type === "video" || item.media_type === "gif") {
@@ -28072,19 +28151,23 @@ if (type === "warn" && scanLimit !== null) {
         const item = items[cur];
         fnEl.textContent = `🖼 ${item.filename || item.url.split("/").pop().split("?")[0]}  (${cur+1}/${items.length})`;
         mediaArea.innerHTML = "";
-        if (item.media_type === "video" || item.media_type === "gif") {
+        if (item._msDead) {
+          mediaArea.appendChild(_msBuildDeadPlaceholder("full"));
+        } else if (item.media_type === "video" || item.media_type === "gif") {
           const v = document.createElement("video");
           v.src       = item.url;
           v.controls  = true;
           v.autoplay  = true;
           v.loop      = item.media_type === "gif";
           v.style.cssText = "max-width:90vw;max-height:70vh;object-fit:contain;border-radius:4px;";
+          v.addEventListener("error", () => { _msRefreshMediaUrl(item).then(() => render(cur)); });
           mediaArea.appendChild(v);
         } else {
           const img = document.createElement("img");
           img.src = item.url;
           img.alt = item.filename || "";
           img.style.cssText = "max-width:90vw;max-height:70vh;object-fit:contain;border-radius:4px;";
+          img.addEventListener("error", () => { _msRefreshMediaUrl(item).then(() => render(cur)); });
           mediaArea.appendChild(img);
         }
         metaEl.textContent = [item.author_name, _msGetChannelName(), _msFmtDate(item.timestamp)].filter(Boolean).join("  ·  ");
@@ -28154,7 +28237,7 @@ if (type === "warn" && scanLimit !== null) {
       ].join(";");
 
       const toolbar = document.createElement("div");
-      toolbar.style.cssText = "display:flex;align-items:center;gap:6px;padding:8px 44px 8px 12px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;background:#313338;cursor:grab;min-width:0;overflow:hidden;";
+      toolbar.style.cssText = "display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;background:#313338;cursor:grab;min-width:0;overflow:hidden;";
 
       const titleEl = document.createElement("span");
       titleEl.textContent = "🖼 Mosaic";
@@ -28257,7 +28340,7 @@ if (type === "warn" && scanLimit !== null) {
 
       const closeBtn = document.createElement("button");
       closeBtn.textContent = "✕";
-      closeBtn.style.cssText = "position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.25);border:none;color:#72767d;font-size:14px;cursor:pointer;padding:3px 7px;border-radius:4px;line-height:1;z-index:2;";
+      closeBtn.style.cssText = "background:rgba(0,0,0,0.25);border:none;color:#72767d;font-size:14px;cursor:pointer;padding:3px 7px;border-radius:4px;line-height:1;flex-shrink:0;margin-left:2px;";
       closeBtn.addEventListener("mouseenter", () => { closeBtn.style.color = "#dbdee1"; closeBtn.style.background = "rgba(237,66,69,0.3)"; });
       closeBtn.addEventListener("mouseleave", () => { closeBtn.style.color = "#72767d"; closeBtn.style.background = "rgba(0,0,0,0.25)"; });
       closeBtn.addEventListener("click", () => {
@@ -28270,7 +28353,7 @@ if (type === "warn" && scanLimit !== null) {
         _msScopeSelEl = _msTypeSelEl = null;
         document.removeEventListener("keydown", panelEsc);
       });
-      panel.appendChild(closeBtn);
+      toolbar.appendChild(closeBtn);
       panel.appendChild(toolbar);
 
       let _dragOffX = 0, _dragOffY = 0;
@@ -28467,10 +28550,10 @@ if (type === "warn" && scanLimit !== null) {
       const gridScroll = document.createElement("div");
       gridScroll.id = "ms-grid-scroll";
       gridScroll.style.cssText = "flex:1;overflow-y:auto;position:relative;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent;";
-      if (!document.getElementById("ms-scrollbar-style")) {
+      if (!document.getElementById("ms-panel-style")) {
         const ss = document.createElement("style");
-        ss.id = "ms-scrollbar-style";
-        ss.textContent = "#ms-grid-scroll::-webkit-scrollbar{width:6px}#ms-grid-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}#ms-grid-scroll::-webkit-scrollbar-track{background:transparent}";
+        ss.id = "ms-panel-style";
+        ss.textContent = "#ms-grid-scroll::-webkit-scrollbar{width:6px}#ms-grid-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}#ms-grid-scroll::-webkit-scrollbar-track{background:transparent}.ms-dead{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#1e1f22;color:#72767d;}.ms-dead-icon{font-size:26px;opacity:0.6;}.ms-dead-label{font-size:10px;}";
         document.head.appendChild(ss);
       }
 
@@ -28492,10 +28575,13 @@ if (type === "warn" && scanLimit !== null) {
 
       const _msRecalcCols = () => {
         if (!_msGridContEl || !gridScroll) return;
-        const availW = gridScroll.clientWidth || panel.clientWidth || 900;
-        const newCols = Math.max(1, Math.floor((availW - 16) / MS_CELL_W));
-        if (newCols !== MS_COLS) {
-          MS_COLS = newCols;
+        const availW   = gridScroll.clientWidth || panel.clientWidth || 900;
+        const newCols  = Math.max(1, Math.floor(availW / MS_CELL_TARGET));
+        const newCellW = Math.floor(availW / newCols);
+        if (newCols !== MS_COLS || newCellW !== MS_CELL_W) {
+          MS_COLS   = newCols;
+          MS_CELL_W = newCellW;
+          MS_CELL_H = newCellW;
           _msGridContEl.style.width = (MS_COLS * MS_CELL_W) + "px";
           _msGridRendered.clear();
           if (_msGridContEl) _msGridContEl.innerHTML = "";
