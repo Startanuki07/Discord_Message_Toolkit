@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.0.2
+// @version      2.7.0.5
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -927,6 +927,16 @@
   })();
   const TranslationCache = new TranslationCacheManager(_transCacheSize);
 
+  let _customLangData = null;
+  (() => {
+    try {
+      const raw = localStorage.getItem("copyMenuLanguage_custom");
+      if (raw) _customLangData = JSON.parse(raw);
+    } catch (e) {
+      console.warn("[i18n] Failed to load custom language data:", e);
+    }
+  })();
+
   function t(key, params = {}) {
     const config = getConfig();
     const lang = config.lang || "en";
@@ -1372,6 +1382,12 @@
       ms_cap_warn:        "⚠️ Stopped at 5,000 items — narrow the time range for complete results",
       ms_stats_title:     "Cache Statistics",
       ms_stats_clear:     "Clear cached media for this scope",
+      ms_expired:         "Link expired",
+      ms_fetching:        "Fetching…",
+      ms_indexing:        "Indexing",
+      ms_rate_limited:    "Rate limited",
+      ms_resuming:        "Resuming…",
+      ms_scope_channel_cur: "Current channel",
 
       mp_panel_title:           "My Posts",
       mp_tab_browse:            "Browse",
@@ -1939,6 +1955,12 @@
       ms_cap_warn:        "⚠️ 已掃描 5,000 筆上限 — 縮小時間範圍可取得完整結果",
       ms_stats_title:     "快取統計",
       ms_stats_clear:     "清除此範圍的快取媒體",
+      ms_expired:         "連結已過期",
+      ms_fetching:        "取得中…",
+      ms_indexing:        "索引建立中",
+      ms_rate_limited:    "請求過頻",
+      ms_resuming:        "恢復中…",
+      ms_scope_channel_cur: "目前頻道",
 
       mp_panel_title:           "個人發文",
       mp_tab_browse:            "瀏覽",
@@ -2504,6 +2526,12 @@
       ms_cap_warn:        "⚠️ 已达到5000条上限 — 缩小时间范围以获取完整结果",
       ms_stats_title:     "缓存统计",
       ms_stats_clear:     "清除此范围的缓存媒体",
+      ms_expired:         "链接已过期",
+      ms_fetching:        "获取中…",
+      ms_indexing:        "索引构建中",
+      ms_rate_limited:    "请求过频",
+      ms_resuming:        "恢复中…",
+      ms_scope_channel_cur: "当前频道",
 
       cs_panel_title:   "⌨ 频道搜索",
       cs_placeholder:   "输入关键字搜索频道消息…",
@@ -3072,6 +3100,12 @@
       ms_cap_warn:        "⚠️ 5,000件の上限に達しました — 時間範囲を絞ってください",
       ms_stats_title:     "キャッシュ統計",
       ms_stats_clear:     "このスコープのキャッシュをクリア",
+      ms_expired:         "リンク期限切れ",
+      ms_fetching:        "取得中…",
+      ms_indexing:        "インデックス中",
+      ms_rate_limited:    "レート制限中",
+      ms_resuming:        "再開中…",
+      ms_scope_channel_cur: "現在のチャンネル",
 
       cs_panel_title:   "⌨ チャンネル検索",
       cs_placeholder:   "キーワードでチャンネルメッセージを検索…",
@@ -3681,6 +3715,12 @@
       ms_cap_warn:        "⚠️ 5,000개 제한에 도달했습니다 — 시간 범위를 좁혀보세요",
       ms_stats_title:     "캐시 통계",
       ms_stats_clear:     "이 범위의 캐시 지우기",
+      ms_expired:         "링크 만료됨",
+      ms_fetching:        "가져오는 중…",
+      ms_indexing:        "인덱싱 중",
+      ms_rate_limited:    "요청 제한",
+      ms_resuming:        "재개 중…",
+      ms_scope_channel_cur: "현재 채널",
 
       mp_panel_title:           "내 게시물",
       mp_tab_browse:            "브라우즈",
@@ -6464,16 +6504,6 @@
     },
   };
 
-  let _customLangData = null;
-  (() => {
-    try {
-      const raw = localStorage.getItem("copyMenuLanguage_custom");
-      if (raw) _customLangData = JSON.parse(raw);
-    } catch (e) {
-      console.warn("[i18n] Failed to load custom language data:", e);
-    }
-  })();
-
   TRANSLATIONS["custom"] = { name: "Custom" };
 
   function initForwardingManager() {
@@ -7947,27 +7977,6 @@
     }
 
     GM_addStyle(`
-    
-    :root {
-      
-      --dmt-bg-primary:   var(--background-secondary,      #2b2d31);
-      --dmt-bg-surface:   var(--background-floating,       #2f3136);
-      --dmt-bg-deep:      var(--background-tertiary,       #1e1f22);
-      --dmt-bg-overlay:   var(--background-secondary-alt,  #313338);
-      --dmt-bg-muted:     var(--interactive-muted,         #4f545c);
-
-      --dmt-accent:       var(--brand-experiment,          #5865f2);
-
-      --dmt-text-primary: var(--text-normal,               #dcddde);
-      --dmt-text-bright:  var(--header-primary,            #dbdee1);
-      --dmt-text-muted:   var(--text-muted,                #72767d);
-      --dmt-text-subtle:  var(--text-secondary,            #b5bac1);
-
-      --dmt-danger:       var(--button-danger-background,  #ed4245);
-      --dmt-success:      var(--button-positive-background, #3ba55c);
-      --dmt-gold:         #ffd700;  
-    }
-
     .msg-copy-btn {
         position: absolute;
         top: ${BUTTON_TOP}px;
@@ -22524,6 +22533,7 @@ unsafeWindow.fetch = function(...args) {
           for (const m of msgs) store.put(_slimMsg(m));
           tx.oncomplete = resolve;
           tx.onerror    = e => reject(e.target.error);
+          tx.onabort    = e => { DEBUG && console.warn("[IDB] _idbPut tx aborted:", e.target.error); };
         });
       } catch (err) {
         DEBUG && console.warn("[IDB] put failed:", err);
@@ -22646,6 +22656,7 @@ unsafeWindow.fetch = function(...args) {
             else resolve(count);
           };
           req.onerror = e => reject(e.target.error);
+          tx.onabort  = e => { DEBUG && console.warn("[IDB] _idbDeleteByYM tx aborted:", e.target.error); };
         });
       } catch (err) {
         DEBUG && console.warn("[IDB] deleteByYM failed:", err);
@@ -22667,6 +22678,7 @@ unsafeWindow.fetch = function(...args) {
             else resolve(count);
           };
           req.onerror = e => reject(e.target.error);
+          tx.onabort  = e => { DEBUG && console.warn("[IDB] _idbClearScope(messages) tx aborted:", e.target.error); };
         });
         await new Promise((resolve, reject) => {
           const tx  = db.transaction("sync_meta", "readwrite");
@@ -22687,6 +22699,7 @@ unsafeWindow.fetch = function(...args) {
           tx.objectStore("sync_meta").clear();
           tx.oncomplete = resolve;
           tx.onerror    = e => reject(e.target.error);
+          tx.onabort    = e => { DEBUG && console.warn("[IDB] _idbClearAll tx aborted:", e.target.error); };
         });
         _idbReadyPromise = null; _idbInstance = null;
       } catch (err) {
@@ -24521,7 +24534,7 @@ unsafeWindow.fetch = function(...args) {
             lineWrap.appendChild(document.createTextNode(prepLine.slice(last, m.index)));
           }
           if (m[1] && m[2]) {
-            const isAnim = line[line.indexOf(m[0]) + 1] === "a";
+            const isAnim = m[0][1] === "a";
             const ext    = isAnim ? "gif" : "webp";
             const img    = document.createElement("img");
             img.src    = "https://cdn.discordapp.com/emojis/" + m[2] + "." + ext + "?size=20&quality=lossless";
@@ -27436,32 +27449,59 @@ if (type === "warn" && scanLimit !== null) {
 
     function _msExtractMedia(msg) {
       const items = [];
+
+      const _msTypeFromExt = url => {
+        if (!url) return null;
+        const ext = url.split("?")[0].split(".").pop().toLowerCase();
+        if (/^(jpg|jpeg|png|webp|avif|bmp|svg)$/.test(ext)) return "image";
+        if (ext === "gif")                                    return "gif";
+        if (/^(mp4|webm|mov|mkv|avi)$/.test(ext))           return "video";
+        return null;
+      };
       for (const att of (msg.attachments || [])) {
         if (!att.url) continue;
         const ct = (att.content_type || "").toLowerCase();
         let type = null;
         if (ct.startsWith("image/"))      type = ct.includes("gif") ? "gif" : "image";
         else if (ct.startsWith("video/")) type = "video";
+        if (!type) type = _msTypeFromExt(att.url);
         if (type) items.push(_msSlimMedia(msg, att, type));
       }
+
+      const _msIsNoPreviewDomain = url => {
+        if (!url) return false;
+        try {
+          const host = new URL(url).hostname.replace(/^www\./, "");
+          return /^(youtube\.com|youtu\.be|bilibili\.com|tiktok\.com|twitch\.tv|twitter\.com|x\.com|vt\.tiktok\.com)$/.test(host);
+        } catch (_) { return false; }
+      };
+      const _msIsGifCdnUrl = url => {
+        if (!url) return false;
+        try {
+          const host = new URL(url).hostname.replace(/^www\./, "");
+          return /^(media\.tenor\.com|media1\.tenor\.com|c\.tenor\.com|media\.giphy\.com|i\.giphy\.com)$/.test(host);
+        } catch (_) { return false; }
+      };
+
       for (const emb of (msg.embeds || [])) {
-        const _msIsNoPreviewDomain = url => {
-          if (!url) return false;
-          try {
-            const host = new URL(url).hostname.replace(/^www\./, "");
-            return /^(youtube\.com|youtu\.be|bilibili\.com|tiktok\.com|twitch\.tv|twitter\.com|x\.com|vt\.tiktok\.com)$/.test(host);
-          } catch (_) { return false; }
-        };
         if (emb.type === "image" && emb.url) {
           const proxy = emb.thumbnail?.proxy_url || emb.url;
           items.push(_msSlimMedia(msg, { url: emb.url, proxy_url: proxy, width: emb.thumbnail?.width || 0, height: emb.thumbnail?.height || 0, filename: "" }, "image"));
-        } else if (emb.type === "gifv" && emb.video?.url) {
-          items.push(_msSlimMedia(msg, { url: emb.video.url, proxy_url: emb.video.proxy_url || emb.video.url, width: emb.video.width || 0, height: emb.video.height || 0, filename: "" }, "gif"));
+        } else if (emb.type === "gifv") {
+          const videoUrl   = emb.video?.url;
+          const videoProxy = emb.video?.proxy_url || videoUrl;
+          if (videoUrl) {
+            items.push(_msSlimMedia(msg, { url: videoUrl, proxy_url: videoProxy, width: emb.video?.width || 0, height: emb.video?.height || 0, filename: "" }, "gif"));
+          } else if (_msIsGifCdnUrl(emb.url)) {
+            items.push(_msSlimMedia(msg, { url: emb.url, proxy_url: emb.url, width: 0, height: 0, filename: "" }, "gif"));
+          } else if (emb.thumbnail?.url) {
+            items.push(_msSlimMedia(msg, { url: emb.thumbnail.url, proxy_url: emb.thumbnail.proxy_url || emb.thumbnail.url, width: emb.thumbnail.width || 0, height: emb.thumbnail.height || 0, filename: "" }, "image"));
+          }
         } else if (emb.type === "video" && emb.video?.url) {
-          if (_msIsNoPreviewDomain(emb.url || emb.video?.url)) break;
+          if (_msIsNoPreviewDomain(emb.url || emb.video?.url)) continue;
           items.push(_msSlimMedia(msg, { url: emb.video.url, proxy_url: emb.video.proxy_url || emb.video.url, width: emb.video.width || 0, height: emb.video.height || 0, filename: "" }, "video"));
         } else if (emb.type === "rich" && emb.thumbnail?.url) {
-          if (_msIsNoPreviewDomain(emb.url)) break;
+          if (_msIsNoPreviewDomain(emb.url)) continue;
           items.push(_msSlimMedia(msg, { url: emb.thumbnail.url, proxy_url: emb.thumbnail.proxy_url || emb.thumbnail.url, width: emb.thumbnail.width || 0, height: emb.thumbnail.height || 0, filename: "" }, "image"));
         }
       }
@@ -27963,13 +28003,28 @@ if (type === "warn" && scanLimit !== null) {
 
       const hover = document.createElement("div");
       hover.className = "ms-hover-info";
-      const author = document.createElement("span");
-      author.className = "ms-author";
-      author.textContent = item.author_name || "";
+      if (item.author_name) {
+        const author = document.createElement("span");
+        author.className = "ms-author";
+        author.textContent = "@" + item.author_name;
+        hover.appendChild(author);
+      }
+      const _msChName = (() => {
+        try {
+          const urlCh = location.pathname.match(/\/channels\/[^/]+\/(\d+)/)?.[1];
+          if (urlCh === item.channel_id) return _msGetChannelName();
+        } catch (_) {}
+        return null;
+      })();
+      if (_msChName) {
+        const chEl = document.createElement("span");
+        chEl.className = "ms-channel";
+        chEl.textContent = "# " + _msChName;
+        hover.appendChild(chEl);
+      }
       const date = document.createElement("span");
       date.className   = "ms-date";
       date.textContent = _msFmtDate(item.timestamp);
-      hover.appendChild(author);
       hover.appendChild(date);
       cell.appendChild(hover);
 
@@ -28111,7 +28166,7 @@ if (type === "warn" && scanLimit !== null) {
       let cur = Math.max(0, Math.min(startIdx, items.length - 1));
 
       const ov = document.createElement("div");
-      ov.style.cssText = "position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;background:rgba(0,0,0,0.93);pointer-events:auto;";
+      ov.style.cssText = "position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;background:rgba(0,0,0,0.93);pointer-events:auto;cursor:default;";
 
       const hdr = document.createElement("div");
       hdr.style.cssText = "display:flex;align-items:center;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.08);gap:8px;flex-shrink:0;";
@@ -28123,10 +28178,16 @@ if (type === "warn" && scanLimit !== null) {
       const nextBtn = document.createElement("button");
       nextBtn.textContent = "▶";
       nextBtn.style.cssText = prevBtn.style.cssText;
-      hdr.appendChild(prevBtn); hdr.appendChild(fnEl); hdr.appendChild(nextBtn);
+      const lbCloseBtn = document.createElement("button");
+      lbCloseBtn.textContent = "✕";
+      lbCloseBtn.title = "Close (ESC)";
+      lbCloseBtn.style.cssText = "background:rgba(0,0,0,0.3);border:none;color:#aaa;font-size:16px;cursor:pointer;padding:4px 10px;border-radius:6px;line-height:1;flex-shrink:0;transition:color 0.15s,background 0.15s;";
+      lbCloseBtn.addEventListener("mouseenter", () => { lbCloseBtn.style.color = "#fff"; lbCloseBtn.style.background = "rgba(237,66,69,0.4)"; });
+      lbCloseBtn.addEventListener("mouseleave", () => { lbCloseBtn.style.color = "#aaa"; lbCloseBtn.style.background = "rgba(0,0,0,0.3)"; });
+      hdr.appendChild(prevBtn); hdr.appendChild(fnEl); hdr.appendChild(nextBtn); hdr.appendChild(lbCloseBtn);
 
       const mediaArea = document.createElement("div");
-      mediaArea.style.cssText = "flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:12px;";
+      mediaArea.style.cssText = "flex:1;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:12px;cursor:default;";
 
       const ftr = document.createElement("div");
       ftr.style.cssText = "display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid rgba(255,255,255,0.08);flex-shrink:0;gap:8px;";
@@ -28152,7 +28213,9 @@ if (type === "warn" && scanLimit !== null) {
         fnEl.textContent = `🖼 ${item.filename || item.url.split("/").pop().split("?")[0]}  (${cur+1}/${items.length})`;
         mediaArea.innerHTML = "";
         if (item._msDead) {
-          mediaArea.appendChild(_msBuildDeadPlaceholder("full"));
+          const ph = _msBuildDeadPlaceholder("full");
+          ph.addEventListener("click", e => e.stopPropagation());
+          mediaArea.appendChild(ph);
         } else if (item.media_type === "video" || item.media_type === "gif") {
           const v = document.createElement("video");
           v.src       = item.url;
@@ -28160,13 +28223,15 @@ if (type === "warn" && scanLimit !== null) {
           v.autoplay  = true;
           v.loop      = item.media_type === "gif";
           v.style.cssText = "max-width:90vw;max-height:70vh;object-fit:contain;border-radius:4px;";
+          v.addEventListener("click", e => e.stopPropagation());
           v.addEventListener("error", () => { _msRefreshMediaUrl(item).then(() => render(cur)); });
           mediaArea.appendChild(v);
         } else {
           const img = document.createElement("img");
           img.src = item.url;
           img.alt = item.filename || "";
-          img.style.cssText = "max-width:90vw;max-height:70vh;object-fit:contain;border-radius:4px;";
+          img.style.cssText = "max-width:90vw;max-height:70vh;object-fit:contain;border-radius:4px;cursor:default;";
+          img.addEventListener("click", e => e.stopPropagation());
           img.addEventListener("error", () => { _msRefreshMediaUrl(item).then(() => render(cur)); });
           mediaArea.appendChild(img);
         }
@@ -28189,16 +28254,22 @@ if (type === "warn" && scanLimit !== null) {
         nextBtn.style.opacity = cur === items.length - 1 ? "0.3" : "1";
       };
 
-      const close = () => { ov.remove(); document.removeEventListener("keydown", onKey); };
+      const close = () => { ov.remove(); document.removeEventListener("keydown", onKey, true); };
       const onKey = e => {
-        if      (e.key === "Escape")      close();
-        else if (e.key === "ArrowLeft")   render(cur - 1);
-        else if (e.key === "ArrowRight")  render(cur + 1);
+        if (e.key === "Escape") {
+          e.stopImmediatePropagation();
+          close();
+        } else if (e.key === "ArrowLeft") {
+          render(cur - 1);
+        } else if (e.key === "ArrowRight") {
+          render(cur + 1);
+        }
       };
       prevBtn.addEventListener("click", e => { e.stopPropagation(); render(cur - 1); });
       nextBtn.addEventListener("click", e => { e.stopPropagation(); render(cur + 1); });
+      lbCloseBtn.addEventListener("click", e => { e.stopPropagation(); close(); });
       ov.addEventListener("click", e => { if (e.target === ov || e.target === mediaArea) close(); });
-      document.addEventListener("keydown", onKey);
+      document.addEventListener("keydown", onKey, true);
       render(startIdx);
       dmtGetPortal().appendChild(ov);
     }
@@ -28252,10 +28323,20 @@ if (type === "warn" && scanLimit !== null) {
       const srvName = guildId ? (_msGetSrvName() || (t("ms_scope_server") || "Server")) : null;
       _msScopeSelEl = document.createElement("select");
       _msScopeSelEl.style.cssText = "background:#1e1f22;border:1px solid rgba(255,255,255,0.12);color:#dbdee1;border-radius:6px;padding:3px 6px;font-size:12px;cursor:pointer;";
+
       const optSrv = document.createElement("option");
       optSrv.value       = scope || "";
       optSrv.textContent = guildId ? `🌐 ${srvName}` : `# ${_msGetChannelName()}`;
       _msScopeSelEl.appendChild(optSrv);
+
+      let _optCh = null;
+      if (guildId && channelId) {
+        _optCh = document.createElement("option");
+        _optCh.value       = `c:${channelId}`;
+        _optCh.textContent = `# ${_msGetChannelName()}`;
+        _msScopeSelEl.appendChild(_optCh);
+      }
+
       _msScopeSelEl.addEventListener("change", () => {
         _msGridScope = _msScopeSelEl.value;
         _msGridItems = []; _msGridRendered.clear();
@@ -28263,6 +28344,31 @@ if (type === "warn" && scanLimit !== null) {
         _msReloadGrid().catch(() => {});
         _msUpdateStatusBar();
       });
+
+      let _msNavDebounce = null;
+      const _msOnUrlChange = () => {
+        const det = _msDetectScope();
+        if (!det.scope) return;
+        if (_optCh && det.guildId) {
+          _optCh.value       = `c:${det.channelId}`;
+          _optCh.textContent = `# ${_msGetChannelName()}`;
+        }
+        if (_msScopeSelEl.value.startsWith("c:") && det.channelId) {
+          _msScopeSelEl.value = `c:${det.channelId}`;
+          _msGridScope = _msScopeSelEl.value;
+          clearTimeout(_msNavDebounce);
+          _msNavDebounce = setTimeout(() => {
+            _msGridItems = []; _msGridRendered.clear();
+            if (_msGridContEl) _msGridContEl.innerHTML = "";
+            _msReloadGrid().catch(() => {});
+            _msUpdateStatusBar();
+          }, 500);
+        }
+      };
+      window.addEventListener("popstate", _msOnUrlChange, { passive: true });
+      if (typeof navigation !== "undefined") {
+        navigation.addEventListener("navigate", _msOnUrlChange, { passive: true });
+      }
       toolbar.appendChild(_msScopeSelEl);
 
       _msTypeSelEl = document.createElement("select");
@@ -28348,10 +28454,15 @@ if (type === "warn" && scanLimit !== null) {
         _msDockRetractTimer = null;
         if (_msDockTabEl) { _msDockTabEl.remove(); _msDockTabEl = null; }
         _msDocked = false; _msDockSide = null; _msDockPeeked = false; _msDockSnapshot = null;
+        clearTimeout(_msNavDebounce);
+        window.removeEventListener("popstate", _msOnUrlChange);
+        if (typeof navigation !== "undefined") {
+          navigation.removeEventListener("navigate", _msOnUrlChange);
+        }
         panel.remove(); _msPanelEl = null;
         _msScanBtnEl = _msStatusBarEl = _msProgressEl = _msGridContEl = null;
         _msScopeSelEl = _msTypeSelEl = null;
-        document.removeEventListener("keydown", panelEsc);
+        document.removeEventListener("keydown", panelEsc, false);
       });
       toolbar.appendChild(closeBtn);
       panel.appendChild(toolbar);
@@ -28553,7 +28664,28 @@ if (type === "warn" && scanLimit !== null) {
       if (!document.getElementById("ms-panel-style")) {
         const ss = document.createElement("style");
         ss.id = "ms-panel-style";
-        ss.textContent = "#ms-grid-scroll::-webkit-scrollbar{width:6px}#ms-grid-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}#ms-grid-scroll::-webkit-scrollbar-track{background:transparent}.ms-dead{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#1e1f22;color:#72767d;}.ms-dead-icon{font-size:26px;opacity:0.6;}.ms-dead-label{font-size:10px;}";
+        ss.textContent = [
+          "#ms-grid-scroll::-webkit-scrollbar{width:6px}",
+          "#ms-grid-scroll::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:3px}",
+          "#ms-grid-scroll::-webkit-scrollbar-track{background:transparent}",
+          ".ms-dead{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#1e1f22;color:#72767d;}",
+          ".ms-dead-icon{font-size:26px;opacity:0.6;}",
+          ".ms-dead-label{font-size:10px;}",
+          ".ms-badge{position:absolute;top:5px;left:5px;z-index:3;background:rgba(0,0,0,0.65);",
+          "color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;",
+          "letter-spacing:.04em;pointer-events:none;}",
+          ".ms-hover-info{position:absolute;bottom:0;left:0;right:0;z-index:3;",
+          "background:linear-gradient(transparent,rgba(0,0,0,0.82));",
+          "padding:18px 7px 6px;display:flex;flex-direction:column;gap:2px;",
+          "opacity:0;transform:translateY(4px);transition:opacity 0.18s,transform 0.18s;",
+          "pointer-events:none;}",
+          ".ms-cell:hover .ms-hover-info{opacity:1;transform:translateY(0);}",
+          ".ms-author{font-size:10px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}",
+          ".ms-date{font-size:9px;color:rgba(255,255,255,0.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}",
+          ".ms-channel{font-size:9px;color:rgba(88,101,242,0.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}",
+          ".ms-cell{transition:outline 0.12s;}",
+          ".ms-cell:hover{outline:2px solid rgba(88,101,242,0.65);outline-offset:-2px;z-index:1;}",
+        ].join("");
         document.head.appendChild(ss);
       }
 
@@ -28727,7 +28859,7 @@ if (type === "warn" && scanLimit !== null) {
       });
 
       const panelEsc = e => { if (e.key === "Escape") closeBtn.click(); };
-      document.addEventListener("keydown", panelEsc);
+      document.addEventListener("keydown", panelEsc, false);
 
       _msPanelEl = panel;
       dmtGetPortal().appendChild(panel);
@@ -28825,6 +28957,35 @@ if (type === "warn" && scanLimit !== null) {
 
     DEBUG && console.log("[Mosaic] Module J initialized");
   }
+
+  function _injectDesignTokens() {
+    if (document.getElementById("dmt-design-tokens")) return;
+    const s = document.createElement("style");
+    s.id = "dmt-design-tokens";
+    s.textContent = `
+      :root {
+        
+        --dmt-bg-primary:   var(--background-secondary,      #2b2d31);
+        --dmt-bg-surface:   var(--background-floating,       #2f3136);
+        --dmt-bg-deep:      var(--background-tertiary,       #1e1f22);
+        --dmt-bg-overlay:   var(--background-secondary-alt,  #313338);
+        --dmt-bg-muted:     var(--interactive-muted,         #4f545c);
+
+        --dmt-accent:       var(--brand-experiment,          #5865f2);
+
+        --dmt-text-primary: var(--text-normal,               #dcddde);
+        --dmt-text-bright:  var(--header-primary,            #dbdee1);
+        --dmt-text-muted:   var(--text-muted,                #72767d);
+        --dmt-text-subtle:  var(--text-secondary,            #b5bac1);
+
+        --dmt-danger:       var(--button-danger-background,  #ed4245);
+        --dmt-success:      var(--button-positive-background, #3ba55c);
+        --dmt-gold:         #ffd700;  
+      }
+    `;
+    (document.head || document.documentElement).appendChild(s);
+  }
+  _injectDesignTokens();
 
   const initModules = [
     { name: "Forwarding", fn: initForwardingManager, key: "mod_forwarding" },
@@ -29048,6 +29209,18 @@ if (type === "warn" && scanLimit !== null) {
       );
       if (DEBUG) {
         dmtShowToast(`[Error] ${event.message} — check console for details.`, { duration: 5000 });
+      }
+    }
+  });
+
+  window.addEventListener("unhandledrejection", (event) => {
+    const src = event.reason?.stack || "";
+    const isOurScript = src.includes("greasyfork") || src.includes("tampermonkey") ||
+                        src.includes("violentmonkey") || src.includes(SCRIPT_NAME) || !src;
+    if (isOurScript) {
+      console.error("[Discord Utilities] Unhandled Promise rejection:", event.reason);
+      if (DEBUG) {
+        dmtShowToast(`[Async Error] ${event.reason?.message || event.reason}`, { duration: 5000 });
       }
     }
   });
