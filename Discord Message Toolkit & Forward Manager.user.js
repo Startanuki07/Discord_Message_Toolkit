@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.0.6
+// @version      2.7.0.7
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -27706,18 +27706,21 @@ if (type === "warn" && scanLimit !== null) {
       const endpoint = isGuild ? `guilds/${id}` : `channels/${id}`;
 
       let minId = null, maxId = null;
+      let _msScanRangeStart = null;
+      const { sync: _msPrevSync } = await _msGetStats(scope);
       if (_msRangeKey === "custom") {
-        if (_msCustomStart) minId = _msTimestampToSnowflake(_msCustomStart.getTime());
+        if (_msCustomStart) { minId = _msTimestampToSnowflake(_msCustomStart.getTime()); _msScanRangeStart = _msCustomStart.getTime(); }
         if (_msCustomEnd)   maxId = _msTimestampToSnowflake(_msCustomEnd.getTime() + 86399999);
       } else {
         const durMs = MS_TIME_RANGES[_msRangeKey];
         if (durMs != null) {
-          const rangeStart = Date.now() - durMs;
-          const { sync } = await _msGetStats(scope);
-          const lastTs = sync?.newest_timestamp
-            ? new Date(sync.newest_timestamp).getTime() - 60000
-            : 0;
+          const rangeStart  = Date.now() - durMs;
+          const prevOldest  = _msPrevSync?.oldest_scanned_ts ? new Date(_msPrevSync.oldest_scanned_ts).getTime() : null;
+          const prevNewest  = _msPrevSync?.newest_timestamp  ? new Date(_msPrevSync.newest_timestamp).getTime()  : null;
+          const rangeCovered = prevOldest !== null && prevOldest <= rangeStart;
+          const lastTs = rangeCovered && prevNewest !== null ? (prevNewest - 60000) : 0;
           minId = _msTimestampToSnowflake(Math.max(rangeStart, lastTs));
+          _msScanRangeStart = rangeStart;
         }
       }
 
@@ -27824,9 +27827,14 @@ if (type === "warn" && scanLimit !== null) {
 
         if (_msScanState.offset >= (_msScanState.total || 0) || msgs.length === 0) {
           _msScanState.phase = "complete";
+          const _msPrevOldestMs = _msPrevSync?.oldest_scanned_ts ? new Date(_msPrevSync.oldest_scanned_ts).getTime() : null;
+          const _msNewOldestMs  = _msScanRangeStart != null
+            ? (_msPrevOldestMs !== null ? Math.min(_msScanRangeStart, _msPrevOldestMs) : _msScanRangeStart)
+            : _msPrevOldestMs;
           await _msWriteSyncMeta(scope, {
             total_remote: _msScanState.total, scanned_count: _msScanState.scanned,
             last_scan_at: new Date().toISOString(), newest_timestamp: newestTs, is_complete: true,
+            oldest_scanned_ts: _msNewOldestMs != null ? new Date(_msNewOldestMs).toISOString() : null,
           });
           _msUpdateStatusBar(); _msUpdateScanBtn();
           if (_msPanelEl && _msGridScope === scope) _msReloadGrid().catch(() => {});
@@ -27926,6 +27934,29 @@ if (type === "warn" && scanLimit !== null) {
       return i === -1 ? u : u.slice(0, i);
     }
 
+    async function _msPersistRefresh(oldUrl, item) {
+      try {
+        const clean = {
+          url: item.url, proxy_url: item.proxy_url, media_type: item.media_type,
+          content_type: item.content_type, width: item.width, height: item.height,
+          filename: item.filename, msg_id: item.msg_id, timestamp: item.timestamp,
+          channel_id: item.channel_id, guild_id: item.guild_id, scope: item.scope,
+          author_id: item.author_id, author_name: item.author_name,
+        };
+        const db = await _msIdbOpen();
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction("media_items", "readwrite");
+          const st = tx.objectStore("media_items");
+          if (oldUrl !== clean.url) st.delete(oldUrl);
+          st.put(clean);
+          tx.oncomplete = resolve;
+          tx.onerror    = e => reject(e.target.error);
+        });
+      } catch (err) {
+        DEBUG && console.warn("[Mosaic] _msPersistRefresh:", err);
+      }
+    }
+
     function _msRefreshMediaUrl(item) {
       if (item._msDead) return Promise.resolve(false);
       if (item._msRefreshPromise) return item._msRefreshPromise;
@@ -27951,8 +27982,10 @@ if (type === "warn" && scanLimit !== null) {
           const target = _msStripQuery(item.proxy_url || item.url);
           const fresh  = _msExtractMedia(msg).find(m => _msStripQuery(m.proxy_url || m.url) === target);
           if (!fresh) { item._msDead = true; return false; }
+          const oldUrl   = item.url;
           item.url       = fresh.url;
           item.proxy_url = fresh.proxy_url;
+          _msPersistRefresh(oldUrl, item);
           return true;
         } catch (err) {
           DEBUG && console.warn("[Mosaic] _msRefreshMediaUrl:", err);
@@ -27975,7 +28008,7 @@ if (type === "warn" && scanLimit !== null) {
       label.className = "ms-dead-label";
       label.textContent = t("ms_expired") || "Link expired";
       if (size === "full") {
-        ph.style.cssText    = "display:flex;flex-direction:column;align-items:center;gap:8px;color:#72767d;";
+        ph.style.cssText    = "position:static;inset:auto;z-index:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:transparent;color:#72767d;";
         icon.style.cssText  = "font-size:48px;opacity:0.6;";
         label.style.cssText = "font-size:13px;";
       }
