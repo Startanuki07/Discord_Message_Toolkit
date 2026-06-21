@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.0.5
+// @version      2.7.0.6
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -488,6 +488,8 @@
     window.addEventListener("beforeunload", () => registry.runAll(), { once: true });
     return registry;
   })();
+
+  let _wormholeInstance = null;
 
   function dmtShowToast(message, opts = {}) {
     const { duration = 2200, onClick = null, icon = null } = opts;
@@ -12435,8 +12437,14 @@
         req.onupgradeneeded = (e) => {
           e.target.result.createObjectStore("blobs", { keyPath: "id" });
         };
+        req.onblocked = () => {
+          DEBUG && console.warn("[GifCache IDB] open blocked — 請關閉其他分頁的 Discord 標籤後重試");
+        };
         req.onsuccess = (e) => resolve(e.target.result);
-        req.onerror = (e) => reject(e.target.error);
+        req.onerror = (e) => {
+          _idbPromise = null;
+          reject(e.target.error);
+        };
       });
       return _idbPromise;
     }
@@ -13579,7 +13587,7 @@
             return;
           }
 
-          const token = window.wormholeModule?._cachedToken || null;
+          const token = _wormholeInstance?._cachedToken || null;
 
           if (!token) {
             const CONSENT_KEY = "dmt_fixcdn_consent";
@@ -14800,8 +14808,8 @@
     }
 
     function _wormholeOrFallback(channelUrl) {
-      if (window.wormholeModule?.navigateToChannel) {
-        window.wormholeModule.navigateToChannel(channelUrl);
+      if (_wormholeInstance?.navigateToChannel) {
+        _wormholeInstance.navigateToChannel(channelUrl);
         return;
       }
       try {
@@ -19901,9 +19909,10 @@ unsafeWindow.fetch = function(...args) {
     try {
       const wormholeModule = new WormholeModule();
       wormholeModule.initialize();
-      window.wormholeModule = wormholeModule;
+      _wormholeInstance = wormholeModule;
 
       if (DEBUG) {
+        window.wormholeModule = wormholeModule;
         window.testWormhole = () => {
           DEBUG && console.log("=== Wormhole Pro Debug ===");
           const data = window.wormholeModule.getData();
@@ -22486,9 +22495,14 @@ unsafeWindow.fetch = function(...args) {
             db.createObjectStore("media_stats", { keyPath: "scope_key" });
           }
         };
+        req.onblocked = () => {
+          DEBUG && console.warn("[IDB] open blocked — 其他分頁仍持有舊版連線");
+          dmtShowToast(t("mp_idb_blocked") || "⚠️ Please close other Discord tabs and retry", { duration: 4000 });
+        };
         req.onsuccess = e => { _idbInstance = e.target.result; resolve(_idbInstance); };
         req.onerror   = e => {
           DEBUG && console.warn("[IDB] open failed:", e.target.error);
+          _idbReadyPromise = null;
           reject(e.target.error);
         };
       });
@@ -26760,7 +26774,7 @@ if (type === "warn" && scanLimit !== null) {
       clearTimeout(_debounceTimer);
       _debounceTimer = setTimeout(async () => {
 
-        const wh = window.wormholeModule;
+        const wh = _wormholeInstance;
         const apiMode = localStorage.getItem("wh_api_mode") === "true";
         const token = (apiMode && isModEnabled("mod_wormhole")) ? (wh?._cachedToken || null) : null;
         const channelId = getCurrentChannelId();
@@ -27422,8 +27436,15 @@ if (type === "warn" && scanLimit !== null) {
             db.createObjectStore("media_stats", { keyPath: "scope_key" });
           }
         };
+        req.onblocked = () => {
+          DEBUG && console.warn("[Mosaic] IDB open blocked — 其他分頁仍持有舊版連線");
+        };
         req.onsuccess = e => { _msIdbInstance = e.target.result; resolve(_msIdbInstance); };
-        req.onerror   = e => { DEBUG && console.warn("[Mosaic] IDB open failed:", e.target.error); reject(e.target.error); };
+        req.onerror   = e => {
+          DEBUG && console.warn("[Mosaic] IDB open failed:", e.target.error);
+          _msIdbReady = null;
+          reject(e.target.error);
+        };
       });
       return _msIdbReady;
     }
