@@ -1,7 +1,5 @@
 # 📮 Message Toolkit for Discord Web Client
 
-📍 **[Author GitHub](https://github.com/Startanuki07?tab=repositories)** | **[Script Repository](https://github.com/Startanuki07/Discord_Message_Toolkit)**
-
 **A userscript that adds a message utility toolbar, an enhanced forwarding panel, cross-channel shortcuts, an expression collection manager, header utility controls, a server media gallery, a personal message manager, and more to the Discord web client.**
 
 ---
