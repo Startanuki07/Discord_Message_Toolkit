@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.0.15
+// @version      2.7.0.17
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -6534,8 +6534,6 @@
         "[Discord Utilities] Initializing Forwarding Manager (v20.1 Memory Safe)...",
       );
 
-    let pollInterval = null;
-    let isPollingActive = false;
     const searchTimers = new Map();
 
     const STYLES = `
@@ -6905,14 +6903,6 @@
       } catch (error) {
         return false;
       }
-    }
-
-    const nsfwCache = new WeakMap();
-    function getCachedNSFWStatus(row) {
-      if (nsfwCache.has(row)) return nsfwCache.get(row);
-      const isNSFW = isNSFWChannel(row);
-      nsfwCache.set(row, isNSFW);
-      return isNSFW;
     }
 
     function truncateText(text, length = 5) {
@@ -11024,7 +11014,6 @@
           addItem("copy", t("copy_all_links"), links.join("\n"));
         if (links.length >= 1) {
           const linkPrefix = config.linkText || "";
-          const displayPrefix = linkPrefix ? linkPrefix : "";
 
           const labelStyle =
             linkPrefix && linkPrefix !== "" ? `style="color:cyan"` : "";
@@ -12908,7 +12897,6 @@
     let activeBatchCollection = null;
     let activeBatchType = null;
     let dragSrcIndex = null;
-    let currentViewType = TYPES.EMOJI;
     let itemDragSrcIdx = null;
 
     function repositionDropdown(center = false) {
@@ -13331,7 +13319,6 @@
     }
 
     function renderTabsView(input, type) {
-      currentViewType = type;
       const dropdown = document.querySelector(".my-popover-menu");
       if (!dropdown) return;
       dropdown.innerHTML = "";
@@ -13603,7 +13590,7 @@
           }
 
           if (totalExpired === 0) {
-            showToast(t("em_refresh_no_expired"));
+            showEmojiToast(t("em_refresh_no_expired"));
             return;
           }
 
@@ -13614,7 +13601,7 @@
             if (localStorage.getItem(CONSENT_KEY) !== "1") {
               const agreed = await dmtConfirm(t("em_refresh_consent"));
               if (!agreed) {
-                showToast(t("em_refresh_cancel_tip"));
+                showEmojiToast(t("em_refresh_cancel_tip"));
                 return;
               }
               localStorage.setItem(CONSENT_KEY, "1");
@@ -13755,7 +13742,7 @@
             ? t("em_refresh_fail")
             : t("em_refresh_no_expired");
 
-          showToast(msg);
+          showEmojiToast(msg);
         };
         controls.appendChild(refreshBtn);
       }
@@ -16442,7 +16429,6 @@
       let dragStartX = 0;
       let dragStartY = 0;
       let hasDragged = false;
-      let isDragging = false;
 
       chip.addEventListener("dragstart", (e) => {
         DEBUG &&
@@ -16456,7 +16442,6 @@
         dragStartX = e.clientX;
         dragStartY = e.clientY;
         hasDragged = false;
-        isDragging = true;
 
         e.dataTransfer.effectAllowed = "move";
         e.dataTransfer.setData(
@@ -16494,7 +16479,6 @@
 
       chip.addEventListener("dragend", (e) => {
         DEBUG && console.log("[Drag] dragend triggered");
-        isDragging = false;
         chip.classList.remove("dragging");
 
         document.querySelectorAll(".drag-over").forEach((el) => {
@@ -17208,8 +17192,6 @@
       let panelApiMode = this.getApiMode();
       const hasToken = !!this._cachedToken;
 
-      const tokenSectionEnabled = () => panelApiMode;
-
       const panel = document.createElement("div");
       panel.id = "wh-api-panel";
 
@@ -17494,7 +17476,6 @@ unsafeWindow.fetch = function(...args) {
         }
       };
 
-      const origRefreshTokenUI = refreshTokenUI;
       panel.querySelectorAll('input[name="wh-mode"]').forEach((radio) => {
         radio.addEventListener("change", () => {
           refreshMonitorSection();
@@ -17526,6 +17507,7 @@ unsafeWindow.fetch = function(...args) {
       });
 
       refreshTokenUI();
+      refreshMonitorSection();
       if (panelApiMode && !this._cachedToken) {
         this._startTokenInterceptor((token) => {
           this._cachedToken = token;
@@ -17807,7 +17789,6 @@ unsafeWindow.fetch = function(...args) {
       const coolNote   = overlay.querySelector("#wh-send-cool-note");
       const status     = overlay.querySelector("#wh-send-status");
       const submitBtn  = overlay.querySelector("#wh-send-submit-btn");
-      const modeDesc   = overlay.querySelector("#wh-send-mode-desc");
 
       const MAX_FIELDS = 5;
       const POST_COOL_MAP = { 1: 0, 2: 0, 3: 5000, 4: 5000, 5: 8000 };
@@ -18367,11 +18348,6 @@ unsafeWindow.fetch = function(...args) {
             files[i].name || `image_${i}.png`,
           );
         }
-
-        const blob = await new Promise((resolve) => {
-          const req = new Request("", { method: "POST", body: formData });
-          req.blob ? req.blob().then(resolve) : resolve(null);
-        }).catch(() => null);
 
         return {
           headers: {
@@ -19951,7 +19927,6 @@ unsafeWindow.fetch = function(...args) {
 
   function initBlacklist() {
     const BL_STORE_KEY  = "blacklist_users";
-    const BL_MUTED_CLS  = "dmt-bl-muted";
     const BL_PANEL_ID   = "dmt-bl-panel";
     const MSG_SEL       = '[data-list-item-id*="chat-messages-"]';
     const AUTHOR_SEL    = '[class*="username_"]';
@@ -20927,7 +20902,6 @@ unsafeWindow.fetch = function(...args) {
 
     const BOT_TAG_SEL     = '[class*="botTag"]';
     const REPLY_SEL       = '[class*="repliedMessage_"]';
-    const REPLY_USER_SEL  = '[class*="repliedMessage_"] [class*="username_"]';
     const GROUP_START_SEL = '[class*="groupStart_"]';
 
     function _applyBotRelay(container, nameMap) {
@@ -20990,12 +20964,6 @@ unsafeWindow.fetch = function(...args) {
     }
     function blHas(name) {
       return blLoad().some(u => u.name === name);
-    }
-    function blGetStyle(name) {
-      return blLoad().find(u => u.name === name)?.style ?? 2;
-    }
-    function blGetExpiresAt(name) {
-      return blLoad().find(u => u.name === name)?.expiresAt ?? null;
     }
     function blSetStyle(name, style) {
       const list = blLoad();
@@ -24189,7 +24157,6 @@ unsafeWindow.fetch = function(...args) {
             _browseOffset = cached.length;
             _browseTotal  = cached.length;
             _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
-            const meta = await _readSyncMeta(scope);
             if (_token) {
               _deltaSync(scope).then(newCount => {
                 if (newCount > 0 && capturedGen === _browseGen) {
@@ -26722,7 +26689,7 @@ if (type === "warn" && scanLimit !== null) {
       const v = parseInt(input, 10);
       if (Number.isFinite(v) && v >= 50 && v <= 1000) {
         GMStore.set(SCAN_LIMIT_KEY, String(v));
-        showToast(`✅ Scan limit updated to ${v}`);
+        dmtShowToast(`✅ Scan limit updated to ${v}`);
       }
     });
   };
@@ -27365,6 +27332,12 @@ if (type === "warn" && scanLimit !== null) {
     const MS_IDB_VER      = 2;
     const MS_SCAN_ITEM_CAP = 5000;
 
+    function _getCtx() {
+      const m = location.pathname.match(/^\/channels\/([^/]+)\/([^/]+)(?:\/([^/]+))?/);
+      if (!m) return null;
+      return { guildId: m[1] === "@me" ? null : m[1], channelId: m[2], threadId: m[3] || null };
+    }
+
     const MS_TIME_RANGES = {
       "1h":     1 * 60 * 60 * 1000,
       "6h":     6 * 60 * 60 * 1000,
@@ -27928,7 +27901,19 @@ if (type === "warn" && scanLimit !== null) {
       };
     }
 
-    function _msGetChannelName(_channelId) {
+    function _msGetChannelName(channelId) {
+      try {
+        const cid = channelId || location.pathname.match(/\/channels\/[^/]+\/(\d+)/)?.[1];
+        if (!cid) return null;
+        const a = document.querySelector(`a[href*="/${cid}"]`);
+        if (!a) return null;
+        const li = a.closest("li[data-dnd-name]");
+        const dndName = li?.getAttribute("data-dnd-name")?.trim();
+        if (dndName) return dndName;
+        const nameEl = a.querySelector('[class*="name_"]:not([class*="hiddenVisually"])');
+        const txt = nameEl?.textContent?.trim();
+        if (txt) return txt;
+      } catch (_) {}
       return null;
     }
 
@@ -28425,7 +28410,7 @@ if (type === "warn" && scanLimit !== null) {
         _msChanFilterSelEl = _msChanFilterRowEl = null;
         return;
       }
-      const { scope, scopeType, guildId, channelId } = _msDetectScope();
+      const { scope, guildId, channelId } = _msDetectScope();
       _msGridScope  = scope;
       _msGridFilter = "all";
       _msGridItems  = [];
