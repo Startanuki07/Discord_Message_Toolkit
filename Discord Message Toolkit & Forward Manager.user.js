@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.0.7
+// @version      2.7.0.15
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -1356,6 +1356,8 @@
       ms_scope_server:    "Server",
       ms_scope_channel:   "Channel",
       ms_filter_all:      "All",
+      ms_chan_filter_all:   "All channels",
+      ms_chan_filter_label: "Filter by channel (cached data only):",
       ms_filter_images:   "Images",
       ms_filter_videos:   "Videos",
       ms_items:           "items",
@@ -1368,6 +1370,7 @@
       ms_btn_jump:        "Jump to message",
       ms_btn_download:    "Download",
       ms_err_forbidden:   "Permission denied for this scope",
+      ms_err_channel_type: "This channel type doesn't support Discord's search API (commonly threads or voice-channel text chat) — switching to Server scope can often work around this",
       ms_no_token_warn:   "⚠️ Requires API Mode — enable in Wormhole settings",
       ms_range_1h:        "Last 1 hour",
       ms_range_6h:        "Last 6 hours",
@@ -1444,6 +1447,7 @@
       mp_err_401:               "Token expired. Please refresh the page.",
       mp_err_403:               "Cannot delete this message (no permission).",
       mp_err_net:               "Network error. Retrying…",
+      mp_idb_blocked:           "⚠️ Please close other Discord tabs and retry",
       mp_quota_label:           "Daily quota:",
       mp_quota_conservative:    "Conservative — 20 / day",
       mp_quota_balanced:        "Balanced — 50 / day (default)",
@@ -1929,6 +1933,8 @@
       ms_scope_server:    "伺服器",
       ms_scope_channel:   "頻道",
       ms_filter_all:      "全部",
+      ms_chan_filter_all:   "所有頻道",
+      ms_chan_filter_label: "篩選頻道（僅篩選已快取資料，不重新掃描）：",
       ms_filter_images:   "圖片",
       ms_filter_videos:   "影片",
       ms_items:           "個媒體",
@@ -1941,6 +1947,7 @@
       ms_btn_jump:        "跳至訊息",
       ms_btn_download:    "下載",
       ms_err_forbidden:   "此範圍無存取權限",
+      ms_err_channel_type: "此頻道類型不支援 Discord 的搜尋 API（常見於討論串或語音頻道文字聊天）— 切換到 Server 範圍通常可以繞過此限制",
       ms_no_token_warn:   "⚠️ 需要 API 模式 — 請在蟲洞設定中啟用",
       ms_range_1h:        "1 小時內",
       ms_range_6h:        "6 小時內",
@@ -2017,6 +2024,7 @@
       mp_err_401:               "Token 已失效，請重新整理頁面。",
       mp_err_403:               "無法刪除此訊息（權限不足）。",
       mp_err_net:               "網路錯誤，重試中…",
+      mp_idb_blocked:           "⚠️ 請關閉其他 Discord 分頁後重試",
       mp_quota_label:           "每日配額：",
       mp_quota_conservative:    "保守 — 20 則 / 天",
       mp_quota_balanced:        "平衡 — 50 則 / 天（預設）",
@@ -2500,6 +2508,8 @@
       ms_scope_server:    "服务器",
       ms_scope_channel:   "频道",
       ms_filter_all:      "全部",
+      ms_chan_filter_all:   "所有频道",
+      ms_chan_filter_label: "筛选频道（仅筛选已缓存数据，不重新扫描）：",
       ms_filter_images:   "图片",
       ms_filter_videos:   "视频",
       ms_items:           "个媒体",
@@ -2512,6 +2522,7 @@
       ms_btn_jump:        "跳转到消息",
       ms_btn_download:    "下载",
       ms_err_forbidden:   "无此范围访问权限",
+      ms_err_channel_type: "此频道类型不支持 Discord 的搜索 API（常见于讨论串或语音频道文字聊天）— 切换到 Server 范围通常可以绕过此限制",
       ms_no_token_warn:   "⚠️ 需要 API 模式 — 请在虫洞设置中启用",
       ms_range_1h:        "1小时内",
       ms_range_6h:        "6小时内",
@@ -2633,6 +2644,7 @@
       mp_err_401:               "Token 无效，请刷新页面。",
       mp_err_403:               "无法删除此消息（权限不足）。",
       mp_err_net:               "网络错误，正在重试…",
+      mp_idb_blocked:           "⚠️ 请关闭其他 Discord 标签页后重试",
       mp_quota_label:           "每日上限：",
       mp_quota_conservative:    "保守 — 20 条/天",
       mp_quota_balanced:        "均衡 — 50 条/天（默认）",
@@ -3080,6 +3092,8 @@
       ms_scope_server:    "サーバー",
       ms_scope_channel:   "チャンネル",
       ms_filter_all:      "すべて",
+      ms_chan_filter_all:   "すべてのチャンネル",
+      ms_chan_filter_label: "チャンネルで絞り込み（キャッシュのみ、再スキャンなし）：",
       ms_filter_images:   "画像",
       ms_filter_videos:   "動画",
       ms_items:           "件",
@@ -3092,6 +3106,7 @@
       ms_btn_jump:        "メッセージに移動",
       ms_btn_download:    "ダウンロード",
       ms_err_forbidden:   "このスコープへのアクセスが拒否されました",
+      ms_err_channel_type: "このチャンネルタイプは Discord の検索 API に対応していません（スレッドやボイスチャンネルのテキストチャットでよく発生）— Server スコープに切り替えると回避できることが多いです",
       ms_no_token_warn:   "⚠️ API モードが必要です — ワームホール設定で有効にしてください",
       ms_range_1h:        "1時間以内", ms_range_6h:   "6時間以内",
       ms_range_12h:       "12時間以内", ms_range_1d:  "1日以内",
@@ -3207,6 +3222,7 @@
       mp_err_401:               "トークンが無効です。ページを再読み込みしてください。",
       mp_err_403:               "このメッセージを削除できません（権限不足）。",
       mp_err_net:               "ネットワークエラー、再試行中…",
+      mp_idb_blocked:           "⚠️ 他の Discord タブを閉じてから再試行してください",
       mp_quota_label:           "1日の上限：",
       mp_quota_conservative:    "控えめ — 20 件/日",
       mp_quota_balanced:        "バランス — 50 件/日（デフォルト）",
@@ -3695,6 +3711,8 @@
       ms_scope_server:    "서버",
       ms_scope_channel:   "채널",
       ms_filter_all:      "전체",
+      ms_chan_filter_all:   "모든 채널",
+      ms_chan_filter_label: "채널 필터(캐시된 데이터만, 재스캔 없음):",
       ms_filter_images:   "이미지",
       ms_filter_videos:   "동영상",
       ms_items:           "개",
@@ -3707,6 +3725,7 @@
       ms_btn_jump:        "메시지로 이동",
       ms_btn_download:    "다운로드",
       ms_err_forbidden:   "이 범위에 대한 접근이 거부되었습니다",
+      ms_err_channel_type: "이 채널 유형은 Discord의 검색 API를 지원하지 않습니다 (스레드 또는 음성 채널 텍스트 채팅에서 흔함) — Server 범위로 전환하면 우회할 수 있는 경우가 많습니다",
       ms_no_token_warn:   "⚠️ API 모드가 필요합니다 — 웜홀 설정에서 활성화하세요",
       ms_range_1h:        "1시간 이내", ms_range_6h:   "6시간 이내",
       ms_range_12h:       "12시간 이내", ms_range_1d:  "1일 이내",
@@ -3778,6 +3797,7 @@
       mp_err_401:               "토큰이 만료되었습니다. 페이지를 새로고침하세요.",
       mp_err_403:               "이 메시지를 삭제할 수 없습니다 (권한 부족).",
       mp_err_net:               "네트워크 오류, 재시도 중…",
+      mp_idb_blocked:           "⚠️ 다른 Discord 탭을 닫은 후 다시 시도하세요",
       mp_quota_label:           "일일 한도:",
       mp_quota_conservative:    "보수적 — 20개/일",
       mp_quota_balanced:        "균형 — 50개/일 (기본값)",
@@ -27379,6 +27399,7 @@ if (type === "warn" && scanLimit !== null) {
     let _msGridCursor   = null;
     let _msGridAll      = false;
     let _msGridFilter   = "all";
+    let _msChannelFilter = "all";
     let _msGridScope    = null;
     let _msGridRendered = new Map();
     let _msScrollTimer  = null;
@@ -27386,6 +27407,8 @@ if (type === "warn" && scanLimit !== null) {
 
     let _msScopeSelEl  = null;
     let _msTypeSelEl   = null;
+    let _msChanFilterSelEl = null;
+    let _msChanFilterRowEl = null;
     let _msScanBtnEl   = null;
     let _msStatusBarEl = null;
     let _msProgressEl  = null;
@@ -27595,7 +27618,7 @@ if (type === "warn" && scanLimit !== null) {
       } catch (_) { return { stats: null, sync: null }; }
     }
 
-    async function _msReadPage(scope, filter, cursorPos, pageSize) {
+    async function _msReadPage(scope, filter, cursorPos, pageSize, chanFilter) {
       pageSize = pageSize || MS_PAGE_SIZE;
       try {
         const db = await _msIdbOpen();
@@ -27616,7 +27639,9 @@ if (type === "warn" && scanLimit !== null) {
               cur.continue();
               return;
             }
-            if (filter === "all" || v.media_type === filter) items.push(v);
+            const typeOk = filter === "all" || v.media_type === filter;
+            const chanOk = !chanFilter || chanFilter === "all" || v.channel_id === chanFilter;
+            if (typeOk && chanOk) items.push(v);
             cur.continue();
           };
           req.onerror = e => reject(e.target.error);
@@ -27624,6 +27649,30 @@ if (type === "warn" && scanLimit !== null) {
       } catch (err) {
         DEBUG && console.warn("[Mosaic] _msReadPage:", err);
         return [];
+      }
+    }
+
+    async function _msGetDistinctChannels(scope) {
+      try {
+        const db = await _msIdbOpen();
+        return await new Promise((resolve, reject) => {
+          const tx    = db.transaction("media_items", "readonly");
+          const idx   = tx.objectStore("media_items").index("scope_ts");
+          const range = IDBKeyRange.bound([scope, ""], [scope, "\uffff"]);
+          const req   = idx.openCursor(range);
+          const counts = new Map();
+          req.onsuccess = e => {
+            const cur = e.target.result;
+            if (!cur) { resolve(counts); return; }
+            const cid = cur.value.channel_id;
+            if (cid) counts.set(cid, (counts.get(cid) || 0) + 1);
+            cur.continue();
+          };
+          req.onerror = e => reject(e.target.error);
+        });
+      } catch (err) {
+        DEBUG && console.warn("[Mosaic] _msGetDistinctChannels:", err);
+        return new Map();
       }
     }
 
@@ -27797,7 +27846,19 @@ if (type === "warn" && scanLimit !== null) {
             await _msWriteSyncMeta(scope, { scanned_count: _msScanState.scanned, last_scan_at: new Date().toISOString(), newest_timestamp: newestTs, is_complete: false });
           } else {
             _msScanState.phase = "error";
-            _msScanState.error = "HTTP 400 — " + (t("ms_err_forbidden") || "Check scope permissions or narrow time range");
+            let detail = "", code = null;
+            try {
+              const parsed = JSON.parse(res.body || "{}");
+              code = parsed.code;
+              detail = parsed.message ? ` (code ${code ?? "?"}: ${parsed.message})` : "";
+            } catch (_) {
+              detail = res.body ? ` (${String(res.body).slice(0, 120)})` : "";
+            }
+            DEBUG && console.warn("[Mosaic] HTTP 400 raw body:", res.body);
+            const tail = code === 50024
+              ? (t("ms_err_channel_type") || "This channel type doesn't support Discord's search API (commonly threads or voice-channel text chat) — switching to Server scope can often work around this")
+              : (t("ms_err_forbidden") || "Check scope permissions or narrow time range");
+            _msScanState.error = "HTTP 400" + detail + " — " + tail;
           }
           _msUpdateStatusBar(); _msUpdateProgressBar(); _msUpdateScanBtn();
           if (_msPanelEl && _msGridScope === scope) _msReloadGrid().catch(() => {});
@@ -27837,7 +27898,10 @@ if (type === "warn" && scanLimit !== null) {
             oldest_scanned_ts: _msNewOldestMs != null ? new Date(_msNewOldestMs).toISOString() : null,
           });
           _msUpdateStatusBar(); _msUpdateScanBtn();
-          if (_msPanelEl && _msGridScope === scope) _msReloadGrid().catch(() => {});
+          if (_msPanelEl && _msGridScope === scope) {
+            _msReloadGrid().catch(() => {});
+            _msRefreshChanFilterOptions().catch(() => {});
+          }
           return;
         }
         await _msSleep(MS_SCAN_DELAY);
@@ -27864,10 +27928,8 @@ if (type === "warn" && scanLimit !== null) {
       };
     }
 
-    function _msGetChannelName() {
-      return document.querySelector('[class*="channelName"]')?.textContent?.trim()
-          || document.querySelector('[class*="name_"]')?.textContent?.trim()
-          || "channel";
+    function _msGetChannelName(_channelId) {
+      return null;
     }
 
     function _msRelTime(iso) {
@@ -27883,6 +27945,33 @@ if (type === "warn" && scanLimit !== null) {
       if (!iso) return "";
       const d = new Date(iso);
       return d.toLocaleDateString() + " " + d.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+    }
+
+    async function _msRefreshChanFilterOptions() {
+      if (!_msChanFilterRowEl || !_msChanFilterSelEl || !_msGridScope) return;
+      const counts = await _msGetDistinctChannels(_msGridScope);
+      if (counts.size < 2) {
+        _msChanFilterRowEl.style.display = "none";
+        if (_msChannelFilter !== "all") { _msChannelFilter = "all"; _msReloadGrid().catch(() => {}); }
+        return;
+      }
+      const prevValue = _msChanFilterSelEl.value || "all";
+      _msChanFilterSelEl.innerHTML = "";
+      const optAll = document.createElement("option");
+      optAll.value = "all";
+      optAll.textContent = t("ms_chan_filter_all") || "All channels";
+      _msChanFilterSelEl.appendChild(optAll);
+      [...counts.entries()].sort((a, b) => b[1] - a[1]).forEach(([cid, cnt]) => {
+        const o = document.createElement("option");
+        o.value = cid;
+        const name = _msGetChannelName(cid);
+        o.textContent = (name ? `# ${name}` : `#${cid}`) + ` (${cnt})`;
+        _msChanFilterSelEl.appendChild(o);
+      });
+      const stillExists = [...counts.keys()].includes(prevValue);
+      _msChanFilterSelEl.value = stillExists ? prevValue : "all";
+      _msChannelFilter = _msChanFilterSelEl.value;
+      _msChanFilterRowEl.style.display = "flex";
     }
 
     function _msUpdateStatusBar() {
@@ -28024,29 +28113,35 @@ if (type === "warn" && scanLimit !== null) {
       cell.className = "ms-cell";
       cell.style.cssText = `position:absolute;top:${row*MS_CELL_H}px;left:${col*MS_CELL_W}px;width:${MS_CELL_W}px;height:${MS_CELL_H}px;overflow:hidden;border-radius:4px;cursor:pointer;background:#1e1f22;`;
 
-      const img = document.createElement("img");
-      img.className  = "ms-thumb";
-      img.loading    = "lazy";
-      img.decoding   = "async";
-      img.alt = item.filename || "";
-      img.style.cssText = "width:100%;height:100%;object-fit:cover;transition:opacity 0.2s;";
-      const _msSetThumbSrc = () => {
-        const base = item.proxy_url || item.url;
-        img.src = base.includes("?") ? base + `&width=${MS_CELL_W}&height=${MS_CELL_H}` : base + `?width=${MS_CELL_W}&height=${MS_CELL_H}`;
-      };
-      if (item._msDead) {
-        img.style.display = "none";
-        cell.appendChild(_msBuildDeadPlaceholder("cell"));
+      const isVideo = item.media_type === "video";
+      let img = null;
+      if (isVideo) {
+        cell.style.background = "#1e1f22";
       } else {
-        img.addEventListener("error", () => {
-          _msRefreshMediaUrl(item).then(ok => {
-            if (ok) { _msSetThumbSrc(); }
-            else { img.style.display = "none"; cell.appendChild(_msBuildDeadPlaceholder("cell")); }
+        img = document.createElement("img");
+        img.className  = "ms-thumb";
+        img.loading    = "lazy";
+        img.decoding   = "async";
+        img.alt = item.filename || "";
+        img.style.cssText = "width:100%;height:100%;object-fit:cover;transition:opacity 0.2s;";
+        const _msSetThumbSrc = () => {
+          const base = item.proxy_url || item.url;
+          img.src = base.includes("?") ? base + `&width=${MS_CELL_W}&height=${MS_CELL_H}` : base + `?width=${MS_CELL_W}&height=${MS_CELL_H}`;
+        };
+        if (item._msDead) {
+          img.style.display = "none";
+          cell.appendChild(_msBuildDeadPlaceholder("cell"));
+        } else {
+          img.addEventListener("error", () => {
+            _msRefreshMediaUrl(item).then(ok => {
+              if (ok) { _msSetThumbSrc(); }
+              else { img.style.display = "none"; cell.appendChild(_msBuildDeadPlaceholder("cell")); }
+            });
           });
-        });
-        _msSetThumbSrc();
+          _msSetThumbSrc();
+        }
+        cell.appendChild(img);
       }
-      cell.appendChild(img);
 
       if (item.media_type === "video" || item.media_type === "gif") {
         const badge = document.createElement("div");
@@ -28063,13 +28158,7 @@ if (type === "warn" && scanLimit !== null) {
         author.textContent = "@" + item.author_name;
         hover.appendChild(author);
       }
-      const _msChName = (() => {
-        try {
-          const urlCh = location.pathname.match(/\/channels\/[^/]+\/(\d+)/)?.[1];
-          if (urlCh === item.channel_id) return _msGetChannelName();
-        } catch (_) {}
-        return null;
-      })();
+      const _msChName = item.channel_id ? (_msGetChannelName(item.channel_id) || item.channel_id) : null;
       if (_msChName) {
         const chEl = document.createElement("span");
         chEl.className = "ms-channel";
@@ -28152,7 +28241,7 @@ if (type === "warn" && scanLimit !== null) {
       if (_msGridLoading || !_msGridScope || !_msGridContEl) return;
       _msGridLoading = true;
       try {
-        const items = await _msReadPage(_msGridScope, _msGridFilter, null, MS_PAGE_SIZE);
+        const items = await _msReadPage(_msGridScope, _msGridFilter, null, MS_PAGE_SIZE, _msChannelFilter);
         _msGridItems   = items;
         _msGridCursor  = items.length ? [_msGridScope, items[items.length-1].timestamp, items[items.length-1].url] : null;
         _msGridAll     = items.length < MS_PAGE_SIZE;
@@ -28166,7 +28255,7 @@ if (type === "warn" && scanLimit !== null) {
 
     async function _msLoadMoreItems() {
       if (_msGridAll || !_msGridScope || !_msGridCursor) return;
-      const more = await _msReadPage(_msGridScope, _msGridFilter, _msGridCursor, MS_PAGE_SIZE);
+      const more = await _msReadPage(_msGridScope, _msGridFilter, _msGridCursor, MS_PAGE_SIZE, _msChannelFilter);
       if (!more.length) { _msGridAll = true; return; }
       _msGridItems  = _msGridItems.concat(more);
       _msGridCursor = [_msGridScope, more[more.length-1].timestamp, more[more.length-1].url];
@@ -28289,7 +28378,7 @@ if (type === "warn" && scanLimit !== null) {
           img.addEventListener("error", () => { _msRefreshMediaUrl(item).then(() => render(cur)); });
           mediaArea.appendChild(img);
         }
-        metaEl.textContent = [item.author_name, _msGetChannelName(), _msFmtDate(item.timestamp)].filter(Boolean).join("  ·  ");
+        metaEl.textContent = [item.author_name, _msGetChannelName(item.channel_id) || item.channel_id, _msFmtDate(item.timestamp)].filter(Boolean).join("  ·  ");
         const gid = item.guild_id
             || (item.scope?.startsWith("g:") ? item.scope.slice(2) : _getCtx()?.guildId)
             || "@me";
@@ -28333,6 +28422,7 @@ if (type === "warn" && scanLimit !== null) {
         _msPanelEl.remove(); _msPanelEl = null;
         _msScanBtnEl = _msStatusBarEl = _msProgressEl = _msGridContEl = null;
         _msScopeSelEl = _msTypeSelEl = null;
+        _msChanFilterSelEl = _msChanFilterRowEl = null;
         return;
       }
       const { scope, scopeType, guildId, channelId } = _msDetectScope();
@@ -28370,32 +28460,34 @@ if (type === "warn" && scanLimit !== null) {
       toolbar.appendChild(titleEl);
 
       const _msGetSrvName = () => {
-        const parts = document.title.split(/\s[—\-]\s/);
-        if (parts.length >= 2) return parts[parts.length - 2].trim();
-        return document.querySelector('[class*="guildName_"]')?.textContent?.trim() || null;
+        try {
+          const el = document.querySelector('[aria-selected="true"][class*="guild" i], [class*="selected_"][class*="listItem"]');
+          const label = el?.getAttribute?.("aria-label");
+          if (label) {
+            const parts = label.split(/[,，]/);
+            const name = parts[parts.length - 1]?.trim();
+            if (name) return name;
+          }
+        } catch (_) {}
+        return null;
       };
       const srvName = guildId ? (_msGetSrvName() || (t("ms_scope_server") || "Server")) : null;
       _msScopeSelEl = document.createElement("select");
       _msScopeSelEl.style.cssText = "background:#1e1f22;border:1px solid rgba(255,255,255,0.12);color:#dbdee1;border-radius:6px;padding:3px 6px;font-size:12px;cursor:pointer;";
 
       const optSrv = document.createElement("option");
-      optSrv.value       = scope || "";
-      optSrv.textContent = guildId ? `🌐 ${srvName}` : `# ${_msGetChannelName()}`;
+      optSrv.value       = guildId ? `g:${guildId}` : (scope || "");
+      optSrv.textContent = guildId ? `🌐 ${srvName}` : `# ${channelId || "channel"}`;
       _msScopeSelEl.appendChild(optSrv);
-
-      let _optCh = null;
-      if (guildId && channelId) {
-        _optCh = document.createElement("option");
-        _optCh.value       = `c:${channelId}`;
-        _optCh.textContent = `# ${_msGetChannelName()}`;
-        _msScopeSelEl.appendChild(_optCh);
-      }
+      _msScopeSelEl.value = optSrv.value;
 
       _msScopeSelEl.addEventListener("change", () => {
         _msGridScope = _msScopeSelEl.value;
+        _msChannelFilter = "all";
         _msGridItems = []; _msGridRendered.clear();
         if (_msGridContEl) _msGridContEl.innerHTML = "";
         _msReloadGrid().catch(() => {});
+        _msRefreshChanFilterOptions().catch(() => {});
         _msUpdateStatusBar();
       });
 
@@ -28403,10 +28495,6 @@ if (type === "warn" && scanLimit !== null) {
       const _msOnUrlChange = () => {
         const det = _msDetectScope();
         if (!det.scope) return;
-        if (_optCh && det.guildId) {
-          _optCh.value       = `c:${det.channelId}`;
-          _optCh.textContent = `# ${_msGetChannelName()}`;
-        }
         if (_msScopeSelEl.value.startsWith("c:") && det.channelId) {
           _msScopeSelEl.value = `c:${det.channelId}`;
           _msGridScope = _msScopeSelEl.value;
@@ -28516,6 +28604,7 @@ if (type === "warn" && scanLimit !== null) {
         panel.remove(); _msPanelEl = null;
         _msScanBtnEl = _msStatusBarEl = _msProgressEl = _msGridContEl = null;
         _msScopeSelEl = _msTypeSelEl = null;
+        _msChanFilterSelEl = _msChanFilterRowEl = null;
         document.removeEventListener("keydown", panelEsc, false);
       });
       toolbar.appendChild(closeBtn);
@@ -28644,6 +28733,28 @@ if (type === "warn" && scanLimit !== null) {
       _msCustomRowEl.appendChild(endInput);
       _msCustomRowEl.appendChild(applyBtn);
       panel.appendChild(_msCustomRowEl);
+
+      _msChanFilterRowEl = document.createElement("div");
+      _msChanFilterRowEl.style.cssText = [
+        "display:none","align-items:center","gap:8px","padding:6px 12px",
+        "border-bottom:1px solid rgba(255,255,255,0.06)","flex-shrink:0",
+        "background:rgba(0,0,0,0.15)","font-size:12px","color:#b5bac1",
+      ].join(";");
+      const _chanLbl = document.createElement("span");
+      _chanLbl.textContent = t("ms_chan_filter_label") || "Channel:";
+      _chanLbl.style.flexShrink = "0";
+      _msChanFilterSelEl = document.createElement("select");
+      _msChanFilterSelEl.style.cssText = "background:#1e1f22;border:1px solid rgba(255,255,255,0.15);color:#dbdee1;border-radius:6px;padding:3px 6px;font-size:12px;cursor:pointer;flex:1;min-width:0;";
+      _msChanFilterSelEl.addEventListener("change", () => {
+        _msChannelFilter = _msChanFilterSelEl.value;
+        _msGridItems = []; _msGridRendered.clear();
+        if (_msGridContEl) _msGridContEl.innerHTML = "";
+        _msReloadGrid().catch(() => {});
+      });
+      _msChanFilterRowEl.appendChild(_chanLbl);
+      _msChanFilterRowEl.appendChild(_msChanFilterSelEl);
+      panel.appendChild(_msChanFilterRowEl);
+      _msRefreshChanFilterOptions().catch(() => {});
 
       const statsOverlay = document.createElement("div");
       statsOverlay.style.cssText = "display:none;flex-direction:column;gap:10px;padding:14px 16px;flex:1;overflow-y:auto;background:#2b2d31;";
