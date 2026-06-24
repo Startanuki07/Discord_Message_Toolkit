@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.0.17
+// @version      2.7.1.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -41,6 +41,7 @@
 // @connect     cdn.discordapp.com
 // @connect     media.discordapp.net
 // @connect     fixcdn.hyonsu.com
+// 💡" fixcdn.hyonsu.com " Requires explicit user consent before connecting.
 // ==/UserScript==
 
 (function () {
@@ -10446,15 +10447,77 @@
           (currentPage + 1) * PAGE_SIZE,
         );
 
-        if (!window._symDragState) {
-          window._symDragState = { srcIndex: -1, hoverTimer: null };
+        if (!window._symPtrDragState) {
+          window._symPtrDragState = {
+            srcIdx: -1, active: false, pointerId: null,
+            pagTimer: null, pagFlipping: false, _docCleanup: null,
+          };
         }
-        const DS = window._symDragState;
-        const clearDropTimer = () => {
-          if (DS.hoverTimer) {
-            clearTimeout(DS.hoverTimer);
-            DS.hoverTimer = null;
-          }
+        const gDS = window._symPtrDragState;
+        if (!gDS.pagFlipping) {
+          if (gDS._docCleanup) { gDS._docCleanup(); gDS._docCleanup = null; }
+          if (gDS.pagTimer) { clearTimeout(gDS.pagTimer); gDS.pagTimer = null; }
+          gDS.active = false; gDS.srcIdx = -1;
+        } else {
+          gDS.pagFlipping = false;
+        }
+
+        const _startDocListeners = () => {
+          if (gDS._docCleanup) return;
+
+          const docMove = (ev) => {
+            if (!gDS.active || ev.pointerId !== gDS.pointerId) return;
+            const el = document.elementFromPoint(ev.clientX, ev.clientY);
+            const pagBtn = el?.closest("[data-dmt-pag]");
+            if (pagBtn && !pagBtn.disabled) {
+              if (!gDS.pagTimer) {
+                gDS.pagTimer = setTimeout(() => {
+                  gDS.pagTimer = null;
+                  gDS.pagFlipping = true;
+                  refreshCallback(true, parseInt(pagBtn.dataset.dmtPag, 10));
+                }, 600);
+              }
+            } else {
+              if (gDS.pagTimer) { clearTimeout(gDS.pagTimer); gDS.pagTimer = null; }
+            }
+            const dd = document.querySelector(".msg-copy-dropdown");
+            if (!dd) return;
+            dd.querySelectorAll("[data-abs-idx]").forEach((r) => (r.style.outline = ""));
+            const hoverRow = el?.closest("[data-abs-idx]");
+            if (hoverRow && parseInt(hoverRow.dataset.absIdx, 10) !== gDS.srcIdx) {
+              hoverRow.style.outline = "1px dashed #7289da";
+            }
+          };
+
+          const docUp = (ev) => {
+            if (!gDS.active || ev.pointerId !== gDS.pointerId) return;
+            if (gDS.pagTimer) { clearTimeout(gDS.pagTimer); gDS.pagTimer = null; }
+            const src = gDS.srcIdx;
+            gDS.active = false; gDS.srcIdx = -1;
+            gDS._docCleanup?.(); gDS._docCleanup = null;
+            document.querySelector(".msg-copy-dropdown")
+              ?.querySelectorAll("[data-abs-idx]")
+              .forEach((r) => (r.style.outline = ""));
+            const tgt = (() => {
+              const el = document.elementFromPoint(ev.clientX, ev.clientY);
+              const r = el?.closest("[data-abs-idx]");
+              return r ? parseInt(r.dataset.absIdx, 10) : -1;
+            })();
+            if (tgt === -1 || src === tgt) return;
+            const arr = [...config.symbols];
+            const [moved] = arr.splice(src, 1);
+            arr.splice(tgt, 0, moved);
+            config.symbols = arr;
+            saveSymbols();
+            refreshCallback(true, Math.floor(tgt / PAGE_SIZE));
+          };
+
+          document.addEventListener("pointermove", docMove, { capture: true });
+          document.addEventListener("pointerup", docUp, { capture: true });
+          gDS._docCleanup = () => {
+            document.removeEventListener("pointermove", docMove, { capture: true });
+            document.removeEventListener("pointerup", docUp, { capture: true });
+          };
         };
 
         if (config.symbols.length) {
@@ -10463,7 +10526,7 @@
 
             const row = document.createElement("div");
             row.style.cssText =
-              "display:flex; align-items:center; justify-content:space-between; padding:0 12px;";
+              "display:flex; align-items:center; justify-content:space-between; padding:0 12px; min-width:0;";
             row.dataset.absIdx = absIdx;
 
             const handle = document.createElement("span");
@@ -10476,62 +10539,45 @@
               <circle cx="7.5" cy="11.5" r="1.5"/>
             </svg>`;
             handle.style.cssText =
-              "color:#555; margin-right:6px; cursor:grab; user-select:none; flex-shrink:0; display:inline-flex; align-items:center;";
-            handle.draggable = true;
+              "color:#555; margin-right:6px; cursor:grab; user-select:none; flex-shrink:0; display:inline-flex; align-items:center; touch-action:none;";
 
-            handle.addEventListener("dragstart", (e) => {
-              DS.srcIndex = absIdx;
-              e.dataTransfer.effectAllowed = "move";
-              e.dataTransfer.setData("text/plain", String(absIdx));
+            handle.addEventListener("pointerdown", (e) => {
+              if (e.button !== 0 || gDS.active) return;
+              e.preventDefault();
+              gDS.srcIdx = absIdx;
+              gDS.active = true;
+              gDS.pointerId = e.pointerId;
+              handle.setPointerCapture(e.pointerId);
+              handle.style.cursor = "grabbing";
               handle.style.color = "#7289da";
-              setTimeout(() => {
-                row.style.opacity = "0.4";
-              }, 0);
+              row.style.opacity = "0.4";
+              _startDocListeners();
             });
-            handle.addEventListener("dragend", () => {
-              row.style.opacity = "1";
+
+            handle.addEventListener("pointercancel", () => {
+              handle.style.cursor = "grab";
               handle.style.color = "#555";
-              clearDropTimer();
-              dropdown
-                .querySelectorAll("[data-abs-idx]")
-                .forEach((el) => (el.style.outline = ""));
-              DS.srcIndex = -1;
+              row.style.opacity = "1";
+              if (gDS.pagFlipping) return;
+              if (gDS.pagTimer) { clearTimeout(gDS.pagTimer); gDS.pagTimer = null; }
+              gDS.active = false; gDS.srcIdx = -1;
+              gDS._docCleanup?.(); gDS._docCleanup = null;
+              document.querySelector(".msg-copy-dropdown")
+                ?.querySelectorAll("[data-abs-idx]")
+                .forEach((r) => (r.style.outline = ""));
             });
 
-            row.addEventListener("dragover", (e) => {
-              e.preventDefault();
-              e.dataTransfer.dropEffect = "move";
-              dropdown
-                .querySelectorAll("[data-abs-idx]")
-                .forEach((el) => (el.style.outline = ""));
-              row.style.outline = "1px dashed #7289da";
-            });
-            row.addEventListener("dragleave", () => {
-              row.style.outline = "";
-            });
-            row.addEventListener("drop", (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              row.style.outline = "";
-              const src = DS.srcIndex;
-              const tgt = parseInt(row.dataset.absIdx, 10);
-              if (src === -1 || src === tgt) return;
-
-              const arr = [...config.symbols];
-              const [moved] = arr.splice(src, 1);
-              const insertAt = src < tgt ? tgt - 1 : tgt;
-              arr.splice(insertAt, 0, moved);
-              config.symbols = arr;
-              saveSymbols();
-              DS.srcIndex = -1;
-              const landPage = Math.floor(insertAt / PAGE_SIZE);
-              refreshCallback(true, landPage);
+            handle.addEventListener("pointerup", () => {
+              handle.style.cursor = "grab";
+              handle.style.color = "#555";
+              row.style.opacity = "1";
             });
 
             const insertBtn = document.createElement("button");
             insertBtn.textContent = t("insert_symbol", { s: s });
             insertBtn.style.cssText =
-              "flex:1; white-space:nowrap; text-align:left; padding:6px 0;";
+              "flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; padding:6px 0;";
+            insertBtn.title = s;
             bindButtonAction(insertBtn, s, s);
 
             const delBtn = document.createElement("button");
@@ -10572,37 +10618,11 @@
             btn.textContent = label;
             btn.style.cssText = `width:28px; padding:2px 0; opacity:${disabled ? "0.3" : "1"};`;
             btn.disabled = disabled;
+            btn.dataset.dmtPag = String(targetPage);
             btn.onclick = (e) => {
               e.stopPropagation();
               refreshCallback(true, targetPage);
             };
-
-            btn.addEventListener("dragover", (e) => {
-              e.preventDefault();
-              e.dataTransfer.dropEffect = "move";
-              if (!DS.hoverTimer && !disabled) {
-                DS.hoverTimer = setTimeout(() => {
-                  DS.hoverTimer = null;
-                  refreshCallback(true, targetPage);
-                }, 600);
-              }
-            });
-            btn.addEventListener("dragleave", clearDropTimer);
-            btn.addEventListener("drop", (e) => {
-              e.preventDefault();
-              clearDropTimer();
-              const src = DS.srcIndex;
-              if (src === -1 || disabled) return;
-              const tgt = targetPage * PAGE_SIZE;
-              const arr = [...config.symbols];
-              const [moved] = arr.splice(src, 1);
-              const insertAt = Math.min(tgt, arr.length);
-              arr.splice(insertAt, 0, moved);
-              config.symbols = arr;
-              saveSymbols();
-              DS.srcIndex = -1;
-              refreshCallback(true, targetPage);
-            });
             return btn;
           };
 
@@ -12265,6 +12285,23 @@
                 90%  { opacity: 1; transform: translate(-50%, -10px); }
                 100% { opacity: 0; transform: translate(-50%, 0);     }
             }
+
+            .dmt-recent-chip {
+                background: var(--dmt-bg-primary, #2b2d31);
+                border: 1px solid rgba(255,255,255,0.14);
+                border-radius: 12px;
+                box-shadow: 0 8px 28px rgba(0,0,0,0.65), 0 2px 8px rgba(0,0,0,0.45);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                will-change: transform;
+                position: absolute;
+            }
+            @keyframes dmt-chip-float {
+                0%,100% { transform: translateY(0px)  rotate(var(--dmt-rot)); }
+                50%     { transform: translateY(-7px) rotate(var(--dmt-rot)); }
+            }
         `;
     GM_addStyle(EMOJI_STYLES);
 
@@ -12335,6 +12372,24 @@
     function saveCollections(type, data) {
       GMStore.set(getCollectionKey(type), data, true);
     }
+
+    const RECENTLY_USED_MAX = 3;
+    function _recentKey(type) { return `dmt_recent_${type}`; }
+    function getRecentlyUsed(type) {
+      return GMStore.get(_recentKey(type), [], true);
+    }
+    function addToRecentlyUsed(type, item) {
+      const recent = getRecentlyUsed(type);
+      const newKey = typeof item === 'object'
+        ? (item.url || item.stableUrl || item.content) : item;
+      const filtered = recent.filter(r => {
+        const rk = typeof r === 'object' ? (r.url || r.stableUrl || r.content) : r;
+        return rk !== newKey;
+      });
+      filtered.unshift(item);
+      GMStore.set(_recentKey(type), filtered.slice(0, RECENTLY_USED_MAX), true);
+    }
+
     function reorderCollections(type, oldIndex, newIndex) {
       const cols = getCollections(type);
       const entries = Object.entries(cols);
@@ -12890,6 +12945,40 @@
       }
     }
 
+    async function sendCollectionItem(type, url, loadingEl) {
+      let finalUrl = url;
+
+      if (type === TYPES.EMOJI) {
+        const isNative = getNativeMode();
+        if (loadingEl) loadingEl.style.opacity = "0.5";
+        try {
+          const rawUrl =
+            typeof url === "object"
+              ? url.url || url.stableUrl || url.content
+              : url;
+          const result = await detectAnimatedUrl(rawUrl);
+          if (isNative) {
+            const nativeTag = getNativeEmojiTag(result.url, result.isGif);
+            finalUrl = nativeTag ? nativeTag : getSendableUrl(url, type);
+          } else {
+            if (result.isGif)
+              finalUrl =
+                result.url.split("?")[0] + "?size=56&quality=lossless";
+            else finalUrl = getSendableUrl(url, type);
+          }
+        } catch (e) {
+          console.warn("Detection failed", e);
+          finalUrl = getSendableUrl(url, type);
+        }
+        if (loadingEl) loadingEl.style.opacity = "1";
+      } else {
+        finalUrl = getSendableUrl(url, type);
+      }
+
+      pasteAndSend(finalUrl);
+      addToRecentlyUsed(type, url);
+    }
+
     let activeDropdown = null;
     let activeTrigger = null;
     let currentActiveTab = "General";
@@ -12932,6 +13021,7 @@
     }
 
     function closeAllMenus() {
+      hideRecentUsedOverlay(true);
       document
         .querySelectorAll(".my-popover-menu.show")
         .forEach((m) => {
@@ -13868,37 +13958,7 @@
           wrap.onclick = async (ev) => {
             if (ev.target.closest(".my-col-del-btn")) return;
             if (!ev.shiftKey) closeAllMenus();
-
-            let finalUrl = url;
-
-            if (type === TYPES.EMOJI) {
-              const isNative = getNativeMode();
-              wrap.style.opacity = "0.5";
-              try {
-                const rawUrl =
-                  typeof url === "object"
-                    ? url.url || url.stableUrl || url.content
-                    : url;
-                const result = await detectAnimatedUrl(rawUrl);
-                if (isNative) {
-                  const nativeTag = getNativeEmojiTag(result.url, result.isGif);
-                  finalUrl = nativeTag ? nativeTag : getSendableUrl(url, type);
-                } else {
-                  if (result.isGif)
-                    finalUrl =
-                      result.url.split("?")[0] + "?size=56&quality=lossless";
-                  else finalUrl = getSendableUrl(url, type);
-                }
-              } catch (e) {
-                console.warn("Detection failed", e);
-                finalUrl = getSendableUrl(url, type);
-              }
-              wrap.style.opacity = "1";
-            } else {
-              finalUrl = getSendableUrl(url, type);
-            }
-
-            pasteAndSend(finalUrl);
+            await sendCollectionItem(type, url, wrap);
           };
           grid.appendChild(wrap);
         });
@@ -13908,6 +13968,120 @@
       dropdown.appendChild(typeSidebar);
       dropdown.appendChild(colMain);
       repositionDropdown();
+    }
+
+    let _recentOverlayEl = null;
+    let _recentHideTimer = null;
+    let _recentShowTimer = null;
+    const RECENT_OVERLAY_HIDE_GRACE_MS = 1000;
+    const RECENT_OVERLAY_SHOW_INTENT_MS = 150;
+
+    function showRecentUsedOverlay(type, anchorEl, onChipClick) {
+      clearTimeout(_recentHideTimer);
+      if (_recentOverlayEl) { _recentOverlayEl.remove(); _recentOverlayEl = null; }
+
+      const recent = getRecentlyUsed(type);
+      if (!recent.length) return;
+
+      const toShow = recent.slice(0, RECENTLY_USED_MAX);
+
+      const size = (type === TYPES.STICKER) ? 64 : 52;
+      const imgSize = size - 8;
+
+      const panelEl = document.querySelector('.my-popover-menu') || anchorEl;
+      const panel = panelEl.getBoundingClientRect();
+      const chipGap = 10;
+      const edgeGap = 10;
+      const totalWidth = size * toShow.length + chipGap * (toShow.length - 1);
+
+      let originX = panel.left;
+      if (originX + totalWidth > window.innerWidth - 8) {
+        originX = Math.max(8, window.innerWidth - 8 - totalWidth);
+      }
+      const baseTop = Math.max(8, panel.top - edgeGap - size);
+
+      const SCATTER = [
+        { dx: 0,                    dy:  0, rot: -4 },
+        { dx: size + chipGap,       dy: -6, rot:  3 },
+        { dx: (size + chipGap) * 2, dy:  0, rot: -3 },
+      ];
+
+      const overlay = document.createElement('div');
+      overlay.id = 'dmt-recent-overlay';
+      overlay.style.cssText = [
+        'position:fixed', 'top:0', 'left:0',
+        'width:100vw', 'height:100vh',
+        'pointer-events:none',
+        'z-index:2147483640',
+        'overflow:visible',
+        'opacity:0',
+        'transition:opacity 0.22s ease',
+      ].join(';');
+      overlay.addEventListener('mousedown', (e) => e.stopPropagation());
+
+      toShow.forEach((item, i) => {
+        const cfg = SCATTER[i];
+        const chipX = originX + cfg.dx;
+        const chipY = baseTop + cfg.dy;
+
+        const chip = document.createElement('div');
+        chip.className = 'dmt-recent-chip';
+        chip.style.cssText = [
+          `left:${chipX}px`,
+          `top:${chipY}px`,
+          `width:${size}px`,
+          `height:${size}px`,
+          `--dmt-rot:${cfg.rot}deg`,
+          `animation:dmt-chip-float ${2.0 + i * 0.28}s ease-in-out ${i * 0.18}s infinite`,
+          'pointer-events:auto',
+          'cursor:pointer',
+        ].join(';');
+
+        chip.addEventListener('mouseenter', () => { clearTimeout(_recentHideTimer); clearTimeout(_recentShowTimer); });
+        chip.addEventListener('mouseleave', () => { _recentHideTimer = setTimeout(() => hideRecentUsedOverlay(), RECENT_OVERLAY_HIDE_GRACE_MS); });
+
+        if (onChipClick) {
+          chip.addEventListener('click', (e) => {
+            e.stopPropagation();
+            hideRecentUsedOverlay(true);
+            onChipClick(item);
+          });
+        }
+
+        const mediaEl = createMediaElement(item, true, type);
+        if (mediaEl) {
+          mediaEl.style.cssText = [
+            `width:${imgSize}px`, `height:${imgSize}px`,
+            'object-fit:contain', 'border-radius:6px',
+            'pointer-events:none', 'display:block',
+          ].join(';');
+          chip.appendChild(mediaEl);
+        }
+        overlay.appendChild(chip);
+      });
+
+      dmtGetPortal().appendChild(overlay);
+      _recentOverlayEl = overlay;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => { overlay.style.opacity = '1'; });
+      });
+    }
+
+    function hideRecentUsedOverlay(immediate = false) {
+      clearTimeout(_recentHideTimer);
+      clearTimeout(_recentShowTimer);
+      const el = _recentOverlayEl || document.getElementById('dmt-recent-overlay');
+      if (!el) return;
+      if (immediate) {
+        el.remove();
+        if (el === _recentOverlayEl) _recentOverlayEl = null;
+        return;
+      }
+      el.style.opacity = '0';
+      _recentHideTimer = setTimeout(() => {
+        el.remove();
+        if (el === _recentOverlayEl) _recentOverlayEl = null;
+      }, 240);
     }
 
     const processedNodes = new WeakSet();
@@ -14612,10 +14786,30 @@
 
           item.onclick = (e) => {
             e.stopPropagation();
+            hideRecentUsedOverlay(true);
             const inputProxy = inputElement;
             renderTabsView(inputProxy, t.id);
             updatePosition();
           };
+
+          if (t.id === TYPES.EMOJI || t.id === TYPES.STICKER) {
+            const _onChipClick = (recentItem) => {
+              closeAllMenus();
+              sendCollectionItem(t.id, recentItem, null);
+            };
+            item.addEventListener('mouseenter', () => {
+              clearTimeout(_recentShowTimer);
+              _recentShowTimer = setTimeout(
+                () => showRecentUsedOverlay(t.id, item, _onChipClick),
+                RECENT_OVERLAY_SHOW_INTENT_MS,
+              );
+            });
+            item.addEventListener('mouseleave', () => {
+              clearTimeout(_recentShowTimer);
+              _recentHideTimer = setTimeout(() => hideRecentUsedOverlay(), RECENT_OVERLAY_HIDE_GRACE_MS);
+            });
+          }
+
           dropdown.appendChild(item);
         });
 
