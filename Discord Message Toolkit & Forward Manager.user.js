@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.1.0
+// @version      2.7.1.1
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -56,7 +56,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.0.0";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.1.0";
 
   const GMStore = {
     
@@ -467,6 +467,17 @@
   };
   function escHtml(s) {
     return String(s).replace(/[&<>"']/g, (c) => _escMap[c]);
+  }
+
+  function safeParseJSON(raw, fallback) {
+    if (raw === null || raw === undefined) return fallback;
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed ?? fallback;
+    } catch (e) {
+      DEBUG && console.warn("[safeParseJSON] 解析失敗，回退預設值", e);
+      return fallback;
+    }
   }
 
   const CleanupRegistry = (() => {
@@ -8492,7 +8503,7 @@
         ioMargin:            localStorage.getItem("copyIOMargin"),
         transCacheSize:      localStorage.getItem("copyTransCacheSize"),
         dmtGifCacheMax:      localStorage.getItem("dmtGifCacheMax"),
-        symbols:             JSON.parse(localStorage.getItem("copySymbols") || "[]"),
+        symbols:             safeParseJSON(localStorage.getItem("copySymbols"), []),
       };
 
       const moduleCData = {
@@ -21144,20 +21155,21 @@ unsafeWindow.fetch = function(...args) {
       _blListCache = arr;
       GMStore.set(BL_STORE_KEY, arr, true);
     }
-    function blAdd(name, style = 2, expiresAt = null) {
+    function blAdd(name, style = 2, expiresAt = null, id = null) {
       const list = blLoad();
-      if (list.some(u => u.name === name)) return false;
+      if (list.some(u => (id && u.id === id) || u.name === name)) return false;
       const entry = { name, addedAt: new Date().toISOString(), style };
+      if (id) entry.id = id;
       if (expiresAt) entry.expiresAt = expiresAt;
       list.push(entry);
       blSave(list);
       return true;
     }
-    function blRemove(name) {
-      blSave(blLoad().filter(u => u.name !== name));
+    function blRemove(name, id = null) {
+      blSave(blLoad().filter(u => !((id && u.id && u.id === id) || u.name === name)));
     }
-    function blHas(name) {
-      return blLoad().some(u => u.name === name);
+    function blHas(name, id = null) {
+      return blLoad().some(u => (id && u.id && u.id === id) || u.name === name);
     }
     function blSetStyle(name, style) {
       const list = blLoad();
@@ -21199,6 +21211,34 @@ unsafeWindow.fetch = function(...args) {
         const prevContainer = prevLi.querySelector(MSG_SEL);
         if (prevContainer) {
           const a = _getOwnAuthor(prevContainer);
+          if (a) return a;
+        }
+        prevLi = prevLi.previousElementSibling;
+      }
+      return null;
+    }
+
+    function _getOwnAuthorId(container) {
+      const replyBlock = container.querySelector('[class*="repliedMessage_"]');
+      const avatars = container.querySelectorAll('img[src*="/avatars/"]');
+      for (const img of avatars) {
+        if (replyBlock && replyBlock.contains(img)) continue;
+        const m = img.src.match(/\/avatars\/(\d+)\//);
+        if (m) return m[1];
+      }
+      return null;
+    }
+
+    function _resolveAuthorId(container) {
+      const own = _getOwnAuthorId(container);
+      if (own) return own;
+      let li = container.closest("li");
+      if (!li) return null;
+      let prevLi = li.previousElementSibling;
+      while (prevLi) {
+        const prevContainer = prevLi.querySelector(MSG_SEL);
+        if (prevContainer) {
+          const a = _getOwnAuthorId(prevContainer);
           if (a) return a;
         }
         prevLi = prevLi.previousElementSibling;
@@ -21324,11 +21364,14 @@ unsafeWindow.fetch = function(...args) {
     function blApplyAll() {
       const list = blLoad();
       const nameMap = new Map(list.map(u => [u.name, u.style ?? 2]));
+      const idMap = new Map(list.filter(u => u.id).map(u => [u.id, u.style ?? 2]));
       document.querySelectorAll(MSG_SEL).forEach(container => {
         const name = _resolveAuthor(container);
         if (!name) return;
-        if (nameMap.has(name)) {
-          _applyStyle(container, nameMap.get(name), name);
+        const id = idMap.size > 0 ? _resolveAuthorId(container) : null;
+        const matched = (id && idMap.has(id)) ? idMap.get(id) : nameMap.get(name);
+        if (matched !== undefined) {
+          _applyStyle(container, matched, name);
         } else {
           BL_ALL_CLS.forEach(c => container.classList.remove(c));
           container.classList.remove("dmt-bl-open");
@@ -21345,10 +21388,13 @@ unsafeWindow.fetch = function(...args) {
     function blApplyNode(container) {
       const list = blLoad();
       const nameMap = new Map(list.map(u => [u.name, u.style ?? 2]));
+      const idMap = new Map(list.filter(u => u.id).map(u => [u.id, u.style ?? 2]));
       const name = _resolveAuthor(container);
       if (!name) return;
-      if (nameMap.has(name)) {
-        _applyStyle(container, nameMap.get(name), name);
+      const id = idMap.size > 0 ? _resolveAuthorId(container) : null;
+      const matched = (id && idMap.has(id)) ? idMap.get(id) : nameMap.get(name);
+      if (matched !== undefined) {
+        _applyStyle(container, matched, name);
       } else {
         BL_ALL_CLS.forEach(c => container.classList.remove(c));
         container.classList.remove("dmt-bl-open");
@@ -21484,7 +21530,7 @@ unsafeWindow.fetch = function(...args) {
       const expired = list.filter(u => u.expiresAt && now >= new Date(u.expiresAt).getTime());
       if (expired.length === 0) return;
       expired.forEach(u => {
-        blRemove(u.name);
+        blRemove(u.name, u.id);
         dmtShowToast(t("mu_temp_expired_toast").replace("{name}", u.name));
       });
       blApplyAll();
@@ -22419,13 +22465,14 @@ unsafeWindow.fetch = function(...args) {
           if (!_blCtxContainer) continue;
           const name = _resolveAuthor(_blCtxContainer);
           if (!name) continue;
+          const ctxId = _resolveAuthorId(_blCtxContainer);
 
           if (menu.querySelector("#dmt-bl-inject")) continue;
 
           const blockItem = menu.querySelector("#user-context-block");
           if (!blockItem) continue;
 
-          const getIsBlocked = () => blHas(name);
+          const getIsBlocked = () => blHas(name, ctxId);
 
           const injectItem = document.createElement("div");
           injectItem.id = "dmt-bl-inject";
@@ -22492,12 +22539,12 @@ unsafeWindow.fetch = function(...args) {
             document.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
             setTimeout(() => {
               if (getIsBlocked()) {
-                blRemove(name);
+                blRemove(name, ctxId);
                 blApplyAll();
                 dmtShowToast(t("mu_remove_toast").replace("{name}", name));
               } else {
                 _openStylePicker(name, (chosenStyle, expiresAt) => {
-                  blAdd(name, chosenStyle, expiresAt);
+                  blAdd(name, chosenStyle, expiresAt, ctxId);
                   blApplyAll();
                   dmtShowToast(t("mu_add_toast").replace("{name}", name));
                 });
@@ -26375,6 +26422,27 @@ unsafeWindow.fetch = function(...args) {
         .map(normalizeURL);
     }
 
+    const UC_CACHE_KEY = "uc_seen_urls_cache";
+    const UC_CACHE_MAX_PER_CHANNEL = 300;
+    const UC_CACHE_TTL_MS = 14 * 24 * 60 * 60 * 1000;
+
+    function _ucLoadCache() {
+      return GMStore.get(UC_CACHE_KEY, {}, true) || {};
+    }
+    function _ucMergeIntoCache(channelId, urlMap) {
+      if (!channelId || urlMap.size === 0) return;
+      const cache = _ucLoadCache();
+      const now = Date.now();
+      const bucket = cache[channelId] || {};
+      urlMap.forEach((count, url) => {
+        bucket[url] = { count: (bucket[url]?.count || 0) + count, lastSeen: now };
+      });
+      let entries = Object.entries(bucket).filter(([, v]) => now - v.lastSeen < UC_CACHE_TTL_MS);
+      entries.sort((a, b) => b[1].lastSeen - a[1].lastSeen);
+      cache[channelId] = Object.fromEntries(entries.slice(0, UC_CACHE_MAX_PER_CHANNEL));
+      GMStore.set(UC_CACHE_KEY, cache, true);
+    }
+
     async function fetchMessages(channelId, token, limit) {
       const all = [];
       let before = null;
@@ -27001,9 +27069,20 @@ if (type === "warn" && scanLimit !== null) {
         }
 
         const { urlMap: domMap, count: domCount } = scanDOMMessages();
-        const domHits = normalizedPasted.filter(u => domMap.has(u));
+
+        _ucMergeIntoCache(channelId, domMap);
+        const combinedMap = new Map(domMap);
+        const cachedBucket = _ucLoadCache()[channelId] || {};
+        const cacheNow = Date.now();
+        Object.entries(cachedBucket).forEach(([u, v]) => {
+          if (!combinedMap.has(u) && cacheNow - v.lastSeen < UC_CACHE_TTL_MS) {
+            combinedMap.set(u, v.count);
+          }
+        });
+
+        const domHits = normalizedPasted.filter(u => combinedMap.has(u));
         if (domHits.length > 0) {
-          const maxCount = Math.max(...domHits.map(u => domMap.get(u)));
+          const maxCount = Math.max(...domHits.map(u => combinedMap.get(u)));
           showBanner("warn", t("uc_dom_found")
             .replace("{count}", String(maxCount))
             .replace("{limit}", String(domCount)),
@@ -28111,6 +28190,28 @@ if (type === "warn" && scanLimit !== null) {
       return null;
     }
 
+    const _msChanNameCache = new Map();
+    async function _msFetchChannelNameAPI(channelId) {
+      if (_msChanNameCache.has(channelId)) return _msChanNameCache.get(channelId);
+      try {
+        const token = await _msEnsureToken();
+        const res = await new Promise((resolve, reject) => {
+          GM_xmlhttpRequest({
+            method: "GET", url: `${MS_API_BASE}/channels/${channelId}`,
+            headers: { Authorization: token },
+            onload: r => resolve(r),
+            onerror: () => reject(new Error("network error")),
+          });
+        });
+        if (res.status !== 200) { _msChanNameCache.set(channelId, null); return null; }
+        const name = JSON.parse(res.responseText)?.name || null;
+        _msChanNameCache.set(channelId, name);
+        return name;
+      } catch (_) {
+        return null;
+      }
+    }
+
     function _msRelTime(iso) {
       if (!iso) return "";
       const s = (Date.now() - new Date(iso).getTime()) / 1000;
@@ -28140,17 +28241,33 @@ if (type === "warn" && scanLimit !== null) {
       optAll.value = "all";
       optAll.textContent = t("ms_chan_filter_all") || "All channels";
       _msChanFilterSelEl.appendChild(optAll);
+      const unresolved = [];
       [...counts.entries()].sort((a, b) => b[1] - a[1]).forEach(([cid, cnt]) => {
         const o = document.createElement("option");
         o.value = cid;
+        o.dataset.cid = cid;
         const name = _msGetChannelName(cid);
         o.textContent = (name ? `# ${name}` : `#${cid}`) + ` (${cnt})`;
+        if (!name) unresolved.push(cid);
         _msChanFilterSelEl.appendChild(o);
       });
       const stillExists = [...counts.keys()].includes(prevValue);
       _msChanFilterSelEl.value = stillExists ? prevValue : "all";
       _msChannelFilter = _msChanFilterSelEl.value;
       _msChanFilterRowEl.style.display = "flex";
+
+      if (unresolved.length > 0) {
+        const selEl = _msChanFilterSelEl;
+        for (const cid of unresolved) {
+          const name = await _msFetchChannelNameAPI(cid);
+          if (!selEl.isConnected) break;
+          if (name) {
+            const opt = selEl.querySelector(`option[data-cid="${cid}"]`);
+            if (opt) opt.textContent = opt.textContent.replace(`#${cid}`, `# ${name}`);
+          }
+          await new Promise(r => setTimeout(r, 300));
+        }
+      }
     }
 
     function _msUpdateStatusBar() {
@@ -28158,9 +28275,16 @@ if (type === "warn" && scanLimit !== null) {
       const { phase, scanned, error, statusDetail } = _msScanState;
       if (phase === "scanning" || phase === "paused") {
         const base = `${scanned.toLocaleString()} ${t("ms_items") || "items"} found`;
-        _msStatusBarEl.textContent = statusDetail
+        const text = statusDetail
           ? `${base}  ·  ${statusDetail}`
           : `${t("ms_scanning") || "Scanning"}… ${base}`;
+        _msStatusBarEl.innerHTML = "";
+        if (phase === "scanning") {
+          const dot = document.createElement("span");
+          dot.className = "ms-pulse-dot";
+          _msStatusBarEl.appendChild(dot);
+        }
+        _msStatusBarEl.appendChild(document.createTextNode(text));
         return;
       }
       if (phase === "error") { _msStatusBarEl.textContent = "⚠️ " + error; return; }
@@ -28225,9 +28349,22 @@ if (type === "warn" && scanLimit !== null) {
       }
     }
 
+    function _msIsDiscordCdn(url) {
+      try {
+        const host = new URL(url).hostname;
+        return host === "cdn.discordapp.com" || host === "media.discordapp.net";
+      } catch (_) { return false; }
+    }
+
     function _msRefreshMediaUrl(item) {
       if (item._msDead) return Promise.resolve(false);
       if (item._msRefreshPromise) return item._msRefreshPromise;
+      const checkUrl = item.proxy_url || item.url;
+      if (!_msIsDiscordCdn(checkUrl)) {
+        item._msDead = true;
+        item._msExternalFail = true;
+        return Promise.resolve(false);
+      }
       item._msRetryCount = (item._msRetryCount || 0) + 1;
       if (item._msRetryCount > 2) { item._msDead = true; return Promise.resolve(false); }
       item._msRefreshPromise = (async () => {
@@ -28266,22 +28403,35 @@ if (type === "warn" && scanLimit !== null) {
       return item._msRefreshPromise;
     }
 
-    function _msBuildDeadPlaceholder(size) {
+    function _msBuildDeadPlaceholder(size, item = null) {
+      const isExternal = !!item?._msExternalFail;
       const ph = document.createElement("div");
       ph.className = "ms-dead";
       const icon = document.createElement("div");
       icon.className = "ms-dead-icon";
-      icon.textContent = "🚫";
+      icon.textContent = isExternal ? "🔗" : "🚫";
       const label = document.createElement("div");
       label.className = "ms-dead-label";
-      label.textContent = t("ms_expired") || "Link expired";
+      label.textContent = isExternal
+        ? (t("ms_external_cant_embed") || "Can't embed — file may still exist")
+        : (t("ms_expired") || "Link expired");
+      ph.appendChild(icon);
+      ph.appendChild(label);
       if (size === "full") {
         ph.style.cssText    = "position:static;inset:auto;z-index:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:transparent;color:#72767d;";
         icon.style.cssText  = "font-size:48px;opacity:0.6;";
         label.style.cssText = "font-size:13px;";
+        if (isExternal && item?.url) {
+          const link = document.createElement("a");
+          link.href = item.url;
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          link.textContent = t("ms_open_original") || "Open original link ↗";
+          link.style.cssText = "color:#5865f2;font-size:12px;text-decoration:underline;cursor:pointer;";
+          link.addEventListener("click", e => e.stopPropagation());
+          ph.appendChild(link);
+        }
       }
-      ph.appendChild(icon);
-      ph.appendChild(label);
       return ph;
     }
 
@@ -28309,12 +28459,12 @@ if (type === "warn" && scanLimit !== null) {
         };
         if (item._msDead) {
           img.style.display = "none";
-          cell.appendChild(_msBuildDeadPlaceholder("cell"));
+          cell.appendChild(_msBuildDeadPlaceholder("cell", item));
         } else {
           img.addEventListener("error", () => {
             _msRefreshMediaUrl(item).then(ok => {
               if (ok) { _msSetThumbSrc(); }
-              else { img.style.display = "none"; cell.appendChild(_msBuildDeadPlaceholder("cell")); }
+              else { img.style.display = "none"; cell.appendChild(_msBuildDeadPlaceholder("cell", item)); }
             });
           });
           _msSetThumbSrc();
@@ -28535,7 +28685,7 @@ if (type === "warn" && scanLimit !== null) {
         fnEl.textContent = `🖼 ${item.filename || item.url.split("/").pop().split("?")[0]}  (${cur+1}/${items.length})`;
         mediaArea.innerHTML = "";
         if (item._msDead) {
-          const ph = _msBuildDeadPlaceholder("full");
+          const ph = _msBuildDeadPlaceholder("full", item);
           ph.addEventListener("click", e => e.stopPropagation());
           mediaArea.appendChild(ph);
         } else if (item.media_type === "video" || item.media_type === "gif") {
@@ -29015,6 +29165,9 @@ if (type === "warn" && scanLimit !== null) {
           ".ms-dead{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:#1e1f22;color:#72767d;}",
           ".ms-dead-icon{font-size:26px;opacity:0.6;}",
           ".ms-dead-label{font-size:10px;}",
+          ".ms-pulse-dot{display:inline-block;width:6px;height:6px;border-radius:50%;",
+          "background:#5865f2;margin-right:6px;vertical-align:middle;animation:ms-pulse 1.1s ease-in-out infinite;}",
+          "@keyframes ms-pulse{0%,100%{opacity:0.35;transform:scale(0.85);}50%{opacity:1;transform:scale(1.15);}}",
           ".ms-badge{position:absolute;top:5px;left:5px;z-index:3;background:rgba(0,0,0,0.65);",
           "color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;",
           "letter-spacing:.04em;pointer-events:none;}",
