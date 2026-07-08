@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.1.1
+// @version      2.7.1.2
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -56,7 +56,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.1.0";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.1.2";
 
   const GMStore = {
     
@@ -12184,7 +12184,7 @@
                 100% { opacity: 0; transform: scale(0.5) rotate(30deg); }
             }
 
-.my-tab-content { padding: 8px; overflow-y: auto; flex: 1; min-height: 0; max-height: clamp(200px, 60vh, 400px); min-height: 120px; background: var(--dmt-bg-surface); position: relative; }
+.my-tab-content { padding: 8px; overflow-y: auto; flex: 1; min-height: 0; max-height: clamp(200px, 60vh, 400px); background: var(--dmt-bg-surface); position: relative; }
 
             .my-col-grid { display: grid; gap: 8px; width: 100%; box-sizing: border-box; }
             .my-col-grid.emoji { grid-template-columns: repeat(auto-fill, 58px); gap: 4px; justify-content: start; }
@@ -12200,6 +12200,12 @@
             .my-col-grid.emoji .my-col-img { width: 48px; height: 48px; }
             .my-col-img-wrapper:hover .my-col-img { transform: scale(1.1); }
             .my-col-text { font-size: 32px; user-select: none; }
+
+            .my-col-highlight-new { animation: myColHighlightPulse 1.2s ease-out; }
+            @keyframes myColHighlightPulse {
+                0% { box-shadow: 0 0 0 2px var(--dmt-gold, #d4af37); }
+                100% { box-shadow: 0 0 0 2px transparent; }
+            }
 
             .my-col-del-btn { position: absolute; top: 0; right: 0; width: 20px; height: 20px; background: rgba(0,0,0,0.6); color: var(--dmt-danger); display: flex; align-items: center; justify-content: center; border-bottom-left-radius: 6px; z-index: 999; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.1s; pointer-events: auto; }
             .my-col-del-btn > * { pointer-events: none; }
@@ -12442,7 +12448,7 @@
         }
       }
 
-      const key = item.url || item.content;
+      const key = item.url || item.stableUrl || item.content;
       const isDuplicate = cols[colName].some((existing) => {
         const existingKey =
           typeof existing === "object"
@@ -12455,6 +12461,14 @@
         cols[colName].push(item);
         saveCollections(type, cols);
         showEmojiToast(t("em_col_add_success", { g: colName }));
+
+        _pendingScrollTarget = { type, colName, key };
+
+        const openDropdown = document.querySelector(".my-popover-menu.show");
+        if (openDropdown && currentActiveTab === colName) {
+          renderTabsView(document.querySelector('input[placeholder*="Tenor"]') ||
+            openDropdown.querySelector("input"), type);
+        }
 
         if (type === TYPES.GIF || type === TYPES.STICKER) {
           const downloadUrl =
@@ -12995,6 +13009,7 @@
     let currentActiveTab = "General";
     let batchTargetMode = false;
     let activeBatchCollection = null;
+    let _pendingScrollTarget = null;
     let activeBatchType = null;
     let dragSrcIndex = null;
     let itemDragSrcIdx = null;
@@ -13912,6 +13927,18 @@
           const media = createMediaElement(url, true, type);
           if (media) wrap.appendChild(media);
 
+          if (
+            _pendingScrollTarget &&
+            _pendingScrollTarget.type === type &&
+            _pendingScrollTarget.colName === currentActiveTab
+          ) {
+            const wrapItemKey =
+              typeof url === "object" ? url.url || url.stableUrl || url.content : url;
+            if (wrapItemKey === _pendingScrollTarget.key) {
+              wrap.classList.add("my-col-scroll-target");
+            }
+          }
+
           const del = document.createElement("div");
           del.className = "my-col-del-btn";
           del.style.zIndex = "999";
@@ -13979,6 +14006,18 @@
       dropdown.appendChild(typeSidebar);
       dropdown.appendChild(colMain);
       repositionDropdown();
+
+      if (_pendingScrollTarget) {
+        const targetEl = content.querySelector(".my-col-scroll-target");
+        if (targetEl) {
+          requestAnimationFrame(() => {
+            targetEl.scrollIntoView({ block: "nearest" });
+            targetEl.classList.add("my-col-highlight-new");
+            setTimeout(() => targetEl.classList.remove("my-col-highlight-new"), 1200);
+          });
+        }
+        _pendingScrollTarget = null;
+      }
     }
 
     let _recentOverlayEl = null;
