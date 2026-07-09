@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.1.2
+// @version      2.7.3.3
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -56,7 +56,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.1.2";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.3.3";
 
   const GMStore = {
     
@@ -1285,6 +1285,12 @@
       em_modal_choose_tab: "Save to which collection?",
       em_modal_create_new: "+ Create New...",
       em_col_refresh_tooltip: "Refresh all GIF previews across all tabs (re-fetch expired CDN cache)",
+      em_settings_tooltip: "Emoji/GIF/Sticker panel settings",
+      em_settings_title: "Panel Settings",
+      em_settings_recent_count: "Recently Used candidates",
+      em_settings_recent_count_hint: "Number of recently used items shown above the panel (range: {min}-{max}). Existing history may take a few more uses to fill up to a higher count.",
+      em_settings_save: "Save",
+      em_settings_saved: "✨ Settings saved",
       em_refresh_no_expired:   "ℹ️ No expired GIFs in this tab",
       em_refresh_consent:      "⚠️ About GIF Refresh\n\nThis feature will use a third-party proxy (fixcdn.hyonsu.com)\nto obtain fresh Discord attachment credentials.\n\nNotes:\n• Your image URLs will be sent to fixcdn.hyonsu.com\n• This is a third-party service, unrelated to Discord or this script\n• Search 'fixcdn hyonsu' to learn more before proceeding\n\nContinue?",
       em_refresh_cancel_tip:   "ℹ️ Cancelled. Manual steps:\n① Find the original GIF on Discord\n② Re-add it to your collection",
@@ -1539,6 +1545,13 @@
       cs_add_tag_prompt: "Enter new tag (right-click to delete):",
       cs_float_title:   "Channel Scout (F2)",
       cs_float_label:   "Channel Scout",
+      cs_deep_search_tip:        "Deep search (scans message history via API)",
+      cs_deep_search_need_token: "Deep search requires Wormhole API mode to be enabled first",
+      cs_deep_searching:         "Searching message history…",
+      cs_deep_search_failed:     "Deep search failed. Please try again",
+      cs_deep_search_token_not_ready: "Token not captured yet. Try switching channels or scrolling once, then search again",
+      cs_deep_search_no_results:      "No matches found in the scanned history",
+      cs_remote_tag:             "history · jumps to channel",
 
       mu_panel_title:   "🌫️ Mute User Messages",
       mu_empty:         "No muted users\nRight-click a message to add",
@@ -12048,6 +12061,15 @@
             .my-popover-menu { position: fixed; background: var(--dmt-bg-primary); border: 1px solid var(--dmt-bg-deep); border-radius: 4px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); padding: 0; display: none; flex-direction: column; z-index: 2147483647; min-width: 340px; max-width: 620px; max-height: min(550px, 90vh); overflow: hidden; pointer-events: auto; }
             .my-popover-menu.show { display: flex; }
 
+            .my-panel-settings-btn {
+                position: absolute; top: 4px; right: 4px; z-index: 10;
+                width: 18px; height: 18px; line-height: 18px; text-align: center;
+                font-size: 11px; cursor: pointer; border-radius: 3px;
+                opacity: 0.45; transition: opacity 0.15s, background 0.15s;
+                user-select: none;
+            }
+            .my-panel-settings-btn:hover { opacity: 1; background: rgba(255,255,255,0.1); }
+
             .my-menu-item { padding: 6px 10px; color: var(--dmt-text-primary); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.03); }
             .my-menu-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
             .my-emoji-preview-box { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -12219,6 +12241,20 @@
             .my-save-item:hover { background: var(--dmt-accent); color: #fff; }
             .my-save-item.create { color: var(--dmt-success); font-weight: 500; }
             .my-save-item.create:hover { background: var(--dmt-success); color: #fff; }
+
+            .my-settings-body { padding: 14px 15px 6px; }
+            .my-settings-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+            .my-settings-label { font-size: 13px; color: var(--dmt-text-bright); flex: 1; }
+            .my-settings-number-input {
+                width: 56px; padding: 4px 6px; text-align: center;
+                background: var(--dmt-bg-deep); border: 1px solid var(--dmt-bg-primary);
+                border-radius: 4px; color: #fff; font-size: 13px;
+            }
+            .my-settings-hint { font-size: 11px; color: #949ba4; margin-top: 6px; line-height: 1.4; }
+            .my-settings-footer { padding: 10px 15px 14px; }
+            
+            .my-emoji-settings-modal { width: 300px; }
+
             @keyframes myPop { from { opacity: 0; transform: translate(-50%, -45%); } to { opacity: 1; transform: translate(-50%, -50%); } }
             .my-picker-mask { position: fixed; background: rgba(0, 0, 0, 0.75); z-index: 2147483647; cursor: crosshair; }
             .my-picker-tip { position: fixed; top: 10%; left: 50%; transform: translateX(-50%); background: var(--dmt-accent); color: white; padding: 10px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 2147483648; pointer-events: none; }
@@ -12390,7 +12426,27 @@
       GMStore.set(getCollectionKey(type), data, true);
     }
 
-    const RECENTLY_USED_MAX = 3;
+    const _RECENTLY_USED_DEFAULT = 3;
+    const _RECENTLY_USED_MIN = 3;
+    const _RECENTLY_USED_MAX_CAP = 10;
+    const EMOJI_SETTINGS_KEY = "discord_emoji_module_settings";
+
+    function getEmojiModuleSettings() {
+      const raw = GMStore.get(EMOJI_SETTINGS_KEY, {}, true) || {};
+      return {
+        recentlyUsedMax: Number.isFinite(raw.recentlyUsedMax)
+          ? Math.min(_RECENTLY_USED_MAX_CAP, Math.max(_RECENTLY_USED_MIN, raw.recentlyUsedMax))
+          : _RECENTLY_USED_DEFAULT,
+      };
+    }
+    function saveEmojiModuleSettings(patch) {
+      const current = getEmojiModuleSettings();
+      GMStore.set(EMOJI_SETTINGS_KEY, { ...current, ...patch }, true);
+    }
+    function getRecentlyUsedMax() {
+      return getEmojiModuleSettings().recentlyUsedMax;
+    }
+
     function _recentKey(type) { return `dmt_recent_${type}`; }
     function getRecentlyUsed(type) {
       return GMStore.get(_recentKey(type), [], true);
@@ -12404,7 +12460,7 @@
         return rk !== newKey;
       });
       filtered.unshift(item);
-      GMStore.set(_recentKey(type), filtered.slice(0, RECENTLY_USED_MAX), true);
+      GMStore.set(_recentKey(type), filtered.slice(0, _RECENTLY_USED_MAX_CAP), true);
     }
 
     function reorderCollections(type, oldIndex, newIndex) {
@@ -13305,6 +13361,84 @@
       }, 100);
     }
 
+    function showEmojiSettingsModal() {
+      const existing = document.querySelector(".my-emoji-settings-modal");
+      if (existing) existing.remove();
+
+      const settings = getEmojiModuleSettings();
+
+      const modal = document.createElement("div");
+      modal.className = "my-save-modal my-emoji-settings-modal";
+      modal.addEventListener("mousedown", (e) => e.stopPropagation());
+      modal.addEventListener("click", (e) => e.stopPropagation());
+
+      const header = document.createElement("div");
+      header.className = "my-save-header";
+      header.innerText = t("em_settings_title");
+      modal.appendChild(header);
+
+      const body = document.createElement("div");
+      body.className = "my-settings-body";
+
+      const row = document.createElement("div");
+      row.className = "my-settings-row";
+
+      const label = document.createElement("label");
+      label.className = "my-settings-label";
+      label.innerText = t("em_settings_recent_count");
+      row.appendChild(label);
+
+      const input = document.createElement("input");
+      input.type = "number";
+      input.className = "my-settings-number-input";
+      input.min = String(_RECENTLY_USED_MIN);
+      input.max = String(_RECENTLY_USED_MAX_CAP);
+      input.value = String(settings.recentlyUsedMax);
+      input.addEventListener("mousedown", (e) => e.stopPropagation());
+      row.appendChild(input);
+      body.appendChild(row);
+
+      const hint = document.createElement("div");
+      hint.className = "my-settings-hint";
+      hint.innerText = t("em_settings_recent_count_hint", {
+        min: _RECENTLY_USED_MIN,
+        max: _RECENTLY_USED_MAX_CAP,
+      });
+      body.appendChild(hint);
+
+      modal.appendChild(body);
+
+      const footer = document.createElement("div");
+      footer.className = "my-settings-footer";
+      const saveBtn = document.createElement("div");
+      saveBtn.className = "my-save-item create";
+      saveBtn.style.textAlign = "center";
+      saveBtn.innerText = t("em_settings_save");
+      saveBtn.onclick = () => {
+        const parsed = parseInt(input.value, 10);
+        const clamped = Number.isFinite(parsed)
+          ? Math.min(_RECENTLY_USED_MAX_CAP, Math.max(_RECENTLY_USED_MIN, parsed))
+          : _RECENTLY_USED_DEFAULT;
+        saveEmojiModuleSettings({ recentlyUsedMax: clamped });
+        modal.remove();
+        showEmojiToast(t("em_settings_saved"));
+      };
+      footer.appendChild(saveBtn);
+      modal.appendChild(footer);
+
+      dmtGetPortal().appendChild(modal);
+      modal.style.pointerEvents = "auto";
+      setTimeout(() => {
+        const closeFn = (e) => {
+          if (!modal.contains(e.target)) {
+            modal.remove();
+            document.removeEventListener("click", closeFn);
+          }
+        };
+        document.addEventListener("click", closeFn);
+      }, 100);
+    }
+
     function showEmojiToast(msg, iconUrl) {
       dmtShowToast(String(msg), { icon: iconUrl || null, duration: 2000 });
     }
@@ -14005,6 +14139,7 @@
       colMain.appendChild(content);
       dropdown.appendChild(typeSidebar);
       dropdown.appendChild(colMain);
+
       repositionDropdown();
 
       if (_pendingScrollTarget) {
@@ -14033,7 +14168,7 @@
       const recent = getRecentlyUsed(type);
       if (!recent.length) return;
 
-      const toShow = recent.slice(0, RECENTLY_USED_MAX);
+      const toShow = recent.slice(0, getRecentlyUsedMax());
 
       const size = (type === TYPES.STICKER) ? 64 : 52;
       const imgSize = size - 8;
@@ -14050,11 +14185,11 @@
       }
       const baseTop = Math.max(8, panel.top - edgeGap - size);
 
-      const SCATTER = [
-        { dx: 0,                    dy:  0, rot: -4 },
-        { dx: size + chipGap,       dy: -6, rot:  3 },
-        { dx: (size + chipGap) * 2, dy:  0, rot: -3 },
-      ];
+      const SCATTER = Array.from({ length: toShow.length }, (_, i) => ({
+        dx: (size + chipGap) * i,
+        dy: i % 2 === 0 ? 0 : -6,
+        rot: i % 2 === 0 ? -4 : 3,
+      }));
 
       const overlay = document.createElement('div');
       overlay.id = 'dmt-recent-overlay';
@@ -14862,6 +14997,17 @@
 
           dropdown.appendChild(item);
         });
+
+        const settingsBtn = document.createElement("div");
+        settingsBtn.className = "my-panel-settings-btn";
+        settingsBtn.innerHTML = "⚙️";
+        settingsBtn.title = t("em_settings_tooltip");
+        settingsBtn.addEventListener("mousedown", (e) => e.stopPropagation());
+        settingsBtn.onclick = (e) => {
+          e.stopPropagation();
+          showEmojiSettingsModal();
+        };
+        dropdown.appendChild(settingsBtn);
 
         const updatePosition = () => {
           const btnRect = triggerBtn.getBoundingClientRect();
@@ -21243,6 +21389,7 @@ unsafeWindow.fetch = function(...args) {
     function _resolveAuthor(container) {
       const own = _getOwnAuthor(container);
       if (own) return own;
+      if (container.matches(GROUP_START_SEL)) return null;
       let li = container.closest("li");
       if (!li) return null;
       let prevLi = li.previousElementSibling;
@@ -21271,6 +21418,7 @@ unsafeWindow.fetch = function(...args) {
     function _resolveAuthorId(container) {
       const own = _getOwnAuthorId(container);
       if (own) return own;
+      if (container.matches(GROUP_START_SEL)) return null;
       let li = container.closest("li");
       if (!li) return null;
       let prevLi = li.previousElementSibling;
@@ -21445,6 +21593,18 @@ unsafeWindow.fetch = function(...args) {
       _mergeCollapseGroups();
     }
 
+    const _blPendingNodes = new WeakSet();
+    const BL_NEW_MSG_DELAY_MS = 150;
+    function _scheduleBlApplyNode(container) {
+      if (_blPendingNodes.has(container)) return;
+      _blPendingNodes.add(container);
+      setTimeout(() => {
+        _blPendingNodes.delete(container);
+        if (!container.isConnected) return;
+        blApplyNode(container);
+      }, BL_NEW_MSG_DELAY_MS);
+    }
+
     const _blGetChannel = () => {
       const m = location.pathname.match(/\/channels\/\d+\/(\d+)/);
       return m ? m[1] : location.pathname;
@@ -21469,9 +21629,9 @@ unsafeWindow.fetch = function(...args) {
         for (const node of mut.addedNodes) {
           if (!(node instanceof Element)) continue;
           if (node.matches(MSG_SEL)) {
-            blApplyNode(node);
+            _scheduleBlApplyNode(node);
           } else {
-            node.querySelectorAll?.(MSG_SEL).forEach(blApplyNode);
+            node.querySelectorAll?.(MSG_SEL).forEach(_scheduleBlApplyNode);
           }
           if (node.querySelector?.("[class*=\"blockedSystemMessage\"]") ||
               node.matches?.("[class*=\"blockedSystemMessage\"]")) {
@@ -26804,6 +26964,15 @@ unsafeWindow.fetch = function(...args) {
           color: #c5caff;
         }
         
+        #dmt-cs-panel .cs-input-btn-disabled {
+          opacity: 0.35; cursor: not-allowed;
+        }
+        #dmt-cs-panel .cs-input-btn-disabled:hover {
+          background: rgba(255,255,255,0.06);
+          border-color: rgba(255,255,255,0.10);
+          color: rgba(185,187,190,0.65);
+        }
+        
         #dmt-cs-hist-dropdown {
           position: absolute; z-index: 10;
           top: calc(100% + 4px); right: 0;
@@ -26928,6 +27097,17 @@ unsafeWindow.fetch = function(...args) {
           color: #ffd700;
           border-radius: 2px;
           padding: 0 1px;
+        }
+        
+        #dmt-cs-panel .cs-result-remote {
+          border-left: 2px solid rgba(88, 101, 242, 0.35);
+        }
+        #dmt-cs-panel .cs-result-remote-tag {
+          font-size: 9px;
+          color: rgba(160, 170, 245, 0.6);
+          flex-shrink: 0;
+          align-self: center;
+          white-space: nowrap;
         }
         
         #dmt-cs-panel .cs-empty {
@@ -27205,6 +27385,43 @@ if (type === "warn" && scanLimit !== null) {
       return hits;
     }
 
+    async function _csSearchAPI(keyword) {
+      const kw = keyword.trim().toLowerCase();
+      if (!kw) return { hits: [], error: null };
+
+      const wh = _wormholeInstance;
+      const apiMode = localStorage.getItem("wh_api_mode") === "true";
+      const token = (apiMode && isModEnabled("mod_wormhole")) ? (wh?._cachedToken || null) : null;
+      if (!token) return { hits: [], error: "no_token" };
+
+      const channelId = getCurrentChannelId();
+      if (!channelId) return { hits: [], error: "no_channel" };
+
+      let messages;
+      try {
+        messages = await fetchMessages(channelId, token, getScanLimit());
+      } catch (e) {
+        return { hits: [], error: "fetch_failed" };
+      }
+
+      const hits = [];
+      for (const msg of messages) {
+        const text = msg.content || "";
+        const idx = text.toLowerCase().indexOf(kw);
+        if (idx === -1) continue;
+        hits.push({
+          el: null,
+          author: msg.author?.username || msg.author?.global_name || "",
+          text,
+          matchIndex: idx,
+          msgId: msg.id,
+          channelId,
+        });
+        if (hits.length >= CS_MAX_RESULTS) break;
+      }
+      return { hits, error: null };
+    }
+
     function _csHighlight(text, keyword) {
       const preview = text.length > CS_PREVIEW_LEN
         ? text.slice(0, CS_PREVIEW_LEN) + "…"
@@ -27225,7 +27442,55 @@ if (type === "warn" && scanLimit !== null) {
       setTimeout(() => panel.remove(), 200);
     }
 
+    function _csJumpToRemoteMessage(channelId, msgId) {
+      const segments = location.pathname.split("/").filter(Boolean);
+      const guildId = segments[1] || "@me";
+      const path = "/channels/" + guildId + "/" + channelId + "/" + msgId;
+      const fullUrl = "https://discord.com" + path;
+
+      try {
+        const fiberKey = Object.keys(document.querySelector("div") || {})
+          .find(k => k.startsWith("__reactFiber"));
+        if (fiberKey) {
+          const roots = [
+            document.querySelector('div[class*="appMount"]'),
+            document.body,
+          ];
+          for (const root of roots) {
+            if (!root) continue;
+            let fiber = root[fiberKey];
+            let depth = 50;
+            while (fiber && depth-- > 0) {
+              const h = fiber.memoizedProps?.history || fiber.memoizedProps?.navigator;
+              if (h?.push) { h.push(path); return; }
+              if (fiber.stateNode?.history?.push) { fiber.stateNode.history.push(path); return; }
+              fiber = fiber.child || fiber.return;
+            }
+          }
+        }
+      } catch (_) {}
+
+      try {
+        window.history.pushState(null, "", path);
+        window.dispatchEvent(new PopStateEvent("popstate", { state: null }));
+        return;
+      } catch (_) {}
+
+      try {
+        window.history.replaceState(window.history.state, "", path);
+        window.dispatchEvent(new PopStateEvent("popstate", { state: window.history.state }));
+        return;
+      } catch (_) {}
+
+      window.location.href = fullUrl;
+    }
+
     function _csJumpTo(item) {
+      if (!item.el && item.msgId && item.channelId) {
+        _csClose(true);
+        _csJumpToRemoteMessage(item.channelId, item.msgId);
+        return;
+      }
       _csClose(true);
       if (item.el) {
         item.el.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -27251,6 +27516,7 @@ if (type === "warn" && scanLimit !== null) {
       hits.forEach(item => {
         const row = document.createElement("div");
         row.className = "cs-result-item";
+        if (!item.el) row.classList.add("cs-result-remote");
 
         const meta = document.createElement("div");
         meta.className = "cs-result-meta";
@@ -27273,15 +27539,39 @@ if (type === "warn" && scanLimit !== null) {
 
         row.appendChild(meta);
         row.appendChild(body);
+
+        if (!item.el) {
+          const remoteTag = document.createElement("div");
+          remoteTag.className = "cs-result-remote-tag";
+          remoteTag.textContent = t("cs_remote_tag");
+          row.appendChild(remoteTag);
+        }
+
         row.addEventListener("click", () => _csJumpTo(item));
         container.appendChild(row);
       });
+    }
+
+    function _csRenderRemoteNotice(container, message) {
+      container.innerHTML = "";
+      const notice = document.createElement("div");
+      notice.className = "cs-empty";
+      notice.textContent = message;
+      container.appendChild(notice);
     }
 
     function openSearchPanel(initialQuery = "") {
       if (document.getElementById(CS_PANEL_ID)) {
         document.querySelector("#dmt-cs-panel .cs-input")?.focus();
         return;
+      }
+
+      {
+        const wh = _wormholeInstance;
+        const apiMode = localStorage.getItem("wh_api_mode") === "true";
+        if (apiMode && isModEnabled("mod_wormhole") && wh && !wh._cachedToken) {
+          wh._startTokenInterceptor?.((token) => { wh._cachedToken = token; });
+        }
       }
 
       const anchor = _getEditorAnchor();
@@ -27417,6 +27707,52 @@ if (type === "warn" && scanLimit !== null) {
       searchRow.appendChild(input);
       searchRow.appendChild(pasteBtn);
       searchRow.appendChild(histBtn);
+
+      const deepSearchBtn = document.createElement("div");
+      deepSearchBtn.className = "cs-input-btn";
+      const _deepSearchAvailable =
+        localStorage.getItem("wh_api_mode") === "true" && isModEnabled("mod_wormhole");
+      if (!_deepSearchAvailable) deepSearchBtn.classList.add("cs-input-btn-disabled");
+      deepSearchBtn.title = _deepSearchAvailable
+        ? t("cs_deep_search_tip")
+        : t("cs_deep_search_need_token");
+      deepSearchBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <path d="M9 11h4M11 9v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>`;
+      deepSearchBtn.addEventListener("mousedown", async (e) => {
+        e.preventDefault();
+        const kw = input.value;
+        if (!kw.trim()) return;
+
+        const apiMode = localStorage.getItem("wh_api_mode") === "true";
+        if (!apiMode || !isModEnabled("mod_wormhole")) {
+          _csRenderRemoteNotice(results, t("cs_deep_search_need_token"));
+          return;
+        }
+
+        _csRenderRemoteNotice(results, t("cs_deep_searching"));
+        const { hits: apiHits, error } = await _csSearchAPI(kw);
+        if (error === "no_token") {
+          _csRenderRemoteNotice(results, t("cs_deep_search_token_not_ready"));
+          return;
+        }
+        if (error) {
+          _csRenderRemoteNotice(results, t("cs_deep_search_failed"));
+          return;
+        }
+        const domHits = _csSearch(kw);
+        const seenIds = new Set(domHits.map(h => h.msgId));
+        const merged = [...domHits, ...apiHits.filter(h => !seenIds.has(h.msgId))];
+        if (merged.length === 0) {
+          _csRenderRemoteNotice(results, t("cs_deep_search_no_results"));
+          return;
+        }
+        _csRenderResults(results, merged, kw);
+      });
+
+      searchRow.appendChild(deepSearchBtn);
 
       const tagsRow = document.createElement("div");
       tagsRow.className = "cs-tags";
