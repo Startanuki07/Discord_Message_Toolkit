@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.3.3
+// @version      2.7.3.4
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -56,7 +56,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.3.3";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.3.4";
 
   const GMStore = {
     
@@ -15966,6 +15966,8 @@
       this._monitorTimer = null;
       this._monitorBadgeMap = new Map();
       this._monitorVisHandler = null;
+      this._monitorIdleCounts = new Map();
+      this._monitorLastPolledAt = new Map();
     }
 
     initialize() {
@@ -19728,21 +19730,39 @@ unsafeWindow.fetch = function(...args) {
       GMStore.set("wh_monitor_badge_style", v);
     }
 
+    _jitterInterval(baseMs) {
+      const jitter = baseMs * 0.2;
+      return baseMs + (Math.random() * jitter * 2 - jitter);
+    }
+    _getBackoffMultiplier(whId) {
+      const idleCount = this._monitorIdleCounts.get(whId) || 0;
+      return Math.min(1.5, 1 + Math.floor(idleCount / 3) * 0.1);
+    }
+
     startMonitor() {
       if (this._monitorTimer) return;
-      const intervalMs = this.getMonitorInterval() * 1000;
 
-      DEBUG && console.log(`[WH Monitor] Started. Interval: ${intervalMs / 1000}s`);
+      DEBUG && console.log(`[WH Monitor] Started. Base interval: ${this.getMonitorInterval()}s (±20% jitter)`);
+
+      const scheduleNext = () => {
+        const baseMs = this.getMonitorInterval() * 1000;
+        const nextDelay = this._jitterInterval(baseMs);
+        this._monitorTimer = setTimeout(() => {
+          if (!document.hidden) this._pollAllWormholes();
+          scheduleNext();
+        }, nextDelay);
+      };
 
       this._pollAllWormholes();
-
-      this._monitorTimer = setInterval(() => {
-        if (!document.hidden) this._pollAllWormholes();
-      }, intervalMs);
+      scheduleNext();
 
       if (!this._monitorVisHandler) {
         this._monitorVisHandler = () => {
-          if (!document.hidden && this._monitorTimer) this._pollAllWormholes();
+          if (document.hidden || !this._monitorTimer) return;
+          const delay = Math.random() * 3000;
+          setTimeout(() => {
+            if (!document.hidden && this._monitorTimer) this._pollAllWormholes();
+          }, delay);
         };
         document.addEventListener("visibilitychange", this._monitorVisHandler);
       }
@@ -19750,7 +19770,7 @@ unsafeWindow.fetch = function(...args) {
 
     stopMonitor() {
       if (this._monitorTimer) {
-        clearInterval(this._monitorTimer);
+        clearTimeout(this._monitorTimer);
         this._monitorTimer = null;
         DEBUG && console.log("[WH Monitor] Stopped.");
       }
@@ -19765,7 +19785,15 @@ unsafeWindow.fetch = function(...args) {
       const wormholes = this.getAllWormholes();
       if (!wormholes.length) return;
 
+      const baseMs = this.getMonitorInterval() * 1000;
+      const nowTs = Date.now();
+
       for (const wh of wormholes) {
+        const lastPolled = this._monitorLastPolledAt.get(wh.id) || 0;
+        const backoff = this._getBackoffMultiplier(wh.id);
+        if (nowTs - lastPolled < baseMs * backoff) continue;
+        this._monitorLastPolledAt.set(wh.id, nowTs);
+
         try {
           const channelId = this._extractChannelId(wh.url);
           if (!channelId) continue;
@@ -19797,12 +19825,16 @@ unsafeWindow.fetch = function(...args) {
             this._monitorBadgeMap.set(wh.id, current + 1);
             this._setWormholeBadge(wh.id);
             sessionStorage.setItem(sessionKey, latestId);
+            this._monitorIdleCounts.set(wh.id, 0);
+          } else {
+            const idle = this._monitorIdleCounts.get(wh.id) || 0;
+            this._monitorIdleCounts.set(wh.id, idle + 1);
           }
         } catch (err) {
           DEBUG && console.warn(`[WH Monitor] Poll failed for wormhole ${wh.id}:`, err);
         }
 
-        await new Promise(r => setTimeout(r, 200));
+        await new Promise(r => setTimeout(r, 150 + Math.random() * 200));
       }
     }
 
