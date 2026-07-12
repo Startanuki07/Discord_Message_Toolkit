@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.3.4
+// @version      2.7.3.6
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -56,7 +56,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.3.4";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.3.6";
 
   const GMStore = {
     
@@ -1551,6 +1551,7 @@
       cs_deep_search_failed:     "Deep search failed. Please try again",
       cs_deep_search_token_not_ready: "Token not captured yet. Try switching channels or scrolling once, then search again",
       cs_deep_search_no_results:      "No matches found in the scanned history",
+      cs_deep_search_no_channel:      "Couldn't detect the current channel. Try reopening this panel",
       cs_remote_tag:             "history · jumps to channel",
 
       mu_panel_title:   "🌫️ Mute User Messages",
@@ -4423,6 +4424,62 @@
       mp_fav_filter_label:      "Favoritos",
       mp_fav_filter_tip:        "Mostrar solo mensajes favoritos",
       mp_copy_link:             "Copiar enlace del mensaje",
+      mp_idb_blocked:           "⚠️ Cierra otras pestañas de Discord y vuelve a intentarlo",
+      mod_tip_mosaic:           "Explora todos los archivos multimedia del servidor o canal actual. Requiere el modo API de Wormhole.",
+      ms_token_warn:            "⚠️ Mosaic usa tu token de API para escanear archivos multimedia. Úsalo solo en entornos de confianza.",
+      ms_scope_server:          "Servidor",
+      ms_scope_channel:         "Canal",
+      ms_filter_all:            "Todos",
+      ms_chan_filter_all:       "Todos los canales",
+      ms_chan_filter_label:     "Filtrar por canal (solo datos en caché):",
+      ms_filter_images:         "Imágenes",
+      ms_filter_videos:         "Vídeos",
+      ms_items:                 "elementos",
+      ms_empty:                 "Aún no se ha escaneado ningún archivo",
+      ms_last_scan:             "Último escaneo",
+      ms_scanning:              "Escaneando",
+      ms_btn_scan:              "Escanear",
+      ms_btn_pause:             "Pausar",
+      ms_btn_resume:            "Reanudar",
+      ms_btn_jump:              "Ir al mensaje",
+      ms_btn_download:          "Descargar",
+      ms_err_forbidden:         "Permiso denegado para este ámbito",
+      ms_err_channel_type:      "Este tipo de canal no admite la API de búsqueda de Discord (foros/hilos)",
+      ms_no_token_warn:         "⚠️ Requiere el modo API — actívalo en la configuración de Wormhole",
+      ms_range_1h:              "Última 1 hora",
+      ms_range_6h:              "Últimas 6 horas",
+      ms_range_12h:             "Últimas 12 horas",
+      ms_range_1d:              "Último 1 día",
+      ms_range_3d:              "Últimos 3 días",
+      ms_range_1w:              "Última 1 semana",
+      ms_range_3w:              "Últimas 3 semanas",
+      ms_range_1m:              "Último 1 mes",
+      ms_range_custom:          "Rango personalizado…",
+      ms_range_from:            "Desde",
+      ms_range_to:              "Hasta",
+      ms_range_apply:           "Aplicar",
+      ms_cap_warn:              "⚠️ Detenido en 5000 elementos — acota el rango de tiempo para un escaneo completo",
+      ms_stats_title:           "Estadísticas de caché",
+      ms_stats_clear:           "Borrar archivos en caché de este ámbito",
+      ms_expired:               "Enlace caducado",
+      ms_fetching:              "Obteniendo…",
+      ms_indexing:              "Indexando",
+      ms_rate_limited:          "Límite de solicitudes alcanzado",
+      ms_resuming:              "Reanudando…",
+      ms_scope_channel_cur:     "Canal actual",
+      em_settings_tooltip:              "Configuración del panel de Emoji/GIF/Sticker",
+      em_settings_title:                "Configuración del panel",
+      em_settings_recent_count:         "Elementos recientes",
+      em_settings_recent_count_hint:    "Número de elementos recientes mostrados encima del panel (rango: {min}-{max}). El historial existente puede tardar algunos usos más en llenarse hasta un número mayor.",
+      em_settings_save:                 "Guardar",
+      em_settings_saved:                "✨ Configuración guardada",
+      cs_deep_search_tip:               "Búsqueda profunda (escanea el historial de mensajes vía API)",
+      cs_deep_search_need_token:        "La búsqueda profunda requiere activar antes el modo API de Wormhole",
+      cs_deep_searching:                "Buscando en el historial de mensajes…",
+      cs_deep_search_failed:            "La búsqueda profunda falló. Inténtalo de nuevo",
+      cs_deep_search_token_not_ready:   "Token aún no capturado. Cambia de canal o desplázate una vez, luego busca de nuevo",
+      cs_deep_search_no_results:        "No se encontraron coincidencias en el historial escaneado",
+      cs_remote_tag:                    "historial · va al canal",
     },    "pt-BR": {
       name: "Português (Brasil)",
       fm_pinned_channels: "★ Canais fixados",
@@ -4955,6 +5012,62 @@
       mp_fav_filter_label:      "Favoritos",
       mp_fav_filter_tip:        "Mostrar apenas mensagens favoritas",
       mp_copy_link:             "Copiar link da mensagem",
+      mp_idb_blocked:           "⚠️ Feche outras abas do Discord e tente novamente",
+      mod_tip_mosaic:           "Navegue por toda a mídia do servidor ou canal atual. Requer o modo API do Wormhole.",
+      ms_token_warn:            "⚠️ O Mosaic usa seu token de API para escanear mídia. Use apenas em ambientes confiáveis.",
+      ms_scope_server:          "Servidor",
+      ms_scope_channel:         "Canal",
+      ms_filter_all:            "Todos",
+      ms_chan_filter_all:       "Todos os canais",
+      ms_chan_filter_label:     "Filtrar por canal (somente dados em cache):",
+      ms_filter_images:         "Imagens",
+      ms_filter_videos:         "Vídeos",
+      ms_items:                 "itens",
+      ms_empty:                 "Nenhuma mídia escaneada ainda",
+      ms_last_scan:             "Última varredura",
+      ms_scanning:              "Escaneando",
+      ms_btn_scan:              "Escanear",
+      ms_btn_pause:             "Pausar",
+      ms_btn_resume:            "Retomar",
+      ms_btn_jump:              "Ir para a mensagem",
+      ms_btn_download:          "Baixar",
+      ms_err_forbidden:         "Permissão negada para este escopo",
+      ms_err_channel_type:      "Este tipo de canal não suporta a API de busca do Discord (fóruns/threads)",
+      ms_no_token_warn:         "⚠️ Requer o modo API — ative nas configurações do Wormhole",
+      ms_range_1h:              "Última 1 hora",
+      ms_range_6h:              "Últimas 6 horas",
+      ms_range_12h:             "Últimas 12 horas",
+      ms_range_1d:              "Último 1 dia",
+      ms_range_3d:              "Últimos 3 dias",
+      ms_range_1w:              "Última 1 semana",
+      ms_range_3w:              "Últimas 3 semanas",
+      ms_range_1m:              "Último 1 mês",
+      ms_range_custom:          "Intervalo personalizado…",
+      ms_range_from:            "De",
+      ms_range_to:              "Até",
+      ms_range_apply:           "Aplicar",
+      ms_cap_warn:              "⚠️ Interrompido em 5000 itens — reduza o intervalo de tempo para uma varredura completa",
+      ms_stats_title:           "Estatísticas de cache",
+      ms_stats_clear:           "Limpar mídia em cache deste escopo",
+      ms_expired:               "Link expirado",
+      ms_fetching:              "Buscando…",
+      ms_indexing:              "Indexando",
+      ms_rate_limited:          "Limite de requisições atingido",
+      ms_resuming:              "Retomando…",
+      ms_scope_channel_cur:     "Canal atual",
+      em_settings_tooltip:              "Configurações do painel de Emoji/GIF/Sticker",
+      em_settings_title:                "Configurações do painel",
+      em_settings_recent_count:         "Itens recentes",
+      em_settings_recent_count_hint:    "Número de itens recentes exibidos acima do painel (intervalo: {min}-{max}). O histórico existente pode levar mais alguns usos até preencher um número maior.",
+      em_settings_save:                 "Salvar",
+      em_settings_saved:                "✨ Configurações salvas",
+      cs_deep_search_tip:               "Busca profunda (escaneia o histórico de mensagens via API)",
+      cs_deep_search_need_token:        "A busca profunda requer que o modo API do Wormhole seja ativado primeiro",
+      cs_deep_searching:                "Buscando no histórico de mensagens…",
+      cs_deep_search_failed:            "A busca profunda falhou. Tente novamente",
+      cs_deep_search_token_not_ready:   "Token ainda não capturado. Troque de canal ou role uma vez, depois busque novamente",
+      cs_deep_search_no_results:        "Nenhuma correspondência encontrada no histórico escaneado",
+      cs_remote_tag:                    "histórico · vai para o canal",
     },
 
     fr: {
@@ -5493,6 +5606,62 @@
       mp_fav_filter_label:      "Favoris",
       mp_fav_filter_tip:        "Afficher uniquement les messages favoris",
       mp_copy_link:             "Copier le lien du message",
+      mp_idb_blocked:           "⚠️ Veuillez fermer les autres onglets Discord et réessayer",
+      mod_tip_mosaic:           "Parcourez tous les médias du serveur ou du canal actuel. Nécessite le mode API Wormhole.",
+      ms_token_warn:            "⚠️ Mosaic utilise votre jeton API pour scanner les médias. À utiliser uniquement dans un environnement de confiance.",
+      ms_scope_server:          "Serveur",
+      ms_scope_channel:         "Canal",
+      ms_filter_all:            "Tous",
+      ms_chan_filter_all:       "Tous les canaux",
+      ms_chan_filter_label:     "Filtrer par canal (données en cache uniquement) :",
+      ms_filter_images:         "Images",
+      ms_filter_videos:         "Vidéos",
+      ms_items:                 "éléments",
+      ms_empty:                 "Aucun média scanné pour le moment",
+      ms_last_scan:             "Dernier scan",
+      ms_scanning:              "Analyse en cours",
+      ms_btn_scan:              "Scanner",
+      ms_btn_pause:             "Pause",
+      ms_btn_resume:            "Reprendre",
+      ms_btn_jump:              "Aller au message",
+      ms_btn_download:          "Télécharger",
+      ms_err_forbidden:         "Permission refusée pour cette portée",
+      ms_err_channel_type:      "Ce type de canal ne prend pas en charge l'API de recherche de Discord (forums/fils)",
+      ms_no_token_warn:         "⚠️ Nécessite le mode API — activez-le dans les paramètres Wormhole",
+      ms_range_1h:              "Dernière heure",
+      ms_range_6h:              "6 dernières heures",
+      ms_range_12h:             "12 dernières heures",
+      ms_range_1d:              "Dernier jour",
+      ms_range_3d:              "3 derniers jours",
+      ms_range_1w:              "Dernière semaine",
+      ms_range_3w:              "3 dernières semaines",
+      ms_range_1m:              "Dernier mois",
+      ms_range_custom:          "Plage personnalisée…",
+      ms_range_from:            "De",
+      ms_range_to:              "À",
+      ms_range_apply:           "Appliquer",
+      ms_cap_warn:              "⚠️ Arrêté à 5000 éléments — réduisez la plage temporelle pour une analyse complète",
+      ms_stats_title:           "Statistiques du cache",
+      ms_stats_clear:           "Effacer les médias en cache de cette portée",
+      ms_expired:               "Lien expiré",
+      ms_fetching:              "Récupération…",
+      ms_indexing:              "Indexation",
+      ms_rate_limited:          "Limite de requêtes atteinte",
+      ms_resuming:              "Reprise…",
+      ms_scope_channel_cur:     "Canal actuel",
+      em_settings_tooltip:              "Paramètres du panneau Emoji/GIF/Sticker",
+      em_settings_title:                "Paramètres du panneau",
+      em_settings_recent_count:         "Éléments récents",
+      em_settings_recent_count_hint:    "Nombre d'éléments récents affichés au-dessus du panneau (plage : {min}-{max}). L'historique existant peut nécessiter quelques utilisations supplémentaires pour atteindre un nombre plus élevé.",
+      em_settings_save:                 "Enregistrer",
+      em_settings_saved:                "✨ Paramètres enregistrés",
+      cs_deep_search_tip:               "Recherche approfondie (analyse l'historique des messages via API)",
+      cs_deep_search_need_token:        "La recherche approfondie nécessite d'activer d'abord le mode API Wormhole",
+      cs_deep_searching:                "Recherche dans l'historique des messages…",
+      cs_deep_search_failed:            "La recherche approfondie a échoué. Veuillez réessayer",
+      cs_deep_search_token_not_ready:   "Jeton pas encore capturé. Essayez de changer de canal ou de faire défiler une fois, puis recherchez à nouveau",
+      cs_deep_search_no_results:        "Aucune correspondance trouvée dans l'historique analysé",
+      cs_remote_tag:                    "historique · va au canal",
     },
 
     ru: {
@@ -6026,6 +6195,62 @@
       mp_fav_filter_label:      "Избранное",
       mp_fav_filter_tip:        "Показывать только избранные сообщения",
       mp_copy_link:             "Скопировать ссылку на сообщение",
+      mp_idb_blocked:           "⚠️ Закройте другие вкладки Discord и повторите попытку",
+      mod_tip_mosaic:           "Просмотр всех медиафайлов текущего сервера или канала. Требуется режим API Wormhole.",
+      ms_token_warn:            "⚠️ Mosaic использует ваш API-токен для сканирования медиафайлов. Используйте только в доверенной среде.",
+      ms_scope_server:          "Сервер",
+      ms_scope_channel:         "Канал",
+      ms_filter_all:            "Все",
+      ms_chan_filter_all:       "Все каналы",
+      ms_chan_filter_label:     "Фильтр по каналу (только кэшированные данные):",
+      ms_filter_images:         "Изображения",
+      ms_filter_videos:         "Видео",
+      ms_items:                 "элементов",
+      ms_empty:                 "Медиафайлы ещё не сканировались",
+      ms_last_scan:             "Последнее сканирование",
+      ms_scanning:              "Сканирование",
+      ms_btn_scan:              "Сканировать",
+      ms_btn_pause:             "Пауза",
+      ms_btn_resume:            "Продолжить",
+      ms_btn_jump:              "Перейти к сообщению",
+      ms_btn_download:          "Скачать",
+      ms_err_forbidden:         "Доступ к этой области запрещён",
+      ms_err_channel_type:      "Этот тип канала не поддерживает API поиска Discord (форумы/ветки)",
+      ms_no_token_warn:         "⚠️ Требуется режим API — включите его в настройках Wormhole",
+      ms_range_1h:              "Последний час",
+      ms_range_6h:              "Последние 6 часов",
+      ms_range_12h:             "Последние 12 часов",
+      ms_range_1d:              "Последний день",
+      ms_range_3d:              "Последние 3 дня",
+      ms_range_1w:              "Последняя неделя",
+      ms_range_3w:              "Последние 3 недели",
+      ms_range_1m:              "Последний месяц",
+      ms_range_custom:          "Свой диапазон…",
+      ms_range_from:            "С",
+      ms_range_to:              "По",
+      ms_range_apply:           "Применить",
+      ms_cap_warn:              "⚠️ Остановлено на 5000 элементах — сузьте диапазон времени для полного сканирования",
+      ms_stats_title:           "Статистика кэша",
+      ms_stats_clear:           "Очистить кэш медиафайлов этой области",
+      ms_expired:               "Ссылка устарела",
+      ms_fetching:              "Получение…",
+      ms_indexing:              "Индексация",
+      ms_rate_limited:          "Достигнут лимит запросов",
+      ms_resuming:              "Возобновление…",
+      ms_scope_channel_cur:     "Текущий канал",
+      em_settings_tooltip:              "Настройки панели Emoji/GIF/Sticker",
+      em_settings_title:                "Настройки панели",
+      em_settings_recent_count:         "Недавние элементы",
+      em_settings_recent_count_hint:    "Количество недавних элементов, отображаемых над панелью (диапазон: {min}-{max}). Существующей истории может потребоваться ещё несколько использований, чтобы достичь большего значения.",
+      em_settings_save:                 "Сохранить",
+      em_settings_saved:                "✨ Настройки сохранены",
+      cs_deep_search_tip:               "Глубокий поиск (сканирует историю сообщений через API)",
+      cs_deep_search_need_token:        "Для глубокого поиска сначала нужно включить режим API Wormhole",
+      cs_deep_searching:                "Поиск в истории сообщений…",
+      cs_deep_search_failed:            "Глубокий поиск не удался. Попробуйте ещё раз",
+      cs_deep_search_token_not_ready:   "Токен ещё не получен. Переключите канал или прокрутите один раз, затем повторите поиск",
+      cs_deep_search_no_results:        "В просканированной истории совпадений не найдено",
+      cs_remote_tag:                    "история · переход в канал",
     },
 
     de: {
@@ -6548,6 +6773,62 @@
       mp_fav_filter_label:      "Favoriten",
       mp_fav_filter_tip:        "Nur favorisierte Nachrichten anzeigen",
       mp_copy_link:             "Nachrichtenlink kopieren",
+      mp_idb_blocked:           "⚠️ Bitte andere Discord-Tabs schließen und erneut versuchen",
+      mod_tip_mosaic:           "Alle Medien des aktuellen Servers oder Kanals durchsuchen. Erfordert den Wormhole-API-Modus.",
+      ms_token_warn:            "⚠️ Mosaic verwendet dein API-Token, um Medien zu scannen. Nur in vertrauenswürdiger Umgebung verwenden.",
+      ms_scope_server:          "Server",
+      ms_scope_channel:         "Kanal",
+      ms_filter_all:            "Alle",
+      ms_chan_filter_all:       "Alle Kanäle",
+      ms_chan_filter_label:     "Nach Kanal filtern (nur zwischengespeicherte Daten):",
+      ms_filter_images:         "Bilder",
+      ms_filter_videos:         "Videos",
+      ms_items:                 "Elemente",
+      ms_empty:                 "Noch keine Medien gescannt",
+      ms_last_scan:             "Letzter Scan",
+      ms_scanning:              "Scannen läuft",
+      ms_btn_scan:              "Scannen",
+      ms_btn_pause:             "Pausieren",
+      ms_btn_resume:            "Fortsetzen",
+      ms_btn_jump:              "Zur Nachricht springen",
+      ms_btn_download:          "Herunterladen",
+      ms_err_forbidden:         "Zugriff für diesen Bereich verweigert",
+      ms_err_channel_type:      "Dieser Kanaltyp unterstützt die Discord-Such-API nicht (Foren/Threads)",
+      ms_no_token_warn:         "⚠️ Erfordert API-Modus — in den Wormhole-Einstellungen aktivieren",
+      ms_range_1h:              "Letzte 1 Stunde",
+      ms_range_6h:              "Letzte 6 Stunden",
+      ms_range_12h:             "Letzte 12 Stunden",
+      ms_range_1d:              "Letzter 1 Tag",
+      ms_range_3d:              "Letzte 3 Tage",
+      ms_range_1w:              "Letzte 1 Woche",
+      ms_range_3w:              "Letzte 3 Wochen",
+      ms_range_1m:              "Letzter 1 Monat",
+      ms_range_custom:          "Benutzerdefinierter Zeitraum…",
+      ms_range_from:            "Von",
+      ms_range_to:              "Bis",
+      ms_range_apply:           "Anwenden",
+      ms_cap_warn:              "⚠️ Bei 5000 Elementen gestoppt — Zeitraum eingrenzen für vollständigen Scan",
+      ms_stats_title:           "Cache-Statistik",
+      ms_stats_clear:           "Zwischengespeicherte Medien dieses Bereichs löschen",
+      ms_expired:               "Link abgelaufen",
+      ms_fetching:              "Wird abgerufen…",
+      ms_indexing:              "Indizierung läuft",
+      ms_rate_limited:          "Anfragelimit erreicht",
+      ms_resuming:              "Wird fortgesetzt…",
+      ms_scope_channel_cur:     "Aktueller Kanal",
+      em_settings_tooltip:              "Einstellungen für Emoji/GIF/Sticker-Panel",
+      em_settings_title:                "Panel-Einstellungen",
+      em_settings_recent_count:         "Zuletzt verwendete Elemente",
+      em_settings_recent_count_hint:    "Anzahl der zuletzt verwendeten Elemente über dem Panel (Bereich: {min}-{max}). Der vorhandene Verlauf benötigt möglicherweise noch etwas Nutzung, um eine höhere Zahl zu erreichen.",
+      em_settings_save:                 "Speichern",
+      em_settings_saved:                "✨ Einstellungen gespeichert",
+      cs_deep_search_tip:               "Tiefensuche (durchsucht Nachrichtenverlauf via API)",
+      cs_deep_search_need_token:        "Für die Tiefensuche muss zuerst der Wormhole-API-Modus aktiviert werden",
+      cs_deep_searching:                "Nachrichtenverlauf wird durchsucht…",
+      cs_deep_search_failed:            "Tiefensuche fehlgeschlagen. Bitte erneut versuchen",
+      cs_deep_search_token_not_ready:   "Token noch nicht erfasst. Kanal wechseln oder einmal scrollen, dann erneut suchen",
+      cs_deep_search_no_results:        "Keine Treffer im gescannten Verlauf gefunden",
+      cs_remote_tag:                    "Verlauf · springt zum Kanal",
     },
   };
 
@@ -7235,7 +7516,6 @@
           t("fm_fuzzy"),
           modal,
           item,
-          true,
           type,
         );
         fuzzyBtn.style.flexShrink = "0";
@@ -7336,7 +7616,6 @@
           t("fm_fuzzy"),
           modal,
           item,
-          true,
           type,
         );
         btn.appendChild(fuzzyBtn);
@@ -7364,7 +7643,7 @@
       return btn;
     }
 
-    function createSubBtn(text, title, modal, item, isFuzzy, type) {
+    function createSubBtn(text, title, modal, item, type) {
       const btn = document.createElement("span");
       btn.className = "my-sub-btn";
       btn.innerText = text;
@@ -9915,7 +10194,7 @@
       btn.addEventListener("selectstart", (e) => e.preventDefault());
     }
 
-    function showSubmenu(items, parentRect, dropdown) {
+    function showSubmenu(items, parentRect) {
       document
         .querySelectorAll(".msg-copy-portal-menu")
         .forEach((el) => el.remove());
@@ -11683,7 +11962,7 @@
               groupEl.addEventListener("mouseenter", () => {
                 cancelCloseGlobalMenu();
                 const rect = groupEl.getBoundingClientRect();
-                showSubmenu(sections[k], rect, dropdown);
+                showSubmenu(sections[k], rect);
               });
 
               dropdown.appendChild(groupEl);
@@ -12874,7 +13153,7 @@
       element.dispatchEvent(new Event("change", { bubbles: true }));
     }
 
-    function createMediaElement(content, isCompact = false, type) {
+    function createMediaElement(content, isCompact = false) {
       if (!content) return null;
 
       let el;
@@ -13299,7 +13578,7 @@
         addToCollection(activeBatchType, activeBatchCollection, content);
         return;
       }
-      showSaveModal(type, content, (selectedColName) => {
+      showSaveModal(type, (selectedColName) => {
         addToCollection(type, selectedColName, content);
         if (batchTargetMode) {
           activeBatchCollection = selectedColName;
@@ -13311,7 +13590,7 @@
       });
     }
 
-    function showSaveModal(type, url, onSelect) {
+    function showSaveModal(type, onSelect) {
       const existing = document.querySelector(".my-save-modal");
       if (existing) existing.remove();
       const modal = document.createElement("div");
@@ -13461,7 +13740,7 @@
           const iconBox = document.createElement("div");
           iconBox.className = "my-emoji-preview-box";
 
-          let media = createMediaElement(item.icon, false, type);
+          let media = createMediaElement(item.icon, false);
           if (!media) {
             media = document.createElement("div");
             media.className = "my-emoji-icon-placeholder";
@@ -14058,7 +14337,7 @@
             }
           });
 
-          const media = createMediaElement(url, true, type);
+          const media = createMediaElement(url, true);
           if (media) wrap.appendChild(media);
 
           if (
@@ -14233,7 +14512,7 @@
           });
         }
 
-        const mediaEl = createMediaElement(item, true, type);
+        const mediaEl = createMediaElement(item, true);
         if (mediaEl) {
           mediaEl.style.cssText = [
             `width:${imgSize}px`, `height:${imgSize}px`,
@@ -14543,7 +14822,7 @@
         filename: finalUrl.split("/").pop(),
         createdAt: new Date().toISOString(),
       };
-      showSaveModal(TYPES.GIF, finalUrl, (col) =>
+      showSaveModal(TYPES.GIF, (col) =>
         addToCollection(TYPES.GIF, col, payload),
       );
     };
@@ -14640,17 +14919,31 @@
         activeLocalObservers.set(pickerContainer, localObserver);
 
         const removeObserver = new MutationObserver((mutations, obs) => {
-          if (!document.body.contains(pickerContainer)) {
+          const isGone = !document.body.contains(pickerContainer);
+          const isHidden = !isGone && (
+            pickerContainer.style.display === "none" ||
+            pickerContainer.offsetParent === null
+          );
+          if (isGone || isHidden) {
             localObserver.disconnect();
             activeLocalObservers.delete(pickerContainer);
             obs.disconnect();
-            DEBUG && console.log("[EmojiSearchHelper] Local observer disconnected.");
+            clearTimeout(_removeObserverFallbackTimer);
+            DEBUG && console.log(
+              `[EmojiSearchHelper] Local observer disconnected (${isGone ? "removed" : "hidden"}).`,
+            );
           }
         });
         removeObserver.observe(document.body, {
           childList: true,
           subtree: true,
         });
+        const _removeObserverFallbackTimer = setTimeout(() => {
+          localObserver.disconnect();
+          activeLocalObservers.delete(pickerContainer);
+          removeObserver.disconnect();
+          DEBUG && console.log("[EmojiSearchHelper] Local observer force-disconnected (30s fallback).");
+        }, 30000);
       }
     };
 
@@ -14823,7 +15116,7 @@
             }
           }
 
-          showSaveModal(type, finalUrl, (col) =>
+          showSaveModal(type, (col) =>
             addToCollection(type, col, finalUrl),
           );
           btn.innerHTML = ICON_FOLDER;
@@ -19781,6 +20074,14 @@ unsafeWindow.fetch = function(...args) {
     }
 
     async _pollAllWormholes() {
+      try {
+        await this._pollAllWormholesInner();
+      } catch (err) {
+        DEBUG && console.warn("[WH Monitor] _pollAllWormholes top-level error:", err);
+      }
+    }
+
+    async _pollAllWormholesInner() {
       if (!this._cachedToken) return;
       const wormholes = this.getAllWormholes();
       if (!wormholes.length) return;
@@ -23325,7 +23626,6 @@ unsafeWindow.fetch = function(...args) {
     let _setupBrowseSentinel = null;
     let _mpRefreshBtn = null;
     let _mpStatusBar  = null;
-    let _favFilterOn = false;
     let _mpUndoBuffer = null;
     let _mpUndoTimer  = null;
     let _favIds = new Set(GMStore.get(SK_FAVS, [], true));
@@ -23559,7 +23859,6 @@ unsafeWindow.fetch = function(...args) {
       }
       return true;
     }
-    function _passesFavFilter(_msg) { return true; }
 
     function _dateKey(msg) { return msg.timestamp.slice(0, 10); }
     function _groupByDate(msgs) {
@@ -23795,9 +24094,6 @@ unsafeWindow.fetch = function(...args) {
         "#dmt-mp-panel .mp-fav-btn{color:var(--dmt-text-muted,#949ba4);}",
         "#dmt-mp-panel .mp-fav-btn:hover,#dmt-mp-panel .mp-fav-btn.mp-fav-active{color:#ff1744;filter:drop-shadow(0 0 4px rgba(255,23,68,.55));}",
         "#dmt-mp-panel .mp-fav-btn svg{width:14px;height:14px;}",
-        
-        "#dmt-mp-panel .mp-fav-chip{border-color:rgba(255,23,68,.35);}",
-        "#dmt-mp-panel .mp-fav-chip.checked{background:rgba(255,23,68,.15);color:#ff1744;border-color:rgba(255,23,68,.6);}",
         "width:22px;height:22px;border-radius:5px;border:none;",
         "background:rgba(0,0,0,.55);color:rgba(255,255,255,.85);cursor:pointer;padding:0;",
         "display:flex;align-items:center;justify-content:center;",
@@ -23914,9 +24210,6 @@ unsafeWindow.fetch = function(...args) {
         "background:rgba(255,255,255,.07);animation:mp-skeleton-pulse 1.4s ease-in-out infinite;",
         "aspect-ratio:1/1;}",
         "#dmt-mp-panel .mp-scope-row{display:flex;gap:4px;padding:8px 12px 4px;flex-shrink:0;align-items:center;}",
-        "#dmt-mp-panel .mp-load-more{text-align:center;padding:10px;",
-        "color:var(--dmt-accent,#5865f2);cursor:pointer;font-size:12px;transition:opacity .15s;}",
-        "#dmt-mp-panel .mp-load-more:hover{opacity:.75;}",
         "#dmt-mp-panel .mp-empty{text-align:center;padding:32px 16px;",
         "color:var(--dmt-text-muted,#949ba4);font-size:13px;}",
         "#dmt-mp-panel .mp-statusbar{display:flex;align-items:center;gap:8px;padding:7px 12px;",
@@ -24493,7 +24786,7 @@ unsafeWindow.fetch = function(...args) {
               _fetchPage(true).then(() => {
                 const q = (searchInput?.value || "").toLowerCase();
                 const allFiltered = _browseData.filter(m =>
-                  _passesTypeFilter(m) && _passesFavFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
+                  _passesTypeFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
                 );
                 const newIds = new Set(_browseData.slice(prevLen).map(m => m.id));
                 const newFiltered = allFiltered.filter(m => newIds.has(m.id));
@@ -24688,7 +24981,7 @@ unsafeWindow.fetch = function(...args) {
           if (_stopRequested) break;
           const q = (searchInput?.value || "").toLowerCase();
           const allFiltered = _browseData.filter(m =>
-            _passesTypeFilter(m) && _passesFavFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
+            _passesTypeFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
           );
           const newIds = new Set(_browseData.slice(prevLen).map(m => m.id));
           const newFiltered = allFiltered.filter(m => newIds.has(m.id));
@@ -24817,7 +25110,7 @@ unsafeWindow.fetch = function(...args) {
           _readSyncMeta(scope).then(meta => {
             if (meta?.isFullySynced) {
               _idbSearch(scope, q).then(results => {
-                const filtered = results.filter(m => _passesTypeFilter(m) && _passesFavFilter(m));
+                const filtered = results.filter(m => _passesTypeFilter(m));
                 msgList.innerHTML = "";
                 if (filtered.length === 0) {
                   msgList.appendChild(Object.assign(document.createElement("div"), {
@@ -24856,7 +25149,7 @@ unsafeWindow.fetch = function(...args) {
 
     function _renderMessagesFallback(msgList, selCount, createBtn, cancelBtn, q) {
       const filtered = _browseData.filter(m =>
-        _passesTypeFilter(m) && _passesFavFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
+        _passesTypeFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
       );
       msgList.innerHTML = "";
 
@@ -25316,17 +25609,6 @@ unsafeWindow.fetch = function(...args) {
         _selectedIds.has(msgId) ? _selectedIds.delete(msgId) : _selectedIds.add(msgId);
         _anchorIdx = idx;
       }
-    }
-
-    function _loadMoreBtn(msgList, selCount, createBtn, cancelBtn, searchInput) {
-      const btn = document.createElement("div");
-      btn.className = "mp-load-more"; btn.textContent = mp("load_more");
-      btn.onclick = async () => {
-        btn.textContent = mp("loading");
-        await _fetchPage();
-        _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
-      };
-      return btn;
     }
 
     let _mediaFilter  = "all";
@@ -27768,6 +28050,10 @@ if (type === "warn" && scanLimit !== null) {
         const { hits: apiHits, error } = await _csSearchAPI(kw);
         if (error === "no_token") {
           _csRenderRemoteNotice(results, t("cs_deep_search_token_not_ready"));
+          return;
+        }
+        if (error === "no_channel") {
+          _csRenderRemoteNotice(results, t("cs_deep_search_no_channel"));
           return;
         }
         if (error) {
