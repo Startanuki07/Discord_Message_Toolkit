@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.3.6
+// @version      2.7.4.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -56,7 +56,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.3.6";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.4.0";
 
   const GMStore = {
     
@@ -1039,9 +1039,9 @@
         "• Bottom options: <b>Auto-close</b> / <b>Go to channel</b> (mutual exclusive) / <b>Show notification</b>.<br>" +
         "• After sending, a clickable toast appears — click it to fly to the target channel.",
 
-      fm_sec_wm_api: "⚡ Wormhole — API Mode (Secret)",
+      fm_sec_wm_api: "⚡ Wormhole — API Mode",
       fm_sec_wm_api_content:
-        "• <b>Hold the Wormhole create button (＋) for 3 seconds</b> to unlock the API Mode panel.<br>" +
+        "• <b>Click the Wormhole ＋ button</b>, then choose <b>Send Mode & API Mode</b> from the settings menu to unlock the API Mode panel.<br>" +
         "• <b>Mode B (Direct API)</b>: sends messages via Discord REST API — no page switch, faster, invisible.<br>" +
         "• Your Token is intercepted silently in the background (from Discord's own requests) — <b>never stored or transmitted</b>, memory only, cleared on page close.<br>" +
         "• Token detection starts automatically when Mode B is enabled — just use Discord normally and it will be captured.<br>" +
@@ -1056,7 +1056,7 @@
         "URL conversion features (like vxtwitter, kkinstagram) rely on third-party services.\nDo not use them if you do not trust these services.\nUsers should have the ability to identify URL safety.",
       manual_content:
         "【Icons Guide】\n• ◫/≡ : Switch Menu Style (Flat / Group)\n• ⇄ : Click Logic Swap (Copy / Insert)\n• ␣ : Append Space at end\n• ↵ : Append Newline at end\n• ☆ : Custom Strings Panel\n• 🖱️ : Trigger Mode (Hover / Click)\n• 🌐 : Change Language\n\n【Actions】\n• **Click**: Copy (Default)\n• **Long Press (0.5s)**: Insert to Input\n• **Shift+Click**: Copy & Insert (Keep Menu Open)",
-      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Quick Start</div><div class='mm-content'>Hover over any Discord message → a copy button appears at the top-right corner.<br><b>Click</b> to copy text · <b>Long-press 0.5s</b> to insert into the input box · <b>Shift+Click</b> to copy AND insert (menu stays open).<br>Switch trigger to <span class='mm-key'>Click mode</span> via <span class='mm-key'>🖱️</span> if you prefer manual activation.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Copy Menu — Text & Links</div><div class='mm-content'>• <b>Copy Text</b>: copies the full message text content.<br>• <b>Copy Media URL</b>: copies the direct URL of an image/video in the message.<br>• <b>Copy First Link (Clean)</b>: extracts and sanitizes the first URL (removes trackers).<br>• <b>Copy All Links</b>: copies every URL found in the message, one per line.<br>• <b>Copy as Markdown</b>: formats the link as <span class='mm-key'>[text](URL)</span> for Markdown use.<br>• <b>Insert [<span class='mm-key'>{t}</span>](URL)</b>: inserts a Markdown link directly into Discord's input box.<br>• <b>Hidden Format</b>: wraps content in <span class='mm-key'>|| spoiler ||</span> tags.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ Download</div><div class='mm-content'>• <b>Download Images/Media</b>: downloads all images or videos in the message.<br>• <b>Download as ZIP</b>: bundles multiple files into a single ZIP archive.<br>• Retries automatically on failure, falls back to alternate URL if available.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 URL Conversion</div><div class='mm-content'><b>Twitter / X</b>: converts between twitter.com, x.com, vxtwitter, fixupx, fxtwitter, cunnyx.<br><b>Instagram</b>: converts between instagram.com ↔ kkinstagram.com for embed previews.<br><b>Bilibili</b>: converts to FX Bilibili or VX Bilibili for better embeds.<br><b>Pixiv</b>: converts between pixiv.net ↔ phixiv.net.<br><b>Batch convert</b>: <span class='mm-key'>⚡ Convert All (N)</span> processes every link of that type in the message at once.</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ Toolbar Icons</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> Switch menu style: Flat / Group</div><div><span class='mm-key'>⇄</span> Swap click logic: Copy ↔ Insert</div><div><span class='mm-key'>␣</span> Append space to inserted text</div><div><span class='mm-key'>↵</span> Append newline to inserted text</div><div><span class='mm-key'>☆</span> Custom string panel (saved snippets)</div><div><span class='mm-key'>🖱️</span> Toggle trigger: Hover / Click</div><div><span class='mm-key'>🌐</span> Switch interface language</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ Custom String Panel</div><div class='mm-content'>• Save frequently used text snippets (greetings, templates, code blocks).<br>• Click to copy · Long-press to insert into input box.<br>• <span class='mm-key'>Shift+Click</span> to delete entries continuously without confirmation.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Wormhole — Overview</div><div class='mm-content'>Wormholes are <b>one-click channel shortcuts</b> that live in the Discord sidebar. Click <span class='mm-key'>＋</span> and paste any Discord channel URL to create one.<br><b>Click</b> the <span class='mm-key'>＋</span> button → create a new wormhole · <b>Long-press 1s</b> → open the settings menu.</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ Navigation & Management</div><div class='mm-content'>• <b>Click</b> a wormhole → instantly jump to that channel.<br>• <b>Right-click</b> → menu: Rename · Delete · Set icon · Move to group · Toggle VIP.<br>• <b>VIP <span class='mm-key'>★</span></b>: pinned wormholes auto-float to the top.<br>• <b>Groups</b>: right-click → Move to Group to organize into folders.<br>• <b>Focus Mode</b>: icon-only compact view via the top-right panel button.<br>• <b>History</b> (purple badges): last visited channels saved, click to return.</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ Send Message</div><div class='mm-content'>• <b>Right-click</b> a wormhole → <b>Send Message Here</b> to open the overlay.<br>• <span class='mm-key'>Ctrl+V</span> to paste images directly — sent with text as one message.<br>• Bottom options (persisted): Auto-close · Go to channel · Show notification.<br>• A clickable 3-second toast appears after sending — click to fly to that channel.</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚡ Settings Menu & API Mode</div><div class='mm-content'>• <b>Long-press <span class='mm-key'>＋</span> for 1 second</b> to open the wormhole settings menu.<br>• Menu items: <span class='mm-key'>➕ Create New Wormhole</span> · <span class='mm-key'>✉️ Send Method & API Mode</span> · <span class='mm-key'>⚙️ More Settings</span> (expandable).<br>• <b>Send Method & API Mode</b> → opens the API panel:<br>&nbsp;&nbsp;— <b>Plan A (Navigate)</b>: switches channel, injects text, returns. No API token needed.<br>&nbsp;&nbsp;— <b>Plan B (Direct API)</b>: REST API send, no page switch, instant &amp; silent.<br>• Token is intercepted silently from Discord's own requests — <b>never stored to disk.</b><br>• After page refresh: interceptor auto-restarts when you open the send overlay.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔍 Duplicate URL Checker</div><div class='mm-content'>Automatically checks for duplicate links when you paste a URL into the chat box.<br>• <b>DOM mode</b> (default): scans all currently visible messages — no API token required.<br>• <b>API mode</b>: scans the last 200 messages via Discord API (requires Wormhole API mode enabled and token captured).<br>• A banner appears at the top of the chat if a duplicate is detected, showing how many times the link appeared.<br>• The banner auto-dismisses once you paste a different URL or switch channels.<br>• <b>No banner = no duplicate</b> — the checker runs silently in the background when no match is found.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔎 Channel Scout — Search</div><div class='mm-content'>Search the current channel's messages by keyword, directly from chat.<br>• <b>Open</b>: click the 🔎 floating button above the input box, or press <span class='mm-key'>F2</span> anywhere outside the input.<br>• <b>Instant search</b>: results update as you type (150 ms debounce). Keyword is highlighted in gold.<br>• <b>Quick tags</b>: save up to 5 custom keywords as one-click search buttons. Left-click to search · Right-click to delete.<br>• <b>Search history</b>: the 🕐 button shows your last 5 searches, click to re-run.<br>• <b>Jump to message</b>: click any result to scroll it into view with a blue highlight ring.<br>• <b>Paste button</b>: click 📋 to paste clipboard content directly into the search box.<br>• Close with <span class='mm-key'>ESC</span>, <span class='mm-key'>F2</span>, or click outside.<br>⚠ DOM mode only — searches messages currently rendered on screen. Scroll up to load older messages before searching.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌫️ Mute User Messages</div><div class='mm-content'>Softly dim messages from specific users so they fade into the background without disappearing.<br>• <b>Mute</b>: right-click any message → <b>🌫️ Mute messages: {name}</b> in the context menu (appears below Block).<br>• <b>Unmute</b>: right-click any message from the same user → <b>✅ Unmute: {name}</b>.<br>• <b>Manage panel</b>: press <span class='mm-key'>Alt+B</span> to open the mute list — shows all muted users with date added and an Unmute button.<br>• Dimmed messages show at <b>7% opacity</b>. Hover over them to temporarily preview at 42% opacity.<br>• Muting is <b>name-based</b> (display name, not user ID). Works across all channels.<br>• Applied automatically to new messages as they arrive, and re-applied after switching channels.<br>• Data is stored permanently in GM storage — survives page reloads.</div></div></div></div>`,
+      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ Quick Start</div><div class='mm-content'>Hover over any Discord message → a copy button appears at the top-right corner.<br><b>Click</b> to copy text · <b>Long-press 0.5s</b> to insert into the input box · <b>Shift+Click</b> to copy AND insert (menu stays open).<br>Switch trigger to <span class='mm-key'>Click mode</span> via <span class='mm-key'>🖱️</span> if you prefer manual activation.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 Copy Menu — Text & Links</div><div class='mm-content'>• <b>Copy Text</b>: copies the full message text content.<br>• <b>Copy Media URL</b>: copies the direct URL of an image/video in the message.<br>• <b>Copy First Link (Clean)</b>: extracts and sanitizes the first URL (removes trackers).<br>• <b>Copy All Links</b>: copies every URL found in the message, one per line.<br>• <b>Copy as Markdown</b>: formats the link as <span class='mm-key'>[text](URL)</span> for Markdown use.<br>• <b>Insert [<span class='mm-key'>{t}</span>](URL)</b>: inserts a Markdown link directly into Discord's input box.<br>• <b>Hidden Format</b>: wraps content in <span class='mm-key'>|| spoiler ||</span> tags.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ Download</div><div class='mm-content'>• <b>Download Images/Media</b>: downloads all images or videos in the message.<br>• <b>Download as ZIP</b>: bundles multiple files into a single ZIP archive.<br>• Retries automatically on failure, falls back to alternate URL if available.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 URL Conversion</div><div class='mm-content'><b>Twitter / X</b>: converts between twitter.com, x.com, vxtwitter, fixupx, fxtwitter, cunnyx.<br><b>Instagram</b>: converts between instagram.com ↔ kkinstagram.com for embed previews.<br><b>Bilibili</b>: converts to FX Bilibili or VX Bilibili for better embeds.<br><b>Pixiv</b>: converts between pixiv.net ↔ phixiv.net.<br><b>Batch convert</b>: <span class='mm-key'>⚡ Convert All (N)</span> processes every link of that type in the message at once.</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ Toolbar Icons</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> Switch menu style: Flat / Group</div><div><span class='mm-key'>⇄</span> Swap click logic: Copy ↔ Insert</div><div><span class='mm-key'>␣</span> Append space to inserted text</div><div><span class='mm-key'>↵</span> Append newline to inserted text</div><div><span class='mm-key'>☆</span> Custom string panel (saved snippets)</div><div><span class='mm-key'>🖱️</span> Toggle trigger: Hover / Click</div><div><span class='mm-key'>🌐</span> Switch interface language</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ Custom String Panel</div><div class='mm-content'>• Save frequently used text snippets (greetings, templates, code blocks).<br>• Click to copy · Long-press to insert into input box.<br>• <span class='mm-key'>Shift+Click</span> to delete entries continuously without confirmation.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 Wormhole — Overview</div><div class='mm-content'>Wormholes are <b>one-click channel shortcuts</b> that live in the Discord sidebar. Click <span class='mm-key'>＋</span> and paste any Discord channel URL to create one.<br><b>Click</b> the <span class='mm-key'>＋</span> button → open the settings menu (create a new wormhole from the first menu item).</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ Navigation & Management</div><div class='mm-content'>• <b>Click</b> a wormhole → instantly jump to that channel.<br>• <b>Right-click</b> → menu: Rename · Delete · Set icon · Move to group · Toggle VIP.<br>• <b>VIP <span class='mm-key'>★</span></b>: pinned wormholes auto-float to the top.<br>• <b>Groups</b>: right-click → Move to Group to organize into folders.<br>• <b>Focus Mode</b>: icon-only compact view via the top-right panel button.<br>• <b>History</b> (purple badges): last visited channels saved, click to return.</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ Send Message</div><div class='mm-content'>• <b>Right-click</b> a wormhole → <b>Send Message Here</b> to open the overlay.<br>• <span class='mm-key'>Ctrl+V</span> to paste images directly — sent with text as one message.<br>• Bottom options (persisted): Auto-close · Go to channel · Show notification.<br>• A clickable 3-second toast appears after sending — click to fly to that channel.</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚡ Settings Menu & API Mode</div><div class='mm-content'>• <b>Click <span class='mm-key'>＋</span></b> to open the wormhole settings menu.<br>• Menu items: <span class='mm-key'>➕ Create New Wormhole</span> · <span class='mm-key'>✉️ Send Method & API Mode</span> · <span class='mm-key'>⚙️ More Settings</span> (expandable).<br>• <b>Send Method & API Mode</b> → opens the API panel:<br>&nbsp;&nbsp;— <b>Plan A (Navigate)</b>: switches channel, injects text, returns. No API token needed.<br>&nbsp;&nbsp;— <b>Plan B (Direct API)</b>: REST API send, no page switch, instant &amp; silent.<br>• Token is intercepted silently from Discord's own requests — <b>never stored to disk.</b><br>• After page refresh: interceptor auto-restarts when you open the send overlay.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔍 Duplicate URL Checker</div><div class='mm-content'>Automatically checks for duplicate links when you paste a URL into the chat box.<br>• <b>DOM mode</b> (default): scans all currently visible messages — no API token required.<br>• <b>API mode</b>: scans the last 200 messages via Discord API (requires Wormhole API mode enabled and token captured).<br>• A banner appears at the top of the chat if a duplicate is detected, showing how many times the link appeared.<br>• The banner auto-dismisses once you paste a different URL or switch channels.<br>• <b>No banner = no duplicate</b> — the checker runs silently in the background when no match is found.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔎 Channel Scout — Search</div><div class='mm-content'>Search the current channel's messages by keyword, directly from chat.<br>• <b>Open</b>: click the 🔎 floating button above the input box, or press <span class='mm-key'>F2</span> anywhere outside the input.<br>• <b>Instant search</b>: results update as you type (150 ms debounce). Keyword is highlighted in gold.<br>• <b>Quick tags</b>: save up to 5 custom keywords as one-click search buttons. Left-click to search · Right-click to delete.<br>• <b>Search history</b>: the 🕐 button shows your last 5 searches, click to re-run.<br>• <b>Jump to message</b>: click any result to scroll it into view with a blue highlight ring.<br>• <b>Paste button</b>: click 📋 to paste clipboard content directly into the search box.<br>• Close with <span class='mm-key'>ESC</span>, <span class='mm-key'>F2</span>, or click outside.<br>⚠ DOM mode only — searches messages currently rendered on screen. Scroll up to load older messages before searching.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌫️ Mute User Messages</div><div class='mm-content'>Softly dim messages from specific users so they fade into the background without disappearing.<br>• <b>Mute</b>: right-click any message → <b>🌫️ Mute messages: {name}</b> in the context menu (appears below Block).<br>• <b>Unmute</b>: right-click any message from the same user → <b>✅ Unmute: {name}</b>.<br>• <b>Manage panel</b>: press <span class='mm-key'>Alt+B</span> to open the mute list — shows all muted users with date added and an Unmute button.<br>• Dimmed messages show at <b>7% opacity</b>. Hover over them to temporarily preview at 42% opacity.<br>• Muting is <b>name-based</b> (display name, not user ID). Works across all channels.<br>• Applied automatically to new messages as they arrive, and re-applied after switching channels.<br>• Data is stored permanently in GM storage — survives page reloads.</div></div></div></div>`,
       reload_confirm: "Settings saved!\nReload page now to apply changes?",
       copy_text: "📋 Copy Text",
       copy_media_url: "🖼️ Copy Media URL",
@@ -1196,7 +1196,7 @@
       wm_icon_set_success: "✅ Icon set for {name}",
       wm_icon_empty: "Please add Emoji in the collection module first",
       wm_title:
-        "Wormhole Controls\n• Click: Create new wormhole\n• Long-press 1s: Open settings menu",
+        "Wormhole Controls\n• Click: Open settings menu",
       wm_settings_menu_title: "🌀 Wormhole Settings",
       wm_settings_create: "Create New Wormhole",
       wm_settings_send_mode: "Send Method & API Mode",
@@ -1351,7 +1351,7 @@
       uc_duplicate_found: "⚠️ This URL was already posted — appeared {count}× in the last {limit} messages",
       uc_duplicate_found_plural: "⚠️ {n} duplicate URLs — up to {count}× in the last {limit} messages",
       uc_dom_found: "⚠️ This URL was spotted {count}× in {limit} visible messages (DOM mode · no API needed)",
-      uc_no_token: "🔍 Duplicate URL Check requires Wormhole API Mode — enable it in the Wormhole settings (hold ＋ for 1s)",
+      uc_no_token: "🔍 Duplicate URL Check requires Wormhole API Mode — click ＋ then open settings to enable it",
       uc_token_waiting: "⏳ Waiting for API Token… switch to any channel once to capture it",
       uc_fetching: "🔄 Checking for duplicate URLs…",
       uc_dismiss: "✕",
@@ -1636,9 +1636,9 @@
         "• 底部選項：<b>傳送後自動關閉</b> / <b>傳送後前往該頻道</b>（兩者互斥）/ <b>顯示傳訊通知</b>。<br>" +
         "• 傳送成功後會出現可點擊的通知，點擊後立即飛往目標頻道。",
 
-      fm_sec_wm_api: "⚡ 蟲洞 — API 模式（彩蛋）",
+      fm_sec_wm_api: "⚡ 蟲洞 — API 模式",
       fm_sec_wm_api_content:
-        "• <b>長按蟲洞建立按鈕（＋）3 秒</b>，即可解鎖 API 模式設定面板。<br>" +
+        "• <b>單擊蟲洞 ＋ 按鈕</b>，於設定選單中選擇<b>傳訊方式與 API 模式</b>即可開啟 API 模式設定面板。<br>" +
         "• <b>方案 B（直接 API）</b>：透過 Discord REST API 傳送訊息，無需切換頁面，速度更快、更隱匿。<br>" +
         "• Token 由腳本在背景靜默攔截（來自 Discord 自身發出的請求），<b>絕不儲存或外傳</b>，僅存於記憶體，關閉頁面即消失。<br>" +
         "• 啟用方案 B 後，Token 偵測會自動在背景運行，正常使用 Discord 即可自動捕獲，無需手動操作。<br>" +
@@ -1652,7 +1652,7 @@
         "本腳本提供的「網址轉換」功能（如 vxtwitter, kkinstagram 等）皆依賴第三方開源服務。\n若您不信任這些第三方服務，請勿點擊轉換選項。\n請使用者自行具備辨識網址安全性的能力。",
       manual_content:
         "【圖示說明】\n• ◫/≡ : 切換選單風格 (平面 / 群組)\n• ⇄ : 點擊邏輯互換 (複製 / 填充)\n• ␣ : 尾部添加空格\n• ↵ : 尾部添加換行\n• ☆ : 自定義字串面板\n• 🖱️ : 切換觸發模式 (懸停 / 點擊)\n• 🌐 : 切換語言\n\n【操作方式】\n• **單擊**: 複製 (預設)\n• **長按 (0.5秒)**: 填充至輸入框\n• **Shift+單擊**: 同時複製並填充 (保持選單開啟)",
-      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ 快速開始</div><div class='mm-content'>將滑鼠懸停在任意 Discord 訊息上 → 右上角出現複製按鈕。<br><b>單擊</b>複製文字 · <b>長按 0.5秒</b>填充到輸入框 · <b>Shift+單擊</b>同時複製並填充（選單保持開啟）。<br>透過工具列的 <span class='mm-key'>🖱️</span> 可切換為<span class='mm-key'>點擊模式</span>，改為手動觸發。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 複製選單 — 文字與連結</div><div class='mm-content'>• <b>複製文字</b>：複製訊息的完整文字內容。<br>• <b>複製媒體網址</b>：複製訊息中圖片或影片的直接連結。<br>• <b>複製第一個連結（已淨化）</b>：提取並清除追蹤參數的第一個 URL。<br>• <b>複製所有連結</b>：將訊息中所有 URL 每行一個一次複製。<br>• <b>複製為 Markdown</b>：格式化為 <span class='mm-key'>[文字](URL)</span> 供 Markdown 使用。<br>• <b>插入 Markdown 連結</b>：直接將連結格式注入 Discord 的輸入框。<br>• <b>隱藏格式</b>：自動包裹為 <span class='mm-key'>|| 暴雷內容 ||</span> 格式。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ 下載</div><div class='mm-content'>• <b>下載圖片/媒體</b>：下載該則訊息中的所有圖片或影片。<br>• <b>下載為 ZIP</b>：多個檔案自動打包為單一 ZIP 壓縮檔。<br>• 下載失敗時自動重試，並備援切換至備用連結。</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 網址轉換</div><div class='mm-content'><b>Twitter / X</b>：在 twitter.com、x.com、vxtwitter、fixupx、fxtwitter、cunnyx 之間互轉，修復 Discord 預覽。<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com，讓嵌入預覽正常顯示。<br><b>Bilibili</b>：轉換為 FX Bilibili 或 VX Bilibili 取得更好的嵌入效果。<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net 互轉，在 Discord 直接顯示插圖預覽。<br><b>批次轉換</b>：<span class='mm-key'>⚡ 全部轉為 (N)</span> 一次處理訊息中同類型的所有連結。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ 工具列圖示說明</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> 切換選單風格：平面 / 群組</div><div><span class='mm-key'>⇄</span> 互換點擊邏輯：複製 ↔ 填充</div><div><span class='mm-key'>␣</span> 填充時在尾部附加空格</div><div><span class='mm-key'>↵</span> 填充時在尾部附加換行</div><div><span class='mm-key'>☆</span> 自定義字串面板（常用片段）</div><div><span class='mm-key'>🖱️</span> 切換觸發方式：懸停 / 點擊</div><div><span class='mm-key'>🌐</span> 切換介面語言</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ 自定義字串面板</div><div class='mm-content'>• 儲存常用的文字片段（問候語、模板、程式碼區塊等）。<br>• 單擊複製 · 長按填充到輸入框。<br>• <span class='mm-key'>Shift+單擊</span> 可連續刪除條目，無需逐一確認。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 蟲洞 — 總覽</div><div class='mm-content'>蟲洞是存在 Discord 側邊欄的<b>一鍵頻道捷徑</b>。點擊 <span class='mm-key'>＋</span> 並貼上 Discord 頻道網址即可建立。<br><b>單擊</b> <span class='mm-key'>＋</span> → 建立新蟲洞 · <b>長按 1 秒</b> → 開啟設定選單。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ 導航與管理</div><div class='mm-content'>• <b>單擊</b>蟲洞 → 立即跳轉至該頻道。<br>• <b>右鍵</b>蟲洞 → 選單：重新命名 · 刪除 · 設定圖示 · 移至群組 · 切換 VIP。<br>• <b>VIP <span class='mm-key'>★</span></b>：設為 VIP 的蟲洞自動置頂顯示。<br>• <b>分組</b>：右鍵 → 移動到分組，整理進資料夾。<br>• <b>聚焦模式</b>：圖示精簡視圖，蟲洞面板右上角按鈕切換。<br>• <b>歷史紀錄</b>（紫色標籤）：自動記錄最近造訪頻道，點擊即可返回。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ 傳送訊息</div><div class='mm-content'>• <b>右鍵</b>蟲洞 → <b>在此頻道傳送訊息</b> 開啟輸入欄。<br>• <span class='mm-key'>Ctrl+V</span> 直接貼上圖片，圖文合為一則訊息一起送出。<br>• 底部選項（跨次保留）：自動關閉 · 前往頻道 · 顯示通知。<br>• 傳送後彈出 3 秒可點擊通知，點擊即飛往目標頻道。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 設定選單與 API 模式</div><div class='mm-content'>• <b>長按 <span class='mm-key'>＋</span> 1 秒</b>即可開啟蟲洞設定選單。<br>• 選單項目：<span class='mm-key'>➕ 建立新蟲洞</span> · <span class='mm-key'>✉️ 傳訊方式與 API 模式</span> · <span class='mm-key'>⚙️ 更多設定</span>（可擴充）。<br>• 點擊「<b>傳訊方式與 API 模式</b>」→ 開啟 API 設定面板：<br>&nbsp;&nbsp;— <b>方案 A（跳頁）</b>：自動切換頻道，注入文字後返回，無需 Token。<br>&nbsp;&nbsp;— <b>方案 B（直接 API）</b>：REST API 直送，不切換頁面，即時且隱匿。<br>• Token 由背景靜默攔截 Discord 自身請求取得——<b>絕不寫入磁碟或外傳。</b><br>• 頁面重整後：開啟傳訊輸入欄時攔截器會自動重啟。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔍 重複網址偵測</div><div class='mm-content'>在聊天框貼上網址時，自動掃描是否已有相同連結出現過。<br>• <b>DOM 模式</b>（預設）：掃描目前頁面可見的所有訊息，無需 API token。<br>• <b>API 模式</b>：透過 Discord API 掃描最近 200 則訊息（需啟用蟲洞 API 模式且已攔截到 token）。<br>• 偵測到重複時，聊天頂部出現 Banner 提示，顯示該連結出現的次數。<br>• 貼上不同連結或切換頻道後，Banner 自動消失。<br>• <b>沒有 Banner = 沒有重複</b>——未命中時偵測器靜默在背景運行。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔎 頻道搜尋 Channel Scout</div><div class='mm-content'>直接在聊天視窗以關鍵字搜尋目前頻道的訊息。<br>• <b>開啟</b>：點擊輸入框上方的 🔎 懸浮按鈕，或在輸入框外按 <span class='mm-key'>F2</span>。<br>• <b>即時搜尋</b>：輸入時結果即時更新（150ms 延遲），命中關鍵字以金色高亮標示。<br>• <b>快捷標籤</b>：最多儲存 5 個自定義關鍵字作為一鍵搜尋按鈕。左鍵搜尋 · 右鍵刪除。<br>• <b>搜尋歷史</b>：點擊 🕐 按鈕顯示最近 5 筆記錄，點擊即可重新搜尋。<br>• <b>跳至訊息</b>：點擊任一結果，頁面自動捲動並以藍紫框高亮標記目標訊息。<br>• <b>貼上按鈕</b>：點擊 📋 直接將剪貼簿內容填入搜尋框。<br>• 按 <span class='mm-key'>ESC</span>、<span class='mm-key'>F2</span> 或點擊面板外關閉。<br>⚠ 僅 DOM 模式——只能搜尋目前已渲染的訊息。需要搜尋更早的訊息時，請先向上捲動讓 Discord 載入歷史訊息。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌫️ 弱化使用者訊息</div><div class='mm-content'>將特定使用者的訊息柔和地弱化至背景，讓它們不再吸引注意，但不會消失。<br>• <b>加入弱化</b>：對任意訊息按右鍵 → 原生選單中「封鎖」下方出現 <b>🌫️ 弱化訊息：{名稱}</b>，點擊即可。<br>• <b>解除弱化</b>：再次對同一使用者的訊息按右鍵 → <b>✅ 解除弱化：{名稱}</b>。<br>• <b>管理面板</b>：按 <span class='mm-key'>Alt+B</span> 開啟弱化名單，顯示所有被弱化的使用者、加入時間及解除按鈕。<br>• 被弱化的訊息顯示為 <b>7% 不透明度</b>，滑鼠移入可暫時預覽至 42% 透明度。<br>• 以<b>顯示名稱</b>識別（非 User ID），跨所有頻道有效。<br>• 新訊息抵達時自動套用，切換頻道後也會自動重新套用。<br>• 資料永久儲存於 GM storage，頁面重整後仍然保留。</div></div></div></div>`,
+      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ 快速開始</div><div class='mm-content'>將滑鼠懸停在任意 Discord 訊息上 → 右上角出現複製按鈕。<br><b>單擊</b>複製文字 · <b>長按 0.5秒</b>填充到輸入框 · <b>Shift+單擊</b>同時複製並填充（選單保持開啟）。<br>透過工具列的 <span class='mm-key'>🖱️</span> 可切換為<span class='mm-key'>點擊模式</span>，改為手動觸發。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 複製選單 — 文字與連結</div><div class='mm-content'>• <b>複製文字</b>：複製訊息的完整文字內容。<br>• <b>複製媒體網址</b>：複製訊息中圖片或影片的直接連結。<br>• <b>複製第一個連結（已淨化）</b>：提取並清除追蹤參數的第一個 URL。<br>• <b>複製所有連結</b>：將訊息中所有 URL 每行一個一次複製。<br>• <b>複製為 Markdown</b>：格式化為 <span class='mm-key'>[文字](URL)</span> 供 Markdown 使用。<br>• <b>插入 Markdown 連結</b>：直接將連結格式注入 Discord 的輸入框。<br>• <b>隱藏格式</b>：自動包裹為 <span class='mm-key'>|| 暴雷內容 ||</span> 格式。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ 下載</div><div class='mm-content'>• <b>下載圖片/媒體</b>：下載該則訊息中的所有圖片或影片。<br>• <b>下載為 ZIP</b>：多個檔案自動打包為單一 ZIP 壓縮檔。<br>• 下載失敗時自動重試，並備援切換至備用連結。</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 網址轉換</div><div class='mm-content'><b>Twitter / X</b>：在 twitter.com、x.com、vxtwitter、fixupx、fxtwitter、cunnyx 之間互轉，修復 Discord 預覽。<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com，讓嵌入預覽正常顯示。<br><b>Bilibili</b>：轉換為 FX Bilibili 或 VX Bilibili 取得更好的嵌入效果。<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net 互轉，在 Discord 直接顯示插圖預覽。<br><b>批次轉換</b>：<span class='mm-key'>⚡ 全部轉為 (N)</span> 一次處理訊息中同類型的所有連結。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ 工具列圖示說明</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> 切換選單風格：平面 / 群組</div><div><span class='mm-key'>⇄</span> 互換點擊邏輯：複製 ↔ 填充</div><div><span class='mm-key'>␣</span> 填充時在尾部附加空格</div><div><span class='mm-key'>↵</span> 填充時在尾部附加換行</div><div><span class='mm-key'>☆</span> 自定義字串面板（常用片段）</div><div><span class='mm-key'>🖱️</span> 切換觸發方式：懸停 / 點擊</div><div><span class='mm-key'>🌐</span> 切換介面語言</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ 自定義字串面板</div><div class='mm-content'>• 儲存常用的文字片段（問候語、模板、程式碼區塊等）。<br>• 單擊複製 · 長按填充到輸入框。<br>• <span class='mm-key'>Shift+單擊</span> 可連續刪除條目，無需逐一確認。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 蟲洞 — 總覽</div><div class='mm-content'>蟲洞是存在 Discord 側邊欄的<b>一鍵頻道捷徑</b>。點擊 <span class='mm-key'>＋</span> 並貼上 Discord 頻道網址即可建立。<br><b>單擊</b> <span class='mm-key'>＋</span> → 開啟設定選單（第一個選項即可建立新蟲洞）。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ 導航與管理</div><div class='mm-content'>• <b>單擊</b>蟲洞 → 立即跳轉至該頻道。<br>• <b>右鍵</b>蟲洞 → 選單：重新命名 · 刪除 · 設定圖示 · 移至群組 · 切換 VIP。<br>• <b>VIP <span class='mm-key'>★</span></b>：設為 VIP 的蟲洞自動置頂顯示。<br>• <b>分組</b>：右鍵 → 移動到分組，整理進資料夾。<br>• <b>聚焦模式</b>：圖示精簡視圖，蟲洞面板右上角按鈕切換。<br>• <b>歷史紀錄</b>（紫色標籤）：自動記錄最近造訪頻道，點擊即可返回。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ 傳送訊息</div><div class='mm-content'>• <b>右鍵</b>蟲洞 → <b>在此頻道傳送訊息</b> 開啟輸入欄。<br>• <span class='mm-key'>Ctrl+V</span> 直接貼上圖片，圖文合為一則訊息一起送出。<br>• 底部選項（跨次保留）：自動關閉 · 前往頻道 · 顯示通知。<br>• 傳送後彈出 3 秒可點擊通知，點擊即飛往目標頻道。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 設定選單與 API 模式</div><div class='mm-content'>• <b>單擊 <span class='mm-key'>＋</span></b> 即可開啟蟲洞設定選單。<br>• 選單項目：<span class='mm-key'>➕ 建立新蟲洞</span> · <span class='mm-key'>✉️ 傳訊方式與 API 模式</span> · <span class='mm-key'>⚙️ 更多設定</span>（可擴充）。<br>• 點擊「<b>傳訊方式與 API 模式</b>」→ 開啟 API 設定面板：<br>&nbsp;&nbsp;— <b>方案 A（跳頁）</b>：自動切換頻道，注入文字後返回，無需 Token。<br>&nbsp;&nbsp;— <b>方案 B（直接 API）</b>：REST API 直送，不切換頁面，即時且隱匿。<br>• Token 由背景靜默攔截 Discord 自身請求取得——<b>絕不寫入磁碟或外傳。</b><br>• 頁面重整後：開啟傳訊輸入欄時攔截器會自動重啟。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔍 重複網址偵測</div><div class='mm-content'>在聊天框貼上網址時，自動掃描是否已有相同連結出現過。<br>• <b>DOM 模式</b>（預設）：掃描目前頁面可見的所有訊息，無需 API token。<br>• <b>API 模式</b>：透過 Discord API 掃描最近 200 則訊息（需啟用蟲洞 API 模式且已攔截到 token）。<br>• 偵測到重複時，聊天頂部出現 Banner 提示，顯示該連結出現的次數。<br>• 貼上不同連結或切換頻道後，Banner 自動消失。<br>• <b>沒有 Banner = 沒有重複</b>——未命中時偵測器靜默在背景運行。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔎 頻道搜尋 Channel Scout</div><div class='mm-content'>直接在聊天視窗以關鍵字搜尋目前頻道的訊息。<br>• <b>開啟</b>：點擊輸入框上方的 🔎 懸浮按鈕，或在輸入框外按 <span class='mm-key'>F2</span>。<br>• <b>即時搜尋</b>：輸入時結果即時更新（150ms 延遲），命中關鍵字以金色高亮標示。<br>• <b>快捷標籤</b>：最多儲存 5 個自定義關鍵字作為一鍵搜尋按鈕。左鍵搜尋 · 右鍵刪除。<br>• <b>搜尋歷史</b>：點擊 🕐 按鈕顯示最近 5 筆記錄，點擊即可重新搜尋。<br>• <b>跳至訊息</b>：點擊任一結果，頁面自動捲動並以藍紫框高亮標記目標訊息。<br>• <b>貼上按鈕</b>：點擊 📋 直接將剪貼簿內容填入搜尋框。<br>• 按 <span class='mm-key'>ESC</span>、<span class='mm-key'>F2</span> 或點擊面板外關閉。<br>⚠ 僅 DOM 模式——只能搜尋目前已渲染的訊息。需要搜尋更早的訊息時，請先向上捲動讓 Discord 載入歷史訊息。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌫️ 弱化使用者訊息</div><div class='mm-content'>將特定使用者的訊息柔和地弱化至背景，讓它們不再吸引注意，但不會消失。<br>• <b>加入弱化</b>：對任意訊息按右鍵 → 原生選單中「封鎖」下方出現 <b>🌫️ 弱化訊息：{名稱}</b>，點擊即可。<br>• <b>解除弱化</b>：再次對同一使用者的訊息按右鍵 → <b>✅ 解除弱化：{名稱}</b>。<br>• <b>管理面板</b>：按 <span class='mm-key'>Alt+B</span> 開啟弱化名單，顯示所有被弱化的使用者、加入時間及解除按鈕。<br>• 被弱化的訊息顯示為 <b>7% 不透明度</b>，滑鼠移入可暫時預覽至 42% 透明度。<br>• 以<b>顯示名稱</b>識別（非 User ID），跨所有頻道有效。<br>• 新訊息抵達時自動套用，切換頻道後也會自動重新套用。<br>• 資料永久儲存於 GM storage，頁面重整後仍然保留。</div></div></div></div>`,
       reload_confirm: "語言設定已儲存！\n是否立即重新整理頁面以套用變更？",
       copy_text: "📋 複製文字內容",
       copy_media_url: "🖼️ 複製媒體網址",
@@ -1795,7 +1795,7 @@
       wm_icon_set_success: "✅ 已設定 {name} 的圖示",
       wm_icon_empty: "請先在蒐藏圖片模組中新增 Emoji",
 
-      wm_title: "蟲洞控制台\n• 單擊：建立新蟲洞\n• 長按 1 秒：開啟設定選單",
+      wm_title: "蟲洞控制台\n• 單擊：開啟設定選單",
       wm_settings_menu_title: "🌀 蟲洞設定",
       wm_settings_create: "建立新蟲洞",
       wm_settings_send_mode: "傳訊方式與 API 模式",
@@ -1934,7 +1934,7 @@
       uc_duplicate_found: "⚠️ 此網址已在最近 {limit} 則訊息中出現 {count} 次",
       uc_duplicate_found_plural: "⚠️ {n} 個重複網址，最多出現 {count} 次（掃描最近 {limit} 則）",
       uc_dom_found: "⚠️ 此網址在目前可見 {limit} 則訊息中出現 {count} 次（DOM 模式 · 不需 API）",
-      uc_no_token: "🔍 重複網址偵測需要蟲洞 API 模式 — 請長按蟲洞 ＋ 鍵 1 秒開啟設定",
+      uc_no_token: "🔍 重複網址偵測需要蟲洞 API 模式 — 請單擊蟲洞 ＋ 鍵開啟設定",
       uc_token_waiting: "⏳ 等待 API Token 就緒… 請切換至任意頻道一次以自動捕捉",
       uc_fetching: "🔄 正在掃描重複網址…",
       uc_dismiss: "✕",
@@ -2211,9 +2211,9 @@
         "• 底部选项：<b>发送后自动关闭</b> / <b>发送后前往该频道</b>（二者互斥）/ <b>显示发送通知</b>。<br>" +
         "• 发送成功后会出现可点击的通知，点击后立即跳转到目标频道。",
 
-      fm_sec_wm_api: "⚡ 虫洞 — API 模式（彩蛋）",
+      fm_sec_wm_api: "⚡ 虫洞 — API 模式",
       fm_sec_wm_api_content:
-        "• <b>长按虫洞创建按钮（＋）3 秒</b>，即可解锁 API 模式设置面板。<br>" +
+        "• <b>单击虫洞 ＋ 按钮</b>，在设置菜单中选择<b>发送方式与 API 模式</b>即可打开 API 模式设置面板。<br>" +
         "• <b>方案 B（直接 API）</b>：通过 Discord REST API 发送消息，无需切换页面，速度更快、更隐蔽。<br>" +
         "• Token 由脚本在后台静默拦截（来自 Discord 自身发出的请求），<b>绝不存储或外传</b>，仅存于内存，关闭页面即消失。<br>" +
         "• 启用方案 B 后，Token 检测会自动在后台运行，正常使用 Discord 即可自动捕获，无需手动操作。<br>" +
@@ -2229,7 +2229,7 @@
         '本脚本提供的"网址转换"功能（如 vxtwitter, kkinstagram 等）皆依赖第三方开源服务。\n若您不信任这些第三方服务，请勿点击转换选项。\n请使用者自行具备辨识网址安全性的能力。',
       manual_content:
         "【图标说明】\n• ◫/≡ : 切换菜单风格 (平面 / 群组)\n• ⇄ : 点击逻辑互换 (复制 / 填充)\n• ␣ : 尾部添加空格\n• ↵ : 尾部添加换行\n• ☆ : 自定义字符串面板\n• 🖱️ : 切换触发模式 (悬停 / 点击)\n• 🌐 : 切换语言\n\n【操作方式】\n• **单击**: 复制 (默认)\n• **长按 (0.5秒)**: 填充至输入框\n• **Shift+单击**: 同时复制并填充 (保持菜单开启)",
-      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ 快速开始</div><div class='mm-content'>将鼠标悬停在任意 Discord 消息上 → 右上角出现复制按钮。<br><b>单击</b>复制文字 · <b>长按 0.5秒</b>填充到输入框 · <b>Shift+单击</b>同时复制并填充（菜单保持开启）。<br>通过工具栏的 <span class='mm-key'>🖱️</span> 可切换为<span class='mm-key'>点击模式</span>，改为手动触发。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 复制菜单 — 文字与链接</div><div class='mm-content'>• <b>复制文字</b>：复制消息的完整文字内容。<br>• <b>复制媒体网址</b>：复制消息中图片或视频的直接链接。<br>• <b>复制第一个链接（已净化）</b>：提取并清除追踪参数的第一个 URL。<br>• <b>复制所有链接</b>：将消息中所有 URL 每行一个一次复制。<br>• <b>复制为 Markdown</b>：格式化为 <span class='mm-key'>[文字](URL)</span> 供 Markdown 使用。<br>• <b>插入 Markdown 链接</b>：直接将链接格式注入 Discord 的输入框。<br>• <b>隐藏格式</b>：自动包裹为 <span class='mm-key'>|| 剧透内容 ||</span> 格式。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ 下载</div><div class='mm-content'>• <b>下载图片/媒体</b>：下载该条消息中的所有图片或视频。<br>• <b>下载为 ZIP</b>：多个文件自动打包为单一 ZIP 压缩包。<br>• 下载失败时自动重试，并备援切换至备用链接。</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 网址转换</div><div class='mm-content'><b>Twitter / X</b>：在 twitter.com、x.com、vxtwitter、fixupx、fxtwitter、cunnyx 之间互转，修复 Discord 预览。<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com，让嵌入预览正常显示。<br><b>Bilibili</b>：转换为 FX Bilibili 或 VX Bilibili 获得更好的嵌入效果。<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net 互转，在 Discord 直接显示插图预览。<br><b>批量转换</b>：<span class='mm-key'>⚡ 全部转为 (N)</span> 一次处理消息中同类型的所有链接。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ 工具栏图标说明</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> 切换菜单风格：平面 / 群组</div><div><span class='mm-key'>⇄</span> 互换点击逻辑：复制 ↔ 填充</div><div><span class='mm-key'>␣</span> 填充时在尾部附加空格</div><div><span class='mm-key'>↵</span> 填充时在尾部附加换行</div><div><span class='mm-key'>☆</span> 自定义字符串面板（常用片段）</div><div><span class='mm-key'>🖱️</span> 切换触发方式：悬停 / 点击</div><div><span class='mm-key'>🌐</span> 切换界面语言</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ 自定义字符串面板</div><div class='mm-content'>• 储存常用的文字片段（问候语、模板、代码块等）。<br>• 单击复制 · 长按填充到输入框。<br>• <span class='mm-key'>Shift+单击</span> 可连续删除条目，无需逐一确认。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 虫洞 — 总览</div><div class='mm-content'>虫洞是存在 Discord 侧边栏的<b>一键频道快捷方式</b>。点击 <span class='mm-key'>＋</span> 并粘贴 Discord 频道网址即可创建。<br><b>单击</b> <span class='mm-key'>＋</span> → 创建新虫洞 · <b>长按 1 秒</b> → 打开设置菜单。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ 导航与管理</div><div class='mm-content'>• <b>单击</b>虫洞 → 立即跳转至该频道。<br>• <b>右键</b>虫洞 → 菜单：重命名 · 删除 · 设置图标 · 移至群组 · 切换 VIP。<br>• <b>VIP <span class='mm-key'>★</span></b>：设为 VIP 的虫洞自动置顶显示。<br>• <b>分组</b>：右键 → 移动到分组，整理进文件夹。<br>• <b>聚焦模式</b>：图标精简视图，虫洞面板右上角按钮切换。<br>• <b>历史记录</b>（紫色标签）：自动记录最近访问频道，点击即可返回。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ 发送消息</div><div class='mm-content'>• <b>右键</b>虫洞 → <b>在此频道发送消息</b> 打开输入框。<br>• <span class='mm-key'>Ctrl+V</span> 直接粘贴图片，图文合为一条消息一起发送。<br>• 底部选项（跨次保留）：自动关闭 · 前往频道 · 显示通知。<br>• 发送后弹出 3 秒可点击通知，点击即跳转到目标频道。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 设置菜单与 API 模式</div><div class='mm-content'>• <b>长按 <span class='mm-key'>＋</span> 1 秒</b>即可打开虫洞设置菜单。<br>• 菜单项目：<span class='mm-key'>➕ 创建新虫洞</span> · <span class='mm-key'>✉️ 发送方式与 API 模式</span> · <span class='mm-key'>⚙️ 更多设置</span>（可扩展）。<br>• 点击「<b>发送方式与 API 模式</b>」→ 打开 API 设置面板：<br>&nbsp;&nbsp;— <b>方案 A（跳页）</b>：自动切换频道，注入文字后返回，无需 Token。<br>&nbsp;&nbsp;— <b>方案 B（直接 API）</b>：REST API 直发，不切换页面，即时且隐蔽。<br>• Token 由后台静默拦截 Discord 自身请求取得——<b>绝不写入磁盘或外传。</b><br>• 页面刷新后：打开发送输入框时拦截器会自动重启。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔍 重复链接检测</div><div class='mm-content'>在聊天框粘贴链接时，自动扫描是否已有相同链接出现过。<br>• <b>DOM 模式</b>（默认）：扫描当前页面可见的所有消息，无需 API token。<br>• <b>API 模式</b>：通过 Discord API 扫描最近 200 条消息（需启用虫洞 API 模式且已拦截到 token）。<br>• 检测到重复时，聊天顶部出现 Banner 提示，显示该链接出现的次数。<br>• 粘贴不同链接或切换频道后，Banner 自动消失。<br>• <b>没有 Banner = 没有重复</b>——未命中时检测器静默在后台运行。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔎 频道搜索 Channel Scout</div><div class='mm-content'>直接在聊天窗口以关键字搜索当前频道的消息。<br>• <b>打开</b>：点击输入框上方的 🔎 悬浮按钮，或在输入框外按 <span class='mm-key'>F2</span>。<br>• <b>即时搜索</b>：输入时结果即时更新（150ms 延迟），命中关键字以金色高亮标注。<br>• <b>快捷标签</b>：最多保存 5 个自定义关键字作为一键搜索按钮。左键搜索 · 右键删除。<br>• <b>搜索历史</b>：点击 🕐 按钮显示最近 5 条记录，点击可重新搜索。<br>• <b>跳至消息</b>：点击任一结果，页面自动滚动并以蓝紫框高亮标记目标消息。<br>• <b>粘贴按钮</b>：点击 📋 直接将剪贴板内容填入搜索框。<br>• 按 <span class='mm-key'>ESC</span>、<span class='mm-key'>F2</span> 或点击面板外关闭。<br>⚠ 仅 DOM 模式——只能搜索当前已渲染的消息。需要搜索更早消息时，请先向上滚动让 Discord 加载历史消息。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌫️ 弱化用户消息</div><div class='mm-content'>将特定用户的消息柔和地弱化至背景，让其不再引人注意，但不会消失。<br>• <b>加入弱化</b>：右键任意消息 → 原生菜单「封锁」下方出现 <b>🌫️ 弱化消息：{名称}</b>，点击即可。<br>• <b>解除弱化</b>：再次右键同一用户的消息 → <b>✅ 解除弱化：{名称}</b>。<br>• <b>管理面板</b>：按 <span class='mm-key'>Alt+B</span> 打开弱化名单，显示所有被弱化的用户、加入时间及解除按钮。<br>• 被弱化的消息显示为 <b>7% 不透明度</b>，鼠标移入可临时预览至 42% 透明度。<br>• 以<b>显示名称</b>识别（非 User ID），跨所有频道有效。<br>• 新消息到达时自动套用，切换频道后也会自动重新套用。<br>• 数据永久储存于 GM storage，页面刷新后仍然保留。</div></div></div></div>`,
+      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ 快速开始</div><div class='mm-content'>将鼠标悬停在任意 Discord 消息上 → 右上角出现复制按钮。<br><b>单击</b>复制文字 · <b>长按 0.5秒</b>填充到输入框 · <b>Shift+单击</b>同时复制并填充（菜单保持开启）。<br>通过工具栏的 <span class='mm-key'>🖱️</span> 可切换为<span class='mm-key'>点击模式</span>，改为手动触发。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 复制菜单 — 文字与链接</div><div class='mm-content'>• <b>复制文字</b>：复制消息的完整文字内容。<br>• <b>复制媒体网址</b>：复制消息中图片或视频的直接链接。<br>• <b>复制第一个链接（已净化）</b>：提取并清除追踪参数的第一个 URL。<br>• <b>复制所有链接</b>：将消息中所有 URL 每行一个一次复制。<br>• <b>复制为 Markdown</b>：格式化为 <span class='mm-key'>[文字](URL)</span> 供 Markdown 使用。<br>• <b>插入 Markdown 链接</b>：直接将链接格式注入 Discord 的输入框。<br>• <b>隐藏格式</b>：自动包裹为 <span class='mm-key'>|| 剧透内容 ||</span> 格式。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ 下载</div><div class='mm-content'>• <b>下载图片/媒体</b>：下载该条消息中的所有图片或视频。<br>• <b>下载为 ZIP</b>：多个文件自动打包为单一 ZIP 压缩包。<br>• 下载失败时自动重试，并备援切换至备用链接。</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 网址转换</div><div class='mm-content'><b>Twitter / X</b>：在 twitter.com、x.com、vxtwitter、fixupx、fxtwitter、cunnyx 之间互转，修复 Discord 预览。<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com，让嵌入预览正常显示。<br><b>Bilibili</b>：转换为 FX Bilibili 或 VX Bilibili 获得更好的嵌入效果。<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net 互转，在 Discord 直接显示插图预览。<br><b>批量转换</b>：<span class='mm-key'>⚡ 全部转为 (N)</span> 一次处理消息中同类型的所有链接。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ 工具栏图标说明</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> 切换菜单风格：平面 / 群组</div><div><span class='mm-key'>⇄</span> 互换点击逻辑：复制 ↔ 填充</div><div><span class='mm-key'>␣</span> 填充时在尾部附加空格</div><div><span class='mm-key'>↵</span> 填充时在尾部附加换行</div><div><span class='mm-key'>☆</span> 自定义字符串面板（常用片段）</div><div><span class='mm-key'>🖱️</span> 切换触发方式：悬停 / 点击</div><div><span class='mm-key'>🌐</span> 切换界面语言</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ 自定义字符串面板</div><div class='mm-content'>• 储存常用的文字片段（问候语、模板、代码块等）。<br>• 单击复制 · 长按填充到输入框。<br>• <span class='mm-key'>Shift+单击</span> 可连续删除条目，无需逐一确认。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 虫洞 — 总览</div><div class='mm-content'>虫洞是存在 Discord 侧边栏的<b>一键频道快捷方式</b>。点击 <span class='mm-key'>＋</span> 并粘贴 Discord 频道网址即可创建。<br><b>单击</b> <span class='mm-key'>＋</span> → 打开设置菜单（第一个选项即可创建新虫洞）。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ 导航与管理</div><div class='mm-content'>• <b>单击</b>虫洞 → 立即跳转至该频道。<br>• <b>右键</b>虫洞 → 菜单：重命名 · 删除 · 设置图标 · 移至群组 · 切换 VIP。<br>• <b>VIP <span class='mm-key'>★</span></b>：设为 VIP 的虫洞自动置顶显示。<br>• <b>分组</b>：右键 → 移动到分组，整理进文件夹。<br>• <b>聚焦模式</b>：图标精简视图，虫洞面板右上角按钮切换。<br>• <b>历史记录</b>（紫色标签）：自动记录最近访问频道，点击即可返回。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ 发送消息</div><div class='mm-content'>• <b>右键</b>虫洞 → <b>在此频道发送消息</b> 打开输入框。<br>• <span class='mm-key'>Ctrl+V</span> 直接粘贴图片，图文合为一条消息一起发送。<br>• 底部选项（跨次保留）：自动关闭 · 前往频道 · 显示通知。<br>• 发送后弹出 3 秒可点击通知，点击即跳转到目标频道。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 设置菜单与 API 模式</div><div class='mm-content'>• <b>单击 <span class='mm-key'>＋</span></b> 即可打开虫洞设置菜单。<br>• 菜单项目：<span class='mm-key'>➕ 创建新虫洞</span> · <span class='mm-key'>✉️ 发送方式与 API 模式</span> · <span class='mm-key'>⚙️ 更多设置</span>（可扩展）。<br>• 点击「<b>发送方式与 API 模式</b>」→ 打开 API 设置面板：<br>&nbsp;&nbsp;— <b>方案 A（跳页）</b>：自动切换频道，注入文字后返回，无需 Token。<br>&nbsp;&nbsp;— <b>方案 B（直接 API）</b>：REST API 直发，不切换页面，即时且隐蔽。<br>• Token 由后台静默拦截 Discord 自身请求取得——<b>绝不写入磁盘或外传。</b><br>• 页面刷新后：打开发送输入框时拦截器会自动重启。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔍 重复链接检测</div><div class='mm-content'>在聊天框粘贴链接时，自动扫描是否已有相同链接出现过。<br>• <b>DOM 模式</b>（默认）：扫描当前页面可见的所有消息，无需 API token。<br>• <b>API 模式</b>：通过 Discord API 扫描最近 200 条消息（需启用虫洞 API 模式且已拦截到 token）。<br>• 检测到重复时，聊天顶部出现 Banner 提示，显示该链接出现的次数。<br>• 粘贴不同链接或切换频道后，Banner 自动消失。<br>• <b>没有 Banner = 没有重复</b>——未命中时检测器静默在后台运行。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔎 频道搜索 Channel Scout</div><div class='mm-content'>直接在聊天窗口以关键字搜索当前频道的消息。<br>• <b>打开</b>：点击输入框上方的 🔎 悬浮按钮，或在输入框外按 <span class='mm-key'>F2</span>。<br>• <b>即时搜索</b>：输入时结果即时更新（150ms 延迟），命中关键字以金色高亮标注。<br>• <b>快捷标签</b>：最多保存 5 个自定义关键字作为一键搜索按钮。左键搜索 · 右键删除。<br>• <b>搜索历史</b>：点击 🕐 按钮显示最近 5 条记录，点击可重新搜索。<br>• <b>跳至消息</b>：点击任一结果，页面自动滚动并以蓝紫框高亮标记目标消息。<br>• <b>粘贴按钮</b>：点击 📋 直接将剪贴板内容填入搜索框。<br>• 按 <span class='mm-key'>ESC</span>、<span class='mm-key'>F2</span> 或点击面板外关闭。<br>⚠ 仅 DOM 模式——只能搜索当前已渲染的消息。需要搜索更早消息时，请先向上滚动让 Discord 加载历史消息。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌫️ 弱化用户消息</div><div class='mm-content'>将特定用户的消息柔和地弱化至背景，让其不再引人注意，但不会消失。<br>• <b>加入弱化</b>：右键任意消息 → 原生菜单「封锁」下方出现 <b>🌫️ 弱化消息：{名称}</b>，点击即可。<br>• <b>解除弱化</b>：再次右键同一用户的消息 → <b>✅ 解除弱化：{名称}</b>。<br>• <b>管理面板</b>：按 <span class='mm-key'>Alt+B</span> 打开弱化名单，显示所有被弱化的用户、加入时间及解除按钮。<br>• 被弱化的消息显示为 <b>7% 不透明度</b>，鼠标移入可临时预览至 42% 透明度。<br>• 以<b>显示名称</b>识别（非 User ID），跨所有频道有效。<br>• 新消息到达时自动套用，切换频道后也会自动重新套用。<br>• 数据永久储存于 GM storage，页面刷新后仍然保留。</div></div></div></div>`,
       reload_confirm: "语言设置已保存！\n是否立即刷新页面以应用更改？",
       copy_text: "📋 复制文字内容",
       copy_media_url: "🖼️ 复制媒体网址",
@@ -2371,7 +2371,7 @@
       wm_icon_picker_title: "选择 {name} 的图标",
       wm_icon_set_success: "✅ 已设定 {name} 的图标",
       wm_icon_empty: "请先在收藏图片模块中添加 Emoji",
-      wm_title: "虫洞控制台\n• 单击：创建新虫洞\n• 长按 1 秒：打开设置菜单",
+      wm_title: "虫洞控制台\n• 单击：打开设置菜单",
       wm_settings_menu_title: "🌀 虫洞设置",
       wm_settings_create: "创建新虫洞",
       wm_settings_send_mode: "发送方式与 API 模式",
@@ -2510,7 +2510,7 @@
       uc_duplicate_found: "⚠️ 此网址已在最近 {limit} 条消息中出现 {count} 次",
       uc_duplicate_found_plural: "⚠️ {n} 个重复网址，最多出现 {count} 次（扫描最近 {limit} 条）",
       uc_dom_found: "⚠️ 此网址在当前可见 {limit} 条消息中出现 {count} 次（DOM 模式 · 无需 API）",
-      uc_no_token: "🔍 重复网址检测需要虫洞 API 模式 — 请长按虫洞 ＋ 键 1 秒打开设置",
+      uc_no_token: "🔍 重复网址检测需要虫洞 API 模式 — 请单击虫洞 ＋ 键打开设置",
       uc_token_waiting: "⏳ 等待 API Token 就绪… 请切换到任意频道一次以自动捕捉",
       uc_fetching: "🔄 正在扫描重复网址…",
       uc_dismiss: "✕",
@@ -2788,9 +2788,9 @@
         "• 下部オプション：<b>送信後に閉じる</b> / <b>送信後チャンネルへ移動</b>（相互排他）/ <b>送信通知を表示</b>。<br>" +
         "• 送信後にクリック可能なトーストが表示され、クリックで対象チャンネルへ即座に移動できます。",
 
-      fm_sec_wm_api: "⚡ ワームホール — API モード（隠し機能）",
+      fm_sec_wm_api: "⚡ ワームホール — API モード",
       fm_sec_wm_api_content:
-        "• <b>ワームホール作成ボタン（＋）を3秒長押し</b>して API モード設定パネルを解除します。<br>" +
+        "• <b>ワームホール ＋ ボタンをクリック</b>し、設定メニューから<b>送信方式と API モード</b>を選択すると API モード設定パネルが開きます。<br>" +
         "• <b>プラン B（直接 API）</b>：Discord REST API 経由でメッセージを送信。ページ切替なし、高速・ステルス動作。<br>" +
         "• Token はスクリプトがバックグラウンドで静かに傍受します（Discord 自身のリクエストから）。<b>保存・外部送信は一切なし</b>、メモリのみ保持、ページを閉じると消去。<br>" +
         "• プラン B を有効にすると Token 検出がバックグラウンドで自動起動。Discord を普通に使うだけで自動取得されます。<br>" +
@@ -2806,7 +2806,7 @@
         "URL変換機能（vxtwitter、kkinstagramなど）はサードパーティのサービスに依存しています。\n信頼できない場合は使用しないでください。\nURLの安全性を識別できる方のみご利用ください。",
       manual_content:
         "【アイコン説明】\n• ◫/≡ : メニュースタイル (フラット / グループ)\n• ⇄ : クリック動作切替 (コピー / 挿入)\n• ␣ : 末尾にスペース追加\n• ↵ : 末尾に改行追加\n• ☆ : カスタム文字列パネル\n• 🖱️ : 起動モード (ホバー / クリック)\n• 🌐 : 言語切り替え\n\n【操作方法】\n• **クリック**: コピー (デフォルト)\n• **長押し (0.5秒)**: 入力欄に挿入\n• **Shift+クリック**: コピーして挿入 (メニュー維持)",
-      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ クイックスタート</div><div class='mm-content'>任意の Discord メッセージにマウスを合わせると → 右上にコピーボタンが表示されます。<br><b>クリック</b>でテキストコピー · <b>長押し 0.5秒</b>で入力欄に挿入 · <b>Shift+クリック</b>でコピーと挿入を同時実行（メニュー維持）。<br>ツールバーの <span class='mm-key'>🖱️</span> で<span class='mm-key'>クリックモード</span>に切替可能（手動トリガー）。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 コピーメニュー — テキスト・リンク</div><div class='mm-content'>• <b>テキストをコピー</b>：メッセージの全文テキストをコピーします。<br>• <b>メディアURLをコピー</b>：メッセージ内の画像・動画の直リンクをコピーします。<br>• <b>最初のリンクをコピー（浄化済）</b>：最初のURLからトラッキングパラメータを除去してコピー。<br>• <b>全リンクをコピー</b>：メッセージ内の全URLを1行ずつコピーします。<br>• <b>Markdownとしてコピー</b>：<span class='mm-key'>[テキスト](URL)</span> 形式に変換します。<br>• <b>Markdownリンクを挿入</b>：Discordの入力欄にMarkdown形式で直接挿入します。<br>• <b>隠しテキスト</b>：<span class='mm-key'>|| スポイラー ||</span> 形式で包みます。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ ダウンロード</div><div class='mm-content'>• <b>画像/メディアをダウンロード</b>：メッセージ内の全画像・動画をまとめてダウンロード。<br>• <b>ZIPとしてダウンロード</b>：複数ファイルを一つのZIPアーカイブにまとめます。<br>• 失敗時は自動リトライし、代替URLにフォールバックします。</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 URL変換</div><div class='mm-content'><b>Twitter / X</b>：twitter.com, x.com, vxtwitter, fixupx, fxtwitter, cunnyx の間で相互変換し Discord プレビューを修正。<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com に変換して埋め込みプレビューを有効化。<br><b>Bilibili</b>：FX Bilibili または VX Bilibili に変換してより良い埋め込みを実現。<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net の相互変換で Discord 内にイラストをプレビュー。<br><b>一括変換</b>：<span class='mm-key'>⚡ 全て変換 (N)</span> でメッセージ内の同種リンクをまとめて変換。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ ツールバーアイコン</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> メニュースタイル：フラット / グループ</div><div><span class='mm-key'>⇄</span> クリック動作切替：コピー ↔ 挿入</div><div><span class='mm-key'>␣</span> 挿入時に末尾スペースを追加</div><div><span class='mm-key'>↵</span> 挿入時に末尾改行を追加</div><div><span class='mm-key'>☆</span> カスタム文字列パネル</div><div><span class='mm-key'>🖱️</span> トリガー切替：ホバー / クリック</div><div><span class='mm-key'>🌐</span> 言語切り替え</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ カスタム文字列パネル</div><div class='mm-content'>• よく使うテキスト（挨拶文・テンプレート・コードブロック）を保存できます。<br>• クリックでコピー · 長押しで入力欄に挿入。<br>• <span class='mm-key'>Shift+クリック</span>で確認なしに連続削除可能。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 ワームホール — 概要</div><div class='mm-content'>ワームホールは Discord サイドバーの<b>ワンクリックチャンネルショートカット</b>です。<span class='mm-key'>＋</span> をクリックして Discord チャンネル URL を貼り付けると作成できます。<br><b>クリック</b> <span class='mm-key'>＋</span> → 新規作成 · <b>1秒長押し</b> → 設定メニューを開く。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ ナビゲーションと管理</div><div class='mm-content'>• <b>クリック</b>でそのチャンネルへ即ジャンプ。<br>• <b>右クリック</b> → メニュー：名前変更 · 削除 · アイコン設定 · グループ移動 · VIP 切替。<br>• <b>VIP <span class='mm-key'>★</span></b>：設定したワームホールは自動で最上部に固定。<br>• <b>グループ</b>：右クリック → グループに移動 でフォルダ整理。<br>• <b>フォーカスモード</b>：アイコンのみのコンパクト表示。パネル右上ボタンで切替。<br>• <b>履歴</b>（紫バッジ）：最近訪れたチャンネルを自動記録、クリックで即復帰。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ メッセージ送信</div><div class='mm-content'>• <b>右クリック</b> → <b>このチャンネルにメッセージを送る</b> でオーバーレイを開く。<br>• <span class='mm-key'>Ctrl+V</span> で画像を直接貼り付け — テキストと一緒に1通で送信。<br>• 下部オプション（セッション間保持）：送信後閉じる · チャンネルへ移動 · 通知を表示。<br>• 送信後3秒間トーストが表示され、クリックで即チャンネルに移動できます。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 設定メニューと API モード</div><div class='mm-content'>• <b><span class='mm-key'>＋</span> を1秒長押し</b>してワームホール設定メニューを開く。<br>• メニュー：<span class='mm-key'>➕ 新しいワームホールを作成</span> · <span class='mm-key'>✉️ 送信方式・API モード</span> · <span class='mm-key'>⚙️ その他の設定</span>（拡張予定）。<br>• 「<b>送信方式・API モード</b>」→ API 設定パネルを開く：<br>&nbsp;&nbsp;— <b>プラン A（ページ移動）</b>：自動移動→テキスト注入→復帰。Token 不要。<br>&nbsp;&nbsp;— <b>プラン B（直接 API）</b>：REST API 経由。ページ切替なし・即時・ステルス。<br>• Token は Discord 自身のリクエストからバックグラウンドで静かに傍受——<b>ディスク保存なし。</b><br>• ページ更新後：送信オーバーレイを開くとインターセプターが自動再起動。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔍 重複 URL チェッカー</div><div class='mm-content'>チャット欄に URL を貼り付けると、同じリンクが過去に投稿されていないか自動確認します。<br>• <b>DOM モード</b>（デフォルト）：現在表示中のメッセージを全件スキャン。API トークン不要。<br>• <b>API モード</b>：Discord API で最新 200 件をスキャン（ワームホール API モード有効+トークン取得済み が必要）。<br>• 重複検出時はチャット上部にバナー表示（出現回数も表示）。<br>• 別の URL を貼るかチャンネルを切り替えるとバナーは自動消去。<br>• <b>バナーなし = 重複なし</b>——ヒットしない場合は無音でバックグラウンド動作。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔎 チャンネル検索 Channel Scout</div><div class='mm-content'>チャット画面からキーワードで現在チャンネルのメッセージを検索します。<br>• <b>開く</b>：入力欄上の 🔎 フローティングボタンをクリック、または入力欄外で <span class='mm-key'>F2</span>。<br>• <b>即時検索</b>：入力と同時に結果更新（150ms 遅延）。ヒット箇所をゴールドでハイライト。<br>• <b>クイックタグ</b>：カスタムキーワードを最大 5 件保存。左クリックで検索・右クリックで削除。<br>• <b>検索履歴</b>：🕐 ボタンで直近 5 件を表示、クリックで再検索。<br>• <b>メッセージへジャンプ</b>：結果をクリックするとスクロールして青紫枠でハイライト。<br>• <b>貼り付けボタン</b>：📋 クリックでクリップボードを検索欄に直接入力。<br>• <span class='mm-key'>ESC</span>・<span class='mm-key'>F2</span>・パネル外クリックで閉じる。<br>⚠ DOM モードのみ——現在レンダリング済みのメッセージのみ対象。古いメッセージは先にスクロールして読み込んでください。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌫️ ユーザーメッセージ弱化</div><div class='mm-content'>特定ユーザーのメッセージを背景に溶け込ませ、邪魔にならないよう薄く表示します（非表示ではありません）。<br>• <b>弱化追加</b>：メッセージを右クリック → 「ブロック」の下に <b>🌫️ メッセージを弱化：{名前}</b> → クリック。<br>• <b>弱化解除</b>：同じユーザーのメッセージを右クリック → <b>✅ 弱化を解除：{名前}</b>。<br>• <b>管理パネル</b>：<span class='mm-key'>Alt+B</span> で弱化リストを開く。追加日時と解除ボタンを表示。<br>• 弱化メッセージは <b>不透明度 7%</b> で表示。ホバーで 42% まで一時プレビュー可能。<br>• <b>表示名</b>で識別（User ID 不使用）、全チャンネルで有効。<br>• 新着メッセージやチャンネル切り替え後も自動で再適用。<br>• データは GM storage に永続保存、ページ更新後も維持。</div></div></div></div>`,
+      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ クイックスタート</div><div class='mm-content'>任意の Discord メッセージにマウスを合わせると → 右上にコピーボタンが表示されます。<br><b>クリック</b>でテキストコピー · <b>長押し 0.5秒</b>で入力欄に挿入 · <b>Shift+クリック</b>でコピーと挿入を同時実行（メニュー維持）。<br>ツールバーの <span class='mm-key'>🖱️</span> で<span class='mm-key'>クリックモード</span>に切替可能（手動トリガー）。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 コピーメニュー — テキスト・リンク</div><div class='mm-content'>• <b>テキストをコピー</b>：メッセージの全文テキストをコピーします。<br>• <b>メディアURLをコピー</b>：メッセージ内の画像・動画の直リンクをコピーします。<br>• <b>最初のリンクをコピー（浄化済）</b>：最初のURLからトラッキングパラメータを除去してコピー。<br>• <b>全リンクをコピー</b>：メッセージ内の全URLを1行ずつコピーします。<br>• <b>Markdownとしてコピー</b>：<span class='mm-key'>[テキスト](URL)</span> 形式に変換します。<br>• <b>Markdownリンクを挿入</b>：Discordの入力欄にMarkdown形式で直接挿入します。<br>• <b>隠しテキスト</b>：<span class='mm-key'>|| スポイラー ||</span> 形式で包みます。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ ダウンロード</div><div class='mm-content'>• <b>画像/メディアをダウンロード</b>：メッセージ内の全画像・動画をまとめてダウンロード。<br>• <b>ZIPとしてダウンロード</b>：複数ファイルを一つのZIPアーカイブにまとめます。<br>• 失敗時は自動リトライし、代替URLにフォールバックします。</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 URL変換</div><div class='mm-content'><b>Twitter / X</b>：twitter.com, x.com, vxtwitter, fixupx, fxtwitter, cunnyx の間で相互変換し Discord プレビューを修正。<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com に変換して埋め込みプレビューを有効化。<br><b>Bilibili</b>：FX Bilibili または VX Bilibili に変換してより良い埋め込みを実現。<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net の相互変換で Discord 内にイラストをプレビュー。<br><b>一括変換</b>：<span class='mm-key'>⚡ 全て変換 (N)</span> でメッセージ内の同種リンクをまとめて変換。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ ツールバーアイコン</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> メニュースタイル：フラット / グループ</div><div><span class='mm-key'>⇄</span> クリック動作切替：コピー ↔ 挿入</div><div><span class='mm-key'>␣</span> 挿入時に末尾スペースを追加</div><div><span class='mm-key'>↵</span> 挿入時に末尾改行を追加</div><div><span class='mm-key'>☆</span> カスタム文字列パネル</div><div><span class='mm-key'>🖱️</span> トリガー切替：ホバー / クリック</div><div><span class='mm-key'>🌐</span> 言語切り替え</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ カスタム文字列パネル</div><div class='mm-content'>• よく使うテキスト（挨拶文・テンプレート・コードブロック）を保存できます。<br>• クリックでコピー · 長押しで入力欄に挿入。<br>• <span class='mm-key'>Shift+クリック</span>で確認なしに連続削除可能。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 ワームホール — 概要</div><div class='mm-content'>ワームホールは Discord サイドバーの<b>ワンクリックチャンネルショートカット</b>です。<span class='mm-key'>＋</span> をクリックして Discord チャンネル URL を貼り付けると作成できます。<br><b>クリック</b> <span class='mm-key'>＋</span> → 設定メニューを開く（最初の項目から新規作成）。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ ナビゲーションと管理</div><div class='mm-content'>• <b>クリック</b>でそのチャンネルへ即ジャンプ。<br>• <b>右クリック</b> → メニュー：名前変更 · 削除 · アイコン設定 · グループ移動 · VIP 切替。<br>• <b>VIP <span class='mm-key'>★</span></b>：設定したワームホールは自動で最上部に固定。<br>• <b>グループ</b>：右クリック → グループに移動 でフォルダ整理。<br>• <b>フォーカスモード</b>：アイコンのみのコンパクト表示。パネル右上ボタンで切替。<br>• <b>履歴</b>（紫バッジ）：最近訪れたチャンネルを自動記録、クリックで即復帰。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ メッセージ送信</div><div class='mm-content'>• <b>右クリック</b> → <b>このチャンネルにメッセージを送る</b> でオーバーレイを開く。<br>• <span class='mm-key'>Ctrl+V</span> で画像を直接貼り付け — テキストと一緒に1通で送信。<br>• 下部オプション（セッション間保持）：送信後閉じる · チャンネルへ移動 · 通知を表示。<br>• 送信後3秒間トーストが表示され、クリックで即チャンネルに移動できます。</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 設定メニューと API モード</div><div class='mm-content'>• <b><span class='mm-key'>＋</span> をクリック</b>してワームホール設定メニューを開く。<br>• メニュー：<span class='mm-key'>➕ 新しいワームホールを作成</span> · <span class='mm-key'>✉️ 送信方式・API モード</span> · <span class='mm-key'>⚙️ その他の設定</span>（拡張予定）。<br>• 「<b>送信方式・API モード</b>」→ API 設定パネルを開く：<br>&nbsp;&nbsp;— <b>プラン A（ページ移動）</b>：自動移動→テキスト注入→復帰。Token 不要。<br>&nbsp;&nbsp;— <b>プラン B（直接 API）</b>：REST API 経由。ページ切替なし・即時・ステルス。<br>• Token は Discord 自身のリクエストからバックグラウンドで静かに傍受——<b>ディスク保存なし。</b><br>• ページ更新後：送信オーバーレイを開くとインターセプターが自動再起動。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔍 重複 URL チェッカー</div><div class='mm-content'>チャット欄に URL を貼り付けると、同じリンクが過去に投稿されていないか自動確認します。<br>• <b>DOM モード</b>（デフォルト）：現在表示中のメッセージを全件スキャン。API トークン不要。<br>• <b>API モード</b>：Discord API で最新 200 件をスキャン（ワームホール API モード有効+トークン取得済み が必要）。<br>• 重複検出時はチャット上部にバナー表示（出現回数も表示）。<br>• 別の URL を貼るかチャンネルを切り替えるとバナーは自動消去。<br>• <b>バナーなし = 重複なし</b>——ヒットしない場合は無音でバックグラウンド動作。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔎 チャンネル検索 Channel Scout</div><div class='mm-content'>チャット画面からキーワードで現在チャンネルのメッセージを検索します。<br>• <b>開く</b>：入力欄上の 🔎 フローティングボタンをクリック、または入力欄外で <span class='mm-key'>F2</span>。<br>• <b>即時検索</b>：入力と同時に結果更新（150ms 遅延）。ヒット箇所をゴールドでハイライト。<br>• <b>クイックタグ</b>：カスタムキーワードを最大 5 件保存。左クリックで検索・右クリックで削除。<br>• <b>検索履歴</b>：🕐 ボタンで直近 5 件を表示、クリックで再検索。<br>• <b>メッセージへジャンプ</b>：結果をクリックするとスクロールして青紫枠でハイライト。<br>• <b>貼り付けボタン</b>：📋 クリックでクリップボードを検索欄に直接入力。<br>• <span class='mm-key'>ESC</span>・<span class='mm-key'>F2</span>・パネル外クリックで閉じる。<br>⚠ DOM モードのみ——現在レンダリング済みのメッセージのみ対象。古いメッセージは先にスクロールして読み込んでください。</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌫️ ユーザーメッセージ弱化</div><div class='mm-content'>特定ユーザーのメッセージを背景に溶け込ませ、邪魔にならないよう薄く表示します（非表示ではありません）。<br>• <b>弱化追加</b>：メッセージを右クリック → 「ブロック」の下に <b>🌫️ メッセージを弱化：{名前}</b> → クリック。<br>• <b>弱化解除</b>：同じユーザーのメッセージを右クリック → <b>✅ 弱化を解除：{名前}</b>。<br>• <b>管理パネル</b>：<span class='mm-key'>Alt+B</span> で弱化リストを開く。追加日時と解除ボタンを表示。<br>• 弱化メッセージは <b>不透明度 7%</b> で表示。ホバーで 42% まで一時プレビュー可能。<br>• <b>表示名</b>で識別（User ID 不使用）、全チャンネルで有効。<br>• 新着メッセージやチャンネル切り替え後も自動で再適用。<br>• データは GM storage に永続保存、ページ更新後も維持。</div></div></div></div>`,
       reload_confirm:
         "設定を保存しました！\nすぐにページを再読み込みしますか？",
       copy_text: "📋 テキストをコピー",
@@ -2954,7 +2954,7 @@
       wm_icon_empty:
         "先にコレクション画像モジュールで Emoji を追加してください",
       wm_title:
-        "ワームホール コントロール\n• クリック：新規作成\n• 1秒長押し：設定メニューを開く",
+        "ワームホール コントロール\n• クリック：設定メニューを開く",
       wm_settings_menu_title: "🌀 ワームホール設定",
       wm_settings_create: "新しいワームホールを作成",
       wm_settings_send_mode: "送信方式・API モード",
@@ -3094,7 +3094,7 @@
       uc_duplicate_found: "⚠️ この URL は直近 {limit} 件のメッセージで {count} 回投稿されています",
       uc_duplicate_found_plural: "⚠️ {n} 件の重複 URL（最大 {count} 回、直近 {limit} 件をスキャン）",
       uc_dom_found: "⚠️ この URL は表示中の {limit} 件で {count} 回確認されました（DOM モード · API 不要）",
-      uc_no_token: "🔍 URL重複チェックにはワームホール API モードが必要です — ＋ を1秒長押しして設定を開いてください",
+      uc_no_token: "🔍 URL重複チェックにはワームホール API モードが必要です — ＋ をクリックして設定を開いてください",
       uc_token_waiting: "⏳ API Token を待機中… 任意のチャンネルに一度切り替えると自動取得されます",
       uc_fetching: "🔄 重複 URL をスキャン中…",
       uc_dismiss: "✕",
@@ -3366,9 +3366,9 @@
         "• 하단 옵션：<b>전송 후 자동 닫기</b> / <b>전송 후 채널로 이동</b>（상호 배타）/ <b>전송 알림 표시</b>。<br>" +
         "• 전송 후 클릭 가능한 알림이 나타나며, 클릭하면 대상 채널로 즉시 이동합니다.",
 
-      fm_sec_wm_api: "⚡ 웜홀 — API 모드（숨겨진 기능）",
+      fm_sec_wm_api: "⚡ 웜홀 — API 모드",
       fm_sec_wm_api_content:
-        "• <b>웜홀 생성 버튼（＋）을 3초 길게 누르면</b> API 모드 설정 패널이 잠금 해제됩니다.<br>" +
+        "• <b>웜홀 ＋ 버튼을 클릭</b>한 후 설정 메뉴에서 <b>전송 방식 및 API 모드</b>를 선택하면 API 모드 설정 패널이 열립니다.<br>" +
         "• <b>플랜 B（직접 API）</b>：Discord REST API를 통해 메시지를 전송. 페이지 전환 없이 빠르고 스텔스하게 동작.<br>" +
         "• Token은 스크립트가 백그라운드에서 조용히 가로챕니다（Discord 자체 요청에서）. <b>저장·외부 전송 없음</b>，메모리에만 유지，페이지 닫으면 소거.<br>" +
         "• 플랜 B 활성화 시 Token 감지가 자동으로 백그라운드에서 실행됩니다. Discord를 평소처럼 사용하면 자동으로 캡처됩니다.<br>" +
@@ -3384,7 +3384,7 @@
         "URL 변환 기능(vxtwitter, kkinstagram 등)은 타사 서비스에 의존합니다.\n신뢰할 수 없는 경우 사용하지 마십시오.\n사용자는 URL 안전성을 식별할 능력이 있어야 합니다.",
       manual_content:
         "【아이콘 설명】\n• ◫/≡ : 메뉴 스타일 (평면 / 그룹)\n• ⇄ : 클릭 로직 전환 (복사 / 삽입)\n• ␣ : 끝에 공백 추가\n• ↵ : 끝에 줄바꿈 추가\n• ☆ : 사용자 정의 문자열 패널\n• 🖱️ : 트리거 모드 (호버 / 클릭)\n• 🌐 : 언어 변경\n\n【조작 방법】\n• **클릭**: 복사 (기본)\n• **길게 누르기 (0.5초)**: 입력창에 삽입\n• **Shift+클릭**: 복사 및 삽입 (메뉴 유지)",
-      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ 빠른 시작</div><div class='mm-content'>Discord 메시지에 마우스를 올리면 → 우측 상단에 복사 버튼이 나타납니다.<br><b>클릭</b>으로 텍스트 복사 · <b>길게 누르기 0.5초</b>로 입력창에 삽입 · <b>Shift+클릭</b>으로 복사와 삽입 동시 실행（메뉴 유지）。<br>툴바의 <span class='mm-key'>🖱️</span> 으로 <span class='mm-key'>클릭 모드</span>로 전환 가능（수동 트리거）。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 복사 메뉴 — 텍스트 & 링크</div><div class='mm-content'>• <b>텍스트 복사</b>：메시지의 전체 텍스트를 복사합니다.<br>• <b>미디어 URL 복사</b>：메시지 내 이미지/동영상의 직접 링크를 복사합니다.<br>• <b>첫 번째 링크 복사（정제됨）</b>：추적 파라미터를 제거한 첫 번째 URL을 복사.<br>• <b>모든 링크 복사</b>：메시지 내 모든 URL을 한 줄씩 복사합니다.<br>• <b>Markdown으로 복사</b>：<span class='mm-key'>[텍스트](URL)</span> 형식으로 변환합니다.<br>• <b>Markdown 링크 삽입</b>：Discord 입력창에 Markdown 형식으로 직접 삽입.<br>• <b>숨김 형식</b>：<span class='mm-key'>|| 스포일러 내용 ||</span> 형식으로 감쌉니다.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ 다운로드</div><div class='mm-content'>• <b>이미지/미디어 다운로드</b>：메시지의 모든 이미지·동영상을 한 번에 다운로드.<br>• <b>ZIP으로 다운로드</b>：여러 파일을 하나의 ZIP 아카이브로 묶어 저장.<br>• 실패 시 자동 재시도하며, 대체 URL로 폴백합니다.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 URL 변환</div><div class='mm-content'><b>Twitter / X</b>：twitter.com, x.com, vxtwitter, fixupx, fxtwitter, cunnyx 간 상호 변환으로 Discord 프리뷰 수정.<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com 변환으로 임베드 프리뷰 활성화.<br><b>Bilibili</b>：FX Bilibili 또는 VX Bilibili로 변환하여 더 나은 임베드 구현.<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net 상호 변환으로 Discord에서 일러스트 프리뷰.<br><b>일괄 변환</b>：<span class='mm-key'>⚡ 전체 변환 (N)</span> 으로 같은 종류의 링크를 한 번에 모두 변환.</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ 툴바 아이콘 설명</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> 메뉴 스타일：평면 / 그룹</div><div><span class='mm-key'>⇄</span> 클릭 동작 전환：복사 ↔ 삽입</div><div><span class='mm-key'>␣</span> 삽입 시 끝에 공백 추가</div><div><span class='mm-key'>↵</span> 삽입 시 끝에 줄바꿈 추가</div><div><span class='mm-key'>☆</span> 사용자 정의 문자열 패널</div><div><span class='mm-key'>🖱️</span> 트리거 전환：호버 / 클릭</div><div><span class='mm-key'>🌐</span> 언어 변경</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ 사용자 정의 문자열 패널</div><div class='mm-content'>• 자주 쓰는 텍스트（인사말·템플릿·코드 블록）를 저장할 수 있습니다.<br>• 클릭으로 복사 · 길게 눌러 입력창에 삽입.<br>• <span class='mm-key'>Shift+클릭</span>으로 확인 없이 연속 삭제 가능.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 웜홀 — 개요</div><div class='mm-content'>웜홀은 Discord 사이드바의 <b>원클릭 채널 단축키</b>입니다. <span class='mm-key'>＋</span> 를 클릭하고 Discord 채널 URL을 붙여넣으면 생성됩니다.<br><b>클릭</b> <span class='mm-key'>＋</span> → 새 웜홀 생성 · <b>1초 길게 누르기</b> → 설정 메뉴 열기.</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ 탐색 및 관리</div><div class='mm-content'>• <b>클릭</b>하면 해당 채널로 즉시 이동합니다.<br>• <b>우클릭</b> → 메뉴: 이름 변경 · 삭제 · 아이콘 설정 · 그룹 이동 · VIP 전환.<br>• <b>VIP <span class='mm-key'>★</span></b>：설정한 웜홀은 자동으로 맨 위에 고정됩니다.<br>• <b>그룹</b>：우클릭 → 그룹으로 이동 으로 폴더에 정리.<br>• <b>포커스 모드</b>：아이콘만 표시. 패널 우측 상단 버튼으로 전환.<br>• <b>기록</b>（보라색 배지）：최근 방문 채널 자동 저장, 클릭으로 즉시 복귀.</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ 메시지 전송</div><div class='mm-content'>• <b>우클릭</b> → <b>이 채널에 메시지 보내기</b> 로 오버레이 열기.<br>• <span class='mm-key'>Ctrl+V</span> 로 이미지 직접 붙여넣기 — 텍스트와 함께 하나의 메시지로 전송.<br>• 하단 옵션（세션 간 유지）：자동 닫기 · 채널로 이동 · 알림 표시.<br>• 전송 후 3초간 토스트 표시, 클릭하면 즉시 해당 채널로 이동합니다.</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 설정 메뉴 및 API 모드</div><div class='mm-content'>• <b><span class='mm-key'>＋</span> 를 1초 길게 누르면</b> 웜홀 설정 메뉴가 열립니다.<br>• 메뉴 항목：<span class='mm-key'>➕ 새 웜홀 생성</span> · <span class='mm-key'>✉️ 전송 방식 및 API 모드</span> · <span class='mm-key'>⚙️ 추가 설정</span>（확장 예정）。<br>• 「<b>전송 방식 및 API 모드</b>」→ API 설정 패널 열기：<br>&nbsp;&nbsp;— <b>플랜 A（페이지 이동）</b>：자동 이동→텍스트 주입→복귀. Token 불필요.<br>&nbsp;&nbsp;— <b>플랜 B（직접 API）</b>：REST API 전송. 페이지 전환 없이 즉시·스텔스.<br>• Token은 Discord 자체 요청에서 백그라운드로 조용히 가로챕니다——<b>디스크 저장 없음.</b><br>• 페이지 새로고침 후：전송 오버레이를 열면 인터셉터가 자동 재시작.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔍 중복 URL 검사기</div><div class='mm-content'>채팅창에 URL을 붙여넣으면 같은 링크가 이전에 공유된 적 있는지 자동으로 확인합니다.<br>• <b>DOM 모드</b>（기본）：현재 화면에 표시된 메시지 전체 스캔. API 토큰 불필요.<br>• <b>API 모드</b>：Discord API로 최근 200개 메시지 스캔（웜홀 API 모드 활성화 + 토큰 캡처 필요）.<br>• 중복 감지 시 채팅 상단에 배너 표시（해당 링크가 몇 번 등장했는지 표시）.<br>• 다른 URL을 붙여넣거나 채널을 전환하면 배너 자동 소거.<br>• <b>배너 없음 = 중복 없음</b>——일치하지 않을 때는 백그라운드에서 무음으로 동작.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔎 채널 검색 Channel Scout</div><div class='mm-content'>채팅 화면에서 키워드로 현재 채널 메시지를 검색합니다.<br>• <b>열기</b>：입력창 위의 🔎 플로팅 버튼 클릭, 또는 입력창 밖에서 <span class='mm-key'>F2</span>.<br>• <b>실시간 검색</b>：입력 즉시 결과 업데이트（150ms 딜레이）. 키워드 금색 하이라이트.<br>• <b>빠른 태그</b>：사용자 정의 키워드 최대 5개 저장. 좌클릭으로 검색·우클릭으로 삭제.<br>• <b>검색 기록</b>：🕐 버튼으로 최근 5건 표시, 클릭으로 재검색.<br>• <b>메시지로 이동</b>：결과 클릭 시 스크롤 이동 + 파란 테두리 하이라이트.<br>• <b>붙여넣기 버튼</b>：📋 클릭으로 클립보드를 검색창에 직접 입력.<br>• <span class='mm-key'>ESC</span>・<span class='mm-key'>F2</span>・패널 외부 클릭으로 닫기.<br>⚠ DOM 모드만 지원——현재 렌더링된 메시지만 검색 가능. 오래된 메시지는 먼저 스크롤하여 로드하세요.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌫️ 사용자 메시지 약화</div><div class='mm-content'>특정 사용자의 메시지를 배경에 녹아들도록 흐리게 표시합니다（숨기지 않고 약화）.<br>• <b>약화 추가</b>：메시지 우클릭 → 「차단」아래 <b>🌫️ 메시지 약화：{이름}</b> → 클릭.<br>• <b>약화 해제</b>：같은 사용자 메시지 우클릭 → <b>✅ 약화 해제：{이름}</b>.<br>• <b>관리 패널</b>：<span class='mm-key'>Alt+B</span> 로 약화 목록 열기. 추가일과 해제 버튼 표시.<br>• 약화된 메시지는 <b>불투명도 7%</b> 표시. 호버 시 42%로 일시 미리보기 가능.<br>• <b>표시 이름</b>으로 식별（User ID 미사용）, 모든 채널에서 유효.<br>• 새 메시지 수신 및 채널 전환 후 자동 재적용.<br>• 데이터는 GM storage에 영구 저장, 페이지 새로고침 후에도 유지.</div></div></div></div>`,
+      manual_content_sections: `<div class='mm-section'><div class='mm-sec-title c-default'>⚡ 빠른 시작</div><div class='mm-content'>Discord 메시지에 마우스를 올리면 → 우측 상단에 복사 버튼이 나타납니다.<br><b>클릭</b>으로 텍스트 복사 · <b>길게 누르기 0.5초</b>로 입력창에 삽입 · <b>Shift+클릭</b>으로 복사와 삽입 동시 실행（메뉴 유지）。<br>툴바의 <span class='mm-key'>🖱️</span> 으로 <span class='mm-key'>클릭 모드</span>로 전환 가능（수동 트리거）。</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>📋 복사 메뉴 — 텍스트 & 링크</div><div class='mm-content'>• <b>텍스트 복사</b>：메시지의 전체 텍스트를 복사합니다.<br>• <b>미디어 URL 복사</b>：메시지 내 이미지/동영상의 직접 링크를 복사합니다.<br>• <b>첫 번째 링크 복사（정제됨）</b>：추적 파라미터를 제거한 첫 번째 URL을 복사.<br>• <b>모든 링크 복사</b>：메시지 내 모든 URL을 한 줄씩 복사합니다.<br>• <b>Markdown으로 복사</b>：<span class='mm-key'>[텍스트](URL)</span> 형식으로 변환합니다.<br>• <b>Markdown 링크 삽입</b>：Discord 입력창에 Markdown 형식으로 직접 삽입.<br>• <b>숨김 형식</b>：<span class='mm-key'>|| 스포일러 내용 ||</span> 형식으로 감쌉니다.</div></div><div class='mm-section accent-blue'><div class='mm-sec-title c-blue'>⬇️ 다운로드</div><div class='mm-content'>• <b>이미지/미디어 다운로드</b>：메시지의 모든 이미지·동영상을 한 번에 다운로드.<br>• <b>ZIP으로 다운로드</b>：여러 파일을 하나의 ZIP 아카이브로 묶어 저장.<br>• 실패 시 자동 재시도하며, 대체 URL로 폴백합니다.</div></div><div class='mm-section accent-yellow'><div class='mm-sec-title c-yellow'>🔁 URL 변환</div><div class='mm-content'><b>Twitter / X</b>：twitter.com, x.com, vxtwitter, fixupx, fxtwitter, cunnyx 간 상호 변환으로 Discord 프리뷰 수정.<br><b>Instagram</b>：instagram.com ↔ kkinstagram.com 변환으로 임베드 프리뷰 활성화.<br><b>Bilibili</b>：FX Bilibili 또는 VX Bilibili로 변환하여 더 나은 임베드 구현.<br><b>Pixiv</b>：pixiv.net ↔ phixiv.net 상호 변환으로 Discord에서 일러스트 프리뷰.<br><b>일괄 변환</b>：<span class='mm-key'>⚡ 전체 변환 (N)</span> 으로 같은 종류의 링크를 한 번에 모두 변환.</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>🎛️ 툴바 아이콘 설명</div><div class='mm-content'><div class='mm-grid'><div><span class='mm-key'>◫/≡</span> 메뉴 스타일：평면 / 그룹</div><div><span class='mm-key'>⇄</span> 클릭 동작 전환：복사 ↔ 삽입</div><div><span class='mm-key'>␣</span> 삽입 시 끝에 공백 추가</div><div><span class='mm-key'>↵</span> 삽입 시 끝에 줄바꿈 추가</div><div><span class='mm-key'>☆</span> 사용자 정의 문자열 패널</div><div><span class='mm-key'>🖱️</span> 트리거 전환：호버 / 클릭</div><div><span class='mm-key'>🌐</span> 언어 변경</div></div></div></div><div class='mm-section'><div class='mm-sec-title c-default'>☆ 사용자 정의 문자열 패널</div><div class='mm-content'>• 자주 쓰는 텍스트（인사말·템플릿·코드 블록）를 저장할 수 있습니다.<br>• 클릭으로 복사 · 길게 눌러 입력창에 삽입.<br>• <span class='mm-key'>Shift+클릭</span>으로 확인 없이 연속 삭제 가능.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌀 웜홀 — 개요</div><div class='mm-content'>웜홀은 Discord 사이드바의 <b>원클릭 채널 단축키</b>입니다. <span class='mm-key'>＋</span> 를 클릭하고 Discord 채널 URL을 붙여넣으면 생성됩니다.<br><b>클릭</b> <span class='mm-key'>＋</span> → 설정 메뉴 열기（첫 번째 항목이 새 웜홀 생성）。</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>🖱️ 탐색 및 관리</div><div class='mm-content'>• <b>클릭</b>하면 해당 채널로 즉시 이동합니다.<br>• <b>우클릭</b> → 메뉴: 이름 변경 · 삭제 · 아이콘 설정 · 그룹 이동 · VIP 전환.<br>• <b>VIP <span class='mm-key'>★</span></b>：설정한 웜홀은 자동으로 맨 위에 고정됩니다.<br>• <b>그룹</b>：우클릭 → 그룹으로 이동 으로 폴더에 정리.<br>• <b>포커스 모드</b>：아이콘만 표시. 패널 우측 상단 버튼으로 전환.<br>• <b>기록</b>（보라색 배지）：최근 방문 채널 자동 저장, 클릭으로 즉시 복귀.</div></div><div class='mm-section accent-wormhole'><div class='mm-sec-title c-worm'>✉️ 메시지 전송</div><div class='mm-content'>• <b>우클릭</b> → <b>이 채널에 메시지 보내기</b> 로 오버레이 열기.<br>• <span class='mm-key'>Ctrl+V</span> 로 이미지 직접 붙여넣기 — 텍스트와 함께 하나의 메시지로 전송.<br>• 하단 옵션（세션 간 유지）：자동 닫기 · 채널로 이동 · 알림 표시.<br>• 전송 후 3초간 토스트 표시, 클릭하면 즉시 해당 채널로 이동합니다.</div></div><div class='mm-section accent-green'><div class='mm-sec-title c-green'>⚙️ 설정 메뉴 및 API 모드</div><div class='mm-content'>• <b><span class='mm-key'>＋</span> 를 클릭하면</b> 웜홀 설정 메뉴가 열립니다.<br>• 메뉴 항목：<span class='mm-key'>➕ 새 웜홀 생성</span> · <span class='mm-key'>✉️ 전송 방식 및 API 모드</span> · <span class='mm-key'>⚙️ 추가 설정</span>（확장 예정）。<br>• 「<b>전송 방식 및 API 모드</b>」→ API 설정 패널 열기：<br>&nbsp;&nbsp;— <b>플랜 A（페이지 이동）</b>：자동 이동→텍스트 주입→복귀. Token 불필요.<br>&nbsp;&nbsp;— <b>플랜 B（직접 API）</b>：REST API 전송. 페이지 전환 없이 즉시·스텔스.<br>• Token은 Discord 자체 요청에서 백그라운드로 조용히 가로챕니다——<b>디스크 저장 없음.</b><br>• 페이지 새로고침 후：전송 오버레이를 열면 인터셉터가 자동 재시작.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔍 중복 URL 검사기</div><div class='mm-content'>채팅창에 URL을 붙여넣으면 같은 링크가 이전에 공유된 적 있는지 자동으로 확인합니다.<br>• <b>DOM 모드</b>（기본）：현재 화면에 표시된 메시지 전체 스캔. API 토큰 불필요.<br>• <b>API 모드</b>：Discord API로 최근 200개 메시지 스캔（웜홀 API 모드 활성화 + 토큰 캡처 필요）.<br>• 중복 감지 시 채팅 상단에 배너 표시（해당 링크가 몇 번 등장했는지 표시）.<br>• 다른 URL을 붙여넣거나 채널을 전환하면 배너 자동 소거.<br>• <b>배너 없음 = 중복 없음</b>——일치하지 않을 때는 백그라운드에서 무음으로 동작.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🔎 채널 검색 Channel Scout</div><div class='mm-content'>채팅 화면에서 키워드로 현재 채널 메시지를 검색합니다.<br>• <b>열기</b>：입력창 위의 🔎 플로팅 버튼 클릭, 또는 입력창 밖에서 <span class='mm-key'>F2</span>.<br>• <b>실시간 검색</b>：입력 즉시 결과 업데이트（150ms 딜레이）. 키워드 금색 하이라이트.<br>• <b>빠른 태그</b>：사용자 정의 키워드 최대 5개 저장. 좌클릭으로 검색·우클릭으로 삭제.<br>• <b>검색 기록</b>：🕐 버튼으로 최근 5건 표시, 클릭으로 재검색.<br>• <b>메시지로 이동</b>：결과 클릭 시 스크롤 이동 + 파란 테두리 하이라이트.<br>• <b>붙여넣기 버튼</b>：📋 클릭으로 클립보드를 검색창에 직접 입력.<br>• <span class='mm-key'>ESC</span>・<span class='mm-key'>F2</span>・패널 외부 클릭으로 닫기.<br>⚠ DOM 모드만 지원——현재 렌더링된 메시지만 검색 가능. 오래된 메시지는 먼저 스크롤하여 로드하세요.</div></div><div class='mm-section'><div class='mm-sec-title c-default'>🌫️ 사용자 메시지 약화</div><div class='mm-content'>특정 사용자의 메시지를 배경에 녹아들도록 흐리게 표시합니다（숨기지 않고 약화）.<br>• <b>약화 추가</b>：메시지 우클릭 → 「차단」아래 <b>🌫️ 메시지 약화：{이름}</b> → 클릭.<br>• <b>약화 해제</b>：같은 사용자 메시지 우클릭 → <b>✅ 약화 해제：{이름}</b>.<br>• <b>관리 패널</b>：<span class='mm-key'>Alt+B</span> 로 약화 목록 열기. 추가일과 해제 버튼 표시.<br>• 약화된 메시지는 <b>불투명도 7%</b> 표시. 호버 시 42%로 일시 미리보기 가능.<br>• <b>표시 이름</b>으로 식별（User ID 미사용）, 모든 채널에서 유효.<br>• 새 메시지 수신 및 채널 전환 후 자동 재적용.<br>• 데이터는 GM storage에 영구 저장, 페이지 새로고침 후에도 유지.</div></div></div></div>`,
       reload_confirm:
         "설정이 저장되었습니다!\n지금 페이지를 새로 고치시겠습니까?",
       copy_text: "📋 텍스트 복사",
@@ -3530,7 +3530,7 @@
       wm_icon_set_success: "✅ {name}의 아이콘이 설정되었습니다",
       wm_icon_empty: "먼저 컬렉션 이미지 모듈에서 Emoji를 추가하세요",
       wm_title:
-        "웜홀 컨트롤\n• 클릭: 새 웜홀 생성\n• 1초 길게 누르기: 설정 메뉴 열기",
+        "웜홀 컨트롤\n• 클릭: 설정 메뉴 열기",
       wm_settings_menu_title: "🌀 웜홀 설정",
       wm_settings_create: "새 웜홀 생성",
       wm_settings_send_mode: "전송 방식 및 API 모드",
@@ -3670,7 +3670,7 @@
       uc_duplicate_found: "⚠️ 이 URL은 최근 {limit}개 메시지에서 {count}번 게시되었습니다",
       uc_duplicate_found_plural: "⚠️ {n}개 중복 URL（최대 {count}번, 최근 {limit}개 스캔）",
       uc_dom_found: "⚠️ 이 URL이 표시된 {limit}개 메시지에서 {count}번 발견되었습니다（DOM 모드 · API 불필요）",
-      uc_no_token: "🔍 중복 URL 검사는 웜홀 API 모드가 필요합니다 — ＋ 버튼을 1초 길게 눌러 설정을 여세요",
+      uc_no_token: "🔍 중복 URL 검사는 웜홀 API 모드가 필요합니다 — ＋ 버튼을 클릭하여 설정을 여세요",
       uc_token_waiting: "⏳ API Token 대기 중… 임의 채널로 한 번 전환하면 자동으로 캡처됩니다",
       uc_fetching: "🔄 중복 URL 스캔 중…",
       uc_dismiss: "✕",
@@ -3938,9 +3938,9 @@
         "• <b>Shift+Clic</b> → abre el panel en el canal actual.<br>" +
         "• Admite <b>pegar imágenes con Ctrl+V</b>.<br>" +
         "• Opciones inferiores: <b>Cierre automático</b> / <b>Ir al canal</b> / <b>Mostrar notificación</b>.",
-      fm_sec_wm_api: "⚡ Agujero de gusano — Modo API (secreto)",
+      fm_sec_wm_api: "⚡ Agujero de gusano — Modo API",
       fm_sec_wm_api_content:
-        "• <b>Mantén presionado el botón ＋ 3 segundos</b> para desbloquear el Modo API.<br>" +
+        "• <b>Haz clic en el botón ＋</b> y elige <b>Modo de envío y Modo API</b> en el menú de ajustes para abrir el panel del Modo API.<br>" +
         "• <b>Modo B (API directa)</b>: envía mensajes vía Discord REST API sin cambiar de página.<br>" +
         "• El token se intercepta silenciosamente en memoria — <b>nunca se almacena ni transmite</b>.<br>" +
         "• Se borra al cerrar la página.",
@@ -4095,7 +4095,7 @@
       wm_icon_set_success: "✅ Icono de {name} establecido",
       wm_icon_empty: "Primero añade un Emoji en el módulo de colección",
       wm_title:
-        "Control de agujero de gusano\n• Clic: crear nuevo\n• Pulsación larga 1s: menú de ajustes",
+        "Control de agujero de gusano\n• Clic: abrir menú de ajustes",
       wm_settings_menu_title: "🌀 Ajustes del agujero de gusano",
       wm_settings_create: "Crear nuevo agujero de gusano",
       wm_settings_send_mode: "Método de envío y Modo API",
@@ -4233,7 +4233,7 @@
       uc_duplicate_found: "⚠️ Esta URL ya fue publicada — apareció {count}× en los últimos {limit} mensajes",
       uc_duplicate_found_plural: "⚠️ {n} URLs duplicadas — hasta {count}× en los últimos {limit} mensajes",
       uc_dom_found: "⚠️ Esta URL apareció {count}× en {limit} mensajes visibles (modo DOM · sin API)",
-      uc_no_token: "🔍 La verificación de URL duplicada requiere el modo API de Wormhole — actívalo en los ajustes de Wormhole (mantén ＋ 1s)",
+      uc_no_token: "🔍 La verificación de URL duplicada requiere el modo API de Wormhole — haz clic en ＋ y ábrelo desde los ajustes",
       uc_token_waiting: "⏳ Esperando API Token… cambia a cualquier canal una vez para capturarlo",
       uc_fetching: "🔄 Buscando URLs duplicadas…",
       uc_dismiss: "✕",
@@ -4528,9 +4528,9 @@
         "• <b>Shift+Clique</b> → abre o painel no canal atual.<br>" +
         "• Suporta <b>colar imagens com Ctrl+V</b>.<br>" +
         "• Opções inferiores: <b>Fechar automaticamente</b> / <b>Ir ao canal</b> / <b>Mostrar notificação</b>.",
-      fm_sec_wm_api: "⚡ Buraco de minhoca — Modo API (secreto)",
+      fm_sec_wm_api: "⚡ Buraco de minhoca — Modo API",
       fm_sec_wm_api_content:
-        "• <b>Mantenha pressionado o botão ＋ por 3 segundos</b> para desbloquear o Modo API.<br>" +
+        "• <b>Clique no botão ＋</b> e escolha <b>Modo de envio e Modo API</b> no menu de configurações para abrir o painel do Modo API.<br>" +
         "• <b>Modo B (API direta)</b>: envia mensagens via Discord REST API sem trocar de página.<br>" +
         "• O token é interceptado silenciosamente na memória — <b>nunca armazenado ou transmitido</b>.<br>" +
         "• Apagado ao fechar a página.",
@@ -4684,7 +4684,7 @@
       wm_icon_set_success: "✅ Ícone de {name} definido",
       wm_icon_empty: "Primeiro adicione um Emoji no módulo de coleção",
       wm_title:
-        "Controle do buraco de minhoca\n• Clique: criar novo\n• Pressão longa 1s: menu de configurações",
+        "Controle do buraco de minhoca\n• Clique: abrir menu de configurações",
       wm_settings_menu_title: "🌀 Configurações do buraco de minhoca",
       wm_settings_create: "Criar novo buraco de minhoca",
       wm_settings_send_mode: "Método de envio e Modo API",
@@ -4821,7 +4821,7 @@
       uc_duplicate_found: "⚠️ Esta URL já foi publicada — apareceu {count}× nas últimas {limit} mensagens",
       uc_duplicate_found_plural: "⚠️ {n} URLs duplicadas — até {count}× nas últimas {limit} mensagens",
       uc_dom_found: "⚠️ Esta URL apareceu {count}× em {limit} mensagens visíveis (modo DOM · sem API)",
-      uc_no_token: "🔍 A verificação de URL duplicada requer o modo API do Wormhole — ative-o nas configurações do Wormhole (segure ＋ por 1s)",
+      uc_no_token: "🔍 A verificação de URL duplicada requer o modo API do Wormhole — clique em ＋ e abra nas configurações",
       uc_token_waiting: "⏳ Aguardando API Token… mude para qualquer canal uma vez para capturá-lo",
       uc_fetching: "🔄 Verificando URLs duplicadas…",
       uc_dismiss: "✕",
@@ -5118,9 +5118,9 @@
         "• <b>Shift+Clic</b> → ouvre le panneau dans le salon actuel.<br>" +
         "• Prend en charge le <b>collage d'images avec Ctrl+V</b>.<br>" +
         "• Options du bas : <b>Fermeture auto</b> / <b>Aller au salon</b> / <b>Afficher la notification</b>.",
-      fm_sec_wm_api: "⚡ Trou de ver — Mode API (secret)",
+      fm_sec_wm_api: "⚡ Trou de ver — Mode API",
       fm_sec_wm_api_content:
-        "• <b>Maintenez le bouton ＋ appuyé 3 secondes</b> pour déverrouiller le Mode API.<br>" +
+        "• <b>Cliquez sur le bouton ＋</b>, puis choisissez <b>Mode d'envoi et Mode API</b> dans le menu des paramètres pour ouvrir le panneau du Mode API.<br>" +
         "• <b>Mode B (API directe)</b> : envoie des messages via l'API REST Discord sans changer de page.<br>" +
         "• Le token est intercepté silencieusement en mémoire — <b>jamais stocké ni transmis</b>.<br>" +
         "• Effacé à la fermeture de la page.",
@@ -5278,7 +5278,7 @@
       wm_icon_set_success: "✅ Icône de {name} définie",
       wm_icon_empty: "Ajoutez d'abord un Emoji dans le module de collection",
       wm_title:
-        "Contrôle du trou de ver\n• Clic : créer nouveau\n• Appui long 1s : menu des paramètres",
+        "Contrôle du trou de ver\n• Clic : ouvrir le menu des paramètres",
       wm_settings_menu_title: "🌀 Paramètres du trou de ver",
       wm_settings_create: "Créer un nouveau trou de ver",
       wm_settings_send_mode: "Méthode d'envoi et Mode API",
@@ -5421,7 +5421,7 @@
       uc_duplicate_found: "⚠️ Cette URL a déjà été publiée — apparue {count}× dans les {limit} derniers messages",
       uc_duplicate_found_plural: "⚠️ {n} URLs dupliquées — jusqu'à {count}× dans les {limit} derniers messages",
       uc_dom_found: "⚠️ Cette URL est apparue {count}× dans {limit} messages visibles (mode DOM · sans API)",
-      uc_no_token: "🔍 La vérification d'URL dupliquée nécessite le mode API Wormhole — activez-le dans les paramètres Wormhole (maintenez ＋ 1s)",
+      uc_no_token: "🔍 La vérification d'URL dupliquée nécessite le mode API Wormhole — cliquez sur ＋ puis ouvrez les paramètres",
       uc_token_waiting: "⏳ En attente du Token API… changez de salon une fois pour le capturer",
       uc_fetching: "🔄 Recherche d'URLs dupliquées…",
       uc_dismiss: "✕",
@@ -5712,9 +5712,9 @@
         "• <b>Shift+Клик</b> → открывает панель в текущем канале.<br>" +
         "• Поддерживает <b>вставку изображений через Ctrl+V</b>.<br>" +
         "• Нижние опции: <b>Автозакрытие</b> / <b>Перейти на канал</b> / <b>Показать уведомление</b>.",
-      fm_sec_wm_api: "⚡ Червоточина — Режим API (секретный)",
+      fm_sec_wm_api: "⚡ Червоточина — Режим API",
       fm_sec_wm_api_content:
-        "• <b>Удерживайте кнопку ＋ 3 секунды</b> для разблокировки режима API.<br>" +
+        "• <b>Нажмите кнопку ＋</b>, затем выберите <b>Режим отправки и режим API</b> в меню настроек, чтобы открыть панель режима API.<br>" +
         "• <b>Режим B (Прямой API)</b>: отправляет сообщения через Discord REST API без смены страницы.<br>" +
         "• Токен перехватывается тихо в памяти — <b>никогда не сохраняется и не передаётся</b>.<br>" +
         "• Очищается при закрытии страницы.",
@@ -5868,7 +5868,7 @@
       wm_icon_set_success: "✅ Значок {name} установлен",
       wm_icon_empty: "Сначала добавьте эмодзи в модуле коллекции",
       wm_title:
-        "Управление червоточиной\n• Клик: создать новую\n• Долгое нажатие 1с: меню настроек",
+        "Управление червоточиной\n• Клик: открыть меню настроек",
       wm_settings_menu_title: "🌀 Настройки червоточины",
       wm_settings_create: "Создать новую червоточину",
       wm_settings_send_mode: "Метод отправки и режим API",
@@ -6010,7 +6010,7 @@
       uc_duplicate_found: "⚠️ Этот URL уже публиковался — встретился {count}× за последние {limit} сообщений",
       uc_duplicate_found_plural: "⚠️ {n} дублирующихся URL — до {count}× за последние {limit} сообщений",
       uc_dom_found: "⚠️ Этот URL встречается {count}× в {limit} видимых сообщениях (режим DOM · без API)",
-      uc_no_token: "🔍 Проверка дублирующихся URL требует режима API Wormhole — включите его в настройках Wormhole (удерживайте ＋ 1с)",
+      uc_no_token: "🔍 Проверка дублирующихся URL требует режима API Wormhole — нажмите ＋ и откройте в настройках",
       uc_token_waiting: "⏳ Ожидание API Token… переключитесь на любой канал для его получения",
       uc_fetching: "🔄 Поиск дублирующихся URL…",
       uc_dismiss: "✕",
@@ -6300,9 +6300,9 @@
         "• <b>Shift+Klick</b> → öffnet Overlay im aktuellen Kanal.<br>" +
         "• Unterstützt <b>Strg+V Bild-Einfügen</b>.<br>" +
         "• Optionen: <b>Automatisch schließen</b> / <b>Zum Kanal wechseln</b> / <b>Benachrichtigung</b>.",
-      fm_sec_wm_api: "⚡ Wurmloch — API-Modus (erweitert)",
+      fm_sec_wm_api: "⚡ Wurmloch — API-Modus",
       fm_sec_wm_api_content:
-        "• <b>＋-Schaltfläche 3 Sekunden gedrückt halten</b> zum Entsperren des API-Modus.<br>" +
+        "• <b>Klicke auf die ＋-Schaltfläche</b> und wähle im Einstellungsmenü <b>Sendemodus & API-Modus</b>, um das API-Modus-Panel zu öffnen.<br>" +
         "• <b>Modus B (direkte API)</b>: sendet via Discord REST API ohne Seitenwechsel.<br>" +
         "• Token wird nur im Speicher gehalten — <b>nie gespeichert oder übertragen</b>.<br>" +
         "• Beim Schließen der Seite gelöscht.",
@@ -6455,7 +6455,7 @@
       wm_icon_set_success: "✅ Symbol von {name} gesetzt",
       wm_icon_empty: "Zuerst ein Emoji im Sammlungsmodul hinzufügen",
       wm_title:
-        "Wurmloch-Steuerung\n• Klick: Neues erstellen\n• Lang drücken 1s: Einstellungsmenü",
+        "Wurmloch-Steuerung\n• Klick: Einstellungsmenü öffnen",
       wm_settings_menu_title: "🌀 Wurmloch-Einstellungen",
       wm_settings_create: "Neues Wurmloch erstellen",
       wm_settings_send_mode: "Sendemethode & API-Modus",
@@ -6592,7 +6592,7 @@
       uc_duplicate_found: "⚠️ Diese URL wurde bereits gepostet — {count}× in den letzten {limit} Nachrichten",
       uc_duplicate_found_plural: "⚠️ {n} doppelte URLs — bis zu {count}× in den letzten {limit} Nachrichten",
       uc_dom_found: "⚠️ Diese URL erschien {count}× in {limit} sichtbaren Nachrichten (DOM-Modus · ohne API)",
-      uc_no_token: "🔍 Doppelte URL-Prüfung benötigt Wurmloch-API-Modus — in Wurmloch-Einstellungen aktivieren (＋ 1s gedrückt halten)",
+      uc_no_token: "🔍 Doppelte URL-Prüfung benötigt Wurmloch-API-Modus — auf ＋ klicken und in den Einstellungen aktivieren",
       uc_token_waiting: "⏳ Warte auf API-Token… einmal den Kanal wechseln",
       uc_fetching: "🔄 Suche nach doppelten URLs…",
       uc_dismiss: "✕",
@@ -16444,35 +16444,15 @@
       if (container.querySelector(".my-wormhole-creator-btn")) return;
 
       const btnGroup = document.createElement("div");
-      btnGroup.style.cssText = "display: flex; gap: 8px; align-items: center;";
+      btnGroup.style.cssText = "display: flex; align-items: center;";
 
       const createBtn = document.createElement("div");
       createBtn.className = "my-wormhole-creator-btn";
       createBtn.innerHTML = this.ICONS.wormhole;
       createBtn.title = this.t("wm_title");
 
-      let debugPressTimer;
-      let isLongPress = false;
-
-      createBtn.onmousedown = (e) => {
-        if (e.button !== 0) return;
-        isLongPress = false;
-        debugPressTimer = setTimeout(() => {
-          isLongPress = true;
-          this.openSettingsMenu(createBtn);
-        }, 500);
-      };
-
-      const clearTimer = () => clearTimeout(debugPressTimer);
-      createBtn.onmouseup = clearTimer;
-      createBtn.onmouseleave = clearTimer;
-
       createBtn.onclick = (e) => {
-        if (isLongPress) {
-          isLongPress = false;
-          return;
-        }
-        this.createNewWormhole();
+        this.openSettingsMenu(createBtn);
       };
 
       const focusBtn = document.createElement("div");
@@ -16481,6 +16461,22 @@
         ? this.ICONS.focusOn
         : this.ICONS.focusOff;
       focusBtn.removeAttribute("title");
+
+      focusBtn.classList.add("my-wormhole-focus-btn-collapsed");
+
+      let _focusRevealTimer = null;
+      const _revealFocusBtn = () => {
+        clearTimeout(_focusRevealTimer);
+        focusBtn.classList.remove("my-wormhole-focus-btn-collapsed");
+      };
+      const _collapseFocusBtn = () => {
+        clearTimeout(_focusRevealTimer);
+        _focusRevealTimer = setTimeout(() => {
+          focusBtn.classList.add("my-wormhole-focus-btn-collapsed");
+        }, 150);
+      };
+      btnGroup.addEventListener("mouseenter", _revealFocusBtn);
+      btnGroup.addEventListener("mouseleave", _collapseFocusBtn);
 
       let _fbPressTimer = null;
       let _fbIsLongPress = false;
@@ -16517,9 +16513,8 @@
               <span class="wh-fbtip-key">Click</span> — toggle focus mode<br>
               <span class="wh-fbtip-key">Long-press</span> — open focus settings<br>
               <hr class="wh-fbtip-hr">
-              <span class="wh-fbtip-dim">Create wormhole:</span><br>
-              <span class="wh-fbtip-key">Click ＋</span> — create new wormhole<br>
-              <span class="wh-fbtip-key">Long-press ＋</span> — open wormhole settings
+              <span class="wh-fbtip-dim">Wormhole ＋:</span><br>
+              <span class="wh-fbtip-key">Click ＋</span> — open settings menu (create wormhole is the first option)
             </div>`;
           document.body.appendChild(tip);
           if (!document.getElementById("wh-fbtip-styles")) {
@@ -20276,8 +20271,10 @@ unsafeWindow.fetch = function(...args) {
             .item-pin-btn:hover { opacity: 1; background: rgba(255, 215, 0, 0.1); transform: scale(1.15); }
             .my-wormhole-creator-btn { color: var(--dmt-text-subtle); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 24px; height: 24px; margin: 0 4px; transition: color 0.2s; }
             .my-wormhole-creator-btn:hover { color: var(--dmt-accent); }
-            .my-wormhole-focus-btn { color: var(--dmt-text-subtle); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; transition: all 0.2s; }
+            .my-wormhole-focus-btn { color: var(--dmt-text-subtle); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 20px; height: 20px; margin-left: 8px; overflow: hidden; transition: width 0.2s ease, margin-left 0.2s ease, opacity 0.15s ease, color 0.2s, transform 0.2s; }
             .my-wormhole-focus-btn:hover { color: var(--dmt-accent); transform: scale(1.1); }
+            
+            .my-wormhole-focus-btn-collapsed { width: 0; margin-left: 0; opacity: 0; pointer-events: none; }
             
             #wh-input-dock { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px; padding: 0 12px; min-height: 28px; background: rgba(30,31,34,0.6); border-bottom: 1px solid rgba(255,255,255,0.06); width: 100%; box-sizing: border-box; flex-shrink: 0; order: -1; }
             #wh-input-dock .my-wormhole-container { margin-left: 0; border-left: none; padding-left: 0; }
