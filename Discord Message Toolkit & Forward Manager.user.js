@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.4.0
+// @version      2.7.5.4
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -56,7 +56,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.4.0";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.5.2";
 
   const GMStore = {
     
@@ -1388,6 +1388,7 @@
       ms_btn_jump:        "Jump to message",
       ms_btn_download:    "Download",
       ms_err_forbidden:   "Permission denied for this scope",
+      ms_err_forbidden_thread_hint: "— threads and forum posts aren't scannable this way; switch to the parent channel and scan from there instead",
       ms_err_channel_type: "This channel type doesn't support Discord's search API (commonly threads or voice-channel text chat) — switching to Server scope can often work around this",
       ms_no_token_warn:   "⚠️ Requires API Mode — enable in Wormhole settings",
       ms_range_1h:        "Last 1 hour",
@@ -1973,6 +1974,7 @@
       ms_btn_jump:        "跳至訊息",
       ms_btn_download:    "下載",
       ms_err_forbidden:   "此範圍無存取權限",
+      ms_err_forbidden_thread_hint: "—討論串或 Forum 貼文無法用此方式掃描，請切換到上層頻道再掃描",
       ms_err_channel_type: "此頻道類型不支援 Discord 的搜尋 API（常見於討論串或語音頻道文字聊天）— 切換到 Server 範圍通常可以繞過此限制",
       ms_no_token_warn:   "⚠️ 需要 API 模式 — 請在蟲洞設定中啟用",
       ms_range_1h:        "1 小時內",
@@ -2548,6 +2550,7 @@
       ms_btn_jump:        "跳转到消息",
       ms_btn_download:    "下载",
       ms_err_forbidden:   "无此范围访问权限",
+      ms_err_forbidden_thread_hint: "—讨论串或 Forum 帖子无法用此方式扫描，请切换到上层频道再扫描",
       ms_err_channel_type: "此频道类型不支持 Discord 的搜索 API（常见于讨论串或语音频道文字聊天）— 切换到 Server 范围通常可以绕过此限制",
       ms_no_token_warn:   "⚠️ 需要 API 模式 — 请在虫洞设置中启用",
       ms_range_1h:        "1小时内",
@@ -3132,6 +3135,7 @@
       ms_btn_jump:        "メッセージに移動",
       ms_btn_download:    "ダウンロード",
       ms_err_forbidden:   "このスコープへのアクセスが拒否されました",
+      ms_err_forbidden_thread_hint: "—スレッドや Forum 投稿はこの方法でスキャンできません。親チャンネルに移動してからスキャンしてください",
       ms_err_channel_type: "このチャンネルタイプは Discord の検索 API に対応していません（スレッドやボイスチャンネルのテキストチャットでよく発生）— Server スコープに切り替えると回避できることが多いです",
       ms_no_token_warn:   "⚠️ API モードが必要です — ワームホール設定で有効にしてください",
       ms_range_1h:        "1時間以内", ms_range_6h:   "6時間以内",
@@ -3751,6 +3755,7 @@
       ms_btn_jump:        "메시지로 이동",
       ms_btn_download:    "다운로드",
       ms_err_forbidden:   "이 범위에 대한 접근이 거부되었습니다",
+      ms_err_forbidden_thread_hint: "—스레드나 Forum 게시물은 이 방식으로 스캔할 수 없습니다. 상위 채널로 이동한 후 스캔해 주세요",
       ms_err_channel_type: "이 채널 유형은 Discord의 검색 API를 지원하지 않습니다 (스레드 또는 음성 채널 텍스트 채팅에서 흔함) — Server 범위로 전환하면 우회할 수 있는 경우가 많습니다",
       ms_no_token_warn:   "⚠️ API 모드가 필요합니다 — 웜홀 설정에서 활성화하세요",
       ms_range_1h:        "1시간 이내", ms_range_6h:   "6시간 이내",
@@ -4444,6 +4449,7 @@
       ms_btn_jump:              "Ir al mensaje",
       ms_btn_download:          "Descargar",
       ms_err_forbidden:         "Permiso denegado para este ámbito",
+      ms_err_forbidden_thread_hint:    "—los hilos y publicaciones de foro no se pueden escanear así; cambia al canal principal y escanea desde ahí",
       ms_err_channel_type:      "Este tipo de canal no admite la API de búsqueda de Discord (foros/hilos)",
       ms_no_token_warn:         "⚠️ Requiere el modo API — actívalo en la configuración de Wormhole",
       ms_range_1h:              "Última 1 hora",
@@ -5032,6 +5038,7 @@
       ms_btn_jump:              "Ir para a mensagem",
       ms_btn_download:          "Baixar",
       ms_err_forbidden:         "Permissão negada para este escopo",
+      ms_err_forbidden_thread_hint:    "—threads e publicações de fórum não podem ser escaneados assim; mude para o canal principal e escaneie a partir de lá",
       ms_err_channel_type:      "Este tipo de canal não suporta a API de busca do Discord (fóruns/threads)",
       ms_no_token_warn:         "⚠️ Requer o modo API — ative nas configurações do Wormhole",
       ms_range_1h:              "Última 1 hora",
@@ -5626,6 +5633,7 @@
       ms_btn_jump:              "Aller au message",
       ms_btn_download:          "Télécharger",
       ms_err_forbidden:         "Permission refusée pour cette portée",
+      ms_err_forbidden_thread_hint:    "—les fils et publications de forum ne peuvent pas être scannés ainsi ; passez au salon parent et scannez depuis celui-ci",
       ms_err_channel_type:      "Ce type de canal ne prend pas en charge l'API de recherche de Discord (forums/fils)",
       ms_no_token_warn:         "⚠️ Nécessite le mode API — activez-le dans les paramètres Wormhole",
       ms_range_1h:              "Dernière heure",
@@ -6215,6 +6223,7 @@
       ms_btn_jump:              "Перейти к сообщению",
       ms_btn_download:          "Скачать",
       ms_err_forbidden:         "Доступ к этой области запрещён",
+      ms_err_forbidden_thread_hint:    "—ветки и посты форума нельзя сканировать таким образом; переключитесь на родительский канал и сканируйте оттуда",
       ms_err_channel_type:      "Этот тип канала не поддерживает API поиска Discord (форумы/ветки)",
       ms_no_token_warn:         "⚠️ Требуется режим API — включите его в настройках Wormhole",
       ms_range_1h:              "Последний час",
@@ -6793,6 +6802,7 @@
       ms_btn_jump:              "Zur Nachricht springen",
       ms_btn_download:          "Herunterladen",
       ms_err_forbidden:         "Zugriff für diesen Bereich verweigert",
+      ms_err_forbidden_thread_hint:    "—Threads und Forenbeiträge können so nicht gescannt werden; wechsle zum übergeordneten Kanal und scanne von dort aus",
       ms_err_channel_type:      "Dieser Kanaltyp unterstützt die Discord-Such-API nicht (Foren/Threads)",
       ms_no_token_warn:         "⚠️ Erfordert API-Modus — in den Wormhole-Einstellungen aktivieren",
       ms_range_1h:              "Letzte 1 Stunde",
@@ -20651,6 +20661,7 @@ unsafeWindow.fetch = function(...args) {
     const MSG_SEL       = '[data-list-item-id*="chat-messages-"]';
     const AUTHOR_SEL    = '[class*="username_"]';
     const _ghostTimers  = new WeakMap();
+    let _dimListenerActive = false;
 
     if (!document.getElementById("dmt-bl-style")) {
       const s = document.createElement("style");
@@ -21503,6 +21514,15 @@ unsafeWindow.fetch = function(...args) {
           animation: dmt-bl-out 0.18s cubic-bezier(.4,0,1,1) forwards !important;
           pointer-events: none;
         }
+        
+        @keyframes dmt-bl-focus-pulse {
+          0%   { box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(88,101,242,0.08); }
+          30%  { box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 0 3px rgba(88,101,242,0.9); }
+          100% { box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(88,101,242,0.08); }
+        }
+        #${BL_PANEL_ID}.dmt-bl-panel-focus-pulse {
+          animation: dmt-bl-focus-pulse 0.9s ease-out;
+        }
         #${BL_PANEL_ID} .bl-header {
           display: flex; align-items: center; gap: 8px;
           padding: 12px 14px 8px;
@@ -21890,15 +21910,20 @@ unsafeWindow.fetch = function(...args) {
         if (matched !== undefined) {
           _applyStyle(container, matched, name);
         } else {
-          BL_ALL_CLS.forEach(c => container.classList.remove(c));
-          container.classList.remove("dmt-bl-open");
-          delete container.dataset.dmtAuthor;
+          const hasAnyBlClass = BL_ALL_CLS.some(c => container.classList.contains(c))
+            || container.classList.contains("dmt-bl-open");
+          if (hasAnyBlClass) {
+            BL_ALL_CLS.forEach(c => container.classList.remove(c));
+            container.classList.remove("dmt-bl-open");
+            delete container.dataset.dmtAuthor;
+          }
           if (_applyBotRelay(container, nameMap)) {
             _applyBotRelayFollowUps(container, nameMap);
           }
         }
       });
       _mergeCollapseGroups();
+      _syncDimListener();
       _blHideNativeNotices();
     }
 
@@ -21913,14 +21938,19 @@ unsafeWindow.fetch = function(...args) {
       if (matched !== undefined) {
         _applyStyle(container, matched, name);
       } else {
-        BL_ALL_CLS.forEach(c => container.classList.remove(c));
-        container.classList.remove("dmt-bl-open");
-        delete container.dataset.dmtAuthor;
+        const hasAnyBlClass = BL_ALL_CLS.some(c => container.classList.contains(c))
+          || container.classList.contains("dmt-bl-open");
+        if (hasAnyBlClass) {
+          BL_ALL_CLS.forEach(c => container.classList.remove(c));
+          container.classList.remove("dmt-bl-open");
+          delete container.dataset.dmtAuthor;
+        }
         if (_applyBotRelay(container, nameMap)) {
           _applyBotRelayFollowUps(container, nameMap);
         }
       }
       _mergeCollapseGroups();
+      _syncDimListener();
     }
 
     const _blPendingNodes = new WeakSet();
@@ -23043,7 +23073,15 @@ unsafeWindow.fetch = function(...args) {
           gearBtn.addEventListener("click", (e) => {
             e.stopPropagation();
             document.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
-            setTimeout(() => openBlPanel(), 80);
+            setTimeout(() => {
+              const existing = document.getElementById(BL_PANEL_ID);
+              if (existing) {
+                existing.classList.add("dmt-bl-panel-focus-pulse");
+                setTimeout(() => existing.classList.remove("dmt-bl-panel-focus-pulse"), 900);
+              } else {
+                openBlPanel();
+              }
+            }, 80);
           });
 
           const renderLabel = () => {
@@ -23172,7 +23210,22 @@ unsafeWindow.fetch = function(...args) {
         _clearDwell();
       }
     }
-    document.addEventListener("mousemove", _onDimMousemove, { passive: true });
+
+    function _syncDimListener() {
+      const shouldActive = !!document.querySelector(".dmt-bl-s0, .dmt-bl-bot-relay");
+      if (shouldActive === _dimListenerActive) return;
+      if (shouldActive) {
+        document.addEventListener("mousemove", _onDimMousemove, { passive: true });
+      } else {
+        document.removeEventListener("mousemove", _onDimMousemove);
+        _dimLastPeek?.classList.remove("dmt-bl-s0-peek", "dmt-bl-bot-relay-peek");
+        _dimLastPeek = null;
+        _clearReveal(_dimLastReveal);
+        _clearDwell();
+      }
+      _dimListenerActive = shouldActive;
+    }
+    _syncDimListener();
 
     CleanupRegistry.add(() => {
       _blObserver.disconnect();
@@ -28650,11 +28703,12 @@ if (type === "warn" && scanLimit !== null) {
       throw new Error(t("ms_no_token_warn") || "Token not found — enable API Mode in Wormhole settings");
     }
 
-    async function _msFetchPage(endpoint, offset, minId, maxId) {
+    async function _msFetchPage(endpoint, offset, minId, maxId, channelId) {
       const token = await _msEnsureToken();
       let url = `${MS_API_BASE}/${endpoint}/messages/search?has=image&has=video&limit=25&offset=${offset}`;
       if (minId) url += `&min_id=${minId}`;
       if (maxId) url += `&max_id=${maxId}`;
+      if (channelId) url += `&channel_id=${channelId}`;
       return new Promise((resolve, reject) => {
         GM_xmlhttpRequest({
           method:  "GET",
@@ -28673,7 +28727,7 @@ if (type === "warn" && scanLimit !== null) {
               try { ra = JSON.parse(r.responseText).retry_after || 5; } catch (_) {}
               resolve({ status: 429, retry_after: ra });
             } else if (r.status === 403) {
-              resolve({ status: 403 });
+              resolve({ status: 403, body: r.responseText });
             } else {
               reject(new Error("HTTP " + r.status));
             }
@@ -28686,8 +28740,10 @@ if (type === "warn" && scanLimit !== null) {
     const _msSleep = ms => new Promise(r => setTimeout(r, ms));
 
     async function _msFullScan(scope, scopeType) {
-      const isGuild  = scopeType === "guild";
-      const id       = scope.slice(2);
+      const isGuild    = scopeType === "guild" || scopeType === "guild-channel";
+      const parsedGc   = scopeType === "guild-channel" ? _msParseScope(scope) : null;
+      const id         = parsedGc ? parsedGc.guildId : scope.slice(2);
+      const channelIdFilter = parsedGc ? parsedGc.channelId : null;
       const endpoint = isGuild ? `guilds/${id}` : `channels/${id}`;
 
       let minId = null, maxId = null;
@@ -28734,7 +28790,7 @@ if (type === "warn" && scanLimit !== null) {
         _msScanState.statusDetail = t("ms_fetching") || "Fetching…";
         _msUpdateStatusBar();
         let res;
-        try { res = await _msFetchPage(endpoint, _msScanState.offset, minId, maxId); }
+        try { res = await _msFetchPage(endpoint, _msScanState.offset, minId, maxId, channelIdFilter); }
         catch (err) {
           _msScanState.phase = "error";
           _msScanState.error = err.message;
@@ -28782,15 +28838,10 @@ if (type === "warn" && scanLimit !== null) {
             await _msWriteSyncMeta(scope, { scanned_count: _msScanState.scanned, last_scan_at: new Date().toISOString(), newest_timestamp: newestTs, is_complete: false });
           } else {
             _msScanState.phase = "error";
-            let detail = "", code = null;
-            try {
-              const parsed = JSON.parse(res.body || "{}");
-              code = parsed.code;
-              detail = parsed.message ? ` (code ${code ?? "?"}: ${parsed.message})` : "";
-            } catch (_) {
-              detail = res.body ? ` (${String(res.body).slice(0, 120)})` : "";
-            }
+            let code = null;
+            try { code = JSON.parse(res.body || "{}").code; } catch (_) {}
             DEBUG && console.warn("[Mosaic] HTTP 400 raw body:", res.body);
+            const detail = code != null ? ` (code ${code})` : "";
             const tail = code === 50024
               ? (t("ms_err_channel_type") || "This channel type doesn't support Discord's search API (commonly threads or voice-channel text chat) — switching to Server scope can often work around this")
               : (t("ms_err_forbidden") || "Check scope permissions or narrow time range");
@@ -28802,7 +28853,14 @@ if (type === "warn" && scanLimit !== null) {
         }
         if (res.status === 403) {
           _msScanState.phase = "error";
-          _msScanState.error = t("ms_err_forbidden") || "Permission denied";
+          let code = null;
+          try { code = JSON.parse(res.body || "{}").code; } catch (_) {}
+          DEBUG && console.warn("[Mosaic] HTTP 403 raw body:", res.body);
+          const detail = code != null ? ` (code ${code})` : "";
+          const scopeHint = (scopeType === "guild-channel" && code === 50001)
+            ? " " + (t("ms_err_forbidden_thread_hint") || "— if this is a thread or forum post, switch to the parent channel and scan from there")
+            : "";
+          _msScanState.error = (t("ms_err_forbidden") || "Permission denied") + detail + scopeHint;
           _msUpdateStatusBar(); _msUpdateScanBtn();
           return;
         }
@@ -28862,6 +28920,17 @@ if (type === "warn" && scanLimit !== null) {
         scopeType: guildId ? "guild" : "channel",
         guildId, channelId,
       };
+    }
+
+    function _msParseScope(scope) {
+      if (!scope) return null;
+      if (scope.startsWith("gc:")) {
+        const [, guildId, channelId] = scope.split(":");
+        return { kind: "guild-channel", guildId, channelId };
+      }
+      if (scope.startsWith("g:")) return { kind: "guild", guildId: scope.slice(2), channelId: null };
+      if (scope.startsWith("c:")) return { kind: "dm", guildId: null, channelId: scope.slice(2) };
+      return null;
     }
 
     function _msGetChannelName(channelId) {
@@ -29193,7 +29262,8 @@ if (type === "warn" && scanLimit !== null) {
       const jumpCorner = document.createElement("a");
       jumpCorner.className = "ms-cell-jump";
       const gid = item.guild_id
-          || (item.scope?.startsWith("g:") ? item.scope.slice(2) : _getCtx()?.guildId)
+          || _msParseScope(item.scope)?.guildId
+          || _getCtx()?.guildId
           || "@me";
       jumpCorner.href  = `/channels/${gid}/${item.channel_id}/${item.msg_id}`;
       jumpCorner.title = t("ms_btn_jump") || "Jump to message";
@@ -29399,7 +29469,8 @@ if (type === "warn" && scanLimit !== null) {
         }
         metaEl.textContent = [item.author_name, _msGetChannelName(item.channel_id) || item.channel_id, _msFmtDate(item.timestamp)].filter(Boolean).join("  ·  ");
         const gid = item.guild_id
-            || (item.scope?.startsWith("g:") ? item.scope.slice(2) : _getCtx()?.guildId)
+            || _msParseScope(item.scope)?.guildId
+            || _getCtx()?.guildId
             || "@me";
         const msgPath = `/channels/${gid}/${item.channel_id}/${item.msg_id}`;
         jumpBtn.href = msgPath;
@@ -29498,7 +29569,18 @@ if (type === "warn" && scanLimit !== null) {
       optSrv.value       = guildId ? `g:${guildId}` : (scope || "");
       optSrv.textContent = guildId ? `🌐 ${srvName}` : `# ${channelId || "channel"}`;
       _msScopeSelEl.appendChild(optSrv);
-      _msScopeSelEl.value = optSrv.value;
+
+      let optChan = null;
+      if (guildId && channelId) {
+        optChan = document.createElement("option");
+        optChan.value       = `gc:${guildId}:${channelId}`;
+        optChan.textContent = `# ${_msGetChannelName(channelId) || channelId}`;
+        optChan.title       = t("ms_scope_channel_cur") || "Current channel";
+        _msScopeSelEl.appendChild(optChan);
+      }
+
+      _msScopeSelEl.value = optChan ? optChan.value : optSrv.value;
+      _msGridScope = _msScopeSelEl.value;
 
       _msScopeSelEl.addEventListener("change", () => {
         _msGridScope = _msScopeSelEl.value;
@@ -29524,6 +29606,24 @@ if (type === "warn" && scanLimit !== null) {
             _msReloadGrid().catch(() => {});
             _msUpdateStatusBar();
           }, 500);
+        } else if (_msScopeSelEl.value.startsWith("gc:") && det.guildId && det.channelId) {
+          const newVal = `gc:${det.guildId}:${det.channelId}`;
+          if (_msScopeSelEl.value !== newVal) {
+            const optChan = _msScopeSelEl.querySelector('option[value^="gc:"]');
+            if (optChan) {
+              optChan.value = newVal;
+              optChan.textContent = `# ${_msGetChannelName(det.channelId) || det.channelId}`;
+            }
+            _msScopeSelEl.value = newVal;
+            _msGridScope = newVal;
+            clearTimeout(_msNavDebounce);
+            _msNavDebounce = setTimeout(() => {
+              _msGridItems = []; _msGridRendered.clear();
+              if (_msGridContEl) _msGridContEl.innerHTML = "";
+              _msReloadGrid().catch(() => {});
+              _msUpdateStatusBar();
+            }, 500);
+          }
         }
       };
       window.addEventListener("popstate", _msOnUrlChange, { passive: true });
@@ -29598,7 +29698,7 @@ if (type === "warn" && scanLimit !== null) {
       _msUpdateScanBtn();
       _msScanBtnEl.addEventListener("click", () => {
         const sc = _msScopeSelEl.value;
-        const st = sc.startsWith("g:") ? "guild" : "channel";
+        const st = sc.startsWith("gc:") ? "guild-channel" : sc.startsWith("g:") ? "guild" : "channel";
         if      (_msScanState.phase === "scanning") { _msScanState.phase = "paused"; _msUpdateScanBtn(); _msUpdateStatusBar(); }
         else if (_msScanState.phase === "paused")   { _msScanState.phase = "scanning"; _msUpdateScanBtn(); }
         else { _msFullScan(sc, st).catch(err => { _msScanState.phase = "error"; _msScanState.error = err.message; _msUpdateStatusBar(); _msUpdateScanBtn(); }); }
