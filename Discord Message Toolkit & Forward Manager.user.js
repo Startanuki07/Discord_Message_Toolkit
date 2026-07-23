@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.5.4
+// @version      2.7.5.8
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -56,7 +56,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.5.2";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.5.8";
 
   const GMStore = {
     
@@ -951,6 +951,25 @@
     }
   })();
 
+  function _lookupTranslation(key, lang) {
+    if (lang === "custom") {
+      return _customLangData?.[key] ?? TRANSLATIONS["en"]?.[key];
+    }
+    const inLang = TRANSLATIONS[lang]?.[key];
+    if (inLang === undefined && lang !== "en") {
+      DEBUG && console.warn(`[t] key="${key}" missing in lang="${lang}", falling back to en`);
+    }
+    return inLang ?? TRANSLATIONS["en"]?.[key];
+  }
+
+  function _applyParams(text, params) {
+    for (const [k, v] of Object.entries(params)) {
+      const safeKey = k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      text = text.replace(new RegExp(`\\{${safeKey}\\}`, "g"), v);
+    }
+    return text;
+  }
+
   function t(key, params = {}) {
     const config = getConfig();
     const lang = config.lang || "en";
@@ -963,25 +982,34 @@
     const cached = TranslationCache.get(cacheKey);
     if (cached !== null) return cached;
 
-    let text;
-    if (lang === "custom") {
-      text = _customLangData?.[key] ?? TRANSLATIONS["en"]?.[key];
-    } else {
-      const inLang = TRANSLATIONS[lang]?.[key];
-      if (inLang === undefined && lang !== "en") {
-        DEBUG && console.warn(`[t] key="${key}" missing in lang="${lang}", falling back to en`);
-      }
-      text = inLang ?? TRANSLATIONS["en"]?.[key];
-    }
+    let text = _lookupTranslation(key, lang);
     if (text === undefined) {
       DEBUG && console.warn(`[t] key="${key}" not found in any language — returning key as-is`);
       text = key;
     }
 
-    for (const [k, v] of Object.entries(params)) {
-      const safeKey = k.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      text = text.replace(new RegExp(`\\{${safeKey}\\}`, "g"), v);
-    }
+    text = _applyParams(text, params);
+
+    TranslationCache.set(cacheKey, text);
+    return text;
+  }
+
+  function tOr(key, fallback, params = {}) {
+    const config = getConfig();
+    const lang = config.lang || "en";
+
+    const paramKeys = Object.keys(params);
+    const paramPart = paramKeys.length
+      ? `:${paramKeys.sort().map(k => `${k}=${params[k]}`).join(",")}`
+      : "";
+    const cacheKey = `tOr:${lang}:${key}${paramPart}:${fallback}`;
+
+    const cached = TranslationCache.get(cacheKey);
+    if (cached !== null) return cached;
+
+    const raw = _lookupTranslation(key, lang);
+    let text = raw === undefined ? fallback : raw;
+    text = _applyParams(text, params);
 
     TranslationCache.set(cacheKey, text);
     return text;
@@ -990,6 +1018,11 @@
   const TRANSLATIONS = {
     en: {
       name: "English",
+      __lang__: "en-US",
+      later: "Later",
+      reload_now: "Reload now",
+      ms_external_cant_embed: "Can't embed — file may still exist",
+      ms_open_original: "Open original link ↗",
       fm_pinned_channels: "★ Pinned Channels",
       fm_toggle_flat: "Switch to: Flat View",
       fm_toggle_drop: "Switch to: Dropdown",
@@ -1388,7 +1421,7 @@
       ms_btn_jump:        "Jump to message",
       ms_btn_download:    "Download",
       ms_err_forbidden:   "Permission denied for this scope",
-      ms_err_forbidden_thread_hint: "— threads and forum posts aren't scannable this way; switch to the parent channel and scan from there instead",
+      ms_err_forbidden_thread_hint: "— common causes: threads/forum posts (try the parent channel), or an NSFW channel blocked by your Discord account's age-restricted content setting or Discord's own search limits (Server scope may help)",
       ms_err_channel_type: "This channel type doesn't support Discord's search API (commonly threads or voice-channel text chat) — switching to Server scope can often work around this",
       ms_no_token_warn:   "⚠️ Requires API Mode — enable in Wormhole settings",
       ms_range_1h:        "Last 1 hour",
@@ -1584,10 +1617,16 @@
       mu_settings_bot_relay: "Auto-mute bot relay",
       mu_settings_bot_relay_desc: "Dim BOT messages that reply to muted users",
       mu_settings_title:       "Settings",
+      conv_pref_title: "⚙ Conversion Preferences",
     },
 
     "zh-TW": {
       name: "繁體中文",
+      __lang__: "zh-TW",
+      later: "稍後",
+      reload_now: "立即重新載入",
+      ms_external_cant_embed: "無法內嵌 — 檔案可能仍存在原網站",
+      ms_open_original: "開啟原始連結 ↗",
       fm_pinned_channels: "★ 收藏頻道",
       fm_toggle_flat: "切換至：平鋪顯示",
       fm_toggle_drop: "切換至：下拉清單",
@@ -1974,7 +2013,7 @@
       ms_btn_jump:        "跳至訊息",
       ms_btn_download:    "下載",
       ms_err_forbidden:   "此範圍無存取權限",
-      ms_err_forbidden_thread_hint: "—討論串或 Forum 貼文無法用此方式掃描，請切換到上層頻道再掃描",
+      ms_err_forbidden_thread_hint: "—常見原因：討論串或 Forum 貼文（請切換到上層頻道），或 NSFW 頻道被你的 Discord 帳號「年齡限制內容」設定或 Discord 搜尋功能本身的已知限制擋下（可試試 Server 範圍）",
       ms_err_channel_type: "此頻道類型不支援 Discord 的搜尋 API（常見於討論串或語音頻道文字聊天）— 切換到 Server 範圍通常可以繞過此限制",
       ms_no_token_warn:   "⚠️ 需要 API 模式 — 請在蟲洞設定中啟用",
       ms_range_1h:        "1 小時內",
@@ -2162,8 +2201,28 @@
       mu_settings_bot_relay: "自動靜音 BOT 轉發",
       mu_settings_bot_relay_desc: "讓轉發被靜音使用者訊息的 BOT 訊息也變暗",
       mu_settings_title:       "設定",
-    },    "zh-CN": {
+      em_settings_recent_count: "最近使用候選數量",
+      em_settings_recent_count_hint: "面板上方顯示的最近使用項目數量（範圍：{min}-{max}）。既有紀錄可能需要再使用幾次才能填滿至較高的數量。",
+      em_settings_save: "儲存",
+      em_settings_saved: "✨ 設定已儲存",
+      em_settings_title: "面板設定",
+      em_settings_tooltip: "表情/GIF/貼圖面板設定",
+      cs_deep_search_tip: "深度搜尋（透過 API 掃描訊息歷史記錄）",
+      cs_deep_search_need_token: "深度搜尋需要先啟用蟲洞 API 模式",
+      cs_deep_searching: "正在搜尋訊息歷史記錄…",
+      cs_deep_search_failed: "深度搜尋失敗，請再試一次",
+      cs_deep_search_token_not_ready: "尚未攔截到 Token，請切換頻道或捲動一次後再搜尋",
+      cs_deep_search_no_results: "掃描的歷史記錄中找不到符合的結果",
+      cs_remote_tag: "歷史記錄 · 跳轉至頻道",
+      conv_pref_title: "⚙ 轉換服務偏好設定",
+    },
+    "zh-CN": {
       name: "简体中文",
+      __lang__: "zh-CN",
+      later: "稍后",
+      reload_now: "立即重新加载",
+      ms_external_cant_embed: "无法内嵌 — 文件可能仍存在原网站",
+      ms_open_original: "打开原始链接 ↗",
       fm_pinned_channels: "★ 收藏频道",
       fm_toggle_flat: "切换至：平铺显示",
       fm_toggle_drop: "切换至：下拉菜单",
@@ -2550,7 +2609,7 @@
       ms_btn_jump:        "跳转到消息",
       ms_btn_download:    "下载",
       ms_err_forbidden:   "无此范围访问权限",
-      ms_err_forbidden_thread_hint: "—讨论串或 Forum 帖子无法用此方式扫描，请切换到上层频道再扫描",
+      ms_err_forbidden_thread_hint: "—常见原因：讨论串或 Forum 帖子（请切换到上层频道），或 NSFW 频道被你的 Discord 账号「年龄限制内容」设置或 Discord 搜索功能本身的已知限制挡下（可试试 Server 范围）",
       ms_err_channel_type: "此频道类型不支持 Discord 的搜索 API（常见于讨论串或语音频道文字聊天）— 切换到 Server 范围通常可以绕过此限制",
       ms_no_token_warn:   "⚠️ 需要 API 模式 — 请在虫洞设置中启用",
       ms_range_1h:        "1小时内",
@@ -2738,10 +2797,29 @@
       mp_fav_filter_label:      "收藏",
       mp_fav_filter_tip:        "仅显示已收藏的消息",
       mp_copy_link:             "复制消息链接",
+      em_settings_recent_count: "最近使用候选数量",
+      em_settings_recent_count_hint: "面板上方显示的最近使用项目数量（范围：{min}-{max}）。已有记录可能需要再使用几次才能填满至较高的数量。",
+      em_settings_save: "保存",
+      em_settings_saved: "✨ 设置已保存",
+      em_settings_title: "面板设置",
+      em_settings_tooltip: "表情/GIF/贴纸面板设置",
+      cs_deep_search_tip: "深度搜索（通过 API 扫描消息历史记录）",
+      cs_deep_search_need_token: "深度搜索需要先启用虫洞 API 模式",
+      cs_deep_searching: "正在搜索消息历史记录…",
+      cs_deep_search_failed: "深度搜索失败，请重试",
+      cs_deep_search_token_not_ready: "尚未捕获到 Token，请切换频道或滚动一次后再搜索",
+      cs_deep_search_no_results: "扫描的历史记录中找不到符合的结果",
+      cs_remote_tag: "历史记录 · 跳转至频道",
+      conv_pref_title: "⚙ 转换服务偏好设置",
     },
 
     ja: {
       name: "日本語",
+      __lang__: "ja",
+      later: "後で",
+      reload_now: "今すぐ再読み込み",
+      ms_external_cant_embed: "埋め込み不可 — ファイルは元のサイトにまだ存在する可能性があります",
+      ms_open_original: "元のリンクを開く ↗",
       fm_pinned_channels: "★ お気に入り",
       fm_toggle_flat: "表示切替：タイル",
       fm_toggle_drop: "表示切替：リスト",
@@ -3135,7 +3213,7 @@
       ms_btn_jump:        "メッセージに移動",
       ms_btn_download:    "ダウンロード",
       ms_err_forbidden:   "このスコープへのアクセスが拒否されました",
-      ms_err_forbidden_thread_hint: "—スレッドや Forum 投稿はこの方法でスキャンできません。親チャンネルに移動してからスキャンしてください",
+      ms_err_forbidden_thread_hint: "—よくある原因：スレッドや Forum 投稿（親チャンネルへ移動）、または Discord アカウントの「年齢制限コンテンツ」設定や Discord 検索機能自体の既知の制限によりブロックされた NSFW チャンネル（Server スコープをお試しください）",
       ms_err_channel_type: "このチャンネルタイプは Discord の検索 API に対応していません（スレッドやボイスチャンネルのテキストチャットでよく発生）— Server スコープに切り替えると回避できることが多いです",
       ms_no_token_warn:   "⚠️ API モードが必要です — ワームホール設定で有効にしてください",
       ms_range_1h:        "1時間以内", ms_range_6h:   "6時間以内",
@@ -3317,10 +3395,29 @@
       mp_fav_filter_label:      "お気に入り",
       mp_fav_filter_tip:        "お気に入りのメッセージのみ表示",
       mp_copy_link:             "メッセージリンクをコピー",
+      em_settings_recent_count: "最近使用した候補の数",
+      em_settings_recent_count_hint: "パネル上部に表示される最近使用した項目数（範囲：{min}〜{max}）。既存の履歴は、より多い数まで埋まるのに数回の使用が必要な場合があります。",
+      em_settings_save: "保存",
+      em_settings_saved: "✨ 設定を保存しました",
+      em_settings_title: "パネル設定",
+      em_settings_tooltip: "絵文字/GIF/スタンプパネル設定",
+      cs_deep_search_tip: "詳細検索（APIでメッセージ履歴をスキャン）",
+      cs_deep_search_need_token: "詳細検索を使うにはワームホールAPIモードを先に有効にしてください",
+      cs_deep_searching: "メッセージ履歴を検索中…",
+      cs_deep_search_failed: "詳細検索に失敗しました。もう一度お試しください",
+      cs_deep_search_token_not_ready: "トークンがまだ取得されていません。チャンネルを切り替えるか一度スクロールしてから再度検索してください",
+      cs_deep_search_no_results: "スキャンした履歴に一致する結果が見つかりません",
+      cs_remote_tag: "履歴 · チャンネルへジャンプ",
+      conv_pref_title: "⚙ 変換サービス設定",
     },
 
     ko: {
       name: "한국어",
+      __lang__: "ko",
+      later: "나중에",
+      reload_now: "지금 새로고침",
+      ms_external_cant_embed: "임베드 불가 — 파일이 원본 사이트에 아직 있을 수 있습니다",
+      ms_open_original: "원본 링크 열기 ↗",
       fm_pinned_channels: "★ 즐겨찾기",
       fm_toggle_flat: "보기 전환: 타일",
       fm_toggle_drop: "보기 전환: 드롭다운",
@@ -3755,7 +3852,7 @@
       ms_btn_jump:        "메시지로 이동",
       ms_btn_download:    "다운로드",
       ms_err_forbidden:   "이 범위에 대한 접근이 거부되었습니다",
-      ms_err_forbidden_thread_hint: "—스레드나 Forum 게시물은 이 방식으로 스캔할 수 없습니다. 상위 채널로 이동한 후 스캔해 주세요",
+      ms_err_forbidden_thread_hint: "—흔한 원인: 스레드나 Forum 게시물(상위 채널로 이동), 또는 Discord 계정의 '연령 제한 콘텐츠' 설정이나 Discord 검색 기능 자체의 알려진 제한으로 차단된 NSFW 채널(Server 범위를 시도해 보세요)",
       ms_err_channel_type: "이 채널 유형은 Discord의 검색 API를 지원하지 않습니다 (스레드 또는 음성 채널 텍스트 채팅에서 흔함) — Server 범위로 전환하면 우회할 수 있는 경우가 많습니다",
       ms_no_token_warn:   "⚠️ API 모드가 필요합니다 — 웜홀 설정에서 활성화하세요",
       ms_range_1h:        "1시간 이내", ms_range_6h:   "6시간 이내",
@@ -3893,10 +3990,29 @@
       mp_fav_filter_label:      "즐겨찾기",
       mp_fav_filter_tip:        "즐겨찾기한 메시지만 표시",
       mp_copy_link:             "메시지 링크 복사",
+      em_settings_recent_count: "최근 사용 후보 개수",
+      em_settings_recent_count_hint: "패널 상단에 표시되는 최근 사용 항목 수 (범위: {min}-{max}). 기존 기록은 더 높은 수까지 채워지려면 몇 번 더 사용해야 할 수 있습니다.",
+      em_settings_save: "저장",
+      em_settings_saved: "✨ 설정이 저장되었습니다",
+      em_settings_title: "패널 설정",
+      em_settings_tooltip: "이모지/GIF/스티커 패널 설정",
+      cs_deep_search_tip: "심층 검색 (API로 메시지 기록을 스캔)",
+      cs_deep_search_need_token: "심층 검색을 사용하려면 먼저 웜홀 API 모드를 활성화해야 합니다",
+      cs_deep_searching: "메시지 기록 검색 중…",
+      cs_deep_search_failed: "심층 검색에 실패했습니다. 다시 시도해 주세요",
+      cs_deep_search_token_not_ready: "아직 토큰이 캡처되지 않았습니다. 채널을 전환하거나 한 번 스크롤한 후 다시 검색해 주세요",
+      cs_deep_search_no_results: "스캔한 기록에서 일치하는 결과를 찾을 수 없습니다",
+      cs_remote_tag: "기록 · 채널로 이동",
+      conv_pref_title: "⚙ 변환 서비스 환경설정",
     },
 
     es: {
       name: "Español",
+      __lang__: "es-ES",
+      later: "Más tarde",
+      reload_now: "Recargar ahora",
+      ms_external_cant_embed: "No se puede incrustar — el archivo aún podría existir en el sitio original",
+      ms_open_original: "Abrir enlace original ↗",
       fm_pinned_channels: "★ Canales fijados",
       fm_toggle_flat: "Cambiar a: Vista plana",
       fm_toggle_drop: "Cambiar a: Desplegable",
@@ -4449,7 +4565,7 @@
       ms_btn_jump:              "Ir al mensaje",
       ms_btn_download:          "Descargar",
       ms_err_forbidden:         "Permiso denegado para este ámbito",
-      ms_err_forbidden_thread_hint:    "—los hilos y publicaciones de foro no se pueden escanear así; cambia al canal principal y escanea desde ahí",
+      ms_err_forbidden_thread_hint:    "—causas comunes: hilos o publicaciones de foro (cambia al canal principal), o un canal NSFW bloqueado por la configuración de «contenido con restricción de edad» de tu cuenta de Discord, o por limitaciones conocidas de la búsqueda de Discord (el ámbito Server puede ayudar)",
       ms_err_channel_type:      "Este tipo de canal no admite la API de búsqueda de Discord (foros/hilos)",
       ms_no_token_warn:         "⚠️ Requiere el modo API — actívalo en la configuración de Wormhole",
       ms_range_1h:              "Última 1 hora",
@@ -4486,8 +4602,15 @@
       cs_deep_search_token_not_ready:   "Token aún no capturado. Cambia de canal o desplázate una vez, luego busca de nuevo",
       cs_deep_search_no_results:        "No se encontraron coincidencias en el historial escaneado",
       cs_remote_tag:                    "historial · va al canal",
-    },    "pt-BR": {
+      conv_pref_title:                  "⚙ Preferencias de conversión",
+    },
+    "pt-BR": {
       name: "Português (Brasil)",
+      __lang__: "pt-BR",
+      later: "Mais tarde",
+      reload_now: "Recarregar agora",
+      ms_external_cant_embed: "Não é possível incorporar — o arquivo pode ainda existir no site original",
+      ms_open_original: "Abrir link original ↗",
       fm_pinned_channels: "★ Canais fixados",
       fm_toggle_flat: "Alternar para: Vista plana",
       fm_toggle_drop: "Alternar para: Menu suspenso",
@@ -5038,7 +5161,7 @@
       ms_btn_jump:              "Ir para a mensagem",
       ms_btn_download:          "Baixar",
       ms_err_forbidden:         "Permissão negada para este escopo",
-      ms_err_forbidden_thread_hint:    "—threads e publicações de fórum não podem ser escaneados assim; mude para o canal principal e escaneie a partir de lá",
+      ms_err_forbidden_thread_hint:    "—causas comuns: threads ou publicações de fórum (mude para o canal principal), ou um canal NSFW bloqueado pela configuração de «conteúdo com restrição de idade» da sua conta do Discord, ou por limitações conhecidas da busca do Discord (o escopo Server pode ajudar)",
       ms_err_channel_type:      "Este tipo de canal não suporta a API de busca do Discord (fóruns/threads)",
       ms_no_token_warn:         "⚠️ Requer o modo API — ative nas configurações do Wormhole",
       ms_range_1h:              "Última 1 hora",
@@ -5075,10 +5198,16 @@
       cs_deep_search_token_not_ready:   "Token ainda não capturado. Troque de canal ou role uma vez, depois busque novamente",
       cs_deep_search_no_results:        "Nenhuma correspondência encontrada no histórico escaneado",
       cs_remote_tag:                    "histórico · vai para o canal",
+      conv_pref_title:                  "⚙ Preferências de conversão",
     },
 
     fr: {
       name: "Français",
+      __lang__: "fr-FR",
+      later: "Plus tard",
+      reload_now: "Recharger maintenant",
+      ms_external_cant_embed: "Intégration impossible — le fichier existe peut-être encore sur le site d'origine",
+      ms_open_original: "Ouvrir le lien original ↗",
       fm_pinned_channels: "★ Salons épinglés",
       fm_toggle_flat: "Passer à : Vue plate",
       fm_toggle_drop: "Passer à : Menu déroulant",
@@ -5633,7 +5762,7 @@
       ms_btn_jump:              "Aller au message",
       ms_btn_download:          "Télécharger",
       ms_err_forbidden:         "Permission refusée pour cette portée",
-      ms_err_forbidden_thread_hint:    "—les fils et publications de forum ne peuvent pas être scannés ainsi ; passez au salon parent et scannez depuis celui-ci",
+      ms_err_forbidden_thread_hint:    "—causes courantes : fils de discussion ou publications de forum (passez au salon parent), ou un salon NSFW bloqué par le paramètre « contenu réservé aux adultes » de votre compte Discord, ou par des limitations connues de la recherche Discord (la portée Server peut aider)",
       ms_err_channel_type:      "Ce type de canal ne prend pas en charge l'API de recherche de Discord (forums/fils)",
       ms_no_token_warn:         "⚠️ Nécessite le mode API — activez-le dans les paramètres Wormhole",
       ms_range_1h:              "Dernière heure",
@@ -5670,10 +5799,16 @@
       cs_deep_search_token_not_ready:   "Jeton pas encore capturé. Essayez de changer de canal ou de faire défiler une fois, puis recherchez à nouveau",
       cs_deep_search_no_results:        "Aucune correspondance trouvée dans l'historique analysé",
       cs_remote_tag:                    "historique · va au canal",
+      conv_pref_title:                  "⚙ Préférences de conversion",
     },
 
     ru: {
       name: "Русский",
+      __lang__: "ru-RU",
+      later: "Позже",
+      reload_now: "Перезагрузить сейчас",
+      ms_external_cant_embed: "Невозможно встроить — файл может всё ещё существовать на исходном сайте",
+      ms_open_original: "Открыть исходную ссылку ↗",
       fm_pinned_channels: "★ Закреплённые каналы",
       fm_toggle_flat: "Переключить на: Плоский вид",
       fm_toggle_drop: "Переключить на: Выпадающий список",
@@ -6223,7 +6358,7 @@
       ms_btn_jump:              "Перейти к сообщению",
       ms_btn_download:          "Скачать",
       ms_err_forbidden:         "Доступ к этой области запрещён",
-      ms_err_forbidden_thread_hint:    "—ветки и посты форума нельзя сканировать таким образом; переключитесь на родительский канал и сканируйте оттуда",
+      ms_err_forbidden_thread_hint:    "—частые причины: ветки или посты форума (переключитесь на родительский канал), либо NSFW-канал, заблокированный настройкой «контент с возрастным ограничением» вашего аккаунта Discord, либо известными ограничениями поиска Discord (может помочь область Server)",
       ms_err_channel_type:      "Этот тип канала не поддерживает API поиска Discord (форумы/ветки)",
       ms_no_token_warn:         "⚠️ Требуется режим API — включите его в настройках Wormhole",
       ms_range_1h:              "Последний час",
@@ -6260,10 +6395,16 @@
       cs_deep_search_token_not_ready:   "Токен ещё не получен. Переключите канал или прокрутите один раз, затем повторите поиск",
       cs_deep_search_no_results:        "В просканированной истории совпадений не найдено",
       cs_remote_tag:                    "история · переход в канал",
+      conv_pref_title:                  "⚙ Настройки конвертации",
     },
 
     de: {
       name: "Deutsch",
+      __lang__: "de-DE",
+      later: "Später",
+      reload_now: "Jetzt neu laden",
+      ms_external_cant_embed: "Kann nicht eingebettet werden — Datei existiert möglicherweise noch auf der Originalseite",
+      ms_open_original: "Original-Link öffnen ↗",
       fm_pinned_channels: "★ Angeheftete Kanäle",
       fm_toggle_flat: "Wechseln zu: Flache Ansicht",
       fm_toggle_drop: "Wechseln zu: Dropdown",
@@ -6802,7 +6943,7 @@
       ms_btn_jump:              "Zur Nachricht springen",
       ms_btn_download:          "Herunterladen",
       ms_err_forbidden:         "Zugriff für diesen Bereich verweigert",
-      ms_err_forbidden_thread_hint:    "—Threads und Forenbeiträge können so nicht gescannt werden; wechsle zum übergeordneten Kanal und scanne von dort aus",
+      ms_err_forbidden_thread_hint:    "—häufige Ursachen: Threads oder Forenbeiträge (wechsle zum übergeordneten Kanal), oder ein NSFW-Kanal, der durch die Einstellung „Inhalte mit Altersbeschränkung“ deines Discord-Kontos oder bekannte Einschränkungen der Discord-Suche blockiert wird (der Server-Bereich kann helfen)",
       ms_err_channel_type:      "Dieser Kanaltyp unterstützt die Discord-Such-API nicht (Foren/Threads)",
       ms_no_token_warn:         "⚠️ Erfordert API-Modus — in den Wormhole-Einstellungen aktivieren",
       ms_range_1h:              "Letzte 1 Stunde",
@@ -6839,6 +6980,7 @@
       cs_deep_search_token_not_ready:   "Token noch nicht erfasst. Kanal wechseln oder einmal scrollen, dann erneut suchen",
       cs_deep_search_no_results:        "Keine Treffer im gescannten Verlauf gefunden",
       cs_remote_tag:                    "Verlauf · springt zum Kanal",
+      conv_pref_title:                  "⚙ Konvertierungseinstellungen",
     },
   };
 
@@ -7285,7 +7427,7 @@
                             <div class="help-content">${t("fm_sec_user_content")}</div>
                         </div>
                         <div class="help-section">
-                            <div class="help-title" style="color:#b5bac1;">⚙️ ${t("fm_sec_misc_title") || "Tips"}</div>
+                            <div class="help-title" style="color:#b5bac1;">⚙️ ${tOr("fm_sec_misc_title", "Tips")}</div>
                             <div class="help-content">${t("fm_sec_misc")}</div>
                         </div>
                     </div>
@@ -10451,8 +10593,8 @@
               if (mod.enableWarn) {
                 setTimeout(() => {
                   dmtConfirm(
-                    t("reload_confirm") || "Reload page now to apply changes?",
-                    { confirmText: t("reload_now") || "Reload now", cancelText: t("later") || "Later" }
+                    tOr("reload_confirm", "Reload page now to apply changes?"),
+                    { confirmText: tOr("reload_now", "Reload now"), cancelText: tOr("later", "Later") }
                   ).then(ok => { if (ok) location.reload(); });
                 }, 200);
               }
@@ -11705,7 +11847,7 @@
 
           const gear = document.createElement("div");
           gear.className = "dmt-conv-gear";
-          gear.title = "⚙ 轉換服務偏好設定";
+          gear.title = t("conv_pref_title");
           gear.style.cssText = "position:static; transform:none; flex-shrink:0; opacity:1; width:28px; display:flex; align-items:center; justify-content:center; cursor:pointer; border-left:1px solid rgba(255,255,255,0.07);";
           gear.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`;
 
@@ -16348,7 +16490,7 @@
         } catch (error) {
           console.error("[Wormhole] Reset failed:", error);
           dmtShowToast(
-            this.t("wm_reset_fail") || "❌ Reset failed — check console (F12) for details.",
+            tOr("wm_reset_fail", "❌ Reset failed — check console (F12) for details."),
             { duration: 4000 }
           );
         }
@@ -16927,7 +17069,7 @@
 
       const chatBtn = document.createElement("button");
       chatBtn.className = "wh-chat-btn";
-      chatBtn.title     = this.t("wm_send_chat_btn") || "Send message";
+      chatBtn.title     = tOr("wm_send_chat_btn", "Send message");
       chatBtn.innerHTML = `<span class="wh-chat-icon">💬</span>`;
       chatBtn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -16975,7 +17117,7 @@
 
       const chatBtn = document.createElement("button");
       chatBtn.className  = "wh-chat-btn";
-      chatBtn.title      = this.t("wm_send_chat_btn") || "Send message";
+      chatBtn.title      = tOr("wm_send_chat_btn", "Send message");
       chatBtn.innerHTML  = `<span class="wh-chat-icon">💬</span>`;
       chatBtn.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -17812,7 +17954,7 @@
 
         const labelHeader = document.createElement("div");
         labelHeader.className = "wh-sm-section";
-        labelHeader.textContent = this.t("wm_focus_label_section") || "Label";
+        labelHeader.textContent = tOr("wm_focus_label_section", "Label");
         menu.appendChild(labelHeader);
 
         const showLabels = this.getFocusShowLabels();
@@ -18332,7 +18474,7 @@ unsafeWindow.fetch = function(...args) {
           ${needsToken ? `<div id="wh-send-token-warn" style="opacity:0">${this.t("wm_send_token_warn")}</div>` : ""}
           <div id="wh-send-dropzone">
             <div id="wh-send-fields"></div>
-            <button id="wh-send-field-add">${this.t("wm_send_field_add") || "+ Add field"}</button>
+            <button id="wh-send-field-add">${tOr("wm_send_field_add", "+ Add field")}</button>
             <div id="wh-send-cool-note"></div>
             <div id="wh-send-paste-hint">${this.t("wm_send_paste_hint")}</div>
             <div id="wh-send-paste-preview"></div>
@@ -18493,7 +18635,7 @@ unsafeWindow.fetch = function(...args) {
         const n = getFieldCount();
         if (n <= 2) { coolNote.textContent = ""; return; }
         const s = POST_COOL_MAP[Math.min(n, 5)] / 1000;
-        coolNote.textContent = (this.t("wm_send_cool_warn") || "Cool-down: {s}s between messages")
+        coolNote.textContent = (tOr("wm_send_cool_warn", "Cool-down: {s}s between messages"))
           .replace("{s}", s.toFixed(0));
       }
 
@@ -18511,7 +18653,7 @@ unsafeWindow.fetch = function(...args) {
         ta.maxLength   = 2000;
         const delBtn = document.createElement("button");
         delBtn.className   = "wh-field-del";
-        delBtn.title       = this.t("wm_send_field_del") || "Remove";
+        delBtn.title       = tOr("wm_send_field_del", "Remove");
         delBtn.textContent = "✕";
         delBtn.style.display = n <= 2 ? "none" : "";
         delBtn.addEventListener("click", () => {
@@ -18795,7 +18937,7 @@ unsafeWindow.fetch = function(...args) {
           });
 
           const self = this;
-          const hint = self.t("wm_send_toast_hint") || "Click to go to channel";
+          const hint = tOr("wm_send_toast_hint", "Click to go to channel");
 
           const setPill = (topText, state = "progress") => {
             pill.innerHTML = `<div style="font-weight:500">${topText}</div><div style="font-size:11px;margin-top:3px;opacity:0.65">${hint}</div>`;
@@ -18836,7 +18978,7 @@ unsafeWindow.fetch = function(...args) {
             const files   = isLast && hasImg ? pendingFiles : [];
 
             setPill(
-              (self.t("wm_send_sending_n") || "Sending {n}/{total}…")
+              (tOr("wm_send_sending_n", "Sending {n}/{total}…"))
                 .replace("{n}", i + 1).replace("{total}", total)
             );
 
@@ -18863,7 +19005,7 @@ unsafeWindow.fetch = function(...args) {
           if (postCool > 0) {
             let remaining = Math.ceil(postCool / 1000);
             const coolLabel = (s) =>
-              (self.t("wm_send_cool_warn") || "Cool-down: {s}s").replace("{s}", s);
+              (tOr("wm_send_cool_warn", "Cool-down: {s}s")).replace("{s}", s);
             setPill(coolLabel(remaining), "cool");
 
             const coolTick = setInterval(() => {
@@ -19358,7 +19500,7 @@ unsafeWindow.fetch = function(...args) {
     }
 
     async editGroup(group) {
-      const newName = await dmtPrompt(this.t("wm_edit_group") || "編輯群組名稱:", group.name);
+      const newName = await dmtPrompt(tOr("wm_edit_group", "編輯群組名稱:"), group.name);
       if (newName && newName.trim() !== group.name) {
         const data = this.getData();
         const target = data.groups.find((g) => g.id === group.id);
@@ -19406,7 +19548,7 @@ unsafeWindow.fetch = function(...args) {
         <div class="wormhole-icon-picker-overlay"></div>
         <div class="wormhole-icon-picker-content">
           <div class="picker-header">
-            <span class="picker-title">${this.t("wm_icon_picker_title", { name: group.name })}</span>
+            <span class="picker-title">${this.t("wm_icon_picker_title", { name: escHtml(group.name) })}</span>
             <button class="picker-close">✕</button>
           </div>
           <div class="picker-tabs"></div>
@@ -22333,7 +22475,7 @@ unsafeWindow.fetch = function(...args) {
         const hv = Math.floor((mins % 1440) / 60);
         const mv = mins % 60;
         const lang = (typeof t === "function")
-          ? (t("__lang__") || "en-US")
+          ? (tOr("__lang__", "en-US"))
           : "en-US";
         const isCJK = /^zh|^ja|^ko/.test(lang);
         const units = isCJK
@@ -22369,7 +22511,7 @@ unsafeWindow.fetch = function(...args) {
 
       const gearBtn = document.createElement("button");
       gearBtn.className = "picker-gear-btn";
-      gearBtn.title = t("mu_settings_title") || "Settings";
+      gearBtn.title = tOr("mu_settings_title", "Settings");
       gearBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="pointer-events:none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`;
 
       headerEl.appendChild(titleEl);
@@ -22396,7 +22538,7 @@ unsafeWindow.fetch = function(...args) {
 
       const chipsLabel = document.createElement("div");
       chipsLabel.className = "picker-temp-label";
-      chipsLabel.textContent = t("mu_temp_quick") || "Quick select";
+      chipsLabel.textContent = tOr("mu_temp_quick", "Quick select");
 
       const chipsContainer = document.createElement("div");
       chipsContainer.className = "picker-chips";
@@ -22415,7 +22557,7 @@ unsafeWindow.fetch = function(...args) {
       const timeInput = document.createElement("input");
       timeInput.type = "text";
       timeInput.className = "picker-time-input";
-      timeInput.placeholder = t("mu_temp_placeholder") || "e.g. 3H, 1D 6H, 27H 20M";
+      timeInput.placeholder = tOr("mu_temp_placeholder", "e.g. 3H, 1D 6H, 27H 20M");
 
       const parsedEl = document.createElement("div");
       parsedEl.className = "picker-time-parsed";
@@ -22435,10 +22577,10 @@ unsafeWindow.fetch = function(...args) {
         }
         if (isTempMode) {
           if (mins > 0) {
-            confirmBtn.textContent = t("mu_temp_confirm") || "⏳ Mute temporarily";
+            confirmBtn.textContent = tOr("mu_temp_confirm", "⏳ Mute temporarily");
             confirmBtn.classList.add("lit");
           } else {
-            confirmBtn.textContent = t("mu_temp_confirm") || "⏳ Mute temporarily";
+            confirmBtn.textContent = tOr("mu_temp_confirm", "⏳ Mute temporarily");
             confirmBtn.classList.remove("lit");
           }
         }
@@ -22480,8 +22622,8 @@ unsafeWindow.fetch = function(...args) {
       const TEMP_DEF = {
         id: BL_TEMP_STYLE_ID,
         icon: "⏳",
-        name: t("mu_temp_card_name") || "Temp",
-        desc: t("mu_temp_card_desc") || "Auto-unmute after timer",
+        name: tOr("mu_temp_card_name", "Temp"),
+        desc: tOr("mu_temp_card_desc", "Auto-unmute after timer"),
       };
 
       const groupEl = document.createElement("div");
@@ -22549,7 +22691,7 @@ unsafeWindow.fetch = function(...args) {
 
       const pvLabel = document.createElement("div");
       pvLabel.className = "picker-preview-label";
-      pvLabel.textContent = t("mu_settings_preview") || "Preview";
+      pvLabel.textContent = tOr("mu_settings_preview", "Preview");
       previewEl.appendChild(pvLabel);
 
       const PV_AV_COLOR = "#5865f2";
@@ -22678,10 +22820,10 @@ unsafeWindow.fetch = function(...args) {
       tabsEl.className = "pset-tabs";
       const tabList  = document.createElement("div");
       tabList.className  = "pset-tab active";
-      tabList.textContent = t("mu_settings_tab_list")  || "Mute List";
+      tabList.textContent = tOr("mu_settings_tab_list", "Mute List");
       const tabStyle = document.createElement("div");
       tabStyle.className = "pset-tab";
-      tabStyle.textContent = t("mu_settings_tab_style") || "Style Settings";
+      tabStyle.textContent = tOr("mu_settings_tab_style", "Style Settings");
       if (isFeatureNew("bl_hide_notices")) {
         const _tabDot = document.createElement("span");
         _tabDot.className = "pset-tab-dot";
@@ -22816,9 +22958,9 @@ unsafeWindow.fetch = function(...args) {
 
         const clearBtn = document.createElement("button");
         clearBtn.className = "pset-clear-btn";
-        clearBtn.textContent = t("mu_settings_clear_all") || "Clear All";
+        clearBtn.textContent = tOr("mu_settings_clear_all", "Clear All");
         clearBtn.addEventListener("click", () => {
-          dmtConfirm(t("mu_settings_clear_confirm") || "Remove all muted users?", { danger: true }).then(ok => {
+          dmtConfirm(tOr("mu_settings_clear_confirm", "Remove all muted users?"), { danger: true }).then(ok => {
             if (!ok) return;
             blSave([]);
             blApplyAll();
@@ -22838,7 +22980,7 @@ unsafeWindow.fetch = function(...args) {
       ghostRow.className = "pset-setting-row";
       const ghostLabel = document.createElement("div");
       ghostLabel.className = "pset-setting-label";
-      ghostLabel.textContent = t("mu_settings_ghost_delay") || "Ghost vanish delay (seconds)";
+      ghostLabel.textContent = tOr("mu_settings_ghost_delay", "Ghost vanish delay (seconds)");
       const ghostInput = document.createElement("input");
       ghostInput.type  = "number";
       ghostInput.min   = "1";
@@ -22863,10 +23005,10 @@ unsafeWindow.fetch = function(...args) {
       botRelayRow.className = "pset-setting-row";
       const botRelayLabel = document.createElement("div");
       botRelayLabel.className = "pset-setting-label";
-      botRelayLabel.textContent = t("mu_settings_bot_relay") || "Auto-mute bot relay";
+      botRelayLabel.textContent = tOr("mu_settings_bot_relay", "Auto-mute bot relay");
       const botRelayDesc = document.createElement("div");
       botRelayDesc.className = "pset-setting-desc";
-      botRelayDesc.textContent = t("mu_settings_bot_relay_desc") || "Dim BOT messages that reply to muted users";
+      botRelayDesc.textContent = tOr("mu_settings_bot_relay_desc", "Dim BOT messages that reply to muted users");
       botRelayDesc.style.cssText = "font-size:10px;color:rgba(185,187,190,0.5);margin-top:2px;";
       const botRelayToggle = document.createElement("input");
       botRelayToggle.type = "checkbox";
@@ -22892,7 +23034,7 @@ unsafeWindow.fetch = function(...args) {
       const hideBlockedLabel = document.createElement("div");
       hideBlockedLabel.className = "pset-setting-label";
       hideBlockedLabel.style.cssText = "display:flex;align-items:center;gap:0;";
-      hideBlockedLabel.textContent = t("mu_settings_hide_blocked") || "Hide Discord blocked notices";
+      hideBlockedLabel.textContent = tOr("mu_settings_hide_blocked", "Hide Discord blocked notices");
       if (isFeatureNew("bl_hide_notices")) {
         const _blTag = document.createElement("span");
         _blTag.className = "pset-new-tag";
@@ -22901,7 +23043,7 @@ unsafeWindow.fetch = function(...args) {
       }
       const hideBlockedDesc = document.createElement("div");
       hideBlockedDesc.className = "pset-setting-desc";
-      hideBlockedDesc.textContent = t("mu_settings_hide_blocked_desc") || "Hide \"N blocked messages — Show\" rows";
+      hideBlockedDesc.textContent = tOr("mu_settings_hide_blocked_desc", "Hide \"N blocked messages — Show\" rows");
       hideBlockedDesc.style.cssText = "font-size:10px;color:rgba(185,187,190,0.5);margin-top:2px;";
       const hideBlockedToggle = document.createElement("input");
       hideBlockedToggle.type = "checkbox";
@@ -22925,7 +23067,7 @@ unsafeWindow.fetch = function(...args) {
       const hideIgnoredLabel = document.createElement("div");
       hideIgnoredLabel.className = "pset-setting-label";
       hideIgnoredLabel.style.cssText = "display:flex;align-items:center;gap:0;";
-      hideIgnoredLabel.textContent = t("mu_settings_hide_ignored") || "Hide Discord ignored notices";
+      hideIgnoredLabel.textContent = tOr("mu_settings_hide_ignored", "Hide Discord ignored notices");
       if (isFeatureNew("bl_hide_notices")) {
         const _igTag = document.createElement("span");
         _igTag.className = "pset-new-tag";
@@ -22934,7 +23076,7 @@ unsafeWindow.fetch = function(...args) {
       }
       const hideIgnoredDesc = document.createElement("div");
       hideIgnoredDesc.className = "pset-setting-desc";
-      hideIgnoredDesc.textContent = t("mu_settings_hide_ignored_desc") || "Hide \"N ignored messages — Show\" rows";
+      hideIgnoredDesc.textContent = tOr("mu_settings_hide_ignored_desc", "Hide \"N ignored messages — Show\" rows");
       hideIgnoredDesc.style.cssText = "font-size:10px;color:rgba(185,187,190,0.5);margin-top:2px;";
       const hideIgnoredToggle = document.createElement("input");
       hideIgnoredToggle.type = "checkbox";
@@ -22986,7 +23128,7 @@ unsafeWindow.fetch = function(...args) {
           settingsEl.classList.add("open");
           gearBtn.classList.add("active");
           mainEls.forEach(el => { el.style.display = "none"; });
-          titleEl.textContent = t("mu_settings_title") || "Settings";
+          titleEl.textContent = tOr("mu_settings_title", "Settings");
           _renderSettingsList();
         }
       });
@@ -23308,7 +23450,7 @@ unsafeWindow.fetch = function(...args) {
         };
         req.onblocked = () => {
           DEBUG && console.warn("[IDB] open blocked — 其他分頁仍持有舊版連線");
-          dmtShowToast(t("mp_idb_blocked") || "⚠️ Please close other Discord tabs and retry", { duration: 4000 });
+          dmtShowToast(tOr("mp_idb_blocked", "⚠️ Please close other Discord tabs and retry"), { duration: 4000 });
         };
         req.onsuccess = e => { _idbInstance = e.target.result; resolve(_idbInstance); };
         req.onerror   = e => {
@@ -24408,7 +24550,7 @@ unsafeWindow.fetch = function(...args) {
       const hdr = document.createElement("div");
       hdr.style.cssText = "display:flex;align-items:center;padding:14px 16px 10px;border-bottom:1px solid var(--dmt-divider,#1e1f22);";
       const hdrTitle = document.createElement("span");
-      hdrTitle.textContent = t("mp_cache_title") || "📦 Cache Management";
+      hdrTitle.textContent = tOr("mp_cache_title", "📦 Cache Management");
       hdrTitle.style.cssText = "font-size:15px;font-weight:600;color:var(--dmt-text,#dbdee1);flex:1;";
       const closeBtn = document.createElement("button");
       closeBtn.textContent = "✕";
@@ -24419,7 +24561,7 @@ unsafeWindow.fetch = function(...args) {
       const body = document.createElement("div");
       body.style.cssText = "flex:1;overflow-y:auto;padding:12px 16px;";
 
-      body.textContent = t("mp_loading") || "Loading…";
+      body.textContent = tOr("mp_loading", "Loading…");
       panel.append(hdr, body);
       overlay.appendChild(panel);
       dmtGetPortal().appendChild(overlay);
@@ -24431,7 +24573,7 @@ unsafeWindow.fetch = function(...args) {
 
       if (stats.totalCount === 0) {
         const empty = document.createElement("p");
-        empty.textContent = t("mp_cache_empty") || "No cached messages yet. Browse your posts to build the cache.";
+        empty.textContent = tOr("mp_cache_empty", "No cached messages yet. Browse your posts to build the cache.");
         empty.style.cssText = "color:var(--dmt-text-muted,#949ba4);font-size:13px;text-align:center;margin:24px 0;";
         body.appendChild(empty);
       } else {
@@ -24474,7 +24616,7 @@ unsafeWindow.fetch = function(...args) {
 
           const metaLine = document.createElement("div");
           metaLine.style.cssText = "font-size:11px;color:var(--dmt-text-muted,#949ba4);margin-bottom:8px;";
-          metaLine.textContent = (t("mp_cache_last_sync") || "Last sync: ") + lastSync;
+          metaLine.textContent = (tOr("mp_cache_last_sync", "Last sync: ")) + lastSync;
 
           const monthTable = document.createElement("div");
           monthTable.style.cssText = "display:flex;flex-direction:column;gap:3px;margin-bottom:8px;";
@@ -24486,16 +24628,16 @@ unsafeWindow.fetch = function(...args) {
             ymLabel.textContent = ym;
             ymLabel.style.cssText = "font-size:12px;color:var(--dmt-text,#dbdee1);flex:1;font-variant-numeric:tabular-nums;";
             const countLabel = document.createElement("span");
-            countLabel.textContent = count.toLocaleString() + (t("mp_cache_msgs") || " msgs");
+            countLabel.textContent = count.toLocaleString() + (tOr("mp_cache_msgs", " msgs"));
             countLabel.style.cssText = "font-size:11px;color:var(--dmt-text-muted,#949ba4);";
             const delBtn = document.createElement("button");
-            delBtn.textContent = t("mp_cache_delete") || "Delete";
+            delBtn.textContent = tOr("mp_cache_delete", "Delete");
             delBtn.style.cssText = "font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid var(--dmt-danger,#ed4245);background:none;color:var(--dmt-danger,#ed4245);cursor:pointer;";
             delBtn.onclick = async () => {
-              delBtn.disabled = true; delBtn.textContent = t("mp_cache_deleting") || "…";
+              delBtn.disabled = true; delBtn.textContent = tOr("mp_cache_deleting", "…");
               const n = await _idbDeleteByYM(sc.scope_key, ym);
               row.style.opacity = "0.35";
-              countLabel.textContent = (t("mp_cache_deleted") || "Deleted ") + n;
+              countLabel.textContent = (tOr("mp_cache_deleted", "Deleted ")) + n;
               delBtn.textContent = "✓";
             };
             row.append(ymLabel, countLabel, delBtn);
@@ -24503,14 +24645,14 @@ unsafeWindow.fetch = function(...args) {
           }
 
           const clearScopeBtn = document.createElement("button");
-          clearScopeBtn.textContent = t("mp_cache_clear_scope") || "Clear this scope";
+          clearScopeBtn.textContent = tOr("mp_cache_clear_scope", "Clear this scope");
           clearScopeBtn.style.cssText = "font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--dmt-danger,#ed4245);background:none;color:var(--dmt-danger,#ed4245);cursor:pointer;";
           clearScopeBtn.onclick = async () => {
             if (!await dmtConfirm("Clear all cached messages for this scope?")) return;
-            clearScopeBtn.disabled = true; clearScopeBtn.textContent = t("mp_cache_clearing") || "Clearing…";
+            clearScopeBtn.disabled = true; clearScopeBtn.textContent = tOr("mp_cache_clearing", "Clearing…");
             await _idbClearScope(sc.scope_key);
             scopeBlock.style.opacity = "0.4";
-            clearScopeBtn.textContent = t("mp_cache_cleared") || "Cleared ✓";
+            clearScopeBtn.textContent = tOr("mp_cache_cleared", "Cleared ✓");
           };
 
           scopeBlock.append(scopeHdr, metaLine, monthTable, clearScopeBtn);
@@ -24528,14 +24670,14 @@ unsafeWindow.fetch = function(...args) {
       footer.style.cssText = "padding:10px 16px;border-top:1px solid var(--dmt-divider,#1e1f22);display:flex;gap:8px;justify-content:flex-end;align-items:center;";
 
       const resyncBtn = document.createElement("button");
-      resyncBtn.textContent = t("mp_cache_resync") || "🔄 Force full resync";
+      resyncBtn.textContent = tOr("mp_cache_resync", "🔄 Force full resync");
       resyncBtn.title = "Clear cache for current scope and re-fetch all messages from the API.";
       resyncBtn.style.cssText = "font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--dmt-text-muted,#949ba4);background:none;color:var(--dmt-text-muted,#949ba4);cursor:pointer;";
       resyncBtn.onclick = async () => {
         const scope = _scopeKey();
         if (!scope) return;
         if (!await dmtConfirm("Clear cache for this scope and re-fetch all messages from Discord?\nThis may take a while depending on your message count.")) return;
-        resyncBtn.disabled = true; resyncBtn.textContent = t("mp_cache_clearing") || "Clearing…";
+        resyncBtn.disabled = true; resyncBtn.textContent = tOr("mp_cache_clearing", "Clearing…");
         await _idbClearScope(scope);
         overlay.remove();
         _browseData = []; _browseOffset = 0; _browseTotal = null;
@@ -24550,11 +24692,11 @@ unsafeWindow.fetch = function(...args) {
       };
 
       const clearAllBtn = document.createElement("button");
-      clearAllBtn.textContent = t("mp_cache_clear_all") || "🗑 Clear all cache";
+      clearAllBtn.textContent = tOr("mp_cache_clear_all", "🗑 Clear all cache");
       clearAllBtn.style.cssText = "font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--dmt-danger,#ed4245);background:none;color:var(--dmt-danger,#ed4245);cursor:pointer;";
       clearAllBtn.onclick = async () => {
         if (!await dmtConfirm("Clear ALL cached messages? This cannot be undone.")) return;
-        clearAllBtn.disabled = true; clearAllBtn.textContent = t("mp_cache_clearing") || "Clearing…";
+        clearAllBtn.disabled = true; clearAllBtn.textContent = tOr("mp_cache_clearing", "Clearing…");
         await _idbClearAll();
         overlay.remove();
       };
@@ -28148,9 +28290,9 @@ if (type === "warn" && scanLimit !== null) {
         if (tags.length < 5) {
           const addBtn = document.createElement("div");
           addBtn.className = "cs-tag cs-tag-edit";
-          addBtn.textContent = t("cs_add_tag") || "+ New Tag";
+          addBtn.textContent = tOr("cs_add_tag", "+ New Tag");
           addBtn.onclick = () => {
-            dmtPrompt(t("cs_add_tag_prompt") || "Enter new tag (right-click to delete):", "").then((val) => {
+            dmtPrompt(tOr("cs_add_tag_prompt", "Enter new tag (right-click to delete):"), "").then((val) => {
               if (val?.trim()) {
                 const arr = _csGetTags();
                 arr.push(val.trim());
@@ -28254,13 +28396,13 @@ if (type === "warn" && scanLimit !== null) {
       const btn = document.createElement("div");
       btn.id = F2_HINT_ID;
       btn.innerHTML = `
-        <span class="dmt-f2-cap" title="${t("cs_float_title") || "Channel Scout (F2)"}">
+        <span class="dmt-f2-cap" title="${tOr("cs_float_title", "Channel Scout (F2)")}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
             <path d="M15.5 15.5L20 20" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
           </svg>
         </span>
-        <span class="dmt-f2-label">${t("cs_float_label") || "Channel Scout"}</span>`;
+        <span class="dmt-f2-label">${tOr("cs_float_label", "Channel Scout")}</span>`;
 
       btn.style.left = (rect.left + F2_OFFSET_X) + "px";
       btn.style.top  = (rect.top  + F2_OFFSET_Y) + "px";
@@ -28700,12 +28842,12 @@ if (type === "warn" && scanLimit !== null) {
         if (wpTok) { _msToken = wpTok; _msTokenFetchedAt = now; return wpTok; }
       } catch (_) {}
 
-      throw new Error(t("ms_no_token_warn") || "Token not found — enable API Mode in Wormhole settings");
+      throw new Error(tOr("ms_no_token_warn", "Token not found — enable API Mode in Wormhole settings"));
     }
 
     async function _msFetchPage(endpoint, offset, minId, maxId, channelId) {
       const token = await _msEnsureToken();
-      let url = `${MS_API_BASE}/${endpoint}/messages/search?has=image&has=video&limit=25&offset=${offset}`;
+      let url = `${MS_API_BASE}/${endpoint}/messages/search?has=image&has=video&limit=25&offset=${offset}&include_nsfw=true`;
       if (minId) url += `&min_id=${minId}`;
       if (maxId) url += `&max_id=${maxId}`;
       if (channelId) url += `&channel_id=${channelId}`;
@@ -28780,14 +28922,14 @@ if (type === "warn" && scanLimit !== null) {
 
         if (_msScanState.scanned >= MS_SCAN_ITEM_CAP) {
           _msScanState.phase = "complete";
-          _msScanState.error = t("ms_cap_warn") || "⚠️ Stopped at 5,000 items — narrow the time range";
+          _msScanState.error = tOr("ms_cap_warn", "⚠️ Stopped at 5,000 items — narrow the time range");
           await _msWriteSyncMeta(scope, { scanned_count: _msScanState.scanned, last_scan_at: new Date().toISOString(), newest_timestamp: newestTs, is_complete: false });
           _msUpdateStatusBar(); _msUpdateScanBtn();
           if (_msPanelEl && _msGridScope === scope) _msReloadGrid().catch(() => {});
           return;
         }
 
-        _msScanState.statusDetail = t("ms_fetching") || "Fetching…";
+        _msScanState.statusDetail = tOr("ms_fetching", "Fetching…");
         _msUpdateStatusBar();
         let res;
         try { res = await _msFetchPage(endpoint, _msScanState.offset, minId, maxId, channelIdFilter); }
@@ -28808,7 +28950,7 @@ if (type === "warn" && scanLimit !== null) {
             _msUpdateStatusBar(); _msUpdateScanBtn();
             return;
           }
-          _msScanState.statusDetail = `⏳ ${t("ms_indexing") || "Indexing"}… (${retryCount}/${MS_MAX_RETRY})`;
+          _msScanState.statusDetail = `⏳ ${tOr("ms_indexing", "Indexing")}… (${retryCount}/${MS_MAX_RETRY})`;
           _msUpdateStatusBar();
           await _msSleep(MS_RETRY_DELAY);
           _msScanState.statusDetail = null;
@@ -28821,8 +28963,8 @@ if (type === "warn" && scanLimit !== null) {
           let cdSec = waitSec;
           const updateCd = () => {
             _msScanState.statusDetail = cdSec > 0
-              ? `⏳ ${t("ms_rate_limited") || "Rate limited"} — ${cdSec}s`
-              : `⏳ ${t("ms_resuming") || "Resuming…"}`;
+              ? `⏳ ${tOr("ms_rate_limited", "Rate limited")} — ${cdSec}s`
+              : `⏳ ${tOr("ms_resuming", "Resuming…")}`;
             _msUpdateStatusBar();
           };
           updateCd();
@@ -28843,8 +28985,8 @@ if (type === "warn" && scanLimit !== null) {
             DEBUG && console.warn("[Mosaic] HTTP 400 raw body:", res.body);
             const detail = code != null ? ` (code ${code})` : "";
             const tail = code === 50024
-              ? (t("ms_err_channel_type") || "This channel type doesn't support Discord's search API (commonly threads or voice-channel text chat) — switching to Server scope can often work around this")
-              : (t("ms_err_forbidden") || "Check scope permissions or narrow time range");
+              ? (tOr("ms_err_channel_type", "This channel type doesn't support Discord's search API (commonly threads or voice-channel text chat) — switching to Server scope can often work around this"))
+              : (tOr("ms_err_forbidden", "Check scope permissions or narrow time range"));
             _msScanState.error = "HTTP 400" + detail + " — " + tail;
           }
           _msUpdateStatusBar(); _msUpdateProgressBar(); _msUpdateScanBtn();
@@ -28858,9 +29000,9 @@ if (type === "warn" && scanLimit !== null) {
           DEBUG && console.warn("[Mosaic] HTTP 403 raw body:", res.body);
           const detail = code != null ? ` (code ${code})` : "";
           const scopeHint = (scopeType === "guild-channel" && code === 50001)
-            ? " " + (t("ms_err_forbidden_thread_hint") || "— if this is a thread or forum post, switch to the parent channel and scan from there")
+            ? " " + (tOr("ms_err_forbidden_thread_hint", "— common causes: threads/forum posts (try the parent channel), or an NSFW channel blocked by your Discord account's age-restricted content setting or Discord's own search limits (Server scope may help)"))
             : "";
-          _msScanState.error = (t("ms_err_forbidden") || "Permission denied") + detail + scopeHint;
+          _msScanState.error = (tOr("ms_err_forbidden", "Permission denied")) + detail + scopeHint;
           _msUpdateStatusBar(); _msUpdateScanBtn();
           return;
         }
@@ -28998,7 +29140,7 @@ if (type === "warn" && scanLimit !== null) {
       _msChanFilterSelEl.innerHTML = "";
       const optAll = document.createElement("option");
       optAll.value = "all";
-      optAll.textContent = t("ms_chan_filter_all") || "All channels";
+      optAll.textContent = tOr("ms_chan_filter_all", "All channels");
       _msChanFilterSelEl.appendChild(optAll);
       const unresolved = [];
       [...counts.entries()].sort((a, b) => b[1] - a[1]).forEach(([cid, cnt]) => {
@@ -29033,10 +29175,10 @@ if (type === "warn" && scanLimit !== null) {
       if (!_msStatusBarEl) return;
       const { phase, scanned, error, statusDetail } = _msScanState;
       if (phase === "scanning" || phase === "paused") {
-        const base = `${scanned.toLocaleString()} ${t("ms_items") || "items"} found`;
+        const base = `${scanned.toLocaleString()} ${tOr("ms_items", "items")} found`;
         const text = statusDetail
           ? `${base}  ·  ${statusDetail}`
-          : `${t("ms_scanning") || "Scanning"}… ${base}`;
+          : `${tOr("ms_scanning", "Scanning")}… ${base}`;
         _msStatusBarEl.innerHTML = "";
         if (phase === "scanning") {
           const dot = document.createElement("span");
@@ -29052,9 +29194,9 @@ if (type === "warn" && scanLimit !== null) {
         const total   = stats?.total_count ?? 0;
         const lastScan = sync?.last_scan_at ? _msRelTime(sync.last_scan_at) : "";
         let text = total
-          ? `${total.toLocaleString()} ${t("ms_items") || "items"}`
-          : (t("ms_empty") || "No media scanned yet");
-        if (lastScan) text += ` · ${t("ms_last_scan") || "Last scan"}: ${lastScan}`;
+          ? `${total.toLocaleString()} ${tOr("ms_items", "items")}`
+          : (tOr("ms_empty", "No media scanned yet"));
+        if (lastScan) text += ` · ${tOr("ms_last_scan", "Last scan")}: ${lastScan}`;
         _msStatusBarEl.textContent = text;
       }).catch(() => {});
     }
@@ -29074,9 +29216,9 @@ if (type === "warn" && scanLimit !== null) {
     function _msUpdateScanBtn() {
       if (!_msScanBtnEl) return;
       const phase = _msScanState.phase;
-      if      (phase === "scanning") _msScanBtnEl.textContent = "⏸ " + (t("ms_btn_pause")  || "Pause");
-      else if (phase === "paused")   _msScanBtnEl.textContent = "▶ " + (t("ms_btn_resume") || "Resume");
-      else                           _msScanBtnEl.textContent = "⟳ " + (t("ms_btn_scan")   || "Scan");
+      if      (phase === "scanning") _msScanBtnEl.textContent = "⏸ " + (tOr("ms_btn_pause", "Pause"));
+      else if (phase === "paused")   _msScanBtnEl.textContent = "▶ " + (tOr("ms_btn_resume", "Resume"));
+      else                           _msScanBtnEl.textContent = "⟳ " + (tOr("ms_btn_scan", "Scan"));
     }
 
     function _msStripQuery(u) {
@@ -29172,8 +29314,8 @@ if (type === "warn" && scanLimit !== null) {
       const label = document.createElement("div");
       label.className = "ms-dead-label";
       label.textContent = isExternal
-        ? (t("ms_external_cant_embed") || "Can't embed — file may still exist")
-        : (t("ms_expired") || "Link expired");
+        ? (tOr("ms_external_cant_embed", "Can't embed — file may still exist"))
+        : (tOr("ms_expired", "Link expired"));
       ph.appendChild(icon);
       ph.appendChild(label);
       if (size === "full") {
@@ -29185,7 +29327,7 @@ if (type === "warn" && scanLimit !== null) {
           link.href = item.url;
           link.target = "_blank";
           link.rel = "noopener noreferrer";
-          link.textContent = t("ms_open_original") || "Open original link ↗";
+          link.textContent = tOr("ms_open_original", "Open original link ↗");
           link.style.cssText = "color:#5865f2;font-size:12px;text-decoration:underline;cursor:pointer;";
           link.addEventListener("click", e => e.stopPropagation());
           ph.appendChild(link);
@@ -29266,7 +29408,7 @@ if (type === "warn" && scanLimit !== null) {
           || _getCtx()?.guildId
           || "@me";
       jumpCorner.href  = `/channels/${gid}/${item.channel_id}/${item.msg_id}`;
-      jumpCorner.title = t("ms_btn_jump") || "Jump to message";
+      jumpCorner.title = tOr("ms_btn_jump", "Jump to message");
       jumpCorner.addEventListener("click", e => {
         e.preventDefault();
         e.stopPropagation();
@@ -29430,10 +29572,10 @@ if (type === "warn" && scanLimit !== null) {
       const btnStyle = "background:rgba(88,101,242,0.2);border:1px solid rgba(88,101,242,0.4);color:#dbdee1;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;text-decoration:none;display:flex;align-items:center;";
       const jumpBtn = document.createElement("a");
       jumpBtn.style.cssText = btnStyle;
-      jumpBtn.textContent = "↗ " + (t("ms_btn_jump") || "Jump to message");
+      jumpBtn.textContent = "↗ " + (tOr("ms_btn_jump", "Jump to message"));
       const dlBtn = document.createElement("a");
       dlBtn.style.cssText = btnStyle;
-      dlBtn.textContent   = "⬇ " + (t("ms_btn_download") || "Download");
+      dlBtn.textContent   = "⬇ " + (tOr("ms_btn_download", "Download"));
       actEl.appendChild(jumpBtn); actEl.appendChild(dlBtn);
       ftr.appendChild(metaEl); ftr.appendChild(actEl);
 
@@ -29561,7 +29703,7 @@ if (type === "warn" && scanLimit !== null) {
         } catch (_) {}
         return null;
       };
-      const srvName = guildId ? (_msGetSrvName() || (t("ms_scope_server") || "Server")) : null;
+      const srvName = guildId ? (_msGetSrvName() || (tOr("ms_scope_server", "Server"))) : null;
       _msScopeSelEl = document.createElement("select");
       _msScopeSelEl.style.cssText = "background:#1e1f22;border:1px solid rgba(255,255,255,0.12);color:#dbdee1;border-radius:6px;padding:3px 6px;font-size:12px;cursor:pointer;";
 
@@ -29575,7 +29717,7 @@ if (type === "warn" && scanLimit !== null) {
         optChan = document.createElement("option");
         optChan.value       = `gc:${guildId}:${channelId}`;
         optChan.textContent = `# ${_msGetChannelName(channelId) || channelId}`;
-        optChan.title       = t("ms_scope_channel_cur") || "Current channel";
+        optChan.title       = tOr("ms_scope_channel_cur", "Current channel");
         _msScopeSelEl.appendChild(optChan);
       }
 
@@ -29636,7 +29778,7 @@ if (type === "warn" && scanLimit !== null) {
       _msTypeSelEl.style.cssText = _msScopeSelEl.style.cssText;
       [["all","All"],["image","Images"],["video","Videos"],["gif","GIF"]].forEach(([v,lbl]) => {
         const o = document.createElement("option");
-        o.value = v; o.textContent = t("ms_filter_" + (v === "all" ? "all" : v === "image" ? "images" : "videos")) || lbl;
+        o.value = v; o.textContent = tOr("ms_filter_" + (v === "all" ? "all" : v === "image" ? "images" : "videos"), lbl);
         if (v === "gif") o.textContent = "GIF";
         _msTypeSelEl.appendChild(o);
       });
@@ -29681,7 +29823,7 @@ if (type === "warn" && scanLimit !== null) {
 
       const statsBtnEl = document.createElement("button");
       statsBtnEl.textContent = "📊";
-      statsBtnEl.title = t("ms_stats_title") || "Cache statistics";
+      statsBtnEl.title = tOr("ms_stats_title", "Cache statistics");
       statsBtnEl.style.cssText = "background:none;border:none;cursor:pointer;font-size:16px;padding:4px 6px;border-radius:4px;flex-shrink:0;opacity:0.7;transition:opacity 0.15s;";
       statsBtnEl.addEventListener("mouseenter", () => { statsBtnEl.style.opacity = "1"; });
       statsBtnEl.addEventListener("mouseleave", () => { statsBtnEl.style.opacity = "0.7"; });
@@ -29834,7 +29976,7 @@ if (type === "warn" && scanLimit !== null) {
         _msCustomEnd = endInput.value ? new Date(endInput.value) : null;
       });
       const applyBtn = document.createElement("button");
-      applyBtn.textContent  = t("ms_range_apply") || "Apply";
+      applyBtn.textContent  = tOr("ms_range_apply", "Apply");
       applyBtn.style.cssText = "background:rgba(88,101,242,0.25);border:1px solid rgba(88,101,242,0.4);color:#dbdee1;padding:3px 8px;border-radius:6px;font-size:12px;cursor:pointer;flex-shrink:0;";
       applyBtn.addEventListener("click", () => {
         _msGridItems = []; _msGridRendered.clear();
@@ -29846,9 +29988,9 @@ if (type === "warn" && scanLimit !== null) {
       if (_msCustomEnd)   endInput.valueAsDate   = _msCustomEnd;
       if (_msRangeKey === "custom") _msCustomRowEl.style.display = "flex";
 
-      _msCustomRowEl.appendChild(_mkDateLbl(t("ms_range_from") || "From"));
+      _msCustomRowEl.appendChild(_mkDateLbl(tOr("ms_range_from", "From")));
       _msCustomRowEl.appendChild(startInput);
-      _msCustomRowEl.appendChild(_mkDateLbl(t("ms_range_to") || "To"));
+      _msCustomRowEl.appendChild(_mkDateLbl(tOr("ms_range_to", "To")));
       _msCustomRowEl.appendChild(endInput);
       _msCustomRowEl.appendChild(applyBtn);
       panel.appendChild(_msCustomRowEl);
@@ -29860,7 +30002,7 @@ if (type === "warn" && scanLimit !== null) {
         "background:rgba(0,0,0,0.15)","font-size:12px","color:#b5bac1",
       ].join(";");
       const _chanLbl = document.createElement("span");
-      _chanLbl.textContent = t("ms_chan_filter_label") || "Channel:";
+      _chanLbl.textContent = tOr("ms_chan_filter_label", "Channel:");
       _chanLbl.style.flexShrink = "0";
       _msChanFilterSelEl = document.createElement("select");
       _msChanFilterSelEl.style.cssText = "background:#1e1f22;border:1px solid rgba(255,255,255,0.15);color:#dbdee1;border-radius:6px;padding:3px 6px;font-size:12px;cursor:pointer;flex:1;min-width:0;";
@@ -29880,7 +30022,7 @@ if (type === "warn" && scanLimit !== null) {
 
       const statsTitle = document.createElement("div");
       statsTitle.style.cssText = "font-size:13px;font-weight:700;color:#dbdee1;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:8px;";
-      statsTitle.textContent = "📊 " + (t("ms_stats_title") || "Cache Statistics");
+      statsTitle.textContent = "📊 " + (tOr("ms_stats_title", "Cache Statistics"));
       statsOverlay.appendChild(statsTitle);
 
       const statsBody = document.createElement("div");
@@ -29888,7 +30030,7 @@ if (type === "warn" && scanLimit !== null) {
       statsOverlay.appendChild(statsBody);
 
       const clearCacheBtn = document.createElement("button");
-      clearCacheBtn.textContent = "🗑 " + (t("ms_stats_clear") || "Clear cached media for this scope");
+      clearCacheBtn.textContent = "🗑 " + (tOr("ms_stats_clear", "Clear cached media for this scope"));
       clearCacheBtn.style.cssText = "margin-top:8px;background:rgba(237,66,69,0.15);border:1px solid rgba(237,66,69,0.3);color:#f38ba8;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;align-self:flex-start;";
       clearCacheBtn.addEventListener("click", async () => {
         if (!_msGridScope) return;
@@ -29917,10 +30059,10 @@ if (type === "warn" && scanLimit !== null) {
         statsBody.innerHTML = "";
         const { stats, sync } = await _msGetStats(_msGridScope);
         const rows = [
-          ["🖼 " + (t("ms_filter_images") || "Images"),   stats?.image_count ?? 0],
-          ["🎬 " + (t("ms_filter_videos") || "Videos"),   stats?.video_count ?? 0],
+          ["🖼 " + (tOr("ms_filter_images", "Images")),   stats?.image_count ?? 0],
+          ["🎬 " + (tOr("ms_filter_videos", "Videos")),   stats?.video_count ?? 0],
           ["🎞 GIF",                                        stats?.gif_count   ?? 0],
-          ["📦 " + (t("ms_items") || "Total"),             stats?.total_count ?? 0],
+          ["📦 " + (tOr("ms_items", "Total")),             stats?.total_count ?? 0],
         ];
         rows.forEach(([label, val]) => {
           const row = document.createElement("div");
@@ -29935,7 +30077,7 @@ if (type === "warn" && scanLimit !== null) {
         if (sync?.last_scan_at) {
           const info = document.createElement("div");
           info.style.cssText = "color:#72767d;font-size:11px;margin-top:4px;";
-          info.textContent = (t("ms_last_scan") || "Last scan") + ": " + new Date(sync.last_scan_at).toLocaleString();
+          info.textContent = (tOr("ms_last_scan", "Last scan")) + ": " + new Date(sync.last_scan_at).toLocaleString();
           statsBody.appendChild(info);
         }
       };
@@ -30182,7 +30324,7 @@ if (type === "warn" && scanLimit !== null) {
 
       const btn = document.createElement("button");
       btn.type  = "button";
-      btn.title = "Mosaic · " + (t("mod_tip_mosaic") || "Server Media Gallery");
+      btn.title = "Mosaic · " + (tOr("mod_tip_mosaic", "Server Media Gallery"));
       btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="pointer-events:none;display:block;"><path d="M4 4h4.5v4.5H4V4zm5.75 0h4.5v4.5h-4.5V4zM15.5 4H20v4.5h-4.5V4zM4 9.75h4.5v4.5H4v-4.5zm5.75 0h4.5v4.5h-4.5v-4.5zm5.75 0H20v4.5h-4.5v-4.5zM4 15.5h4.5V20H4v-4.5zm5.75 0h4.5V20h-4.5v-4.5zm5.75 0H20V20h-4.5v-4.5z"/></svg>';
       btn.style.cssText = [
         "border:none","cursor:pointer",
