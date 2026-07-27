@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.5.8
+// @version      2.7.7.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -56,7 +56,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.5.8";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.7.0";
 
   const GMStore = {
     
@@ -1411,6 +1411,10 @@
       ms_chan_filter_label: "Filter by channel (cached data only):",
       ms_filter_images:   "Images",
       ms_filter_videos:   "Videos",
+      ms_authortype_all:  "All",
+      ms_authortype_user: "User",
+      ms_filter_pinned_only: "📌 Pinned only",
+      ms_filter_stale_cache_hint: "Only applies to media scanned after this update — older cached results may need a rescan",
       ms_items:           "items",
       ms_empty:           "No media scanned yet",
       ms_last_scan:       "Last scan",
@@ -1418,6 +1422,7 @@
       ms_btn_scan:        "Scan",
       ms_btn_pause:       "Pause",
       ms_btn_resume:      "Resume",
+      ms_btn_stop:        "Stop",
       ms_btn_jump:        "Jump to message",
       ms_btn_download:    "Download",
       ms_err_forbidden:   "Permission denied for this scope",
@@ -1436,7 +1441,7 @@
       ms_range_from:      "From",
       ms_range_to:        "To",
       ms_range_apply:     "Apply",
-      ms_cap_warn:        "⚠️ Stopped at 5,000 items — narrow the time range for complete results",
+      ms_cap_warn:        "⚠️ Stopped at {cap} items — click Scan again to continue further back, or narrow the time range",
       ms_stats_title:     "Cache Statistics",
       ms_stats_clear:     "Clear cached media for this scope",
       ms_expired:         "Link expired",
@@ -2003,6 +2008,10 @@
       ms_chan_filter_label: "篩選頻道（僅篩選已快取資料，不重新掃描）：",
       ms_filter_images:   "圖片",
       ms_filter_videos:   "影片",
+      ms_authortype_all:  "全部",
+      ms_authortype_user: "使用者",
+      ms_filter_pinned_only: "📌 僅顯示已釘選",
+      ms_filter_stale_cache_hint: "僅套用於此次更新後掃描的資料，較舊的快取結果可能需要重新掃描",
       ms_items:           "個媒體",
       ms_empty:           "尚未掃描任何媒體",
       ms_last_scan:       "上次掃描",
@@ -2010,6 +2019,7 @@
       ms_btn_scan:        "掃描",
       ms_btn_pause:       "暫停",
       ms_btn_resume:      "繼續",
+      ms_btn_stop:        "停止",
       ms_btn_jump:        "跳至訊息",
       ms_btn_download:    "下載",
       ms_err_forbidden:   "此範圍無存取權限",
@@ -2028,7 +2038,7 @@
       ms_range_from:      "從",
       ms_range_to:        "到",
       ms_range_apply:     "套用",
-      ms_cap_warn:        "⚠️ 已掃描 5,000 筆上限 — 縮小時間範圍可取得完整結果",
+      ms_cap_warn:        "⚠️ 已掃描 {cap} 筆上限 — 再按一次 Scan 可繼續往更早掃描，或縮小時間範圍",
       ms_stats_title:     "快取統計",
       ms_stats_clear:     "清除此範圍的快取媒體",
       ms_expired:         "連結已過期",
@@ -2599,6 +2609,10 @@
       ms_chan_filter_label: "筛选频道（仅筛选已缓存数据，不重新扫描）：",
       ms_filter_images:   "图片",
       ms_filter_videos:   "视频",
+      ms_authortype_all:  "全部",
+      ms_authortype_user: "用户",
+      ms_filter_pinned_only: "📌 仅显示已置顶",
+      ms_filter_stale_cache_hint: "仅适用于本次更新后扫描的数据，较旧的缓存结果可能需要重新扫描",
       ms_items:           "个媒体",
       ms_empty:           "尚未扫描任何媒体",
       ms_last_scan:       "上次扫描",
@@ -2606,6 +2620,7 @@
       ms_btn_scan:        "扫描",
       ms_btn_pause:       "暂停",
       ms_btn_resume:      "继续",
+      ms_btn_stop:        "停止",
       ms_btn_jump:        "跳转到消息",
       ms_btn_download:    "下载",
       ms_err_forbidden:   "无此范围访问权限",
@@ -2624,7 +2639,7 @@
       ms_range_from:      "从",
       ms_range_to:        "到",
       ms_range_apply:     "应用",
-      ms_cap_warn:        "⚠️ 已达到5000条上限 — 缩小时间范围以获取完整结果",
+      ms_cap_warn:        "⚠️ 已达到 {cap} 条上限 — 再次点击 Scan 可继续向更早扫描，或缩小时间范围",
       ms_stats_title:     "缓存统计",
       ms_stats_clear:     "清除此范围的缓存媒体",
       ms_expired:         "链接已过期",
@@ -3203,6 +3218,10 @@
       ms_chan_filter_label: "チャンネルで絞り込み（キャッシュのみ、再スキャンなし）：",
       ms_filter_images:   "画像",
       ms_filter_videos:   "動画",
+      ms_authortype_all:  "すべて",
+      ms_authortype_user: "ユーザー",
+      ms_filter_pinned_only: "📌 ピン留めのみ",
+      ms_filter_stale_cache_hint: "このアップデート以降にスキャンしたデータにのみ適用されます。古いキャッシュは再スキャンが必要な場合があります",
       ms_items:           "件",
       ms_empty:           "まだメディアはスキャンされていません",
       ms_last_scan:       "最終スキャン",
@@ -3210,6 +3229,7 @@
       ms_btn_scan:        "スキャン",
       ms_btn_pause:       "一時停止",
       ms_btn_resume:      "再開",
+      ms_btn_stop:        "停止",
       ms_btn_jump:        "メッセージに移動",
       ms_btn_download:    "ダウンロード",
       ms_err_forbidden:   "このスコープへのアクセスが拒否されました",
@@ -3222,7 +3242,7 @@
       ms_range_3w:        "3週間以内",  ms_range_1m:  "1ヶ月以内",
       ms_range_custom:    "カスタム範囲…",
       ms_range_from:      "開始", ms_range_to: "終了", ms_range_apply: "適用",
-      ms_cap_warn:        "⚠️ 5,000件の上限に達しました — 時間範囲を絞ってください",
+      ms_cap_warn:        "⚠️ {cap}件の上限に達しました — もう一度 Scan を押すとさらに過去まで続けられます。時間範囲を絞ることもできます",
       ms_stats_title:     "キャッシュ統計",
       ms_stats_clear:     "このスコープのキャッシュをクリア",
       ms_expired:         "リンク期限切れ",
@@ -3842,6 +3862,10 @@
       ms_chan_filter_label: "채널 필터(캐시된 데이터만, 재스캔 없음):",
       ms_filter_images:   "이미지",
       ms_filter_videos:   "동영상",
+      ms_authortype_all:  "전체",
+      ms_authortype_user: "사용자",
+      ms_filter_pinned_only: "📌 고정된 메시지만",
+      ms_filter_stale_cache_hint: "이 업데이트 이후 스캔한 데이터에만 적용됩니다. 이전 캐시 결과는 다시 스캔해야 할 수 있습니다",
       ms_items:           "개",
       ms_empty:           "아직 스캔된 미디어가 없습니다",
       ms_last_scan:       "마지막 스캔",
@@ -3849,6 +3873,7 @@
       ms_btn_scan:        "스캔",
       ms_btn_pause:       "일시 정지",
       ms_btn_resume:      "재개",
+      ms_btn_stop:        "중지",
       ms_btn_jump:        "메시지로 이동",
       ms_btn_download:    "다운로드",
       ms_err_forbidden:   "이 범위에 대한 접근이 거부되었습니다",
@@ -3861,7 +3886,7 @@
       ms_range_3w:        "3주일 이내",  ms_range_1m:  "1개월 이내",
       ms_range_custom:    "사용자 정의 범위…",
       ms_range_from:      "시작", ms_range_to: "종료", ms_range_apply: "적용",
-      ms_cap_warn:        "⚠️ 5,000개 제한에 도달했습니다 — 시간 범위를 좁혀보세요",
+      ms_cap_warn:        "⚠️ {cap}개 제한에 도달했습니다 — Scan을 다시 누르면 더 과거까지 계속 스캔할 수 있습니다. 시간 범위를 좁힐 수도 있습니다",
       ms_stats_title:     "캐시 통계",
       ms_stats_clear:     "이 범위의 캐시 지우기",
       ms_expired:         "링크 만료됨",
@@ -4555,6 +4580,10 @@
       ms_chan_filter_label:     "Filtrar por canal (solo datos en caché):",
       ms_filter_images:         "Imágenes",
       ms_filter_videos:         "Vídeos",
+      ms_authortype_all:        "Todos",
+      ms_authortype_user:       "Usuario",
+      ms_filter_pinned_only:    "📌 Solo fijados",
+      ms_filter_stale_cache_hint: "Solo se aplica a los medios escaneados después de esta actualización; los resultados en caché más antiguos pueden requerir un nuevo escaneo",
       ms_items:                 "elementos",
       ms_empty:                 "Aún no se ha escaneado ningún archivo",
       ms_last_scan:             "Último escaneo",
@@ -4562,6 +4591,7 @@
       ms_btn_scan:              "Escanear",
       ms_btn_pause:             "Pausar",
       ms_btn_resume:            "Reanudar",
+      ms_btn_stop:              "Detener",
       ms_btn_jump:              "Ir al mensaje",
       ms_btn_download:          "Descargar",
       ms_err_forbidden:         "Permiso denegado para este ámbito",
@@ -4580,7 +4610,7 @@
       ms_range_from:            "Desde",
       ms_range_to:              "Hasta",
       ms_range_apply:           "Aplicar",
-      ms_cap_warn:              "⚠️ Detenido en 5000 elementos — acota el rango de tiempo para un escaneo completo",
+      ms_cap_warn:              "⚠️ Detenido en {cap} elementos — pulsa Scan de nuevo para continuar más atrás, o acota el rango de tiempo",
       ms_stats_title:           "Estadísticas de caché",
       ms_stats_clear:           "Borrar archivos en caché de este ámbito",
       ms_expired:               "Enlace caducado",
@@ -5151,6 +5181,10 @@
       ms_chan_filter_label:     "Filtrar por canal (somente dados em cache):",
       ms_filter_images:         "Imagens",
       ms_filter_videos:         "Vídeos",
+      ms_authortype_all:        "Todos",
+      ms_authortype_user:       "Usuário",
+      ms_filter_pinned_only:    "📌 Somente fixados",
+      ms_filter_stale_cache_hint: "Aplica-se apenas a mídias escaneadas após esta atualização; resultados em cache mais antigos podem precisar de um novo escaneamento",
       ms_items:                 "itens",
       ms_empty:                 "Nenhuma mídia escaneada ainda",
       ms_last_scan:             "Última varredura",
@@ -5158,6 +5192,7 @@
       ms_btn_scan:              "Escanear",
       ms_btn_pause:             "Pausar",
       ms_btn_resume:            "Retomar",
+      ms_btn_stop:              "Parar",
       ms_btn_jump:              "Ir para a mensagem",
       ms_btn_download:          "Baixar",
       ms_err_forbidden:         "Permissão negada para este escopo",
@@ -5176,7 +5211,7 @@
       ms_range_from:            "De",
       ms_range_to:              "Até",
       ms_range_apply:           "Aplicar",
-      ms_cap_warn:              "⚠️ Interrompido em 5000 itens — reduza o intervalo de tempo para uma varredura completa",
+      ms_cap_warn:              "⚠️ Interrompido em {cap} itens — clique em Scan novamente para continuar mais para trás, ou reduza o intervalo de tempo",
       ms_stats_title:           "Estatísticas de cache",
       ms_stats_clear:           "Limpar mídia em cache deste escopo",
       ms_expired:               "Link expirado",
@@ -5752,6 +5787,10 @@
       ms_chan_filter_label:     "Filtrer par canal (données en cache uniquement) :",
       ms_filter_images:         "Images",
       ms_filter_videos:         "Vidéos",
+      ms_authortype_all:        "Tous",
+      ms_authortype_user:       "Utilisateur",
+      ms_filter_pinned_only:    "📌 Épinglés uniquement",
+      ms_filter_stale_cache_hint: "S'applique uniquement aux médias scannés après cette mise à jour ; les anciens résultats en cache peuvent nécessiter un nouveau scan",
       ms_items:                 "éléments",
       ms_empty:                 "Aucun média scanné pour le moment",
       ms_last_scan:             "Dernier scan",
@@ -5759,6 +5798,7 @@
       ms_btn_scan:              "Scanner",
       ms_btn_pause:             "Pause",
       ms_btn_resume:            "Reprendre",
+      ms_btn_stop:              "Arrêter",
       ms_btn_jump:              "Aller au message",
       ms_btn_download:          "Télécharger",
       ms_err_forbidden:         "Permission refusée pour cette portée",
@@ -5777,7 +5817,7 @@
       ms_range_from:            "De",
       ms_range_to:              "À",
       ms_range_apply:           "Appliquer",
-      ms_cap_warn:              "⚠️ Arrêté à 5000 éléments — réduisez la plage temporelle pour une analyse complète",
+      ms_cap_warn:              "⚠️ Arrêté à {cap} éléments — cliquez à nouveau sur Scan pour continuer plus loin dans le passé, ou réduisez la plage temporelle",
       ms_stats_title:           "Statistiques du cache",
       ms_stats_clear:           "Effacer les médias en cache de cette portée",
       ms_expired:               "Lien expiré",
@@ -6348,6 +6388,10 @@
       ms_chan_filter_label:     "Фильтр по каналу (только кэшированные данные):",
       ms_filter_images:         "Изображения",
       ms_filter_videos:         "Видео",
+      ms_authortype_all:        "Все",
+      ms_authortype_user:       "Пользователь",
+      ms_filter_pinned_only:    "📌 Только закреплённые",
+      ms_filter_stale_cache_hint: "Применяется только к медиафайлам, отсканированным после этого обновления — для старых закэшированных результатов может потребоваться повторное сканирование",
       ms_items:                 "элементов",
       ms_empty:                 "Медиафайлы ещё не сканировались",
       ms_last_scan:             "Последнее сканирование",
@@ -6355,6 +6399,7 @@
       ms_btn_scan:              "Сканировать",
       ms_btn_pause:             "Пауза",
       ms_btn_resume:            "Продолжить",
+      ms_btn_stop:              "Остановить",
       ms_btn_jump:              "Перейти к сообщению",
       ms_btn_download:          "Скачать",
       ms_err_forbidden:         "Доступ к этой области запрещён",
@@ -6373,7 +6418,7 @@
       ms_range_from:            "С",
       ms_range_to:              "По",
       ms_range_apply:           "Применить",
-      ms_cap_warn:              "⚠️ Остановлено на 5000 элементах — сузьте диапазон времени для полного сканирования",
+      ms_cap_warn:              "⚠️ Остановлено на {cap} элементах — нажмите Scan ещё раз, чтобы продолжить сканирование глубже, или сузьте диапазон времени",
       ms_stats_title:           "Статистика кэша",
       ms_stats_clear:           "Очистить кэш медиафайлов этой области",
       ms_expired:               "Ссылка устарела",
@@ -6933,6 +6978,10 @@
       ms_chan_filter_label:     "Nach Kanal filtern (nur zwischengespeicherte Daten):",
       ms_filter_images:         "Bilder",
       ms_filter_videos:         "Videos",
+      ms_authortype_all:        "Alle",
+      ms_authortype_user:       "Benutzer",
+      ms_filter_pinned_only:    "📌 Nur angeheftete",
+      ms_filter_stale_cache_hint: "Gilt nur für Medien, die nach diesem Update gescannt wurden – ältere zwischengespeicherte Ergebnisse müssen möglicherweise neu gescannt werden",
       ms_items:                 "Elemente",
       ms_empty:                 "Noch keine Medien gescannt",
       ms_last_scan:             "Letzter Scan",
@@ -6940,6 +6989,7 @@
       ms_btn_scan:              "Scannen",
       ms_btn_pause:             "Pausieren",
       ms_btn_resume:            "Fortsetzen",
+      ms_btn_stop:              "Stopp",
       ms_btn_jump:              "Zur Nachricht springen",
       ms_btn_download:          "Herunterladen",
       ms_err_forbidden:         "Zugriff für diesen Bereich verweigert",
@@ -6958,7 +7008,7 @@
       ms_range_from:            "Von",
       ms_range_to:              "Bis",
       ms_range_apply:           "Anwenden",
-      ms_cap_warn:              "⚠️ Bei 5000 Elementen gestoppt — Zeitraum eingrenzen für vollständigen Scan",
+      ms_cap_warn:              "⚠️ Bei {cap} Elementen gestoppt — klicken Sie erneut auf Scan, um weiter in die Vergangenheit fortzufahren, oder grenzen Sie den Zeitraum ein",
       ms_stats_title:           "Cache-Statistik",
       ms_stats_clear:           "Zwischengespeicherte Medien dieses Bereichs löschen",
       ms_expired:               "Link abgelaufen",
@@ -28488,7 +28538,7 @@ if (type === "warn" && scanLimit !== null) {
     const MS_API_BASE     = "https://discord.com/api/v10";
     const MS_IDB_NAME     = "dmt_cache";
     const MS_IDB_VER      = 2;
-    const MS_SCAN_ITEM_CAP = 5000;
+    const MS_SCAN_ITEM_CAP = 6666;
 
     function _getCtx() {
       const m = location.pathname.match(/^\/channels\/([^/]+)\/([^/]+)(?:\/([^/]+))?/);
@@ -28513,6 +28563,11 @@ if (type === "warn" && scanLimit !== null) {
       return String((BigInt(Math.floor(ms)) - 1420070400000n) << 22n);
     }
 
+    function _msSnowflakeToTimestamp(id) {
+      if (!id) return null;
+      return Number(BigInt(id) >> 22n) + 1420070400000;
+    }
+
     let _msScanState = {
       phase:        "idle",
       scope:        null,
@@ -28531,6 +28586,8 @@ if (type === "warn" && scanLimit !== null) {
     let _msGridAll      = false;
     let _msGridFilter   = "all";
     let _msChannelFilter = "all";
+    let _msAuthorTypeFilter = "all";
+    let _msPinnedOnly   = false;
     let _msGridScope    = null;
     let _msGridRendered = new Map();
     let _msScrollTimer  = null;
@@ -28540,7 +28597,10 @@ if (type === "warn" && scanLimit !== null) {
     let _msTypeSelEl   = null;
     let _msChanFilterSelEl = null;
     let _msChanFilterRowEl = null;
+    let _msAuthorTypeSelEl = null;
+    let _msPinnedChkEl     = null;
     let _msScanBtnEl   = null;
+    let _msStopBtnEl   = null;
     let _msStatusBarEl = null;
     let _msProgressEl  = null;
     let _msGridContEl  = null;
@@ -28619,6 +28679,8 @@ if (type === "warn" && scanLimit !== null) {
         scope:        msg.guild_id ? ("g:" + msg.guild_id) : ("c:" + msg.channel_id),
         author_id:    msg.author?.id   || "",
         author_name:  msg.author?.global_name || msg.author?.username || "",
+        author_type:  msg.webhook_id ? "webhook" : (msg.author?.bot ? "bot" : "user"),
+        pinned:       !!msg.pinned,
       };
     }
 
@@ -28732,6 +28794,18 @@ if (type === "warn" && scanLimit !== null) {
       }
     }
 
+    async function _msWriteIncompleteSyncMeta(scope, oldestIdSnapshot, newestTsSnapshot, prevSync) {
+      const oldestMs    = _msSnowflakeToTimestamp(oldestIdSnapshot);
+      const prevOldestMs = prevSync?.oldest_scanned_ts ? new Date(prevSync.oldest_scanned_ts).getTime() : null;
+      const newOldestMs = oldestMs != null
+        ? (prevOldestMs !== null ? Math.min(oldestMs, prevOldestMs) : oldestMs)
+        : prevOldestMs;
+      await _msWriteSyncMeta(scope, {
+        scanned_count: _msScanState.scanned, last_scan_at: new Date().toISOString(), newest_timestamp: newestTsSnapshot, is_complete: false,
+        oldest_scanned_ts: newOldestMs != null ? new Date(newOldestMs).toISOString() : null,
+      });
+    }
+
     async function _msGetStats(scopeKey) {
       if (!scopeKey) return { stats: null, sync: null };
       try {
@@ -28749,7 +28823,7 @@ if (type === "warn" && scanLimit !== null) {
       } catch (_) { return { stats: null, sync: null }; }
     }
 
-    async function _msReadPage(scope, filter, cursorPos, pageSize, chanFilter) {
+    async function _msReadPage(scope, filter, cursorPos, pageSize, chanFilter, authorTypeFilter, pinnedOnly) {
       pageSize = pageSize || MS_PAGE_SIZE;
       try {
         const db = await _msIdbOpen();
@@ -28770,9 +28844,11 @@ if (type === "warn" && scanLimit !== null) {
               cur.continue();
               return;
             }
-            const typeOk = filter === "all" || v.media_type === filter;
-            const chanOk = !chanFilter || chanFilter === "all" || v.channel_id === chanFilter;
-            if (typeOk && chanOk) items.push(v);
+            const typeOk   = filter === "all" || v.media_type === filter;
+            const chanOk   = !chanFilter || chanFilter === "all" || v.channel_id === chanFilter;
+            const authorOk = !authorTypeFilter || authorTypeFilter === "all" || v.author_type === authorTypeFilter;
+            const pinnedOk = !pinnedOnly || v.pinned === true;
+            if (typeOk && chanOk && authorOk && pinnedOk) items.push(v);
             cur.continue();
           };
           req.onerror = e => reject(e.target.error);
@@ -28847,7 +28923,7 @@ if (type === "warn" && scanLimit !== null) {
 
     async function _msFetchPage(endpoint, offset, minId, maxId, channelId) {
       const token = await _msEnsureToken();
-      let url = `${MS_API_BASE}/${endpoint}/messages/search?has=image&has=video&limit=25&offset=${offset}&include_nsfw=true`;
+      let url = `${MS_API_BASE}/${endpoint}/messages/search?has=image&has=video&has=file&has=sound&limit=25&offset=${offset}&include_nsfw=true`;
       if (minId) url += `&min_id=${minId}`;
       if (maxId) url += `&max_id=${maxId}`;
       if (channelId) url += `&channel_id=${channelId}`;
@@ -28904,8 +28980,17 @@ if (type === "warn" && scanLimit !== null) {
           const lastTs = rangeCovered && prevNewest !== null ? (prevNewest - 60000) : 0;
           minId = _msTimestampToSnowflake(Math.max(rangeStart, lastTs));
           _msScanRangeStart = rangeStart;
+
+          if (!rangeCovered && prevOldest !== null) {
+            const boundarySnowflake = _msTimestampToSnowflake(prevOldest);
+            if (boundarySnowflake !== null) maxId = String(BigInt(boundarySnowflake) - 1n);
+          }
         }
       }
+
+      const MS_OFFSET_WINDOW_LIMIT = 2500;
+      let curMaxId = maxId;
+      let oldestIdInWindow = null;
 
       Object.assign(_msScanState, {
         phase: "scanning", scope, scopeType,
@@ -28922,8 +29007,8 @@ if (type === "warn" && scanLimit !== null) {
 
         if (_msScanState.scanned >= MS_SCAN_ITEM_CAP) {
           _msScanState.phase = "complete";
-          _msScanState.error = tOr("ms_cap_warn", "⚠️ Stopped at 5,000 items — narrow the time range");
-          await _msWriteSyncMeta(scope, { scanned_count: _msScanState.scanned, last_scan_at: new Date().toISOString(), newest_timestamp: newestTs, is_complete: false });
+          _msScanState.error = tOr("ms_cap_warn", "⚠️ Stopped at {cap} items — click Scan again to continue further back, or narrow the time range", { cap: MS_SCAN_ITEM_CAP });
+          await _msWriteIncompleteSyncMeta(scope, oldestIdInWindow, newestTs, _msPrevSync);
           _msUpdateStatusBar(); _msUpdateScanBtn();
           if (_msPanelEl && _msGridScope === scope) _msReloadGrid().catch(() => {});
           return;
@@ -28932,7 +29017,7 @@ if (type === "warn" && scanLimit !== null) {
         _msScanState.statusDetail = tOr("ms_fetching", "Fetching…");
         _msUpdateStatusBar();
         let res;
-        try { res = await _msFetchPage(endpoint, _msScanState.offset, minId, maxId, channelIdFilter); }
+        try { res = await _msFetchPage(endpoint, _msScanState.offset, minId, curMaxId, channelIdFilter); }
         catch (err) {
           _msScanState.phase = "error";
           _msScanState.error = err.message;
@@ -29017,10 +29102,22 @@ if (type === "warn" && scanLimit !== null) {
           _msScanState.scanned += mediaItems.length;
           if (!newestTs || mediaItems[0].timestamp > newestTs) newestTs = mediaItems[0].timestamp;
         }
+        if (msgs.length) oldestIdInWindow = msgs[msgs.length - 1].id;
 
         _msScanState.offset += 25;
         _msUpdateStatusBar(); _msUpdateProgressBar();
         if (_msPanelEl && _msGridScope === scope) _msReloadGrid().catch(() => {});
+
+        if (_msScanState.offset >= MS_OFFSET_WINDOW_LIMIT
+            && _msScanState.offset < (_msScanState.total || 0)
+            && oldestIdInWindow) {
+          curMaxId = String(BigInt(oldestIdInWindow) - 1n);
+          _msScanState.offset = 0;
+          _msScanState.total = null;
+          oldestIdInWindow = null;
+          await _msSleep(MS_SCAN_DELAY);
+          continue;
+        }
 
         if (_msScanState.offset >= (_msScanState.total || 0) || msgs.length === 0) {
           _msScanState.phase = "complete";
@@ -29042,6 +29139,7 @@ if (type === "warn" && scanLimit !== null) {
         }
         await _msSleep(MS_SCAN_DELAY);
       }
+      if (_msScanAbort) await _msWriteIncompleteSyncMeta(scope, oldestIdInWindow, newestTs, _msPrevSync);
       _msScanState.phase = "idle";
       _msUpdateStatusBar(); _msUpdateScanBtn();
     }
@@ -29219,6 +29317,7 @@ if (type === "warn" && scanLimit !== null) {
       if      (phase === "scanning") _msScanBtnEl.textContent = "⏸ " + (tOr("ms_btn_pause", "Pause"));
       else if (phase === "paused")   _msScanBtnEl.textContent = "▶ " + (tOr("ms_btn_resume", "Resume"));
       else                           _msScanBtnEl.textContent = "⟳ " + (tOr("ms_btn_scan", "Scan"));
+      if (_msStopBtnEl) _msStopBtnEl.style.display = (phase === "scanning" || phase === "paused") ? "" : "none";
     }
 
     function _msStripQuery(u) {
@@ -29250,6 +29349,22 @@ if (type === "warn" && scanLimit !== null) {
       }
     }
 
+    const MS_REFRESH_CONCURRENCY = 2;
+    let _msRefreshInFlight = 0;
+    const _msRefreshWaitQueue = [];
+    function _msAcquireRefreshSlot() {
+      if (_msRefreshInFlight < MS_REFRESH_CONCURRENCY) {
+        _msRefreshInFlight++;
+        return Promise.resolve();
+      }
+      return new Promise(resolve => _msRefreshWaitQueue.push(resolve));
+    }
+    function _msReleaseRefreshSlot() {
+      const next = _msRefreshWaitQueue.shift();
+      if (next) next();
+      else _msRefreshInFlight--;
+    }
+
     function _msIsDiscordCdn(url) {
       try {
         const host = new URL(url).hostname;
@@ -29269,22 +29384,36 @@ if (type === "warn" && scanLimit !== null) {
       item._msRetryCount = (item._msRetryCount || 0) + 1;
       if (item._msRetryCount > 2) { item._msDead = true; return Promise.resolve(false); }
       item._msRefreshPromise = (async () => {
+        await _msAcquireRefreshSlot();
         try {
           const token    = await _msEnsureToken();
-          const endpoint = `${MS_API_BASE}/channels/${item.channel_id}/messages/${item.msg_id}`;
-          const msg = await new Promise((resolve, reject) => {
-            GM_xmlhttpRequest({
-              method:  "GET", url: endpoint,
-              headers: { Authorization: token, "Content-Type": "application/json" },
-              onload:  r => {
-                if (r.status === 200) {
-                  try { resolve(JSON.parse(r.responseText)); }
-                  catch (_) { reject(new Error("parse error")); }
-                } else reject(new Error("HTTP " + r.status));
-              },
-              onerror: () => reject(new Error("network error")),
+          const endpoint = `${MS_API_BASE}/channels/${item.channel_id}/messages?around=${item.msg_id}&limit=5`;
+          let msg = null;
+          for (let attempt = 0; attempt < 3 && !msg; attempt++) {
+            const res = await new Promise((resolve, reject) => {
+              GM_xmlhttpRequest({
+                method:  "GET", url: endpoint,
+                headers: { Authorization: token, "Content-Type": "application/json" },
+                onload:  r => {
+                  if (r.status === 200) {
+                    try {
+                      const arr = JSON.parse(r.responseText);
+                      resolve({ ok: true, data: Array.isArray(arr) ? arr.find(m => m.id === item.msg_id) || null : null });
+                    }
+                    catch (_) { reject(new Error("parse error")); }
+                  } else if (r.status === 429) {
+                    let ra = 2;
+                    try { ra = JSON.parse(r.responseText).retry_after || 2; } catch (_) {}
+                    resolve({ ok: false, retry_after: ra });
+                  } else reject(new Error("HTTP " + r.status));
+                },
+                onerror: () => reject(new Error("network error")),
+              });
             });
-          });
+            if (res.ok) { msg = res.data; break; }
+            await _msSleep(Math.ceil(res.retry_after * 1000) + 100);
+          }
+          if (!msg) { item._msDead = true; return false; }
           const target = _msStripQuery(item.proxy_url || item.url);
           const fresh  = _msExtractMedia(msg).find(m => _msStripQuery(m.proxy_url || m.url) === target);
           if (!fresh) { item._msDead = true; return false; }
@@ -29298,6 +29427,7 @@ if (type === "warn" && scanLimit !== null) {
           item._msDead = true;
           return false;
         } finally {
+          _msReleaseRefreshSlot();
           item._msRefreshPromise = null;
         }
       })();
@@ -29472,7 +29602,7 @@ if (type === "warn" && scanLimit !== null) {
       if (_msGridLoading || !_msGridScope || !_msGridContEl) return;
       _msGridLoading = true;
       try {
-        const items = await _msReadPage(_msGridScope, _msGridFilter, null, MS_PAGE_SIZE, _msChannelFilter);
+        const items = await _msReadPage(_msGridScope, _msGridFilter, null, MS_PAGE_SIZE, _msChannelFilter, _msAuthorTypeFilter, _msPinnedOnly);
         _msGridItems   = items;
         _msGridCursor  = items.length ? [_msGridScope, items[items.length-1].timestamp, items[items.length-1].url] : null;
         _msGridAll     = items.length < MS_PAGE_SIZE;
@@ -29486,7 +29616,7 @@ if (type === "warn" && scanLimit !== null) {
 
     async function _msLoadMoreItems() {
       if (_msGridAll || !_msGridScope || !_msGridCursor) return;
-      const more = await _msReadPage(_msGridScope, _msGridFilter, _msGridCursor, MS_PAGE_SIZE, _msChannelFilter);
+      const more = await _msReadPage(_msGridScope, _msGridFilter, _msGridCursor, MS_PAGE_SIZE, _msChannelFilter, _msAuthorTypeFilter, _msPinnedOnly);
       if (!more.length) { _msGridAll = true; return; }
       _msGridItems  = _msGridItems.concat(more);
       _msGridCursor = [_msGridScope, more[more.length-1].timestamp, more[more.length-1].url];
@@ -29655,11 +29785,15 @@ if (type === "warn" && scanLimit !== null) {
         _msScanBtnEl = _msStatusBarEl = _msProgressEl = _msGridContEl = null;
         _msScopeSelEl = _msTypeSelEl = null;
         _msChanFilterSelEl = _msChanFilterRowEl = null;
+        _msAuthorTypeSelEl = _msPinnedChkEl = null;
+        _msStopBtnEl = null;
         return;
       }
       const { scope, guildId, channelId } = _msDetectScope();
       _msGridScope  = scope;
       _msGridFilter = "all";
+      _msAuthorTypeFilter = "all";
+      _msPinnedOnly = false;
       _msGridItems  = [];
       _msGridRendered.clear();
 
@@ -29790,6 +29924,39 @@ if (type === "warn" && scanLimit !== null) {
       });
       toolbar.appendChild(_msTypeSelEl);
 
+      const _msStaleCacheHint = tOr("ms_filter_stale_cache_hint", "Only applies to media scanned after this update — older cached results may need a rescan");
+      _msAuthorTypeSelEl = document.createElement("select");
+      _msAuthorTypeSelEl.style.cssText = _msTypeSelEl.style.cssText;
+      _msAuthorTypeSelEl.title = _msStaleCacheHint;
+      [["all", tOr("ms_authortype_all", "All")], ["user", tOr("ms_authortype_user", "User")], ["bot", "Bot"], ["webhook", "Webhook"]].forEach(([v, lbl]) => {
+        const o = document.createElement("option");
+        o.value = v; o.textContent = lbl;
+        _msAuthorTypeSelEl.appendChild(o);
+      });
+      _msAuthorTypeSelEl.addEventListener("change", () => {
+        _msAuthorTypeFilter = _msAuthorTypeSelEl.value;
+        _msGridItems  = []; _msGridRendered.clear();
+        if (_msGridContEl) _msGridContEl.innerHTML = "";
+        _msReloadGrid().catch(() => {});
+      });
+      toolbar.appendChild(_msAuthorTypeSelEl);
+
+      const _msPinnedWrapEl = document.createElement("label");
+      _msPinnedWrapEl.style.cssText = "display:flex;align-items:center;gap:4px;font-size:12px;color:#dbdee1;cursor:pointer;flex-shrink:0;user-select:none;";
+      _msPinnedWrapEl.title = _msStaleCacheHint;
+      _msPinnedChkEl = document.createElement("input");
+      _msPinnedChkEl.type = "checkbox";
+      _msPinnedChkEl.style.cssText = "cursor:pointer;margin:0;";
+      _msPinnedChkEl.addEventListener("change", () => {
+        _msPinnedOnly = _msPinnedChkEl.checked;
+        _msGridItems  = []; _msGridRendered.clear();
+        if (_msGridContEl) _msGridContEl.innerHTML = "";
+        _msReloadGrid().catch(() => {});
+      });
+      _msPinnedWrapEl.appendChild(_msPinnedChkEl);
+      _msPinnedWrapEl.appendChild(document.createTextNode(tOr("ms_filter_pinned_only", "📌 Pinned only")));
+      toolbar.appendChild(_msPinnedWrapEl);
+
       _msRangeSelEl = document.createElement("select");
       _msRangeSelEl.style.cssText = _msTypeSelEl.style.cssText;
       const rangeOptions = [
@@ -29847,6 +30014,12 @@ if (type === "warn" && scanLimit !== null) {
       });
       toolbar.appendChild(_msScanBtnEl);
 
+      _msStopBtnEl = document.createElement("button");
+      _msStopBtnEl.textContent = "⏹ " + tOr("ms_btn_stop", "Stop");
+      _msStopBtnEl.style.cssText = "background:rgba(237,66,69,0.2);border:1px solid rgba(237,66,69,0.35);color:#dbdee1;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;flex-shrink:0;display:none;";
+      _msStopBtnEl.addEventListener("click", () => { _msStop(); });
+      toolbar.appendChild(_msStopBtnEl);
+
       const closeBtn = document.createElement("button");
       closeBtn.textContent = "✕";
       closeBtn.style.cssText = "background:rgba(0,0,0,0.25);border:none;color:#72767d;font-size:14px;cursor:pointer;padding:3px 7px;border-radius:4px;line-height:1;flex-shrink:0;margin-left:2px;";
@@ -29866,6 +30039,8 @@ if (type === "warn" && scanLimit !== null) {
         _msScanBtnEl = _msStatusBarEl = _msProgressEl = _msGridContEl = null;
         _msScopeSelEl = _msTypeSelEl = null;
         _msChanFilterSelEl = _msChanFilterRowEl = null;
+        _msAuthorTypeSelEl = _msPinnedChkEl = null;
+        _msStopBtnEl = null;
         document.removeEventListener("keydown", panelEsc, false);
       });
       toolbar.appendChild(closeBtn);
