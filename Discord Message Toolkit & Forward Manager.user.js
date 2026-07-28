@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.7.0
+// @version      2.7.7.2
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -56,7 +56,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.7.0";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.7.2";
 
   const GMStore = {
     
@@ -28581,6 +28581,8 @@ if (type === "warn" && scanLimit !== null) {
     let _msToken        = null;
     let _msScanAbort    = false;
     let _msPanelEl      = null;
+    let _msNavDebounce  = null;
+    let _msOnUrlChange  = null;
     let _msGridItems    = [];
     let _msGridCursor   = null;
     let _msGridAll      = false;
@@ -29787,6 +29789,12 @@ if (type === "warn" && scanLimit !== null) {
         _msChanFilterSelEl = _msChanFilterRowEl = null;
         _msAuthorTypeSelEl = _msPinnedChkEl = null;
         _msStopBtnEl = null;
+        clearTimeout(_msNavDebounce);
+        window.removeEventListener("ms:locationchange", _msOnUrlChange);
+        window.removeEventListener("popstate", _msOnUrlChange);
+        if (typeof navigation !== "undefined") {
+          navigation.removeEventListener("navigate", _msOnUrlChange);
+        }
         return;
       }
       const { scope, guildId, channelId } = _msDetectScope();
@@ -29859,6 +29867,9 @@ if (type === "warn" && scanLimit !== null) {
       _msGridScope = _msScopeSelEl.value;
 
       _msScopeSelEl.addEventListener("change", () => {
+        if ((_msScanState.phase === "scanning" || _msScanState.phase === "paused") && _msScanState.scope !== _msScopeSelEl.value) {
+          _msStop();
+        }
         _msGridScope = _msScopeSelEl.value;
         _msChannelFilter = "all";
         _msGridItems = []; _msGridRendered.clear();
@@ -29868,12 +29879,16 @@ if (type === "warn" && scanLimit !== null) {
         _msUpdateStatusBar();
       });
 
-      let _msNavDebounce = null;
-      const _msOnUrlChange = () => {
+      _msNavDebounce = null;
+      _msOnUrlChange = () => {
         const det = _msDetectScope();
         if (!det.scope) return;
         if (_msScopeSelEl.value.startsWith("c:") && det.channelId) {
-          _msScopeSelEl.value = `c:${det.channelId}`;
+          const newVal = `c:${det.channelId}`;
+          if ((_msScanState.phase === "scanning" || _msScanState.phase === "paused") && _msScanState.scope !== newVal) {
+            _msStop();
+          }
+          _msScopeSelEl.value = newVal;
           _msGridScope = _msScopeSelEl.value;
           clearTimeout(_msNavDebounce);
           _msNavDebounce = setTimeout(() => {
@@ -29885,6 +29900,9 @@ if (type === "warn" && scanLimit !== null) {
         } else if (_msScopeSelEl.value.startsWith("gc:") && det.guildId && det.channelId) {
           const newVal = `gc:${det.guildId}:${det.channelId}`;
           if (_msScopeSelEl.value !== newVal) {
+            if ((_msScanState.phase === "scanning" || _msScanState.phase === "paused") && _msScanState.scope !== newVal) {
+              _msStop();
+            }
             const optChan = _msScopeSelEl.querySelector('option[value^="gc:"]');
             if (optChan) {
               optChan.value = newVal;
@@ -29902,6 +29920,22 @@ if (type === "warn" && scanLimit !== null) {
           }
         }
       };
+      if (!history.pushState.__msWrapped) {
+        const _msOrigPush    = history.pushState.bind(history);
+        const _msOrigReplace = history.replaceState.bind(history);
+        history.pushState = function (...args) {
+          const r = _msOrigPush(...args);
+          window.dispatchEvent(new Event("ms:locationchange"));
+          return r;
+        };
+        history.pushState.__msWrapped = true;
+        history.replaceState = function (...args) {
+          const r = _msOrigReplace(...args);
+          window.dispatchEvent(new Event("ms:locationchange"));
+          return r;
+        };
+      }
+      window.addEventListener("ms:locationchange", _msOnUrlChange, { passive: true });
       window.addEventListener("popstate", _msOnUrlChange, { passive: true });
       if (typeof navigation !== "undefined") {
         navigation.addEventListener("navigate", _msOnUrlChange, { passive: true });
@@ -30031,6 +30065,7 @@ if (type === "warn" && scanLimit !== null) {
         if (_msDockTabEl) { _msDockTabEl.remove(); _msDockTabEl = null; }
         _msDocked = false; _msDockSide = null; _msDockPeeked = false; _msDockSnapshot = null;
         clearTimeout(_msNavDebounce);
+        window.removeEventListener("ms:locationchange", _msOnUrlChange);
         window.removeEventListener("popstate", _msOnUrlChange);
         if (typeof navigation !== "undefined") {
           navigation.removeEventListener("navigate", _msOnUrlChange);
