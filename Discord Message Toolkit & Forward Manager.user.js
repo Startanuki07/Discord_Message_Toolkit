@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.7.2
+// @version      2.7.9.1
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -56,7 +56,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.7.2";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.9.1";
 
   const GMStore = {
     
@@ -1415,6 +1415,13 @@
       ms_authortype_user: "User",
       ms_filter_pinned_only: "📌 Pinned only",
       ms_filter_stale_cache_hint: "Only applies to media scanned after this update — older cached results may need a rescan",
+      ms_filter_content_placeholder: "Search message text…",
+      ms_adv_filter_toggle: "More filters",
+      ms_mentions_all: "Mentions: Any",
+      ms_mentions_has: "Has mentions",
+      ms_mentions_none: "No mentions",
+      ms_mentions_specific: "Specific user…",
+      ms_mentions_user_placeholder: "Username or display name…",
       ms_items:           "items",
       ms_empty:           "No media scanned yet",
       ms_last_scan:       "Last scan",
@@ -2012,6 +2019,13 @@
       ms_authortype_user: "使用者",
       ms_filter_pinned_only: "📌 僅顯示已釘選",
       ms_filter_stale_cache_hint: "僅套用於此次更新後掃描的資料，較舊的快取結果可能需要重新掃描",
+      ms_filter_content_placeholder: "搜尋訊息內容…",
+      ms_adv_filter_toggle: "更多篩選",
+      ms_mentions_all: "提及：全部",
+      ms_mentions_has: "有提及",
+      ms_mentions_none: "無提及",
+      ms_mentions_specific: "指定使用者…",
+      ms_mentions_user_placeholder: "使用者名稱或顯示名稱…",
       ms_items:           "個媒體",
       ms_empty:           "尚未掃描任何媒體",
       ms_last_scan:       "上次掃描",
@@ -2613,6 +2627,13 @@
       ms_authortype_user: "用户",
       ms_filter_pinned_only: "📌 仅显示已置顶",
       ms_filter_stale_cache_hint: "仅适用于本次更新后扫描的数据，较旧的缓存结果可能需要重新扫描",
+      ms_filter_content_placeholder: "搜索消息内容…",
+      ms_adv_filter_toggle: "更多筛选",
+      ms_mentions_all: "提及：全部",
+      ms_mentions_has: "有提及",
+      ms_mentions_none: "无提及",
+      ms_mentions_specific: "指定用户…",
+      ms_mentions_user_placeholder: "用户名或显示名称…",
       ms_items:           "个媒体",
       ms_empty:           "尚未扫描任何媒体",
       ms_last_scan:       "上次扫描",
@@ -3222,6 +3243,13 @@
       ms_authortype_user: "ユーザー",
       ms_filter_pinned_only: "📌 ピン留めのみ",
       ms_filter_stale_cache_hint: "このアップデート以降にスキャンしたデータにのみ適用されます。古いキャッシュは再スキャンが必要な場合があります",
+      ms_filter_content_placeholder: "メッセージ内容を検索…",
+      ms_adv_filter_toggle: "詳細フィルター",
+      ms_mentions_all: "メンション：すべて",
+      ms_mentions_has: "メンションあり",
+      ms_mentions_none: "メンションなし",
+      ms_mentions_specific: "特定のユーザー…",
+      ms_mentions_user_placeholder: "ユーザー名または表示名…",
       ms_items:           "件",
       ms_empty:           "まだメディアはスキャンされていません",
       ms_last_scan:       "最終スキャン",
@@ -3866,6 +3894,13 @@
       ms_authortype_user: "사용자",
       ms_filter_pinned_only: "📌 고정된 메시지만",
       ms_filter_stale_cache_hint: "이 업데이트 이후 스캔한 데이터에만 적용됩니다. 이전 캐시 결과는 다시 스캔해야 할 수 있습니다",
+      ms_filter_content_placeholder: "메시지 내용 검색…",
+      ms_adv_filter_toggle: "추가 필터",
+      ms_mentions_all: "멘션: 전체",
+      ms_mentions_has: "멘션 있음",
+      ms_mentions_none: "멘션 없음",
+      ms_mentions_specific: "특정 사용자…",
+      ms_mentions_user_placeholder: "사용자 이름 또는 표시 이름…",
       ms_items:           "개",
       ms_empty:           "아직 스캔된 미디어가 없습니다",
       ms_last_scan:       "마지막 스캔",
@@ -4584,6 +4619,13 @@
       ms_authortype_user:       "Usuario",
       ms_filter_pinned_only:    "📌 Solo fijados",
       ms_filter_stale_cache_hint: "Solo se aplica a los medios escaneados después de esta actualización; los resultados en caché más antiguos pueden requerir un nuevo escaneo",
+      ms_filter_content_placeholder: "Buscar en el texto del mensaje…",
+      ms_adv_filter_toggle: "Más filtros",
+      ms_mentions_all: "Menciones: Todas",
+      ms_mentions_has: "Con menciones",
+      ms_mentions_none: "Sin menciones",
+      ms_mentions_specific: "Usuario específico…",
+      ms_mentions_user_placeholder: "Nombre de usuario o de visualización…",
       ms_items:                 "elementos",
       ms_empty:                 "Aún no se ha escaneado ningún archivo",
       ms_last_scan:             "Último escaneo",
@@ -5185,6 +5227,13 @@
       ms_authortype_user:       "Usuário",
       ms_filter_pinned_only:    "📌 Somente fixados",
       ms_filter_stale_cache_hint: "Aplica-se apenas a mídias escaneadas após esta atualização; resultados em cache mais antigos podem precisar de um novo escaneamento",
+      ms_filter_content_placeholder: "Pesquisar no texto da mensagem…",
+      ms_adv_filter_toggle: "Mais filtros",
+      ms_mentions_all: "Menções: Todas",
+      ms_mentions_has: "Com menções",
+      ms_mentions_none: "Sem menções",
+      ms_mentions_specific: "Usuário específico…",
+      ms_mentions_user_placeholder: "Nome de usuário ou de exibição…",
       ms_items:                 "itens",
       ms_empty:                 "Nenhuma mídia escaneada ainda",
       ms_last_scan:             "Última varredura",
@@ -5791,6 +5840,13 @@
       ms_authortype_user:       "Utilisateur",
       ms_filter_pinned_only:    "📌 Épinglés uniquement",
       ms_filter_stale_cache_hint: "S'applique uniquement aux médias scannés après cette mise à jour ; les anciens résultats en cache peuvent nécessiter un nouveau scan",
+      ms_filter_content_placeholder: "Rechercher dans le texte du message…",
+      ms_adv_filter_toggle: "Plus de filtres",
+      ms_mentions_all: "Mentions : Toutes",
+      ms_mentions_has: "Avec mentions",
+      ms_mentions_none: "Sans mentions",
+      ms_mentions_specific: "Utilisateur spécifique…",
+      ms_mentions_user_placeholder: "Nom d'utilisateur ou d'affichage…",
       ms_items:                 "éléments",
       ms_empty:                 "Aucun média scanné pour le moment",
       ms_last_scan:             "Dernier scan",
@@ -6392,6 +6448,13 @@
       ms_authortype_user:       "Пользователь",
       ms_filter_pinned_only:    "📌 Только закреплённые",
       ms_filter_stale_cache_hint: "Применяется только к медиафайлам, отсканированным после этого обновления — для старых закэшированных результатов может потребоваться повторное сканирование",
+      ms_filter_content_placeholder: "Поиск по тексту сообщения…",
+      ms_adv_filter_toggle: "Другие фильтры",
+      ms_mentions_all: "Упоминания: Все",
+      ms_mentions_has: "С упоминаниями",
+      ms_mentions_none: "Без упоминаний",
+      ms_mentions_specific: "Конкретный пользователь…",
+      ms_mentions_user_placeholder: "Имя пользователя или отображаемое имя…",
       ms_items:                 "элементов",
       ms_empty:                 "Медиафайлы ещё не сканировались",
       ms_last_scan:             "Последнее сканирование",
@@ -6982,6 +7045,13 @@
       ms_authortype_user:       "Benutzer",
       ms_filter_pinned_only:    "📌 Nur angeheftete",
       ms_filter_stale_cache_hint: "Gilt nur für Medien, die nach diesem Update gescannt wurden – ältere zwischengespeicherte Ergebnisse müssen möglicherweise neu gescannt werden",
+      ms_filter_content_placeholder: "Nachrichtentext durchsuchen…",
+      ms_adv_filter_toggle: "Weitere Filter",
+      ms_mentions_all: "Erwähnungen: Alle",
+      ms_mentions_has: "Mit Erwähnungen",
+      ms_mentions_none: "Ohne Erwähnungen",
+      ms_mentions_specific: "Bestimmter Benutzer…",
+      ms_mentions_user_placeholder: "Benutzername oder Anzeigename…",
       ms_items:                 "Elemente",
       ms_empty:                 "Noch keine Medien gescannt",
       ms_last_scan:             "Letzter Scan",
@@ -27691,7 +27761,8 @@ unsafeWindow.fetch = function(...args) {
     let _autoDismissTimer = null;
 
     function showBanner(type, message, scanLimit = null) {
-      const editor = document.querySelector('div[data-slate-editor="true"]');
+      const scopedEditor = document.querySelector('[class*="channelTextArea_"] div[data-slate-editor="true"]');
+      const editor = scopedEditor || document.querySelector('div[data-slate-editor="true"]');
       if (!editor) return;
       const slateContainer = editor.closest('[class*="scrollableContainer_"]')
         || editor.parentElement?.parentElement?.parentElement;
@@ -28411,6 +28482,11 @@ if (type === "warn" && scanLimit !== null) {
     let _editorFocused  = false;
 
     function _getEditorAnchor() {
+      const scoped = document.querySelector('[class*="channelTextArea_"] div[data-slate-editor="true"]');
+      if (scoped) {
+        return scoped.closest('[class*="scrollableContainer_"]')
+            || scoped.closest('[class*="channelTextArea_"]');
+      }
       const editor = document.querySelector('div[data-slate-editor="true"]');
       if (!editor) return null;
       return editor.closest('[class*="scrollableContainer_"]')
@@ -28590,6 +28666,9 @@ if (type === "warn" && scanLimit !== null) {
     let _msChannelFilter = "all";
     let _msAuthorTypeFilter = "all";
     let _msPinnedOnly   = false;
+    let _msContentFilter = "";
+    let _msMentionsFilter = "all";
+    let _msMentionsUserQuery = "";
     let _msGridScope    = null;
     let _msGridRendered = new Map();
     let _msScrollTimer  = null;
@@ -28601,6 +28680,11 @@ if (type === "warn" && scanLimit !== null) {
     let _msChanFilterRowEl = null;
     let _msAuthorTypeSelEl = null;
     let _msPinnedChkEl     = null;
+    let _msAdvFilterRowEl  = null;
+    let _msAdvToggleBtnEl  = null;
+    let _msContentFilterInputEl = null;
+    let _msMentionsSelEl   = null;
+    let _msMentionsUserInputEl = null;
     let _msScanBtnEl   = null;
     let _msStopBtnEl   = null;
     let _msStatusBarEl = null;
@@ -28683,6 +28767,8 @@ if (type === "warn" && scanLimit !== null) {
         author_name:  msg.author?.global_name || msg.author?.username || "",
         author_type:  msg.webhook_id ? "webhook" : (msg.author?.bot ? "bot" : "user"),
         pinned:       !!msg.pinned,
+        content:      msg.content || "",
+        mentions:     (msg.mentions || []).map(u => ({ id: u.id, name: u.global_name || u.username || "" })),
       };
     }
 
@@ -28825,7 +28911,7 @@ if (type === "warn" && scanLimit !== null) {
       } catch (_) { return { stats: null, sync: null }; }
     }
 
-    async function _msReadPage(scope, filter, cursorPos, pageSize, chanFilter, authorTypeFilter, pinnedOnly) {
+    async function _msReadPage(scope, filter, cursorPos, pageSize, chanFilter, authorTypeFilter, pinnedOnly, contentFilter, mentionsFilter, mentionsUserQuery) {
       pageSize = pageSize || MS_PAGE_SIZE;
       try {
         const db = await _msIdbOpen();
@@ -28850,7 +28936,11 @@ if (type === "warn" && scanLimit !== null) {
             const chanOk   = !chanFilter || chanFilter === "all" || v.channel_id === chanFilter;
             const authorOk = !authorTypeFilter || authorTypeFilter === "all" || v.author_type === authorTypeFilter;
             const pinnedOk = !pinnedOnly || v.pinned === true;
-            if (typeOk && chanOk && authorOk && pinnedOk) items.push(v);
+            const contentOk = !contentFilter || (v.content || "").toLowerCase().includes(contentFilter.toLowerCase());
+            const mentionsOk = !mentionsFilter || mentionsFilter === "all" || (mentionsFilter === "specific"
+              ? (!mentionsUserQuery || (Array.isArray(v.mentions) && v.mentions.some(m => (m.name || "").toLowerCase().includes(mentionsUserQuery.toLowerCase()))))
+              : (Array.isArray(v.mentions) && (mentionsFilter === "has" ? v.mentions.length > 0 : v.mentions.length === 0)));
+            if (typeOk && chanOk && authorOk && pinnedOk && contentOk && mentionsOk) items.push(v);
             cur.continue();
           };
           req.onerror = e => reject(e.target.error);
@@ -29604,7 +29694,7 @@ if (type === "warn" && scanLimit !== null) {
       if (_msGridLoading || !_msGridScope || !_msGridContEl) return;
       _msGridLoading = true;
       try {
-        const items = await _msReadPage(_msGridScope, _msGridFilter, null, MS_PAGE_SIZE, _msChannelFilter, _msAuthorTypeFilter, _msPinnedOnly);
+        const items = await _msReadPage(_msGridScope, _msGridFilter, null, MS_PAGE_SIZE, _msChannelFilter, _msAuthorTypeFilter, _msPinnedOnly, _msContentFilter, _msMentionsFilter, _msMentionsUserQuery);
         _msGridItems   = items;
         _msGridCursor  = items.length ? [_msGridScope, items[items.length-1].timestamp, items[items.length-1].url] : null;
         _msGridAll     = items.length < MS_PAGE_SIZE;
@@ -29618,7 +29708,7 @@ if (type === "warn" && scanLimit !== null) {
 
     async function _msLoadMoreItems() {
       if (_msGridAll || !_msGridScope || !_msGridCursor) return;
-      const more = await _msReadPage(_msGridScope, _msGridFilter, _msGridCursor, MS_PAGE_SIZE, _msChannelFilter, _msAuthorTypeFilter, _msPinnedOnly);
+      const more = await _msReadPage(_msGridScope, _msGridFilter, _msGridCursor, MS_PAGE_SIZE, _msChannelFilter, _msAuthorTypeFilter, _msPinnedOnly, _msContentFilter, _msMentionsFilter, _msMentionsUserQuery);
       if (!more.length) { _msGridAll = true; return; }
       _msGridItems  = _msGridItems.concat(more);
       _msGridCursor = [_msGridScope, more[more.length-1].timestamp, more[more.length-1].url];
@@ -29788,6 +29878,7 @@ if (type === "warn" && scanLimit !== null) {
         _msScopeSelEl = _msTypeSelEl = null;
         _msChanFilterSelEl = _msChanFilterRowEl = null;
         _msAuthorTypeSelEl = _msPinnedChkEl = null;
+        _msAdvFilterRowEl = _msAdvToggleBtnEl = _msContentFilterInputEl = _msMentionsSelEl = _msMentionsUserInputEl = null;
         _msStopBtnEl = null;
         clearTimeout(_msNavDebounce);
         window.removeEventListener("ms:locationchange", _msOnUrlChange);
@@ -29958,38 +30049,17 @@ if (type === "warn" && scanLimit !== null) {
       });
       toolbar.appendChild(_msTypeSelEl);
 
-      const _msStaleCacheHint = tOr("ms_filter_stale_cache_hint", "Only applies to media scanned after this update — older cached results may need a rescan");
-      _msAuthorTypeSelEl = document.createElement("select");
-      _msAuthorTypeSelEl.style.cssText = _msTypeSelEl.style.cssText;
-      _msAuthorTypeSelEl.title = _msStaleCacheHint;
-      [["all", tOr("ms_authortype_all", "All")], ["user", tOr("ms_authortype_user", "User")], ["bot", "Bot"], ["webhook", "Webhook"]].forEach(([v, lbl]) => {
-        const o = document.createElement("option");
-        o.value = v; o.textContent = lbl;
-        _msAuthorTypeSelEl.appendChild(o);
+      _msAdvToggleBtnEl = document.createElement("button");
+      _msAdvToggleBtnEl.textContent = "⚙️";
+      _msAdvToggleBtnEl.title = tOr("ms_adv_filter_toggle", "More filters");
+      _msAdvToggleBtnEl.style.cssText = "background:none;border:none;cursor:pointer;font-size:14px;padding:3px 6px;border-radius:4px;flex-shrink:0;opacity:0.7;transition:opacity 0.15s;";
+      _msAdvToggleBtnEl.addEventListener("mouseenter", () => { _msAdvToggleBtnEl.style.opacity = "1"; });
+      _msAdvToggleBtnEl.addEventListener("mouseleave", () => { _msAdvToggleBtnEl.style.opacity = _msAdvFilterRowEl.style.display !== "none" ? "1" : "0.7"; });
+      _msAdvToggleBtnEl.addEventListener("click", () => {
+        const showing = _msAdvFilterRowEl.style.display !== "none";
+        _msAdvFilterRowEl.style.display = showing ? "none" : "flex";
       });
-      _msAuthorTypeSelEl.addEventListener("change", () => {
-        _msAuthorTypeFilter = _msAuthorTypeSelEl.value;
-        _msGridItems  = []; _msGridRendered.clear();
-        if (_msGridContEl) _msGridContEl.innerHTML = "";
-        _msReloadGrid().catch(() => {});
-      });
-      toolbar.appendChild(_msAuthorTypeSelEl);
-
-      const _msPinnedWrapEl = document.createElement("label");
-      _msPinnedWrapEl.style.cssText = "display:flex;align-items:center;gap:4px;font-size:12px;color:#dbdee1;cursor:pointer;flex-shrink:0;user-select:none;";
-      _msPinnedWrapEl.title = _msStaleCacheHint;
-      _msPinnedChkEl = document.createElement("input");
-      _msPinnedChkEl.type = "checkbox";
-      _msPinnedChkEl.style.cssText = "cursor:pointer;margin:0;";
-      _msPinnedChkEl.addEventListener("change", () => {
-        _msPinnedOnly = _msPinnedChkEl.checked;
-        _msGridItems  = []; _msGridRendered.clear();
-        if (_msGridContEl) _msGridContEl.innerHTML = "";
-        _msReloadGrid().catch(() => {});
-      });
-      _msPinnedWrapEl.appendChild(_msPinnedChkEl);
-      _msPinnedWrapEl.appendChild(document.createTextNode(tOr("ms_filter_pinned_only", "📌 Pinned only")));
-      toolbar.appendChild(_msPinnedWrapEl);
+      toolbar.appendChild(_msAdvToggleBtnEl);
 
       _msRangeSelEl = document.createElement("select");
       _msRangeSelEl.style.cssText = _msTypeSelEl.style.cssText;
@@ -30075,6 +30145,7 @@ if (type === "warn" && scanLimit !== null) {
         _msScopeSelEl = _msTypeSelEl = null;
         _msChanFilterSelEl = _msChanFilterRowEl = null;
         _msAuthorTypeSelEl = _msPinnedChkEl = null;
+        _msAdvFilterRowEl = _msAdvToggleBtnEl = _msContentFilterInputEl = _msMentionsSelEl = _msMentionsUserInputEl = null;
         _msStopBtnEl = null;
         document.removeEventListener("keydown", panelEsc, false);
       });
@@ -30116,7 +30187,7 @@ if (type === "warn" && scanLimit !== null) {
       };
 
       toolbar.addEventListener("mousedown", e => {
-        if (e.target === _msScanBtnEl || e.target === closeBtn || e.target === _msScopeSelEl || e.target === _msTypeSelEl || e.target === _msRangeSelEl || e.target === dockBtnEl) return;
+        if (e.target === _msScanBtnEl || e.target === closeBtn || e.target === _msScopeSelEl || e.target === _msTypeSelEl || e.target === _msRangeSelEl || e.target === dockBtnEl || e.target === _msAdvToggleBtnEl) return;
         if (_msDocked) return;
         toolbar.style.cursor = "grabbing";
         _msStartDrag(e, () => { toolbar.style.cursor = "grab"; });
@@ -30226,6 +30297,100 @@ if (type === "warn" && scanLimit !== null) {
       _msChanFilterRowEl.appendChild(_msChanFilterSelEl);
       panel.appendChild(_msChanFilterRowEl);
       _msRefreshChanFilterOptions().catch(() => {});
+
+      _msAdvFilterRowEl = document.createElement("div");
+      _msAdvFilterRowEl.style.cssText = [
+        "display:none","flex-wrap:wrap","align-items:center","gap:8px","padding:6px 12px",
+        "border-bottom:1px solid rgba(255,255,255,0.06)","flex-shrink:0",
+        "background:rgba(0,0,0,0.15)","font-size:12px","color:#b5bac1",
+      ].join(";");
+
+      const _msStaleCacheHint = tOr("ms_filter_stale_cache_hint", "Only applies to media scanned after this update — older cached results may need a rescan");
+
+      _msAuthorTypeSelEl = document.createElement("select");
+      _msAuthorTypeSelEl.style.cssText = _msTypeSelEl.style.cssText;
+      _msAuthorTypeSelEl.title = _msStaleCacheHint;
+      [["all", tOr("ms_authortype_all", "All")], ["user", tOr("ms_authortype_user", "User")], ["bot", "Bot"], ["webhook", "Webhook"]].forEach(([v, lbl]) => {
+        const o = document.createElement("option");
+        o.value = v; o.textContent = lbl;
+        _msAuthorTypeSelEl.appendChild(o);
+      });
+      _msAuthorTypeSelEl.addEventListener("change", () => {
+        _msAuthorTypeFilter = _msAuthorTypeSelEl.value;
+        _msGridItems  = []; _msGridRendered.clear();
+        if (_msGridContEl) _msGridContEl.innerHTML = "";
+        _msReloadGrid().catch(() => {});
+      });
+      _msAdvFilterRowEl.appendChild(_msAuthorTypeSelEl);
+
+      const _msPinnedWrapEl = document.createElement("label");
+      _msPinnedWrapEl.style.cssText = "display:flex;align-items:center;gap:4px;font-size:12px;color:#dbdee1;cursor:pointer;flex-shrink:0;user-select:none;";
+      _msPinnedWrapEl.title = _msStaleCacheHint;
+      _msPinnedChkEl = document.createElement("input");
+      _msPinnedChkEl.type = "checkbox";
+      _msPinnedChkEl.style.cssText = "cursor:pointer;margin:0;";
+      _msPinnedChkEl.addEventListener("change", () => {
+        _msPinnedOnly = _msPinnedChkEl.checked;
+        _msGridItems  = []; _msGridRendered.clear();
+        if (_msGridContEl) _msGridContEl.innerHTML = "";
+        _msReloadGrid().catch(() => {});
+      });
+      _msPinnedWrapEl.appendChild(_msPinnedChkEl);
+      _msPinnedWrapEl.appendChild(document.createTextNode(tOr("ms_filter_pinned_only", "📌 Pinned only")));
+      _msAdvFilterRowEl.appendChild(_msPinnedWrapEl);
+
+      _msContentFilterInputEl = document.createElement("input");
+      _msContentFilterInputEl.type = "text";
+      _msContentFilterInputEl.placeholder = tOr("ms_filter_content_placeholder", "Search message text…");
+      _msContentFilterInputEl.title = _msStaleCacheHint;
+      _msContentFilterInputEl.style.cssText = "background:#1e1f22;border:1px solid rgba(255,255,255,0.15);color:#dbdee1;border-radius:6px;padding:3px 8px;font-size:12px;flex:1;min-width:120px;";
+      let _msContentDebounce = null;
+      _msContentFilterInputEl.addEventListener("input", () => {
+        clearTimeout(_msContentDebounce);
+        _msContentDebounce = setTimeout(() => {
+          _msContentFilter = _msContentFilterInputEl.value.trim();
+          _msGridItems  = []; _msGridRendered.clear();
+          if (_msGridContEl) _msGridContEl.innerHTML = "";
+          _msReloadGrid().catch(() => {});
+        }, 400);
+      });
+      _msAdvFilterRowEl.appendChild(_msContentFilterInputEl);
+
+      _msMentionsSelEl = document.createElement("select");
+      _msMentionsSelEl.style.cssText = _msTypeSelEl.style.cssText;
+      _msMentionsSelEl.title = _msStaleCacheHint;
+      [["all", tOr("ms_mentions_all", "Mentions: Any")], ["has", tOr("ms_mentions_has", "Has mentions")], ["none", tOr("ms_mentions_none", "No mentions")], ["specific", tOr("ms_mentions_specific", "Specific user…")]].forEach(([v, lbl]) => {
+        const o = document.createElement("option");
+        o.value = v; o.textContent = lbl;
+        _msMentionsSelEl.appendChild(o);
+      });
+      _msMentionsSelEl.addEventListener("change", () => {
+        _msMentionsFilter = _msMentionsSelEl.value;
+        _msMentionsUserInputEl.style.display = _msMentionsFilter === "specific" ? "" : "none";
+        _msGridItems  = []; _msGridRendered.clear();
+        if (_msGridContEl) _msGridContEl.innerHTML = "";
+        _msReloadGrid().catch(() => {});
+      });
+      _msAdvFilterRowEl.appendChild(_msMentionsSelEl);
+
+      _msMentionsUserInputEl = document.createElement("input");
+      _msMentionsUserInputEl.type = "text";
+      _msMentionsUserInputEl.placeholder = tOr("ms_mentions_user_placeholder", "Username or display name…");
+      _msMentionsUserInputEl.title = _msStaleCacheHint;
+      _msMentionsUserInputEl.style.cssText = "display:none;background:#1e1f22;border:1px solid rgba(255,255,255,0.15);color:#dbdee1;border-radius:6px;padding:3px 8px;font-size:12px;flex:1;min-width:120px;";
+      let _msMentionsUserDebounce = null;
+      _msMentionsUserInputEl.addEventListener("input", () => {
+        clearTimeout(_msMentionsUserDebounce);
+        _msMentionsUserDebounce = setTimeout(() => {
+          _msMentionsUserQuery = _msMentionsUserInputEl.value.trim();
+          _msGridItems  = []; _msGridRendered.clear();
+          if (_msGridContEl) _msGridContEl.innerHTML = "";
+          _msReloadGrid().catch(() => {});
+        }, 400);
+      });
+      _msAdvFilterRowEl.appendChild(_msMentionsUserInputEl);
+
+      panel.appendChild(_msAdvFilterRowEl);
 
       const statsOverlay = document.createElement("div");
       statsOverlay.style.cssText = "display:none;flex-direction:column;gap:10px;padding:14px 16px;flex:1;overflow-y:auto;background:#2b2d31;";
