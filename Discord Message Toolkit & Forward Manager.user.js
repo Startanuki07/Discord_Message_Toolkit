@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.9.1
+// @version      2.7.9.3
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -28605,9 +28605,12 @@ if (type === "warn" && scanLimit !== null) {
     const MS_SCAN_DELAY   = 350;
     const MS_RETRY_DELAY  = 2000;
     const MS_MAX_RETRY    = 5;
-    const MS_CELL_TARGET  = 160;
-    let   MS_CELL_W       = 160;
-    let   MS_CELL_H       = 160;
+    const MS_CELL_SIZE_TIERS = { large: 160, medium: 110, small: 80 };
+    let   _msCellSizeMode = "small";
+    let   MS_CELL_TARGET  = MS_CELL_SIZE_TIERS[_msCellSizeMode];
+    let   MS_CELL_W       = MS_CELL_TARGET;
+    let   MS_CELL_H       = MS_CELL_TARGET;
+    const MS_LAYOUT_SETTINGS_KEY = "ms_layout_settings";
     let   MS_COLS         = 5;
     const MS_BUFFER       = 4;
     const MS_PAGE_SIZE    = 80;
@@ -28642,6 +28645,22 @@ if (type === "warn" && scanLimit !== null) {
     function _msSnowflakeToTimestamp(id) {
       if (!id) return null;
       return Number(BigInt(id) >> 22n) + 1420070400000;
+    }
+
+    function getMosaicLayoutSettings() {
+      const raw = GMStore.get(MS_LAYOUT_SETTINGS_KEY, {}, true) || {};
+      return {
+        cellSizeMode: Object.prototype.hasOwnProperty.call(MS_CELL_SIZE_TIERS, raw.cellSizeMode)
+          ? raw.cellSizeMode : "small",
+        left:   Number.isFinite(raw.left)   ? raw.left   : null,
+        top:    Number.isFinite(raw.top)    ? raw.top    : null,
+        width:  Number.isFinite(raw.width)  ? raw.width  : null,
+        height: Number.isFinite(raw.height) ? raw.height : null,
+      };
+    }
+    function saveMosaicLayoutSettings(patch) {
+      const current = getMosaicLayoutSettings();
+      GMStore.set(MS_LAYOUT_SETTINGS_KEY, { ...current, ...patch }, true);
     }
 
     let _msScanState = {
@@ -28702,6 +28721,7 @@ if (type === "warn" && scanLimit !== null) {
     let _msDockPeeked      = false;
     let _msDockRetractTimer = null;
     let _msDockSnapshot    = null;
+    let _msLayoutSaveTimer = null;
 
     let _msIdbInstance = null;
     let _msIdbReady    = null;
@@ -29896,13 +29916,24 @@ if (type === "warn" && scanLimit !== null) {
       _msGridItems  = [];
       _msGridRendered.clear();
 
+      const _msLayoutSettings = getMosaicLayoutSettings();
+      _msCellSizeMode = _msLayoutSettings.cellSizeMode;
+      MS_CELL_TARGET  = MS_CELL_SIZE_TIERS[_msCellSizeMode];
+      const _msInitW = Number.isFinite(_msLayoutSettings.width)  ? Math.max(480, _msLayoutSettings.width)  : 640;
+      const _msInitH = Number.isFinite(_msLayoutSettings.height) ? Math.max(400, _msLayoutSettings.height) : 560;
+      const _msHasSavedPos = Number.isFinite(_msLayoutSettings.left) && Number.isFinite(_msLayoutSettings.top);
+      const _msInitLeft = _msHasSavedPos ? Math.min(Math.max(0, _msLayoutSettings.left), window.innerWidth  - 100) : null;
+      const _msInitTop  = _msHasSavedPos ? Math.min(Math.max(0, _msLayoutSettings.top),  window.innerHeight - 60)  : null;
+
       const panel = document.createElement("div");
       panel.id = "ms-panel";
       panel.style.cssText = [
-        "position:fixed","top:50%","left:50%",
-        "transform:translate(-50%,-50%)",
-        "width:min(900px,96vw)",
-        "height:min(780px,92vh)",
+        "position:fixed",
+        _msHasSavedPos ? `top:${_msInitTop}px` : "top:50%",
+        _msHasSavedPos ? `left:${_msInitLeft}px` : "left:50%",
+        _msHasSavedPos ? "" : "transform:translate(-50%,-50%)",
+        `width:min(${_msInitW}px,96vw)`,
+        `height:min(${_msInitH}px,92vh)`,
         "background:#2b2d31",
         "border:1px solid rgba(255,255,255,0.1)",
         "border-radius:12px",
@@ -29914,10 +29945,10 @@ if (type === "warn" && scanLimit !== null) {
         "pointer-events:auto","user-select:none",
         "box-sizing:border-box",
         "transition:transform 0.28s cubic-bezier(0.4,0,0.2,1)",
-      ].join(";");
+      ].filter(Boolean).join(";");
 
       const toolbar = document.createElement("div");
-      toolbar.style.cssText = "display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;background:#313338;cursor:grab;min-width:0;overflow:hidden;";
+      toolbar.style.cssText = "display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;background:#313338;cursor:grab;min-width:0;";
 
       const titleEl = document.createElement("span");
       titleEl.textContent = "🖼 Mosaic";
@@ -30092,6 +30123,27 @@ if (type === "warn" && scanLimit !== null) {
       dockBtnEl.addEventListener("mouseleave", () => { dockBtnEl.style.opacity = _msDocked ? "1" : "0.55"; });
       toolbar.appendChild(dockBtnEl);
 
+      const MS_CELL_SIZE_ORDER = ["small", "medium", "large"];
+      const MS_CELL_SIZE_LABEL = { small: "S", medium: "M", large: "L" };
+      const cellSizeBtnEl = document.createElement("button");
+      cellSizeBtnEl.style.cssText = "background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;padding:3px 6px;border-radius:4px;flex-shrink:0;opacity:0.7;transition:opacity 0.15s;color:#dbdee1;";
+      const _msUpdateCellSizeBtn = () => {
+        cellSizeBtnEl.textContent = MS_CELL_SIZE_LABEL[_msCellSizeMode];
+        cellSizeBtnEl.title = tOr("ms_cellsize_title", "Cell size: {mode} (click to change)", { mode: _msCellSizeMode });
+      };
+      _msUpdateCellSizeBtn();
+      cellSizeBtnEl.addEventListener("mouseenter", () => { cellSizeBtnEl.style.opacity = "1"; });
+      cellSizeBtnEl.addEventListener("mouseleave", () => { cellSizeBtnEl.style.opacity = "0.7"; });
+      cellSizeBtnEl.addEventListener("click", () => {
+        const nextIdx = (MS_CELL_SIZE_ORDER.indexOf(_msCellSizeMode) + 1) % MS_CELL_SIZE_ORDER.length;
+        _msCellSizeMode = MS_CELL_SIZE_ORDER[nextIdx];
+        MS_CELL_TARGET  = MS_CELL_SIZE_TIERS[_msCellSizeMode];
+        saveMosaicLayoutSettings({ cellSizeMode: _msCellSizeMode });
+        _msUpdateCellSizeBtn();
+        _msRecalcCols();
+      });
+      toolbar.appendChild(cellSizeBtnEl);
+
       const statsBtnEl = document.createElement("button");
       statsBtnEl.textContent = "📊";
       statsBtnEl.title = tOr("ms_stats_title", "Cache statistics");
@@ -30171,6 +30223,7 @@ if (type === "warn" && scanLimit !== null) {
           panel.style.transition = "transform 0.28s cubic-bezier(0.4,0,0.2,1)";
           document.removeEventListener("mousemove", onMove);
           document.removeEventListener("mouseup",   onUp);
+          saveMosaicLayoutSettings({ left: parseFloat(panel.style.left), top: parseFloat(panel.style.top) });
           onEndCb?.();
         };
         document.addEventListener("mousemove", onMove);
@@ -30187,7 +30240,7 @@ if (type === "warn" && scanLimit !== null) {
       };
 
       toolbar.addEventListener("mousedown", e => {
-        if (e.target === _msScanBtnEl || e.target === closeBtn || e.target === _msScopeSelEl || e.target === _msTypeSelEl || e.target === _msRangeSelEl || e.target === dockBtnEl || e.target === _msAdvToggleBtnEl) return;
+        if (e.target === _msScanBtnEl || e.target === closeBtn || e.target === _msScopeSelEl || e.target === _msTypeSelEl || e.target === _msRangeSelEl || e.target === dockBtnEl || e.target === _msAdvToggleBtnEl || e.target === cellSizeBtnEl) return;
         if (_msDocked) return;
         toolbar.style.cursor = "grabbing";
         _msStartDrag(e, () => { toolbar.style.cursor = "grab"; });
@@ -30523,6 +30576,10 @@ if (type === "warn" && scanLimit !== null) {
           if (_msGridContEl) _msGridContEl.innerHTML = "";
           _msRenderGrid();
         }
+        clearTimeout(_msLayoutSaveTimer);
+        _msLayoutSaveTimer = setTimeout(() => {
+          saveMosaicLayoutSettings({ width: panel.offsetWidth, height: panel.offsetHeight });
+        }, 400);
       };
       const _msPanelRO = new ResizeObserver(_msRecalcCols);
       _msPanelRO.observe(panel);
