@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.9.3
+// @version      2.7.9.9
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -28656,6 +28656,8 @@ if (type === "warn" && scanLimit !== null) {
         top:    Number.isFinite(raw.top)    ? raw.top    : null,
         width:  Number.isFinite(raw.width)  ? raw.width  : null,
         height: Number.isFinite(raw.height) ? raw.height : null,
+        lastScopeKind: (raw.lastScopeKind === "guild" || raw.lastScopeKind === "guild-channel")
+          ? raw.lastScopeKind : null,
       };
     }
     function saveMosaicLayoutSettings(patch) {
@@ -28721,6 +28723,7 @@ if (type === "warn" && scanLimit !== null) {
     let _msDockPeeked      = false;
     let _msDockRetractTimer = null;
     let _msDockSnapshot    = null;
+    let _msDockResizeHandler = null;
     let _msLayoutSaveTimer = null;
 
     let _msIdbInstance = null;
@@ -29906,6 +29909,13 @@ if (type === "warn" && scanLimit !== null) {
         if (typeof navigation !== "undefined") {
           navigation.removeEventListener("navigate", _msOnUrlChange);
         }
+        clearTimeout(_msDockRetractTimer);
+        _msDockRetractTimer = null;
+        if (_msDockTabEl) { _msDockTabEl.remove(); _msDockTabEl = null; }
+        if (_msDockResizeHandler) { window.removeEventListener("resize", _msDockResizeHandler); _msDockResizeHandler = null; }
+        _msDocked = false; _msDockSide = null; _msDockPeeked = false; _msDockSnapshot = null;
+        clearTimeout(_msLayoutSaveTimer);
+        _msLayoutSaveTimer = null;
         return;
       }
       const { scope, guildId, channelId } = _msDetectScope();
@@ -29948,11 +29958,11 @@ if (type === "warn" && scanLimit !== null) {
       ].filter(Boolean).join(";");
 
       const toolbar = document.createElement("div");
-      toolbar.style.cssText = "display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;background:#313338;cursor:grab;min-width:0;";
+      toolbar.style.cssText = "display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 48px 8px 12px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;background:#313338;cursor:grab;min-width:0;";
 
       const titleEl = document.createElement("span");
       titleEl.textContent = "🖼 Mosaic";
-      titleEl.style.cssText = "font-size:14px;font-weight:700;color:#dbdee1;flex-shrink:0;pointer-events:none;";
+      titleEl.style.cssText = "font-size:14px;font-weight:700;color:#dbdee1;flex-shrink:0;pointer-events:none;height:24px;display:inline-flex;align-items:center;";
       toolbar.appendChild(titleEl);
 
       const _msGetSrvName = () => {
@@ -29969,7 +29979,7 @@ if (type === "warn" && scanLimit !== null) {
       };
       const srvName = guildId ? (_msGetSrvName() || (tOr("ms_scope_server", "Server"))) : null;
       _msScopeSelEl = document.createElement("select");
-      _msScopeSelEl.style.cssText = "background:#1e1f22;border:1px solid rgba(255,255,255,0.12);color:#dbdee1;border-radius:6px;padding:3px 6px;font-size:12px;cursor:pointer;";
+      _msScopeSelEl.style.cssText = "background:#1e1f22;border:1px solid rgba(255,255,255,0.12);color:#dbdee1;border-radius:6px;padding:3px 6px;font-size:12px;cursor:pointer;height:24px;box-sizing:border-box;";
 
       const optSrv = document.createElement("option");
       optSrv.value       = guildId ? `g:${guildId}` : (scope || "");
@@ -29985,7 +29995,7 @@ if (type === "warn" && scanLimit !== null) {
         _msScopeSelEl.appendChild(optChan);
       }
 
-      _msScopeSelEl.value = optChan ? optChan.value : optSrv.value;
+      _msScopeSelEl.value = (optChan && _msLayoutSettings.lastScopeKind !== "guild") ? optChan.value : optSrv.value;
       _msGridScope = _msScopeSelEl.value;
 
       _msScopeSelEl.addEventListener("change", () => {
@@ -29993,6 +30003,10 @@ if (type === "warn" && scanLimit !== null) {
           _msStop();
         }
         _msGridScope = _msScopeSelEl.value;
+        const _msScopeKindNow = _msParseScope(_msGridScope)?.kind;
+        if (_msScopeKindNow === "guild" || _msScopeKindNow === "guild-channel") {
+          saveMosaicLayoutSettings({ lastScopeKind: _msScopeKindNow });
+        }
         _msChannelFilter = "all";
         _msGridItems = []; _msGridRendered.clear();
         if (_msGridContEl) _msGridContEl.innerHTML = "";
@@ -30083,13 +30097,22 @@ if (type === "warn" && scanLimit !== null) {
       _msAdvToggleBtnEl = document.createElement("button");
       _msAdvToggleBtnEl.textContent = "⚙️";
       _msAdvToggleBtnEl.title = tOr("ms_adv_filter_toggle", "More filters");
-      _msAdvToggleBtnEl.style.cssText = "background:none;border:none;cursor:pointer;font-size:14px;padding:3px 6px;border-radius:4px;flex-shrink:0;opacity:0.7;transition:opacity 0.15s;";
+      _msAdvToggleBtnEl.style.cssText = "position:relative;background:none;border:none;cursor:pointer;font-size:14px;padding:3px 6px;border-radius:4px;flex-shrink:0;opacity:0.7;transition:opacity 0.15s;height:24px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;";
       _msAdvToggleBtnEl.addEventListener("mouseenter", () => { _msAdvToggleBtnEl.style.opacity = "1"; });
       _msAdvToggleBtnEl.addEventListener("mouseleave", () => { _msAdvToggleBtnEl.style.opacity = _msAdvFilterRowEl.style.display !== "none" ? "1" : "0.7"; });
       _msAdvToggleBtnEl.addEventListener("click", () => {
         const showing = _msAdvFilterRowEl.style.display !== "none";
         _msAdvFilterRowEl.style.display = showing ? "none" : "flex";
       });
+      const _msAdvFilterBadgeEl = document.createElement("span");
+      _msAdvFilterBadgeEl.style.cssText = "display:none;position:absolute;top:-2px;right:-2px;min-width:14px;height:14px;padding:0 3px;border-radius:7px;background:#5865f2;color:#fff;font-size:9px;font-weight:700;line-height:14px;text-align:center;pointer-events:none;";
+      _msAdvToggleBtnEl.appendChild(_msAdvFilterBadgeEl);
+      const _msUpdateAdvFilterBadge = () => {
+        const n = (_msAuthorTypeFilter !== "all" ? 1 : 0) + (_msPinnedOnly ? 1 : 0)
+                + (_msContentFilter ? 1 : 0) + (_msMentionsFilter !== "all" ? 1 : 0);
+        _msAdvFilterBadgeEl.textContent = n;
+        _msAdvFilterBadgeEl.style.display = n > 0 ? "block" : "none";
+      };
       toolbar.appendChild(_msAdvToggleBtnEl);
 
       _msRangeSelEl = document.createElement("select");
@@ -30118,7 +30141,7 @@ if (type === "warn" && scanLimit !== null) {
       const dockBtnEl = document.createElement("button");
       dockBtnEl.title = "Dock to edge";
       dockBtnEl.textContent = "⇤";
-      dockBtnEl.style.cssText = "background:none;border:none;cursor:pointer;font-size:14px;padding:3px 5px;border-radius:4px;flex-shrink:0;opacity:0.55;transition:opacity 0.15s;color:#dbdee1;";
+      dockBtnEl.style.cssText = "background:none;border:none;cursor:pointer;font-size:14px;padding:3px 5px;border-radius:4px;flex-shrink:0;opacity:0.55;transition:opacity 0.15s;color:#dbdee1;height:24px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;";
       dockBtnEl.addEventListener("mouseenter", () => { dockBtnEl.style.opacity = "1"; });
       dockBtnEl.addEventListener("mouseleave", () => { dockBtnEl.style.opacity = _msDocked ? "1" : "0.55"; });
       toolbar.appendChild(dockBtnEl);
@@ -30126,7 +30149,7 @@ if (type === "warn" && scanLimit !== null) {
       const MS_CELL_SIZE_ORDER = ["small", "medium", "large"];
       const MS_CELL_SIZE_LABEL = { small: "S", medium: "M", large: "L" };
       const cellSizeBtnEl = document.createElement("button");
-      cellSizeBtnEl.style.cssText = "background:none;border:none;cursor:pointer;font-size:12px;font-weight:700;padding:3px 6px;border-radius:4px;flex-shrink:0;opacity:0.7;transition:opacity 0.15s;color:#dbdee1;";
+      cellSizeBtnEl.style.cssText = "background:none;border:1px solid rgba(255,255,255,0.15);cursor:pointer;font-size:12px;font-weight:700;padding:2px 6px;border-radius:4px;flex-shrink:0;opacity:0.7;transition:opacity 0.15s,border-color 0.15s;color:#dbdee1;height:24px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;";
       const _msUpdateCellSizeBtn = () => {
         cellSizeBtnEl.textContent = MS_CELL_SIZE_LABEL[_msCellSizeMode];
         cellSizeBtnEl.title = tOr("ms_cellsize_title", "Cell size: {mode} (click to change)", { mode: _msCellSizeMode });
@@ -30147,7 +30170,7 @@ if (type === "warn" && scanLimit !== null) {
       const statsBtnEl = document.createElement("button");
       statsBtnEl.textContent = "📊";
       statsBtnEl.title = tOr("ms_stats_title", "Cache statistics");
-      statsBtnEl.style.cssText = "background:none;border:none;cursor:pointer;font-size:16px;padding:4px 6px;border-radius:4px;flex-shrink:0;opacity:0.7;transition:opacity 0.15s;";
+      statsBtnEl.style.cssText = "background:none;border:none;cursor:pointer;font-size:16px;padding:4px 6px;border-radius:4px;flex-shrink:0;opacity:0.7;transition:opacity 0.15s;height:24px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;";
       statsBtnEl.addEventListener("mouseenter", () => { statsBtnEl.style.opacity = "1"; });
       statsBtnEl.addEventListener("mouseleave", () => { statsBtnEl.style.opacity = "0.7"; });
       let statsVisible = false;
@@ -30178,14 +30201,17 @@ if (type === "warn" && scanLimit !== null) {
 
       const closeBtn = document.createElement("button");
       closeBtn.textContent = "✕";
-      closeBtn.style.cssText = "background:rgba(0,0,0,0.25);border:none;color:#72767d;font-size:14px;cursor:pointer;padding:3px 7px;border-radius:4px;line-height:1;flex-shrink:0;margin-left:2px;";
+      closeBtn.style.cssText = "position:absolute;top:8px;right:12px;z-index:2;background:rgba(0,0,0,0.25);border:none;color:#72767d;font-size:14px;cursor:pointer;padding:3px 7px;border-radius:4px;line-height:1;height:24px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;";
       closeBtn.addEventListener("mouseenter", () => { closeBtn.style.color = "#dbdee1"; closeBtn.style.background = "rgba(237,66,69,0.3)"; });
       closeBtn.addEventListener("mouseleave", () => { closeBtn.style.color = "#72767d"; closeBtn.style.background = "rgba(0,0,0,0.25)"; });
       closeBtn.addEventListener("click", () => {
         clearTimeout(_msDockRetractTimer);
         _msDockRetractTimer = null;
         if (_msDockTabEl) { _msDockTabEl.remove(); _msDockTabEl = null; }
+        if (_msDockResizeHandler) { window.removeEventListener("resize", _msDockResizeHandler); _msDockResizeHandler = null; }
         _msDocked = false; _msDockSide = null; _msDockPeeked = false; _msDockSnapshot = null;
+        clearTimeout(_msLayoutSaveTimer);
+        _msLayoutSaveTimer = null;
         clearTimeout(_msNavDebounce);
         window.removeEventListener("ms:locationchange", _msOnUrlChange);
         window.removeEventListener("popstate", _msOnUrlChange);
@@ -30201,8 +30227,8 @@ if (type === "warn" && scanLimit !== null) {
         _msStopBtnEl = null;
         document.removeEventListener("keydown", panelEsc, false);
       });
-      toolbar.appendChild(closeBtn);
       panel.appendChild(toolbar);
+      panel.appendChild(closeBtn);
 
       let _dragOffX = 0, _dragOffY = 0;
 
@@ -30240,7 +30266,7 @@ if (type === "warn" && scanLimit !== null) {
       };
 
       toolbar.addEventListener("mousedown", e => {
-        if (e.target === _msScanBtnEl || e.target === closeBtn || e.target === _msScopeSelEl || e.target === _msTypeSelEl || e.target === _msRangeSelEl || e.target === dockBtnEl || e.target === _msAdvToggleBtnEl || e.target === cellSizeBtnEl) return;
+        if (e.target === _msScanBtnEl || e.target === _msScopeSelEl || e.target === _msTypeSelEl || e.target === _msRangeSelEl || e.target === dockBtnEl || e.target === _msAdvToggleBtnEl || e.target === cellSizeBtnEl) return;
         if (_msDocked) return;
         toolbar.style.cursor = "grabbing";
         _msStartDrag(e, () => { toolbar.style.cursor = "grab"; });
@@ -30263,7 +30289,7 @@ if (type === "warn" && scanLimit !== null) {
       panel.appendChild(_mkSideBar("right"));
 
       const statusWrap = document.createElement("div");
-      statusWrap.style.cssText = "padding:6px 12px 4px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.06);";
+      statusWrap.style.cssText = "padding:6px 12px 4px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,0.06);background:#1e1f22;";
 
       _msStatusBarEl = document.createElement("div");
       _msStatusBarEl.style.cssText = "font-size:12px;color:#949ba4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;";
@@ -30289,7 +30315,7 @@ if (type === "warn" && scanLimit !== null) {
       _msCustomRowEl.style.cssText = [
         "display:none","align-items:center","gap:8px","padding:6px 12px",
         "border-bottom:1px solid rgba(255,255,255,0.06)","flex-shrink:0",
-        "background:rgba(0,0,0,0.15)","font-size:12px","color:#b5bac1",
+        "background:#1e1f22","font-size:12px","color:#b5bac1",
       ].join(";");
 
       const _mkDateLbl = txt => {
@@ -30333,7 +30359,7 @@ if (type === "warn" && scanLimit !== null) {
       _msChanFilterRowEl.style.cssText = [
         "display:none","align-items:center","gap:8px","padding:6px 12px",
         "border-bottom:1px solid rgba(255,255,255,0.06)","flex-shrink:0",
-        "background:rgba(0,0,0,0.15)","font-size:12px","color:#b5bac1",
+        "background:#1e1f22","font-size:12px","color:#b5bac1",
       ].join(";");
       const _chanLbl = document.createElement("span");
       _chanLbl.textContent = tOr("ms_chan_filter_label", "Channel:");
@@ -30355,7 +30381,7 @@ if (type === "warn" && scanLimit !== null) {
       _msAdvFilterRowEl.style.cssText = [
         "display:none","flex-wrap:wrap","align-items:center","gap:8px","padding:6px 12px",
         "border-bottom:1px solid rgba(255,255,255,0.06)","flex-shrink:0",
-        "background:rgba(0,0,0,0.15)","font-size:12px","color:#b5bac1",
+        "background:#1e1f22","font-size:12px","color:#b5bac1",
       ].join(";");
 
       const _msStaleCacheHint = tOr("ms_filter_stale_cache_hint", "Only applies to media scanned after this update — older cached results may need a rescan");
@@ -30370,6 +30396,7 @@ if (type === "warn" && scanLimit !== null) {
       });
       _msAuthorTypeSelEl.addEventListener("change", () => {
         _msAuthorTypeFilter = _msAuthorTypeSelEl.value;
+        _msUpdateAdvFilterBadge();
         _msGridItems  = []; _msGridRendered.clear();
         if (_msGridContEl) _msGridContEl.innerHTML = "";
         _msReloadGrid().catch(() => {});
@@ -30384,6 +30411,7 @@ if (type === "warn" && scanLimit !== null) {
       _msPinnedChkEl.style.cssText = "cursor:pointer;margin:0;";
       _msPinnedChkEl.addEventListener("change", () => {
         _msPinnedOnly = _msPinnedChkEl.checked;
+        _msUpdateAdvFilterBadge();
         _msGridItems  = []; _msGridRendered.clear();
         if (_msGridContEl) _msGridContEl.innerHTML = "";
         _msReloadGrid().catch(() => {});
@@ -30396,18 +30424,18 @@ if (type === "warn" && scanLimit !== null) {
       _msContentFilterInputEl.type = "text";
       _msContentFilterInputEl.placeholder = tOr("ms_filter_content_placeholder", "Search message text…");
       _msContentFilterInputEl.title = _msStaleCacheHint;
-      _msContentFilterInputEl.style.cssText = "background:#1e1f22;border:1px solid rgba(255,255,255,0.15);color:#dbdee1;border-radius:6px;padding:3px 8px;font-size:12px;flex:1;min-width:120px;";
+      _msContentFilterInputEl.style.cssText = "background:#1e1f22;border:1px solid rgba(255,255,255,0.15);color:#dbdee1;border-radius:6px;padding:5px 8px;font-size:12px;flex-basis:100%;min-width:120px;";
       let _msContentDebounce = null;
       _msContentFilterInputEl.addEventListener("input", () => {
         clearTimeout(_msContentDebounce);
         _msContentDebounce = setTimeout(() => {
           _msContentFilter = _msContentFilterInputEl.value.trim();
+          _msUpdateAdvFilterBadge();
           _msGridItems  = []; _msGridRendered.clear();
           if (_msGridContEl) _msGridContEl.innerHTML = "";
           _msReloadGrid().catch(() => {});
         }, 400);
       });
-      _msAdvFilterRowEl.appendChild(_msContentFilterInputEl);
 
       _msMentionsSelEl = document.createElement("select");
       _msMentionsSelEl.style.cssText = _msTypeSelEl.style.cssText;
@@ -30419,6 +30447,7 @@ if (type === "warn" && scanLimit !== null) {
       });
       _msMentionsSelEl.addEventListener("change", () => {
         _msMentionsFilter = _msMentionsSelEl.value;
+        _msUpdateAdvFilterBadge();
         _msMentionsUserInputEl.style.display = _msMentionsFilter === "specific" ? "" : "none";
         _msGridItems  = []; _msGridRendered.clear();
         if (_msGridContEl) _msGridContEl.innerHTML = "";
@@ -30442,6 +30471,8 @@ if (type === "warn" && scanLimit !== null) {
         }, 400);
       });
       _msAdvFilterRowEl.appendChild(_msMentionsUserInputEl);
+      _msAdvFilterRowEl.appendChild(_msContentFilterInputEl);
+      _msUpdateAdvFilterBadge();
 
       panel.appendChild(_msAdvFilterRowEl);
 
@@ -30660,6 +30691,11 @@ if (type === "warn" && scanLimit !== null) {
         _msDockTabEl.addEventListener("mouseenter", _tabEnter);
         _msDockTabEl.addEventListener("mouseleave", _tabLeave);
         document.documentElement.appendChild(_msDockTabEl);
+
+        _msDockResizeHandler = () => {
+          panel.style.left = (side === "left" ? 0 : (window.innerWidth - r.width)) + "px";
+        };
+        window.addEventListener("resize", _msDockResizeHandler);
       }
 
       function _msUndockFn() {
@@ -30677,6 +30713,7 @@ if (type === "warn" && scanLimit !== null) {
         panel.style.transition = "transform 0.28s cubic-bezier(0.4,0,0.2,1)";
         panel.classList.remove("ms-docked");
         if (_msDockTabEl) { _msDockTabEl.remove(); _msDockTabEl = null; }
+        if (_msDockResizeHandler) { window.removeEventListener("resize", _msDockResizeHandler); _msDockResizeHandler = null; }
         _msDockSide = null;
         _msDockSnapshot = null;
         dockBtnEl.textContent = "⇤";
