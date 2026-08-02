@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.9.9
+// @version      2.7.9.12
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -13639,6 +13639,12 @@
       if (left + rect.width > window.innerWidth - 10)
         left = window.innerWidth - rect.width - 10;
       dropdown.style.left = `${left}px`;
+
+      let top = parseFloat(dropdown.style.top) || rect.top;
+      if (top < 10) top = 10;
+      if (top + rect.height > window.innerHeight - 10)
+        top = Math.max(10, window.innerHeight - rect.height - 10);
+      dropdown.style.top = `${top}px`;
     }
 
     function showDropdown(triggerBtn) {
@@ -15468,8 +15474,6 @@
       observer.observe(document.body, { childList: true, subtree: true });
       return observer;
     }
-
-    initChatEntitySaver();
 
     function initChatInputButton() {
 
@@ -25228,7 +25232,11 @@ unsafeWindow.fetch = function(...args) {
       const scope = _scopeKey();
       if (scope) {
         try {
-          const cached = await _idbGetByScope(scope);
+          const ctx = _getCtx();
+          const filterForScope = arr => (_browseScope === "channel" && ctx?.channelId)
+            ? arr.filter(m => m.channel_id === ctx.channelId)
+            : arr;
+          const cached = filterForScope(await _idbGetByScope(scope));
           if (cached.length > 0 && capturedGen === _browseGen) {
             _browseData   = cached;
             _browseOffset = cached.length;
@@ -25239,8 +25247,9 @@ unsafeWindow.fetch = function(...args) {
                 if (newCount > 0 && capturedGen === _browseGen) {
                   _idbGetByScope(scope).then(refreshed => {
                     if (capturedGen !== _browseGen) return;
-                    _browseData   = refreshed;
-                    _browseOffset = refreshed.length;
+                    const refreshedFiltered = filterForScope(refreshed);
+                    _browseData   = refreshedFiltered;
+                    _browseOffset = refreshedFiltered.length;
                     _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
                   });
                 }
