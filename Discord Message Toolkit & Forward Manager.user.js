@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.9.12
+// @version      2.7.9.16
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -1310,6 +1310,7 @@
 
       em_col_title: "My Collections",
       em_col_add_success: 'Saved to "{g}"!',
+      em_col_add_duplicate: 'Already in "{g}"',
       em_col_tab_new: "New Tab",
       em_col_tab_prompt: "New Tab Name:",
       em_col_empty_tab: "This tab is empty.",
@@ -1921,6 +1922,7 @@
 
       em_col_title: "我的收藏庫",
       em_col_add_success: "已儲存到「{g}」！",
+      em_col_add_duplicate: "已經在「{g}」中",
       em_col_tab_new: "新增分頁",
       em_col_tab_prompt: "新分頁名稱：",
       em_col_empty_tab: "此分頁尚無內容。",
@@ -2530,6 +2532,7 @@
 
       em_col_title: "我的收藏库",
       em_col_add_success: '已保存到"{g}"！',
+      em_col_add_duplicate: '已经在"{g}"中',
       em_col_tab_new: "新增标签页",
       em_col_tab_prompt: "新标签页名称：",
       em_col_empty_tab: "此标签页暂无内容。",
@@ -3146,6 +3149,7 @@
 
       em_col_title: "マイコレクション",
       em_col_add_success: "「{g}」に保存しました！",
+      em_col_add_duplicate: "「{g}」に既に保存されています",
       em_col_tab_new: "新しいタブ",
       em_col_tab_prompt: "新しいタブ名：",
       em_col_empty_tab: "このタブは空です。",
@@ -3754,6 +3758,7 @@
 
       em_col_title: "내 컬렉션",
       em_col_add_success: '"{g}"에 저장되었습니다！',
+      em_col_add_duplicate: '이미 "{g}"에 저장되어 있습니다',
       em_col_tab_new: "새 탭",
       em_col_tab_prompt: "새 탭 이름:",
       em_col_empty_tab: "이 탭은 비어 있습니다.",
@@ -4346,6 +4351,7 @@
 
       em_col_title: "Mis colecciones",
       em_col_add_success: '¡Guardado en "{g}"!',
+      em_col_add_duplicate: 'Ya está en "{g}"',
       em_col_tab_new: "Nueva pestaña",
       em_col_tab_prompt: "Nombre de la nueva pestaña:",
       em_col_empty_tab: "Esta pestaña está vacía.",
@@ -4955,6 +4961,7 @@
 
       em_col_title: "Minhas coleções",
       em_col_add_success: 'Salvo em "{g}"!',
+      em_col_add_duplicate: 'Já está em "{g}"',
       em_col_tab_new: "Nova aba",
       em_col_tab_prompt: "Nome da nova aba:",
       em_col_empty_tab: "Esta aba está vazia.",
@@ -5573,6 +5580,7 @@
 
       em_col_title: "Mes collections",
       em_col_add_success: "Enregistré dans « {g} » !",
+      em_col_add_duplicate: "Déjà dans « {g} »",
       em_col_tab_new: "Nouvel onglet",
       em_col_tab_prompt: "Nom du nouvel onglet :",
       em_col_empty_tab: "Cet onglet est vide.",
@@ -6182,6 +6190,7 @@
 
       em_col_title: "Мои коллекции",
       em_col_add_success: "Сохранено в «{g}»!",
+      em_col_add_duplicate: "Уже в «{g}»",
       em_col_tab_new: "Новая вкладка",
       em_col_tab_prompt: "Название новой вкладки:",
       em_col_empty_tab: "Эта вкладка пуста.",
@@ -6785,6 +6794,7 @@
       wm_api_send_fail: "❌ API fehlgeschlagen — Konsole prüfen",
       em_col_title: "Meine Sammlungen",
       em_col_add_success: "In \"{g}\" gespeichert!",
+      em_col_add_duplicate: "Bereits in \"{g}\"",
       em_col_tab_new: "Neuer Tab",
       em_col_tab_prompt: "Name des neuen Tabs:",
       em_col_empty_tab: "Dieser Tab ist leer.",
@@ -13114,6 +13124,8 @@
             inputFolderBtn.classList.remove("my-eat-anim");
           }, 800);
         }
+      } else {
+        showEmojiToast(t("em_col_add_duplicate", { g: colName }));
       }
     }
 
@@ -13616,6 +13628,7 @@
     let currentActiveTab = "General";
     let batchTargetMode = false;
     let activeBatchCollection = null;
+    let _typeSwitchLock = false;
     let _pendingScrollTarget = null;
     let activeBatchType = null;
     let dragSrcIndex = null;
@@ -14151,8 +14164,25 @@
         typeTab.addEventListener("mousedown", (e) => e.stopPropagation());
         typeTab.onclick = (e) => {
           e.stopPropagation();
-          currentActiveTab = "General";
-          renderTabsView(input, id);
+          if (id === type || _typeSwitchLock) return;
+          _typeSwitchLock = true;
+          const dd = document.querySelector(".my-popover-menu");
+          if (dd) {
+            dd.style.transition = "opacity 0.12s ease";
+            dd.style.pointerEvents = "none";
+            dd.style.opacity = "0.3";
+          }
+          setTimeout(() => {
+            currentActiveTab = "General";
+            renderTabsView(input, id);
+            const freshDd = document.querySelector(".my-popover-menu");
+            if (freshDd) {
+              freshDd.style.transition = "opacity 0.12s ease";
+              freshDd.style.opacity = "1";
+              freshDd.style.pointerEvents = "auto";
+            }
+            _typeSwitchLock = false;
+          }, 130);
         };
         typeSidebar.appendChild(typeTab);
       });
@@ -15506,6 +15536,11 @@
 
         btn.onclick = (e) => {
           e.stopPropagation();
+          const dropdown = document.querySelector(".my-popover-menu");
+          if (dropdown?.classList.contains("show") && activeTrigger === btn) {
+            closeAllMenus();
+            return;
+          }
           closeAllMenus();
           const channelTextArea = container.closest(
             '[class*="channelTextArea"], [class*="channelTextarea"]',
@@ -15524,6 +15559,9 @@
         dropdown.className = "my-popover-menu input-mode show";
         dropdown.style.padding = "4px";
         dropdown.style.visibility = "visible";
+        dropdown.style.opacity = "0";
+        dropdown.style.pointerEvents = "none";
+        dropdown.style.transition = "opacity 0.12s ease";
 
         const types = [
           { id: TYPES.EMOJI, label: t("em_menu_emoji"), icon: "😃" },
@@ -15595,6 +15633,13 @@
         updatePosition();
         activeDropdown = dropdown;
         activeTrigger = triggerBtn;
+
+        requestAnimationFrame(() => {
+          dropdown.style.opacity = "1";
+        });
+        setTimeout(() => {
+          dropdown.style.pointerEvents = "auto";
+        }, 150);
       };
 
       const DMT_BTN_SEL = 'div[class*="buttons__"], div[class*="buttonsInner_"]';
