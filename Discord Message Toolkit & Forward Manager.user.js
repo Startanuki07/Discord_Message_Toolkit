@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.9.16
+// @version      2.7.9.17
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -41,7 +41,7 @@
 // @connect     cdn.discordapp.com
 // @connect     media.discordapp.net
 // @connect     fixcdn.hyonsu.com
-// 💡" fixcdn.hyonsu.com " Requires explicit user consent before connecting.
+// 💡" fixcdn.hyonsu.com " Used only without API mode; the script asks for confirmation before connecting.
 // ==/UserScript==
 
 (function () {
