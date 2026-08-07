@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.7.9.17
+// @version      2.8.0.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -1320,6 +1320,9 @@
       em_modal_create_new: "+ Create New...",
       em_col_refresh_tooltip: "Refresh all GIF previews across all tabs (re-fetch expired CDN cache)",
       em_settings_tooltip: "Emoji/GIF/Sticker panel settings",
+      em_popout_tooltip: "Pop out as floating window",
+      em_float_reset_tooltip: "Reset position & size",
+      em_float_close_tooltip: "Close",
       em_settings_title: "Panel Settings",
       em_settings_recent_count: "Recently Used candidates",
       em_settings_recent_count_hint: "Number of recently used items shown above the panel (range: {min}-{max}). Existing history may take a few more uses to fill up to a higher count.",
@@ -2233,6 +2236,9 @@
       em_settings_saved: "✨ 設定已儲存",
       em_settings_title: "面板設定",
       em_settings_tooltip: "表情/GIF/貼圖面板設定",
+      em_popout_tooltip: "彈出為浮動視窗",
+      em_float_reset_tooltip: "重置位置與尺寸",
+      em_float_close_tooltip: "關閉",
       cs_deep_search_tip: "深度搜尋（透過 API 掃描訊息歷史記錄）",
       cs_deep_search_need_token: "深度搜尋需要先啟用蟲洞 API 模式",
       cs_deep_searching: "正在搜尋訊息歷史記錄…",
@@ -2842,6 +2848,9 @@
       em_settings_saved: "✨ 设置已保存",
       em_settings_title: "面板设置",
       em_settings_tooltip: "表情/GIF/贴纸面板设置",
+      em_popout_tooltip: "弹出为浮动窗口",
+      em_float_reset_tooltip: "重置位置和尺寸",
+      em_float_close_tooltip: "关闭",
       cs_deep_search_tip: "深度搜索（通过 API 扫描消息历史记录）",
       cs_deep_search_need_token: "深度搜索需要先启用虫洞 API 模式",
       cs_deep_searching: "正在搜索消息历史记录…",
@@ -3453,6 +3462,9 @@
       em_settings_saved: "✨ 設定を保存しました",
       em_settings_title: "パネル設定",
       em_settings_tooltip: "絵文字/GIF/スタンプパネル設定",
+      em_popout_tooltip: "フローティングウィンドウとして表示",
+      em_float_reset_tooltip: "位置とサイズをリセット",
+      em_float_close_tooltip: "閉じる",
       cs_deep_search_tip: "詳細検索（APIでメッセージ履歴をスキャン）",
       cs_deep_search_need_token: "詳細検索を使うにはワームホールAPIモードを先に有効にしてください",
       cs_deep_searching: "メッセージ履歴を検索中…",
@@ -4061,6 +4073,9 @@
       em_settings_saved: "✨ 설정이 저장되었습니다",
       em_settings_title: "패널 설정",
       em_settings_tooltip: "이모지/GIF/스티커 패널 설정",
+      em_popout_tooltip: "플로팅 창으로 전환",
+      em_float_reset_tooltip: "위치 및 크기 초기화",
+      em_float_close_tooltip: "닫기",
       cs_deep_search_tip: "심층 검색 (API로 메시지 기록을 스캔)",
       cs_deep_search_need_token: "심층 검색을 사용하려면 먼저 웜홀 API 모드를 활성화해야 합니다",
       cs_deep_searching: "메시지 기록 검색 중…",
@@ -4668,6 +4683,9 @@
       ms_resuming:              "Reanudando…",
       ms_scope_channel_cur:     "Canal actual",
       em_settings_tooltip:              "Configuración del panel de Emoji/GIF/Sticker",
+      em_popout_tooltip:                "Abrir como ventana flotante",
+      em_float_reset_tooltip:           "Restablecer posición y tamaño",
+      em_float_close_tooltip:           "Cerrar",
       em_settings_title:                "Configuración del panel",
       em_settings_recent_count:         "Elementos recientes",
       em_settings_recent_count_hint:    "Número de elementos recientes mostrados encima del panel (rango: {min}-{max}). El historial existente puede tardar algunos usos más en llenarse hasta un número mayor.",
@@ -5277,6 +5295,9 @@
       ms_resuming:              "Retomando…",
       ms_scope_channel_cur:     "Canal atual",
       em_settings_tooltip:              "Configurações do painel de Emoji/GIF/Sticker",
+      em_popout_tooltip:                "Abrir como janela flutuante",
+      em_float_reset_tooltip:           "Redefinir posição e tamanho",
+      em_float_close_tooltip:           "Fechar",
       em_settings_title:                "Configurações do painel",
       em_settings_recent_count:         "Itens recentes",
       em_settings_recent_count_hint:    "Número de itens recentes exibidos acima do painel (intervalo: {min}-{max}). O histórico existente pode levar mais alguns usos até preencher um número maior.",
@@ -5891,6 +5912,9 @@
       ms_resuming:              "Reprise…",
       ms_scope_channel_cur:     "Canal actuel",
       em_settings_tooltip:              "Paramètres du panneau Emoji/GIF/Sticker",
+      em_popout_tooltip:                "Ouvrir en fenêtre flottante",
+      em_float_reset_tooltip:           "Réinitialiser position et taille",
+      em_float_close_tooltip:           "Fermer",
       em_settings_title:                "Paramètres du panneau",
       em_settings_recent_count:         "Éléments récents",
       em_settings_recent_count_hint:    "Nombre d'éléments récents affichés au-dessus du panneau (plage : {min}-{max}). L'historique existant peut nécessiter quelques utilisations supplémentaires pour atteindre un nombre plus élevé.",
@@ -6500,6 +6524,9 @@
       ms_resuming:              "Возобновление…",
       ms_scope_channel_cur:     "Текущий канал",
       em_settings_tooltip:              "Настройки панели Emoji/GIF/Sticker",
+      em_popout_tooltip:                "Открыть как плавающее окно",
+      em_float_reset_tooltip:           "Сбросить позицию и размер",
+      em_float_close_tooltip:           "Закрыть",
       em_settings_title:                "Настройки панели",
       em_settings_recent_count:         "Недавние элементы",
       em_settings_recent_count_hint:    "Количество недавних элементов, отображаемых над панелью (диапазон: {min}-{max}). Существующей истории может потребоваться ещё несколько использований, чтобы достичь большего значения.",
@@ -7098,6 +7125,9 @@
       ms_resuming:              "Wird fortgesetzt…",
       ms_scope_channel_cur:     "Aktueller Kanal",
       em_settings_tooltip:              "Einstellungen für Emoji/GIF/Sticker-Panel",
+      em_popout_tooltip:                "Als schwebendes Fenster öffnen",
+      em_float_reset_tooltip:           "Position und Größe zurücksetzen",
+      em_float_close_tooltip:           "Schließen",
       em_settings_title:                "Panel-Einstellungen",
       em_settings_recent_count:         "Zuletzt verwendete Elemente",
       em_settings_recent_count_hint:    "Anzahl der zuletzt verwendeten Elemente über dem Panel (Bereich: {min}-{max}). Der vorhandene Verlauf benötigt möglicherweise noch etwas Nutzung, um eine höhere Zahl zu erreichen.",
@@ -12624,12 +12654,55 @@
 
             .my-panel-settings-btn {
                 position: absolute; top: 4px; right: 4px; z-index: 10;
-                width: 18px; height: 18px; line-height: 18px; text-align: center;
-                font-size: 11px; cursor: pointer; border-radius: 3px;
-                opacity: 0.45; transition: opacity 0.15s, background 0.15s;
+                width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+                cursor: pointer; border-radius: 3px;
+                opacity: 0.7; transition: opacity 0.15s, background 0.15s;
                 user-select: none;
             }
             .my-panel-settings-btn:hover { opacity: 1; background: rgba(255,255,255,0.1); }
+
+            .my-panel-popout-btn {
+                position: absolute; top: 4px; right: 26px; z-index: 10;
+                width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+                cursor: pointer; border-radius: 3px;
+                opacity: 0.7; transition: opacity 0.15s, background 0.15s;
+                user-select: none;
+            }
+            .my-panel-popout-btn:hover { opacity: 1; background: rgba(255,255,255,0.1); }
+
+            .my-float-wrapper {
+                position: fixed; display: none; flex-direction: column;
+                background: var(--dmt-bg-primary);
+                border: 1px solid var(--dmt-bg-deep);
+                border-radius: 8px; overflow: hidden; box-sizing: border-box;
+                box-shadow: 0 16px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
+                z-index: 2147483647; min-width: 440px; min-height: 300px;
+                
+                resize: both; pointer-events: auto;
+            }
+            .my-float-wrapper.show { display: flex; }
+            .my-float-header {
+                display: flex; align-items: center; gap: 4px;
+                padding: 5px 6px; cursor: move; user-select: none;
+                border-bottom: 1px solid rgba(255,255,255,0.07); flex-shrink: 0;
+            }
+            .my-float-header-spacer { flex: 1; }
+            .my-float-header-btn {
+                cursor: pointer; opacity: 0.55; padding: 2px 6px; border-radius: 4px;
+                font-size: 12px; transition: opacity 0.15s, background 0.15s;
+                user-select: none;
+            }
+            .my-float-header-btn:hover { opacity: 1; background: rgba(255,255,255,0.1); }
+            .my-float-body {
+                flex: 1; min-height: 0; min-width: 0; position: relative;
+            }
+            
+            .my-popover-menu.floating {
+                position: static !important; width: 100% !important; height: 100% !important;
+                max-width: none !important; max-height: none !important;
+                min-width: 0 !important; min-height: 0 !important;
+                box-shadow: none !important; border-radius: 0 !important;
+            }
 
             .my-menu-item { padding: 6px 10px; color: var(--dmt-text-primary); font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.03); }
             .my-menu-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
@@ -12657,9 +12730,9 @@
             .my-emoji-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
             .my-emoji-btn.delete:hover { background: var(--dmt-danger); color: #fff; }
 
-            .my-tabs-header { display: flex; align-items: center; background: var(--dmt-bg-deep); border-bottom: 1px solid #111214; padding: 0 4px; width: 100%; box-sizing: border-box; }
-            .my-tab-scroll-area { display: flex; align-items: center; overflow-x: auto; flex: 1; scrollbar-width: none; }
-            .my-tab-scroll-area::-webkit-scrollbar { display: none; }
+            .my-tabs-header { display: flex; align-items: flex-start; background: var(--dmt-bg-deep); border-bottom: 1px solid #111214; padding: 0 4px; width: 100%; box-sizing: border-box; }
+            
+            .my-tab-scroll-area { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 0; flex: 1; }
             .my-tab-controls { display: flex; align-items: center; flex-shrink: 0; padding-left: 4px; border-left: 1px solid rgba(255,255,255,0.05); margin-left: 4px; }
 
             .my-tab { padding: 8px 12px; font-size: 12px; font-weight: 500; color: var(--dmt-text-muted); cursor: pointer; white-space: nowrap; border-bottom: 2px solid transparent; transition: all 0.2s; user-select: none; }
@@ -12667,7 +12740,7 @@
             .my-tab.active { color: #fff; border-bottom-color: var(--dmt-accent); }
             .my-tab.dragging { opacity: 0.5; background: rgba(255,255,255,0.1); }
 
-            .my-popover-menu.collection-mode { flex-direction: row; align-items: stretch; min-width: 420px; max-width: 720px; }
+            .my-popover-menu.collection-mode { flex-direction: row; align-items: stretch; min-width: 460px; max-width: 720px; }
             .my-col-main { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; overflow: hidden; }
             
             .my-tab-controls { flex-shrink: 0 !important; }
@@ -12767,7 +12840,12 @@
                 100% { opacity: 0; transform: scale(0.5) rotate(30deg); }
             }
 
-.my-tab-content { padding: 8px; overflow-y: auto; flex: 1; min-height: 0; max-height: clamp(200px, 60vh, 400px); background: var(--dmt-bg-surface); position: relative; }
+.my-tab-content { padding: 8px; overflow-y: auto; flex: 1; min-height: 0; max-height: clamp(200px, 60vh, 400px); background: var(--dmt-bg-surface); position: relative; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent; }
+            
+            .my-tab-content::-webkit-scrollbar { width: 4px; }
+            .my-tab-content::-webkit-scrollbar-track { background: transparent; }
+            .my-tab-content::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+            .my-tab-content::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
 
             .my-col-grid { display: grid; gap: 8px; width: 100%; box-sizing: border-box; }
             .my-col-grid.emoji { grid-template-columns: repeat(auto-fill, 58px); gap: 4px; justify-content: start; }
@@ -12991,6 +13069,23 @@
     const _RECENTLY_USED_MIN = 3;
     const _RECENTLY_USED_MAX_CAP = 10;
     const EMOJI_SETTINGS_KEY = "discord_emoji_module_settings";
+
+    const EM_FLOAT_LAYOUT_KEY = "em_float_layout";
+    function getEmFloatLayout() {
+      const raw = GMStore.get(EM_FLOAT_LAYOUT_KEY, {}, true) || {};
+      return {
+        left:   typeof raw.left === "string"   ? raw.left   : null,
+        top:    typeof raw.top === "string"    ? raw.top    : null,
+        width:  typeof raw.width === "string"  ? raw.width  : null,
+        height: typeof raw.height === "string" ? raw.height : null,
+      };
+    }
+    function saveEmFloatLayout(patch) {
+      GMStore.set(EM_FLOAT_LAYOUT_KEY, { ...getEmFloatLayout(), ...patch }, true);
+    }
+    function resetEmFloatLayout() {
+      GMStore.set(EM_FLOAT_LAYOUT_KEY, {}, true);
+    }
 
     function getEmojiModuleSettings() {
       const raw = GMStore.get(EMOJI_SETTINGS_KEY, {}, true) || {};
@@ -13629,6 +13724,9 @@
     let batchTargetMode = false;
     let activeBatchCollection = null;
     let _typeSwitchLock = false;
+    let _emFloatMode = false;
+    let _emFloatWrapper = null;
+    let _emFloatCleanup = null;
     let _pendingScrollTarget = null;
     let activeBatchType = null;
     let dragSrcIndex = null;
@@ -13682,12 +13780,25 @@
         });
       const modal = document.querySelector(".my-save-modal");
       if (modal) modal.remove();
+      if (_emFloatMode) {
+        _emFloatCleanup?.();
+        _emFloatCleanup = null;
+        dropdown.classList.remove("floating");
+        dropdown.style.width = "";
+        dropdown.style.height = "";
+        dropdown.style.minWidth = "";
+        dropdown.style.minHeight = "";
+        dmtGetPortal().appendChild(dropdown);
+        if (_emFloatWrapper) _emFloatWrapper.classList.remove("show");
+        _emFloatMode = false;
+      }
       activeDropdown = null;
       activeTrigger = null;
     }
 
     function _onDocMousedown(e) {
       if (!activeDropdown) return;
+      if (_emFloatMode) return;
       if (e.target.closest(".my-save-modal")) return;
       if (e.target.closest(".my-popover-menu")) return;
       if (
@@ -15160,6 +15271,130 @@
     dmtGetPortal().appendChild(dropdown);
     dropdown.style.pointerEvents = "auto";
 
+    function ensureFloatWrapper() {
+      if (_emFloatWrapper) return _emFloatWrapper;
+      const wrapper = document.createElement("div");
+      wrapper.className = "my-float-wrapper";
+      wrapper.addEventListener("mousedown", (e) => e.stopPropagation());
+
+      const header = document.createElement("div");
+      header.className = "my-float-header";
+
+      const spacer = document.createElement("div");
+      spacer.className = "my-float-header-spacer";
+
+      const resetBtn = document.createElement("div");
+      resetBtn.className = "my-float-header-btn";
+      resetBtn.innerHTML = "↺";
+      resetBtn.title = t("em_float_reset_tooltip");
+      resetBtn.addEventListener("mousedown", (e) => e.stopPropagation());
+      resetBtn.onclick = (e) => {
+        e.stopPropagation();
+        resetEmFloatLayout();
+        applyDefaultFloatLayout(wrapper);
+      };
+
+      const closeBtn = document.createElement("div");
+      closeBtn.className = "my-float-header-btn";
+      closeBtn.innerHTML = "✕";
+      closeBtn.title = t("em_float_close_tooltip");
+      closeBtn.addEventListener("mousedown", (e) => e.stopPropagation());
+      closeBtn.onclick = (e) => {
+        e.stopPropagation();
+        closeAllMenus();
+      };
+
+      header.appendChild(spacer);
+      header.appendChild(resetBtn);
+      header.appendChild(closeBtn);
+
+      const body = document.createElement("div");
+      body.className = "my-float-body";
+
+      wrapper.appendChild(header);
+      wrapper.appendChild(body);
+      dmtGetPortal().appendChild(wrapper);
+
+      _emFloatWrapper = wrapper;
+      _emFloatWrapper._body = body;
+      _emFloatWrapper._header = header;
+      return wrapper;
+    }
+
+    function applyDefaultFloatLayout(wrapper) {
+      const w = 460, h = 500;
+      wrapper.style.width = w + "px";
+      wrapper.style.height = h + "px";
+      wrapper.style.left = Math.round((window.innerWidth - w) / 2) + "px";
+      wrapper.style.top = Math.round((window.innerHeight - h) / 2) + "px";
+    }
+
+    function enterFloatMode() {
+      if (_emFloatMode) return;
+      const wrapper = ensureFloatWrapper();
+      const saved = getEmFloatLayout();
+      if (saved.left && saved.top && saved.width && saved.height) {
+        wrapper.style.left = saved.left;
+        wrapper.style.top = saved.top;
+        wrapper.style.width = saved.width;
+        wrapper.style.height = saved.height;
+      } else {
+        applyDefaultFloatLayout(wrapper);
+      }
+      wrapper._body.appendChild(dropdown);
+      dropdown.classList.add("floating");
+      wrapper.classList.add("show");
+      _emFloatMode = true;
+
+      let ox = 0, oy = 0, dragging = false;
+      const ac = new AbortController();
+      const sig = { signal: ac.signal };
+      wrapper._header.addEventListener("mousedown", (e) => {
+        if (e.button !== 0 || e.target.closest(".my-float-header-btn")) return;
+        dragging = true;
+        ox = e.clientX - wrapper.getBoundingClientRect().left;
+        oy = e.clientY - wrapper.getBoundingClientRect().top;
+        e.preventDefault();
+      }, sig);
+      document.addEventListener("mousemove", (e) => {
+        if (!dragging) return;
+        const nx = Math.max(0, Math.min(window.innerWidth  - 60, e.clientX - ox));
+        const ny = Math.max(0, Math.min(window.innerHeight - 60, e.clientY - oy));
+        wrapper.style.left = nx + "px";
+        wrapper.style.top  = ny + "px";
+      }, sig);
+      document.addEventListener("mouseup", () => {
+        if (!dragging) return;
+        dragging = false;
+        saveEmFloatLayout({
+          left: wrapper.style.left, top: wrapper.style.top,
+          width: wrapper.offsetWidth + "px", height: wrapper.offsetHeight + "px",
+        });
+      }, sig);
+
+      let resizeTimer = null;
+      let ro = null;
+      if (typeof ResizeObserver !== "undefined") {
+        ro = new ResizeObserver(() => {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(() => {
+            if (!wrapper.isConnected || !_emFloatMode) return;
+            saveEmFloatLayout({
+              left: wrapper.style.left, top: wrapper.style.top,
+              width: wrapper.offsetWidth + "px", height: wrapper.offsetHeight + "px",
+            });
+          }, 300);
+        });
+        ro.observe(wrapper);
+      }
+
+      _emFloatCleanup = () => {
+        ac.abort();
+        ro?.disconnect();
+        clearTimeout(resizeTimer);
+      };
+    }
+
     const injectEmojiInputTools = function (pickerContainer) {
       if (!pickerContainer) return;
 
@@ -15605,9 +15840,31 @@
           dropdown.appendChild(item);
         });
 
+        if (!_emFloatMode) {
+          const popoutBtn = document.createElement("div");
+          popoutBtn.className = "my-panel-popout-btn";
+          popoutBtn.innerHTML =
+            '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>' +
+            '<polyline points="15 3 21 3 21 9"></polyline>' +
+            '<line x1="10" y1="14" x2="21" y2="3"></line>' +
+            "</svg>";
+          popoutBtn.title = t("em_popout_tooltip");
+          popoutBtn.addEventListener("mousedown", (e) => e.stopPropagation());
+          popoutBtn.onclick = (e) => {
+            e.stopPropagation();
+            enterFloatMode();
+          };
+          dropdown.appendChild(popoutBtn);
+        }
+
         const settingsBtn = document.createElement("div");
         settingsBtn.className = "my-panel-settings-btn";
-        settingsBtn.innerHTML = "⚙️";
+        settingsBtn.innerHTML =
+          '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+          '<circle cx="12" cy="12" r="3"></circle>' +
+          '<path d="M12 1v4M12 19v4M4.2 4.2l2.9 2.9M16.9 16.9l2.9 2.9M1 12h4M19 12h4M4.2 19.8l2.9-2.9M16.9 7.1l2.9-2.9"></path>' +
+          "</svg>";
         settingsBtn.title = t("em_settings_tooltip");
         settingsBtn.addEventListener("mousedown", (e) => e.stopPropagation());
         settingsBtn.onclick = (e) => {
@@ -16677,7 +16934,7 @@
 
         if (!e.target.closest(".my-popover-menu")) {
           const menu = document.querySelector(".my-popover-menu");
-          if (menu && menu.classList.contains("show")) {
+          if (menu && menu.classList.contains("show") && !menu.classList.contains("floating")) {
             menu.classList.remove("show");
           }
         }
@@ -17758,7 +18015,7 @@
 
     createWormholeContextMenu(wormhole, triggerElement) {
       const dropdown =
-        document.querySelector(".my-popover-menu") ||
+        document.querySelector(".my-popover-menu:not(.floating)") ||
         this.createDropdownElement();
       dropdown.innerHTML = "";
       dropdown.className = "my-popover-menu show";
@@ -17803,7 +18060,7 @@
 
     createGroupContextMenu(group, triggerElement) {
       const dropdown =
-        document.querySelector(".my-popover-menu") ||
+        document.querySelector(".my-popover-menu:not(.floating)") ||
         this.createDropdownElement();
       dropdown.innerHTML = "";
       dropdown.className = "my-popover-menu show";
