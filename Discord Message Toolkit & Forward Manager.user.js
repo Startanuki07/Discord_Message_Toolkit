@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.8.0.19
+// @version      2.8.0.24
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -1587,6 +1587,8 @@
       mp_type_command:          "Command",
       mp_type_other:            "Other",
       mp_loading:               "Loading…",
+      mp_scroll_more:           "{n} loaded — scroll down for more",
+      mp_load_complete:         "All {n} messages loaded",
       mp_no_results:            "No messages found.",
       mp_browse_ctx_changed:    "Server or channel changed — loading stopped. Please reselect Server/Channel to continue browsing.",
       mp_chan_filter_label:     "Filter by channel:",
@@ -1646,6 +1648,7 @@
       mp_task_pause:            "Pause",
       mp_task_cancel:           "Cancel task",
       mp_task_cancel_confirm:   "Cancel and discard this task?",
+      mp_close_panel_confirm:   "A delete task is still running. Closing this panel will pause it — you can resume later. Close anyway?",
       mp_quota_reached:         "Daily quota reached ({limit}/{limit}).\nTask progress: {done} / {total}\nEst. {days} day(s) remaining.",
       mp_quota_continue:        "Continue anyway (risk)",
       mp_quota_tomorrow:        "Resume tomorrow",
@@ -2196,6 +2199,8 @@
       mp_type_command:          "指令回應",
       mp_type_other:            "其他",
       mp_loading:               "載入中…",
+      mp_scroll_more:           "已載入 {n} 則，往下捲動載入更多",
+      mp_load_complete:         "已載入全部 {n} 則訊息",
       mp_no_results:            "未找到訊息。",
       search_scope_hint:     "搜尋範圍僅限已載入的 {n} 則訊息。",
       fav_tab_empty_hint:       "尚未載入任何訊息，請先切換到「瀏覽」頁籤。",
@@ -2252,6 +2257,7 @@
       mp_task_pause:            "暫停",
       mp_task_cancel:           "取消任務",
       mp_task_cancel_confirm:   "確認取消並丟棄此任務？",
+      mp_close_panel_confirm:   "刪除任務仍在執行中，關閉面板會暫停它（之後可繼續），確定要關閉嗎？",
       mp_quota_reached:         "今日配額已達（{limit}/{limit}）。\n任務進度：{done} / {total}\n預計還需 {days} 天完成。",
       mp_quota_continue:        "繼續刪除（自負風險）",
       mp_quota_tomorrow:        "明天再繼續",
@@ -2854,6 +2860,8 @@
       mp_type_command:          "斜杠命令",
       mp_type_other:            "其他",
       mp_loading:               "加载中…",
+      mp_scroll_more:           "已加载 {n} 条，向下滚动加载更多",
+      mp_load_complete:         "已加载全部 {n} 条消息",
       mp_no_results:            "未找到消息。",
       search_scope_hint:     "搜索仅限当前已加载的 {n} 条消息。",
       fav_tab_empty_hint:       "尚未加载任何消息，请先切换到「浏览」标签页。",
@@ -2910,6 +2918,7 @@
       mp_task_pause:            "暂停",
       mp_task_cancel:           "取消任务",
       mp_task_cancel_confirm:   "取消并删除此任务？",
+      mp_close_panel_confirm:   "删除任务仍在执行中，关闭面板会暂停它（之后可继续），确定要关闭吗？",
       mp_quota_reached:         "已达每日上限（{limit}/{limit}）。\n进度：{done} / {total}\n约还需 {days} 天。",
       mp_quota_continue:        "继续（风险自负）",
       mp_quota_tomorrow:        "明天继续",
@@ -3469,6 +3478,8 @@
       mp_type_command:          "コマンド",
       mp_type_other:            "その他",
       mp_loading:               "読み込み中…",
+      mp_scroll_more:           "{n}件読み込み済み — スクロールして続きを読み込む",
+      mp_load_complete:         "全{n}件のメッセージを読み込み済み",
       mp_no_results:            "メッセージが見つかりません。",
       search_scope_hint:     "検索は現在読み込まれている {n} 件のメッセージのみ対象です。",
       fav_tab_empty_hint:       "まだメッセージが読み込まれていません。先に「ブラウズ」タブを開いてください。",
@@ -3525,6 +3536,7 @@
       mp_task_pause:            "一時停止",
       mp_task_cancel:           "タスクをキャンセル",
       mp_task_cancel_confirm:   "このタスクをキャンセルして破棄しますか？",
+      mp_close_panel_confirm:   "削除タスクが実行中です。パネルを閉じると一時停止します（後で再開可能）。閉じてもよろしいですか？",
       mp_quota_reached:         "本日の上限に達しました（{limit}/{limit}）。\n進捗：{done} / {total}\nあと約 {days} 日かかります。",
       mp_quota_continue:        "削除を続ける（自己責任）",
       mp_quota_tomorrow:        "明日また続ける",
@@ -4081,6 +4093,8 @@
       mp_type_command:          "명령어",
       mp_type_other:            "기타",
       mp_loading:               "불러오는 중…",
+      mp_scroll_more:           "{n}개 로드됨 — 스크롤하여 더 불러오기",
+      mp_load_complete:         "전체 {n}개 메시지 로드 완료",
       mp_no_results:            "메시지를 찾을 수 없습니다.",
       search_scope_hint:     "검색 범위는 현재 로드된 {n}개 메시지로 제한됩니다.",
       fav_tab_empty_hint:       "아직 메시지가 로드되지 않았습니다. 먼저 「브라우즈」 탭으로 이동하세요.",
@@ -4137,6 +4151,7 @@
       mp_task_pause:            "일시 정지",
       mp_task_cancel:           "작업 취소",
       mp_task_cancel_confirm:   "이 작업을 취소하고 삭제하시겠습니까?",
+      mp_close_panel_confirm:   "삭제 작업이 실행 중입니다. 패널을 닫으면 일시 중지됩니다 (나중에 재개 가능). 그래도 닫으시겠습니까?",
       mp_quota_reached:         "오늘 한도에 도달했습니다 ({limit}/{limit}).\n진행률: {done} / {total}\n완료까지 약 {days}일 남았습니다.",
       mp_quota_continue:        "계속 삭제 (자기 책임)",
       mp_quota_tomorrow:        "내일 계속하기",
@@ -4642,6 +4657,8 @@
       mp_type_command:          "Comando de barra",
       mp_type_other:            "Otro",
       mp_loading:               "Cargando…",
+      mp_scroll_more:           "{n} cargados — desplázate para cargar más",
+      mp_load_complete:         "Los {n} mensajes cargados",
       mp_no_results:            "No se encontraron mensajes.",
       search_scope_hint:     "La búsqueda se limita a los {n} mensajes cargados.",
       fav_tab_empty_hint:       "Aún no se han cargado mensajes. Ve primero a la pestaña Explorar.",
@@ -4697,6 +4714,7 @@
       mp_task_pause:            "Pausar",
       mp_task_cancel:           "Cancelar tarea",
       mp_task_cancel_confirm:   "¿Cancelar y eliminar esta tarea?",
+      mp_close_panel_confirm:   "Hay una tarea de eliminación en curso. Cerrar este panel la pausará (puedes reanudarla después). ¿Cerrar de todos modos?",
       mp_quota_reached:         "Límite diario alcanzado ({limit}/{limit}).\nProgreso: {done} / {total}\nFaltan ~{days} días.",
       mp_quota_continue:        "Continuar (bajo tu responsabilidad)",
       mp_quota_tomorrow:        "Continuar mañana",
@@ -5255,6 +5273,8 @@
       mp_type_command:          "Comando",
       mp_type_other:            "Outro",
       mp_loading:               "Carregando…",
+      mp_scroll_more:           "{n} carregadas — role para carregar mais",
+      mp_load_complete:         "Todas as {n} mensagens carregadas",
       mp_no_results:            "Nenhuma mensagem encontrada.",
       search_scope_hint:     "A pesquisa é limitada às {n} mensagens atualmente carregadas.",
       fav_tab_empty_hint:       "Nenhuma mensagem carregada ainda. Vá primeiro para a aba Explorar.",
@@ -5310,6 +5330,7 @@
       mp_task_pause:            "Pausar",
       mp_task_cancel:           "Cancelar tarefa",
       mp_task_cancel_confirm:   "Cancelar e excluir esta tarefa?",
+      mp_close_panel_confirm:   "Uma tarefa de exclusão ainda está em execução. Fechar este painel vai pausá-la (pode retomar depois). Fechar mesmo assim?",
       mp_quota_reached:         "Limite diário atingido ({limit}/{limit}).\nProgresso: {done} / {total}\nFaltam ~{days} dias.",
       mp_quota_continue:        "Continuar (por sua conta e risco)",
       mp_quota_tomorrow:        "Continuar amanhã",
@@ -5873,6 +5894,8 @@
       mp_type_command:          "Commande",
       mp_type_other:            "Autre",
       mp_loading:               "Chargement…",
+      mp_scroll_more:           "{n} chargés — faites défiler pour en charger plus",
+      mp_load_complete:         "Les {n} messages sont chargés",
       mp_no_results:            "Aucun message trouvé.",
       search_scope_hint:     "La recherche est limitée aux {n} messages chargés.",
       fav_tab_empty_hint:       "Aucun message chargé pour l'instant. Allez d'abord dans l'onglet Parcourir.",
@@ -5928,6 +5951,7 @@
       mp_task_pause:            "Mettre en pause",
       mp_task_cancel:           "Annuler la tâche",
       mp_task_cancel_confirm:   "Annuler et supprimer cette tâche ?",
+      mp_close_panel_confirm:   "Une tâche de suppression est en cours. Fermer ce panneau la mettra en pause (reprise possible plus tard). Fermer quand même ?",
       mp_quota_reached:         "Limite quotidienne atteinte ({limit}/{limit}).\nProgression : {done} / {total}\nEncore ~{days} jour(s).",
       mp_quota_continue:        "Continuer (à vos risques)",
       mp_quota_tomorrow:        "Continuer demain",
@@ -6486,6 +6510,8 @@
       mp_type_command:          "Команда",
       mp_type_other:            "Другое",
       mp_loading:               "Загрузка…",
+      mp_scroll_more:           "Загружено {n} — прокрутите для загрузки ещё",
+      mp_load_complete:         "Загружены все {n} сообщений",
       mp_no_results:            "Сообщения не найдены.",
       search_scope_hint:     "Поиск ограничен {n} загруженными сообщениями.",
       fav_tab_empty_hint:       "Сообщения ещё не загружены. Сначала перейдите на вкладку «Обзор».",
@@ -6541,6 +6567,7 @@
       mp_task_pause:            "Пауза",
       mp_task_cancel:           "Отменить задачу",
       mp_task_cancel_confirm:   "Отменить и удалить эту задачу?",
+      mp_close_panel_confirm:   "Задача удаления ещё выполняется. Закрытие панели поставит её на паузу (позже можно продолжить). Всё равно закрыть?",
       mp_quota_reached:         "Дневной лимит достигнут ({limit}/{limit}).\nПрогресс: {done} / {total}\nОсталось ~{days} дн.",
       mp_quota_continue:        "Продолжить (на свой риск)",
       mp_quota_tomorrow:        "Продолжить завтра",
@@ -7088,6 +7115,8 @@
       mp_type_command:          "Befehl",
       mp_type_other:            "Sonstige",
       mp_loading:               "Lädt…",
+      mp_scroll_more:           "{n} geladen — zum Nachladen scrollen",
+      mp_load_complete:         "Alle {n} Nachrichten geladen",
       mp_no_results:            "Keine Nachrichten gefunden.",
       search_scope_hint:        "Suche beschränkt auf {n} geladene Nachrichten.",
       fav_tab_empty_hint:       "Noch keine Nachrichten geladen. Zuerst zum Durchsuchen-Tab wechseln.",
@@ -7143,6 +7172,7 @@
       mp_task_pause:            "Pausieren",
       mp_task_cancel:           "Aufgabe abbrechen",
       mp_task_cancel_confirm:   "Aufgabe abbrechen und löschen?",
+      mp_close_panel_confirm:   "Eine Löschaufgabe läuft noch. Wenn du dieses Panel schließt, wird sie pausiert (später fortsetzbar). Trotzdem schließen?",
       mp_quota_reached:         "Tageslimit erreicht ({limit}/{limit}).\nFortschritt: {done} / {total}\nNoch ~{days} Tag(e).",
       mp_quota_continue:        "Trotzdem fortfahren (auf eigene Gefahr)",
       mp_quota_tomorrow:        "Morgen fortfahren",
@@ -24685,6 +24715,7 @@ unsafeWindow.fetch = function(...args) {
     let _browseOffset = 0;
     let _browseTotal  = null;
     let _browseGen    = 0;
+    let _browseUnlockedLimit = 0;
     let _browseScope  = "channel";
     let _browseCtxSnapshot = null;
     let _ctxChangedNotified = false;
@@ -25439,7 +25470,16 @@ unsafeWindow.fetch = function(...args) {
 
     function _updatePrefetchProgress(statusBar) {
       let el = statusBar.querySelector(".mp-prefetch-progress");
-      if (!_prefetchActive && (!_browseTotal || _browseData.length >= Math.min(_browseTotal, parseInt(GMStore.get(SK_PREFETCH_LIMIT,"200",true),10)||200))) {
+      const loaded = _browseData.length;
+      const allLoaded = _browseTotal !== null && _browseOffset >= _browseTotal;
+      if (allLoaded) {
+        if (el) {
+          el.textContent = mp("load_complete", { n: loaded });
+          setTimeout(() => el?.remove(), 1500);
+        }
+        return;
+      }
+      if (!_prefetchActive && !_sentinelLoading && _browseTotal === null) {
         el?.remove(); return;
       }
       if (!el) {
@@ -25448,9 +25488,13 @@ unsafeWindow.fetch = function(...args) {
         el.style.cssText = "font-size:11px;color:var(--dmt-text-muted,#949ba4);margin-left:auto;display:flex;align-items:center;gap:4px;";
         statusBar.appendChild(el);
       }
-      const loaded = _browseData.length;
-      const total = _browseTotal ?? "?";
-      el.textContent = loaded + " / " + total + " " + mp("loading");
+      if (_prefetchActive) {
+        el.textContent = loaded + " " + mp("loading");
+      } else if (_sentinelLoading) {
+        el.textContent = mp("loading");
+      } else {
+        el.textContent = mp("scroll_more", { n: loaded });
+      }
       el.style.display = "";
     }
 
@@ -25607,7 +25651,7 @@ unsafeWindow.fetch = function(...args) {
         resyncBtn.disabled = true; resyncBtn.textContent = tOr("mp_cache_clearing", "Clearing…");
         await _idbClearScope(scope);
         overlay.remove();
-        _browseData = []; _browseOffset = 0; _browseTotal = null;
+        _browseData = []; _browseOffset = 0; _browseTotal = null; _browseUnlockedLimit = 0;
         _browseGen++;
         _stopRequested = false; _prefetchActive = false;
         const msgList = _panelEl?.querySelector(".mp-body");
@@ -25629,6 +25673,30 @@ unsafeWindow.fetch = function(...args) {
       };
       footer.append(resyncBtn, clearAllBtn);
       panel.appendChild(footer);
+    }
+
+    async function _closeMyPostsPanel() {
+      if (!_panelEl) return false;
+      if (_runningTask) {
+        const ok = await dmtConfirm(mp("close_panel_confirm"));
+        if (!ok) return false;
+      }
+      if (_browseObs) { _browseObs.disconnect(); _browseObs = null; }
+      if (_mediaObs) { _mediaObs.disconnect(); _mediaObs = null; }
+      _panelEl.querySelectorAll("[data-has-vid-obs]").forEach(el => {
+        el._vidObs?.disconnect(); el._vidObs = null;
+      });
+      if (typeof _panelEl._mpCleanup === "function") _panelEl._mpCleanup();
+      _setupBrowseSentinel = null;
+      _mpRefreshBtn = null;
+      _mpStatusBar = null;
+      _mpTasksArea = null;
+      _mpInlineProgressEl = null;
+      _mpInlineDeleteTaskId = null;
+      _stopRequested = true; _prefetchActive = false;
+      _abortWait?.();
+      _panelEl.remove(); _panelEl = null;
+      return true;
     }
 
     function _buildPanel() {
@@ -25653,25 +25721,7 @@ unsafeWindow.fetch = function(...args) {
       titleText.textContent = "📝 " + mp("panel_title");
       const closeBtn = document.createElement("button");
       closeBtn.className = "mp-close"; closeBtn.textContent = "✕";
-      closeBtn.onclick = () => {
-        if (_browseObs) { _browseObs.disconnect(); _browseObs = null; }
-        if (_mediaObs) { _mediaObs.disconnect(); _mediaObs = null; }
-        if (_panelEl) {
-          _panelEl.querySelectorAll("[data-has-vid-obs]").forEach(el => {
-            el._vidObs?.disconnect(); el._vidObs = null;
-          });
-        }
-        if (typeof panel._mpCleanup === "function") panel._mpCleanup();
-        _setupBrowseSentinel = null;
-        _mpRefreshBtn = null;
-        _mpStatusBar = null;
-        _mpTasksArea = null;
-        _mpInlineProgressEl = null;
-        _mpInlineDeleteTaskId = null;
-        _stopRequested = true; _prefetchActive = false;
-        _abortWait?.();
-        panel.remove(); _panelEl = null;
-      };
+      closeBtn.onclick = () => _closeMyPostsPanel();
       titlebar.append(titleText, closeBtn);
 
       const tabsRow = document.createElement("div");
@@ -25740,7 +25790,7 @@ unsafeWindow.fetch = function(...args) {
           GMStore.set(SK_LAST_SCOPE, s.key, true);
           scopeRow.querySelectorAll(".mp-scope-btn").forEach(b => b.classList.remove("active"));
           btn.classList.add("active");
-          _browseData = []; _browseOffset = 0; _browseTotal = null;
+          _browseData = []; _browseOffset = 0; _browseTotal = null; _browseUnlockedLimit = 0;
           _selectedIds.clear(); _anchorIdx = null;
           _stopRequested = true; _prefetchActive = false;
           _abortWait?.();
@@ -25761,7 +25811,7 @@ unsafeWindow.fetch = function(...args) {
       function _doRefresh() {
         refreshBtn.classList.add("spinning");
         refreshBtn.classList.remove("needs-refresh");
-        _browseData = []; _browseOffset = 0; _browseTotal = null;
+        _browseData = []; _browseOffset = 0; _browseTotal = null; _browseUnlockedLimit = 0;
         _selectedIds.clear(); _anchorIdx = null;
         _stopRequested = true; _prefetchActive = false;
         _abortWait?.();
@@ -25926,27 +25976,49 @@ unsafeWindow.fetch = function(...args) {
         if (_browseObs) { _browseObs.disconnect(); _browseObs = null; }
         if (_browseTotal !== null && _browseOffset < _browseTotal && _browseData.length < _browseTotal) {
           const capturedGen = _browseGen;
+          let _pausedWaitingExit = false;
           _browseObs = new IntersectionObserver(entries => {
-            if (entries[0].isIntersecting && !_prefetchActive && _browseTotal !== null && _browseOffset < _browseTotal) {
-              _browseObs.disconnect(); _browseObs = null;
-              const prevLen = _browseData.length;
-              _fetchPage(true).then(() => {
-                const q = (searchInput?.value || "").toLowerCase();
-                const allFiltered = _browseData.filter(m =>
-                  _passesTypeFilter(m) && _passesChanFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
-                );
-                const newIds = new Set(_browseData.slice(prevLen).map(m => m.id));
-                const newFiltered = allFiltered.filter(m => newIds.has(m.id));
-                if (newFiltered.length > 0) {
-                  _appendFilteredRows(msgList, newFiltered, allFiltered, selCount, createBtn, cancelBtn);
-                }
-                _refreshChanFilterOptions(capturedGen);
-                if (_browseTotal !== null && _browseOffset < _browseTotal) _setupBrowseSentinel();
-              }).catch(e => {
-                DEBUG && console.warn("[Browse] sentinel _fetchPage failed, re-mounting sentinel:", e);
-                _setupBrowseSentinel();
-              });
+            const isIn = entries[0].isIntersecting;
+            if (_prefetchActive || _browseTotal === null || _browseOffset >= _browseTotal) return;
+
+            if (!isIn) {
+              if (_pausedWaitingExit) _pausedWaitingExit = false;
+              return;
             }
+
+            if (_pausedWaitingExit) return;
+
+            if (_browseData.length >= _browseUnlockedLimit) {
+              _browseUnlockedLimit += (parseInt(GMStore.get(SK_PREFETCH_LIMIT, "200", true), 10) || 200);
+              _pausedWaitingExit = true;
+              _updatePrefetchProgress(statusBar);
+              return;
+            }
+
+            _browseObs.disconnect(); _browseObs = null;
+            _sentinelLoading = true;
+            _updatePrefetchProgress(statusBar);
+            const prevLen = _browseData.length;
+            _fetchPage(true).then(() => {
+              const q = (searchInput?.value || "").toLowerCase();
+              const allFiltered = _browseData.filter(m =>
+                _passesTypeFilter(m) && _passesChanFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
+              );
+              const newIds = new Set(_browseData.slice(prevLen).map(m => m.id));
+              const newFiltered = allFiltered.filter(m => newIds.has(m.id));
+              if (newFiltered.length > 0) {
+                _appendFilteredRows(msgList, newFiltered, allFiltered, selCount, createBtn, cancelBtn);
+              }
+              _refreshChanFilterOptions(capturedGen);
+              _sentinelLoading = false;
+              _updatePrefetchProgress(statusBar);
+              if (_browseTotal !== null && _browseOffset < _browseTotal) _setupBrowseSentinel();
+            }).catch(e => {
+              DEBUG && console.warn("[Browse] sentinel _fetchPage failed, re-mounting sentinel:", e);
+              _sentinelLoading = false;
+              _updatePrefetchProgress(statusBar);
+              _setupBrowseSentinel();
+            });
           }, { threshold: 0.1, rootMargin: "200px" });
           _browseObs.observe(browseSentinel);
         }
@@ -26017,7 +26089,7 @@ unsafeWindow.fetch = function(...args) {
           if (!ok || _stopRequested) return;
           _fetchPage(true).then(() => {
             if (_stopRequested) return;
-            _startPrefetch(msgList, selCount, createBtn, cancelBtn, searchInput, null);
+            _browseUnlockedLimit = parseInt(GMStore.get(SK_PREFETCH_LIMIT, "200", true), 10) || 200;
           });
         });
       }
@@ -26127,7 +26199,7 @@ unsafeWindow.fetch = function(...args) {
         if (!ok) msgList.appendChild(_makeMsgPlaceholder("mp-token-warn", _credErrMsg()));
         return;
       }
-      _browseData = []; _browseOffset = 0; _browseTotal = null;
+      _browseData = []; _browseOffset = 0; _browseTotal = null; _browseUnlockedLimit = 0;
       await _fetchPage(true);
       if (capturedGen !== _browseGen) return;
 
@@ -26139,17 +26211,37 @@ unsafeWindow.fetch = function(...args) {
 
       _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
       _refreshChanFilterOptions(capturedGen);
-      _startPrefetch(msgList, selCount, createBtn, cancelBtn, searchInput, _mpStatusBar);
+      _browseUnlockedLimit = parseInt(GMStore.get(SK_PREFETCH_LIMIT, "200", true), 10) || 200;
+      _updatePrefetchProgress(_mpStatusBar);
+      _setupBrowseSentinel?.();
     }
 
     let _prefetchActive = false;
+    let _sentinelLoading = false;
+    let _lastProgressUpdateTs = 0;
+    let _lastChanFilterUpdateTs = 0;
+    const PROGRESS_THROTTLE_MS = 1200;
+    const CHANFILTER_THROTTLE_MS = 1500;
+    function _throttledUpdateProgress(statusBar, force = false) {
+      if (!statusBar) return;
+      const now = Date.now();
+      if (!force && now - _lastProgressUpdateTs < PROGRESS_THROTTLE_MS) return;
+      _lastProgressUpdateTs = now;
+      _updatePrefetchProgress(statusBar);
+    }
+    function _throttledRefreshChanFilter(capturedGen, force = false) {
+      const now = Date.now();
+      if (!force && now - _lastChanFilterUpdateTs < CHANFILTER_THROTTLE_MS) return;
+      _lastChanFilterUpdateTs = now;
+      _refreshChanFilterOptions(capturedGen);
+    }
     async function _startPrefetch(msgList, selCount, createBtn, cancelBtn, searchInput, statusBar) {
       if (_prefetchActive) return;
       const limit = parseInt(GMStore.get(SK_PREFETCH_LIMIT, "200", true), 10) || 200;
       if (limit <= 0) return;
       _prefetchActive = true;
       const capturedGen = _browseGen;
-      if (statusBar) _updatePrefetchProgress(statusBar);
+      _throttledUpdateProgress(statusBar, true);
       try {
         while (!_stopRequested && _browseTotal !== null && _browseData.length < _browseTotal && _browseData.length < limit) {
           await _sleep(_browseFetchDelay);
@@ -26167,12 +26259,16 @@ unsafeWindow.fetch = function(...args) {
           if (newFiltered.length > 0) {
             _appendFilteredRows(msgList, newFiltered, allFiltered, selCount, createBtn, cancelBtn);
           }
-          if (statusBar) _updatePrefetchProgress(statusBar);
-          _refreshChanFilterOptions(capturedGen);
+          _throttledUpdateProgress(statusBar);
+          _throttledRefreshChanFilter(capturedGen);
         }
       } finally {
         _prefetchActive = false;
-        if (statusBar) _updatePrefetchProgress(statusBar);
+        _throttledUpdateProgress(statusBar, true);
+        _throttledRefreshChanFilter(capturedGen, true);
+        if (capturedGen === _browseGen && _browseTotal !== null && _browseOffset < _browseTotal) {
+          _setupBrowseSentinel?.();
+        }
       }
     }
 
@@ -28047,12 +28143,12 @@ unsafeWindow.fetch = function(...args) {
       btn.className = "dmt-myposts-btn" + (_panelEl ? " active" : "");
       btn.title = (mp("panel_title") || "My Posts Manager") + " (Alt+P)";
       btn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>';
-      btn.onclick = () => {
+      btn.onclick = async () => {
         if (_panelEl) {
-          if (typeof _panelEl._mpCleanup === "function") _panelEl._mpCleanup();
-          _stopRequested = true; _prefetchActive = false; _abortWait?.();
-          _panelEl.remove(); _panelEl = null;
-        } else _buildPanel();
+          if (!await _closeMyPostsPanel()) return;
+        } else {
+          _buildPanel();
+        }
         _syncBtnActive();
       };
       trailing.prepend(btn);
@@ -28066,14 +28162,14 @@ unsafeWindow.fetch = function(...args) {
       });
     }
 
-    const _onKeydown = e => {
+    const _onKeydown = async e => {
       if (e.altKey && e.key === "p") {
         e.preventDefault();
         if (_panelEl) {
-          if (typeof _panelEl._mpCleanup === "function") _panelEl._mpCleanup();
-          _stopRequested = true; _prefetchActive = false; _abortWait?.();
-          _panelEl.remove(); _panelEl = null;
-        } else _buildPanel();
+          if (!await _closeMyPostsPanel()) return;
+        } else {
+          _buildPanel();
+        }
         _syncBtnActive();
       }
     };
