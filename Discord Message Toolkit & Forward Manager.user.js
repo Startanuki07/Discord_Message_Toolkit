@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.8.0.0
+// @version      2.8.0.16
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -1328,6 +1328,11 @@
       em_settings_recent_count_hint: "Number of recently used items shown above the panel (range: {min}-{max}). Existing history may take a few more uses to fill up to a higher count.",
       em_settings_save: "Save",
       em_settings_saved: "✨ Settings saved",
+      em_settings_gif_cache_max: "GIF/Sticker cache limit",
+      em_settings_gif_cache_max_hint: "Maximum number of permanently cached GIFs/stickers (range: {min}-{max}). Older items beyond this limit are evicted first and may show a broken-image placeholder once Discord's link expires.",
+      em_paste_no_textbox: "Couldn't find the input box, link copied instead!",
+      em_paste_send_fail: "Send failed, link copied instead",
+      em_gifcache_evict_notice: "ℹ️ Cache limit reached — oldest cached items were removed. Adjust the limit in panel settings if needed.",
       em_refresh_no_expired:   "ℹ️ No expired GIFs in this tab",
       em_refresh_consent:      "⚠️ About GIF Refresh\n\nThis feature will use a third-party proxy (fixcdn.hyonsu.com)\nto obtain fresh Discord attachment credentials.\n\nNotes:\n• Your image URLs will be sent to fixcdn.hyonsu.com\n• This is a third-party service, unrelated to Discord or this script\n• Search 'fixcdn hyonsu' to learn more before proceeding\n\nContinue?",
       em_refresh_cancel_tip:   "ℹ️ Cancelled. Manual steps:\n① Find the original GIF on Discord\n② Re-add it to your collection",
@@ -1348,6 +1353,33 @@
       menu_export: "📤 Export Settings (Backup)",
       menu_import: "⬇️ Import Settings (Restore)",
       menu_change_lang: "🌐 Change Language",
+      export_modal_title: "Export Settings",
+      export_modal_subtitle: "Choose which modules to include in the backup file.",
+      export_select_all: "Select All",
+      export_select_none: "Select None",
+      export_cancel: "Cancel",
+      export_confirm: "Export",
+      export_select_at_least_one: "Please select at least one module",
+      export_mod_a_label: "A · Forwarding Manager",
+      export_mod_a_desc: "Saved forwarding presets and display preference",
+      export_mod_b_label: "B · Copy Menu / Message Utility",
+      export_mod_b_desc: "Copy menu language, style, symbols, and other preferences",
+      export_mod_c_label: "C · Emoji / Sticker / GIF Collections",
+      export_mod_c_desc: "Favorites, custom collections, and native-mode preference",
+      export_mod_d_label: "D · Wormhole",
+      export_mod_d_desc: "Saved wormholes, dock/focus preferences, and monitor settings",
+      export_mod_e_label: "E · Header Mods",
+      export_mod_e_desc: "Anti-hijack and name-concealment default preferences",
+      export_mod_f_label: "F · Webhook Manager",
+      export_mod_f_desc: "Saved webhook list",
+      export_mod_g_label: "G · URL Checker / Channel Scout",
+      export_mod_g_desc: "Custom tags and search history",
+      export_mod_h_label: "H · Blacklist / Mute",
+      export_mod_h_desc: "Muted user list and related preferences",
+      export_mod_i_label: "I · My Posts Manager",
+      export_mod_i_desc: "Daily quota level and custom quota",
+      export_mod_j_label: "J · Mosaic Gallery",
+      export_mod_j_desc: "Last scan scope preference",
       custom_lang_desc:
         "Click 「📤 Export」 to get the English source JSON. After translating, click 「📥 Import」 to apply your language.\nNo matching language? Try: Deutsch (Benutzerdefinierte Übersetzung) · ภาษาไทย (ภาษาที่กำหนดเอง) · Türkçe (Özel Çeviri) · Polski (Niestandardowe tłumaczenie) · Italiano (Traduzione personalizzata)",
       custom_lang_export: "📤 Export Text",
@@ -1472,11 +1504,12 @@
       mp_type_text:             "Text",
       mp_type_reply:            "Reply",
       mp_type_command:          "Command",
-      mp_type_thread_start:     "Thread start",
       mp_type_other:            "Other",
-      mp_load_more:             "Load more",
       mp_loading:               "Loading…",
       mp_no_results:            "No messages found.",
+      mp_browse_ctx_changed:    "Server or channel changed — loading stopped. Please reselect Server/Channel to continue browsing.",
+      mp_chan_filter_label:     "Filter by channel:",
+      mp_chan_filter_all:       "All channels ({n} messages)",
       search_scope_hint:     "Search is limited to the {n} messages currently loaded.",
       fav_tab_empty_hint:       "No messages loaded yet. Switch to Browse tab first.",
       mp_empty_cta_title:       "No messages loaded yet",
@@ -1505,12 +1538,12 @@
       mp_selected_n:            "{n} selected",
       mp_create_task:           "Create delete task",
       mp_cancel_select:         "Cancel",
+      mp_select_all_loaded:      "Select All Loaded",
       mp_token_warn:            "⚠️ This module fetches your API token from browser storage to query and delete messages. Only enable this on devices you trust.",
       mp_token_fail:            "Could not retrieve API token. Please switch to any channel once to capture it.",
       mp_token_fetching:        "Fetching token…",
       mp_userid_fail:           "Could not retrieve your User ID.",
       mp_confirm_delete_single: "Delete this message? This cannot be undone.",
-      mp_confirm_delete_batch:  "Delete {n} messages?\n{summary}\nThis cannot be undone.",
       mp_undo_deleted:          "Message deleted.",
       mp_err_401:               "Token expired. Please refresh the page.",
       mp_err_403:               "Cannot delete this message (no permission).",
@@ -1570,16 +1603,13 @@
       mp_create_task_filters:   "Filters: {types}",
       mp_create_task_count:     "Selected: {n} message(s)",
       mp_create_task_quota:     "Quota: inherit global ({limit}/day)",
-      mp_create_task_label:     "Task label (optional):",
       mp_create_task_warn:      "⚠️ Deleted messages cannot be recovered. Task will be queued.",
       mp_create_task_confirm:   "Create task",
       mp_img_expired:           "Image URL may have expired.",
-      mp_attachments_n:         "{n} attachment(s)",
       mp_fav_add:               "Favorite (protected from Task deletion)",
       mp_fav_remove:            "Unfavorite",
       mp_fav_all_excluded:      "All selected messages are favorited — Task not created.",
       mp_fav_filter_label:      "Favorites",
-      mp_fav_filter_tip:        "Show favorited messages only",
       mp_copy_link:             "Copy message link",
 
       cs_panel_title:   "⌨ Channel Scout",
@@ -1926,6 +1956,9 @@
       em_col_title: "我的收藏庫",
       em_col_add_success: "已儲存到「{g}」！",
       em_col_add_duplicate: "已經在「{g}」中",
+      em_paste_no_textbox: "無法找到輸入框，已複製連結！",
+      em_paste_send_fail: "發送失敗，已複製連結",
+      em_gifcache_evict_notice: "ℹ️ 已達快取上限，較舊的快取項目已被清除。如需調整上限，請至面板設定。",
       em_col_tab_new: "新增分頁",
       em_col_tab_prompt: "新分頁名稱：",
       em_col_empty_tab: "此分頁尚無內容。",
@@ -2077,9 +2110,7 @@
       mp_type_text:             "文字",
       mp_type_reply:            "回覆",
       mp_type_command:          "指令回應",
-      mp_type_thread_start:     "子頻道起始",
       mp_type_other:            "其他",
-      mp_load_more:             "載入更多",
       mp_loading:               "載入中…",
       mp_no_results:            "未找到訊息。",
       search_scope_hint:     "搜尋範圍僅限已載入的 {n} 則訊息。",
@@ -2110,12 +2141,12 @@
       mp_selected_n:            "已選 {n} 則",
       mp_create_task:           "建立刪除任務",
       mp_cancel_select:         "取消",
+      mp_select_all_loaded:      "全選已載入",
       mp_token_warn:            "⚠️ 此模組將從瀏覽器儲存取得 API Token，用於查詢與刪除訊息。請僅在您信任的裝置上啟用此功能。",
       mp_token_fail:            "無法取得 API Token，請切換一次頻道以促使腳本捕捉 Token。",
       mp_token_fetching:        "取得 Token 中…",
       mp_userid_fail:           "無法取得您的 User ID。",
       mp_confirm_delete_single: "確認刪除此訊息？刪除後無法復原。",
-      mp_confirm_delete_batch:  "確認刪除 {n} 則訊息？\n{summary}\n刪除後無法復原。",
       mp_undo_deleted:          "訊息已刪除。",
       mp_err_401:               "Token 已失效，請重新整理頁面。",
       mp_err_403:               "無法刪除此訊息（權限不足）。",
@@ -2175,16 +2206,13 @@
       mp_create_task_filters:   "篩選：{types}",
       mp_create_task_count:     "已選取：{n} 則",
       mp_create_task_quota:     "配額：繼承全域設定（{limit} 則/天）",
-      mp_create_task_label:     "任務標籤（選填）：",
       mp_create_task_warn:      "⚠️ 刪除後無法復原。任務將加入佇列。",
       mp_create_task_confirm:   "確認建立",
       mp_img_expired:           "圖片連結可能已過期。",
-      mp_attachments_n:         "{n} 個附件",
       mp_fav_add:               "收藏（保護此訊息不被 Task 刪除）",
       mp_fav_remove:            "取消收藏",
       mp_fav_all_excluded:      "所有已選訊息均已收藏，Task 未建立。",
       mp_fav_filter_label:      "已收藏",
-      mp_fav_filter_tip:        "只顯示已收藏的訊息",
       mp_copy_link:             "複製訊息連結",
 
       cs_panel_title:   "⌨ 頻道搜尋",
@@ -2539,6 +2567,9 @@
       em_col_title: "我的收藏库",
       em_col_add_success: '已保存到"{g}"！',
       em_col_add_duplicate: '已经在"{g}"中',
+      em_paste_no_textbox: "无法找到输入框，已复制链接！",
+      em_paste_send_fail: "发送失败，已复制链接",
+      em_gifcache_evict_notice: "ℹ️ 已达缓存上限，较旧的缓存项目已被清除。如需调整上限，请至面板设置。",
       em_col_tab_new: "新增标签页",
       em_col_tab_prompt: "新标签页名称：",
       em_col_empty_tab: "此标签页暂无内容。",
@@ -2734,9 +2765,7 @@
       mp_type_text:             "文字",
       mp_type_reply:            "回复",
       mp_type_command:          "斜杠命令",
-      mp_type_thread_start:     "帖子起点",
       mp_type_other:            "其他",
-      mp_load_more:             "加载更多",
       mp_loading:               "加载中…",
       mp_no_results:            "未找到消息。",
       search_scope_hint:     "搜索仅限当前已加载的 {n} 条消息。",
@@ -2767,12 +2796,12 @@
       mp_selected_n:            "已选 {n} 条",
       mp_create_task:           "创建删除任务",
       mp_cancel_select:         "取消",
+      mp_select_all_loaded:      "全选已加载",
       mp_token_warn:            "⚠️ 此模块将获取您的 API Token，请仅在可信设备上使用。",
       mp_token_fail:            "无法获取 API Token，请切换频道后重试。",
       mp_token_fetching:        "正在获取 Token…",
       mp_userid_fail:           "无法获取用户 ID。",
       mp_confirm_delete_single: "确认删除此消息？此操作不可撤销。",
-      mp_confirm_delete_batch:  "删除 {n} 条消息？\n{summary}\n此操作不可撤销。",
       mp_undo_deleted:          "消息已删除。",
       mp_err_401:               "Token 无效，请刷新页面。",
       mp_err_403:               "无法删除此消息（权限不足）。",
@@ -2831,16 +2860,13 @@
       mp_create_task_filters:   "过滤器：{types}",
       mp_create_task_count:     "已选：{n}",
       mp_create_task_quota:     "上限：继承全局设置（{limit} 条/天）",
-      mp_create_task_label:     "任务标签（可选）：",
       mp_create_task_warn:      "⚠️ 此操作不可撤销，任务将加入队列。",
       mp_create_task_confirm:   "创建任务",
       mp_img_expired:           "图片链接可能已过期。",
-      mp_attachments_n:         "{n} 个附件",
       mp_fav_add:               "收藏（受保护，任务不会删除）",
       mp_fav_remove:            "取消收藏",
       mp_fav_all_excluded:      "所选消息均已收藏 — 任务未创建。",
       mp_fav_filter_label:      "收藏",
-      mp_fav_filter_tip:        "仅显示已收藏的消息",
       mp_copy_link:             "复制消息链接",
       em_settings_recent_count: "最近使用候选数量",
       em_settings_recent_count_hint: "面板上方显示的最近使用项目数量（范围：{min}-{max}）。已有记录可能需要再使用几次才能填满至较高的数量。",
@@ -3159,6 +3185,9 @@
       em_col_title: "マイコレクション",
       em_col_add_success: "「{g}」に保存しました！",
       em_col_add_duplicate: "「{g}」に既に保存されています",
+      em_paste_no_textbox: "入力欄が見つかりません。リンクをコピーしました！",
+      em_paste_send_fail: "送信に失敗しました。リンクをコピーしました",
+      em_gifcache_evict_notice: "ℹ️ キャッシュ上限に達しました。古いキャッシュ項目が削除されました。上限はパネル設定で調整できます。",
       em_col_tab_new: "新しいタブ",
       em_col_tab_prompt: "新しいタブ名：",
       em_col_empty_tab: "このタブは空です。",
@@ -3348,9 +3377,7 @@
       mp_type_text:             "テキスト",
       mp_type_reply:            "返信",
       mp_type_command:          "コマンド",
-      mp_type_thread_start:     "スレッド起点",
       mp_type_other:            "その他",
-      mp_load_more:             "さらに読み込む",
       mp_loading:               "読み込み中…",
       mp_no_results:            "メッセージが見つかりません。",
       search_scope_hint:     "検索は現在読み込まれている {n} 件のメッセージのみ対象です。",
@@ -3381,12 +3408,12 @@
       mp_selected_n:            "{n} 件選択中",
       mp_create_task:           "削除タスクを作成",
       mp_cancel_select:         "キャンセル",
+      mp_select_all_loaded:      "読み込み済みを全選択",
       mp_token_warn:            "⚠️ このモジュールはAPIトークンを取得します。信頼できる端末でのみ使用してください。",
       mp_token_fail:            "APIトークンを取得できません。チャンネルを一度切り替えてください。",
       mp_token_fetching:        "トークン取得中…",
       mp_userid_fail:           "ユーザーIDを取得できません。",
       mp_confirm_delete_single: "このメッセージを削除しますか？この操作は元に戻せません。",
-      mp_confirm_delete_batch:  "{n} 件のメッセージを削除しますか？\n{summary}\nこの操作は元に戻せません。",
       mp_undo_deleted:          "メッセージを削除しました。",
       mp_err_401:               "トークンが無効です。ページを再読み込みしてください。",
       mp_err_403:               "このメッセージを削除できません（権限不足）。",
@@ -3445,16 +3472,13 @@
       mp_create_task_filters:   "フィルター：{types}",
       mp_create_task_count:     "選択中：{n} 件",
       mp_create_task_quota:     "上限：グローバル設定を継承（{limit} 件/日）",
-      mp_create_task_label:     "タスクラベル（任意）：",
       mp_create_task_warn:      "⚠️ 削除後は元に戻せません。タスクはキューに追加されます。",
       mp_create_task_confirm:   "タスクを作成",
       mp_img_expired:           "画像URLが期限切れの可能性があります。",
-      mp_attachments_n:         "{n} 件の添付ファイル",
       mp_fav_add:               "お気に入り（Taskによる削除から保護）",
       mp_fav_remove:            "お気に入りを解除",
       mp_fav_all_excluded:      "選択したメッセージはすべてお気に入りです — Taskを作成できません。",
       mp_fav_filter_label:      "お気に入り",
-      mp_fav_filter_tip:        "お気に入りのメッセージのみ表示",
       mp_copy_link:             "メッセージリンクをコピー",
       em_settings_recent_count: "最近使用した候補の数",
       em_settings_recent_count_hint: "パネル上部に表示される最近使用した項目数（範囲：{min}〜{max}）。既存の履歴は、より多い数まで埋まるのに数回の使用が必要な場合があります。",
@@ -3771,6 +3795,9 @@
       em_col_title: "내 컬렉션",
       em_col_add_success: '"{g}"에 저장되었습니다！',
       em_col_add_duplicate: '이미 "{g}"에 저장되어 있습니다',
+      em_paste_no_textbox: "입력창을 찾을 수 없어 링크를 복사했습니다!",
+      em_paste_send_fail: "전송 실패, 링크를 복사했습니다",
+      em_gifcache_evict_notice: "ℹ️ 캐시 한도에 도달하여 오래된 항목이 삭제되었습니다. 한도는 패널 설정에서 조정할 수 있습니다.",
       em_col_tab_new: "새 탭",
       em_col_tab_prompt: "새 탭 이름:",
       em_col_empty_tab: "이 탭은 비어 있습니다.",
@@ -3959,9 +3986,7 @@
       mp_type_text:             "텍스트",
       mp_type_reply:            "답글",
       mp_type_command:          "명령어",
-      mp_type_thread_start:     "스레드 시작",
       mp_type_other:            "기타",
-      mp_load_more:             "더 불러오기",
       mp_loading:               "불러오는 중…",
       mp_no_results:            "메시지를 찾을 수 없습니다.",
       search_scope_hint:     "검색 범위는 현재 로드된 {n}개 메시지로 제한됩니다.",
@@ -3992,12 +4017,12 @@
       mp_selected_n:            "{n}개 선택됨",
       mp_create_task:           "삭제 작업 만들기",
       mp_cancel_select:         "취소",
+      mp_select_all_loaded:      "로드된 항목 전체 선택",
       mp_token_warn:            "⚠️ 이 모듈은 API 토큰을 가져옵니다. 신뢰할 수 있는 기기에서만 사용하세요.",
       mp_token_fail:            "API 토큰을 가져올 수 없습니다. 채널을 한 번 전환해 주세요.",
       mp_token_fetching:        "토큰 가져오는 중…",
       mp_userid_fail:           "사용자 ID를 가져올 수 없습니다.",
       mp_confirm_delete_single: "이 메시지를 삭제하시겠습니까? 되돌릴 수 없습니다.",
-      mp_confirm_delete_batch:  "{n}개의 메시지를 삭제하시겠습니까?\n{summary}\n되돌릴 수 없습니다.",
       mp_undo_deleted:          "메시지가 삭제되었습니다.",
       mp_err_401:               "토큰이 만료되었습니다. 페이지를 새로고침하세요.",
       mp_err_403:               "이 메시지를 삭제할 수 없습니다 (권한 부족).",
@@ -4056,16 +4081,13 @@
       mp_create_task_filters:   "필터: {types}",
       mp_create_task_count:     "선택됨: {n}개",
       mp_create_task_quota:     "한도: 전역 설정 상속 ({limit}개/일)",
-      mp_create_task_label:     "작업 레이블 (선택 사항):",
       mp_create_task_warn:      "⚠️ 삭제 후 복구할 수 없습니다. 작업이 대기열에 추가됩니다.",
       mp_create_task_confirm:   "작업 만들기",
       mp_img_expired:           "이미지 URL이 만료되었을 수 있습니다.",
-      mp_attachments_n:         "첨부파일 {n}개",
       mp_fav_add:               "즐겨찾기 (Task 삭제로부터 보호)",
       mp_fav_remove:            "즐겨찾기 해제",
       mp_fav_all_excluded:      "선택한 모든 메시지가 즐겨찾기 상태입니다 — Task가 생성되지 않았습니다.",
       mp_fav_filter_label:      "즐겨찾기",
-      mp_fav_filter_tip:        "즐겨찾기한 메시지만 표시",
       mp_copy_link:             "메시지 링크 복사",
       em_settings_recent_count: "최근 사용 후보 개수",
       em_settings_recent_count_hint: "패널 상단에 표시되는 최근 사용 항목 수 (범위: {min}-{max}). 기존 기록은 더 높은 수까지 채워지려면 몇 번 더 사용해야 할 수 있습니다.",
@@ -4367,6 +4389,9 @@
       em_col_title: "Mis colecciones",
       em_col_add_success: '¡Guardado en "{g}"!',
       em_col_add_duplicate: 'Ya está en "{g}"',
+      em_paste_no_textbox: "No se encontró el campo de texto, ¡enlace copiado!",
+      em_paste_send_fail: "Error al enviar, enlace copiado",
+      em_gifcache_evict_notice: "ℹ️ Límite de caché alcanzado; se eliminaron los elementos más antiguos. Puedes ajustar el límite en la configuración del panel.",
       em_col_tab_new: "Nueva pestaña",
       em_col_tab_prompt: "Nombre de la nueva pestaña:",
       em_col_empty_tab: "Esta pestaña está vacía.",
@@ -4519,9 +4544,7 @@
       mp_type_text:             "Texto",
       mp_type_reply:            "Respuesta",
       mp_type_command:          "Comando de barra",
-      mp_type_thread_start:     "Inicio de hilo",
       mp_type_other:            "Otro",
-      mp_load_more:             "Cargar más",
       mp_loading:               "Cargando…",
       mp_no_results:            "No se encontraron mensajes.",
       search_scope_hint:     "La búsqueda se limita a los {n} mensajes cargados.",
@@ -4552,12 +4575,12 @@
       mp_selected_n:            "{n} seleccionado(s)",
       mp_create_task:           "Crear tarea de eliminación",
       mp_cancel_select:         "Cancelar",
+      mp_select_all_loaded:      "Seleccionar todo lo cargado",
       mp_token_warn:            "⚠️ Este módulo obtiene tu token de API. Úsalo solo en dispositivos de confianza.",
       mp_token_fail:            "No se pudo obtener el token de API. Cambia de canal y vuelve a intentarlo.",
       mp_token_fetching:        "Obteniendo token…",
       mp_userid_fail:           "No se pudo obtener el ID de usuario.",
       mp_confirm_delete_single: "¿Eliminar este mensaje? Esta acción no se puede deshacer.",
-      mp_confirm_delete_batch:  "¿Eliminar {n} mensaje(s)?\n{summary}\nEsta acción no se puede deshacer.",
       mp_undo_deleted:          "Mensaje eliminado.",
       mp_err_401:               "Token inválido. Recarga la página.",
       mp_err_403:               "No se puede eliminar este mensaje (sin permisos).",
@@ -4615,16 +4638,13 @@
       mp_create_task_filters:   "Filtros: {types}",
       mp_create_task_count:     "Seleccionados: {n}",
       mp_create_task_quota:     "Límite: hereda configuración global ({limit}/día)",
-      mp_create_task_label:     "Etiqueta de tarea (opcional):",
       mp_create_task_warn:      "⚠️ Esta acción no se puede deshacer. La tarea se añadirá a la cola.",
       mp_create_task_confirm:   "Crear tarea",
       mp_img_expired:           "La URL de la imagen puede haber caducado.",
-      mp_attachments_n:         "{n} adjunto(s)",
       mp_fav_add:               "Favorito (protegido de eliminación por Tarea)",
       mp_fav_remove:            "Quitar de favoritos",
       mp_fav_all_excluded:      "Todos los mensajes seleccionados son favoritos — Tarea no creada.",
       mp_fav_filter_label:      "Favoritos",
-      mp_fav_filter_tip:        "Mostrar solo mensajes favoritos",
       mp_copy_link:             "Copiar enlace del mensaje",
       mp_idb_blocked:           "⚠️ Cierra otras pestañas de Discord y vuelve a intentarlo",
       mod_tip_mosaic:           "Explora todos los archivos multimedia del servidor o canal actual. Requiere el modo API de Wormhole.",
@@ -4980,6 +5000,9 @@
       em_col_title: "Minhas coleções",
       em_col_add_success: 'Salvo em "{g}"!',
       em_col_add_duplicate: 'Já está em "{g}"',
+      em_paste_no_textbox: "Caixa de texto não encontrada, link copiado!",
+      em_paste_send_fail: "Falha ao enviar, link copiado",
+      em_gifcache_evict_notice: "ℹ️ Limite de cache atingido; itens mais antigos foram removidos. Ajuste o limite nas configurações do painel se necessário.",
       em_col_tab_new: "Nova aba",
       em_col_tab_prompt: "Nome da nova aba:",
       em_col_empty_tab: "Esta aba está vazia.",
@@ -5131,9 +5154,7 @@
       mp_type_text:             "Texto",
       mp_type_reply:            "Resposta",
       mp_type_command:          "Comando",
-      mp_type_thread_start:     "Início de tópico",
       mp_type_other:            "Outro",
-      mp_load_more:             "Carregar mais",
       mp_loading:               "Carregando…",
       mp_no_results:            "Nenhuma mensagem encontrada.",
       search_scope_hint:     "A pesquisa é limitada às {n} mensagens atualmente carregadas.",
@@ -5164,12 +5185,12 @@
       mp_selected_n:            "{n} selecionado(s)",
       mp_create_task:           "Criar tarefa de exclusão",
       mp_cancel_select:         "Cancelar",
+      mp_select_all_loaded:      "Selecionar tudo carregado",
       mp_token_warn:            "⚠️ Este módulo obtém seu token de API. Use apenas em dispositivos confiáveis.",
       mp_token_fail:            "Não foi possível obter o token de API. Troque de canal e tente novamente.",
       mp_token_fetching:        "Obtendo token…",
       mp_userid_fail:           "Não foi possível obter o ID do usuário.",
       mp_confirm_delete_single: "Excluir esta mensagem? Esta ação não pode ser desfeita.",
-      mp_confirm_delete_batch:  "Excluir {n} mensagem(ns)?\n{summary}\nEsta ação não pode ser desfeita.",
       mp_undo_deleted:          "Mensagem excluída.",
       mp_err_401:               "Token inválido. Recarregue a página.",
       mp_err_403:               "Não é possível excluir esta mensagem (sem permissão).",
@@ -5227,16 +5248,13 @@
       mp_create_task_filters:   "Filtros: {types}",
       mp_create_task_count:     "Selecionados: {n}",
       mp_create_task_quota:     "Limite: herda configuração global ({limit}/dia)",
-      mp_create_task_label:     "Rótulo da tarefa (opcional):",
       mp_create_task_warn:      "⚠️ Esta ação não pode ser desfeita. A tarefa será adicionada à fila.",
       mp_create_task_confirm:   "Criar tarefa",
       mp_img_expired:           "A URL da imagem pode ter expirado.",
-      mp_attachments_n:         "{n} anexo(s)",
       mp_fav_add:               "Favorito (protegido de exclusão por Tarefa)",
       mp_fav_remove:            "Remover dos favoritos",
       mp_fav_all_excluded:      "Todas as mensagens selecionadas são favoritas — Tarefa não criada.",
       mp_fav_filter_label:      "Favoritos",
-      mp_fav_filter_tip:        "Mostrar apenas mensagens favoritas",
       mp_copy_link:             "Copiar link da mensagem",
       mp_idb_blocked:           "⚠️ Feche outras abas do Discord e tente novamente",
       mod_tip_mosaic:           "Navegue por toda a mídia do servidor ou canal atual. Requer o modo API do Wormhole.",
@@ -5602,6 +5620,9 @@
       em_col_title: "Mes collections",
       em_col_add_success: "Enregistré dans « {g} » !",
       em_col_add_duplicate: "Déjà dans « {g} »",
+      em_paste_no_textbox: "Champ de saisie introuvable, lien copié !",
+      em_paste_send_fail: "Échec de l'envoi, lien copié",
+      em_gifcache_evict_notice: "ℹ️ Limite de cache atteinte ; les éléments les plus anciens ont été supprimés. Ajustez la limite dans les paramètres du panneau si besoin.",
       em_col_tab_new: "Nouvel onglet",
       em_col_tab_prompt: "Nom du nouvel onglet :",
       em_col_empty_tab: "Cet onglet est vide.",
@@ -5748,9 +5769,7 @@
       mp_type_text:             "Texte",
       mp_type_reply:            "Réponse",
       mp_type_command:          "Commande",
-      mp_type_thread_start:     "Début de fil",
       mp_type_other:            "Autre",
-      mp_load_more:             "Charger plus",
       mp_loading:               "Chargement…",
       mp_no_results:            "Aucun message trouvé.",
       search_scope_hint:     "La recherche est limitée aux {n} messages chargés.",
@@ -5781,12 +5800,12 @@
       mp_selected_n:            "{n} sélectionné(s)",
       mp_create_task:           "Créer une tâche de suppression",
       mp_cancel_select:         "Annuler",
+      mp_select_all_loaded:      "Tout sélectionner (chargé)",
       mp_token_warn:            "⚠️ Ce module récupère votre token API. Utilisez-le uniquement sur des appareils de confiance.",
       mp_token_fail:            "Impossible d'obtenir le token API. Changez de salon et réessayez.",
       mp_token_fetching:        "Récupération du token…",
       mp_userid_fail:           "Impossible d'obtenir l'ID utilisateur.",
       mp_confirm_delete_single: "Supprimer ce message ? Cette action est irréversible.",
-      mp_confirm_delete_batch:  "Supprimer {n} message(s) ?\n{summary}\nCette action est irréversible.",
       mp_undo_deleted:          "Message supprimé.",
       mp_err_401:               "Token invalide. Rechargez la page.",
       mp_err_403:               "Impossible de supprimer ce message (permissions insuffisantes).",
@@ -5844,16 +5863,13 @@
       mp_create_task_filters:   "Filtres : {types}",
       mp_create_task_count:     "Sélectionnés : {n}",
       mp_create_task_quota:     "Limite : hérite de la configuration globale ({limit}/jour)",
-      mp_create_task_label:     "Étiquette de tâche (optionnel) :",
       mp_create_task_warn:      "⚠️ Cette action est irréversible. La tâche sera ajoutée à la file.",
       mp_create_task_confirm:   "Créer la tâche",
       mp_img_expired:           "L'URL de l'image a peut-être expiré.",
-      mp_attachments_n:         "{n} pièce(s) jointe(s)",
       mp_fav_add:               "Favori (protégé contre la suppression par Tâche)",
       mp_fav_remove:            "Retirer des favoris",
       mp_fav_all_excluded:      "Tous les messages sélectionnés sont en favoris — Tâche non créée.",
       mp_fav_filter_label:      "Favoris",
-      mp_fav_filter_tip:        "Afficher uniquement les messages favoris",
       mp_copy_link:             "Copier le lien du message",
       mp_idb_blocked:           "⚠️ Veuillez fermer les autres onglets Discord et réessayer",
       mod_tip_mosaic:           "Parcourez tous les médias du serveur ou du canal actuel. Nécessite le mode API Wormhole.",
@@ -6215,6 +6231,9 @@
       em_col_title: "Мои коллекции",
       em_col_add_success: "Сохранено в «{g}»!",
       em_col_add_duplicate: "Уже в «{g}»",
+      em_paste_no_textbox: "Поле ввода не найдено, ссылка скопирована!",
+      em_paste_send_fail: "Не удалось отправить, ссылка скопирована",
+      em_gifcache_evict_notice: "ℹ️ Достигнут лимит кэша, старые элементы удалены. При необходимости измените лимит в настройках панели.",
       em_col_tab_new: "Новая вкладка",
       em_col_tab_prompt: "Название новой вкладки:",
       em_col_empty_tab: "Эта вкладка пуста.",
@@ -6360,9 +6379,7 @@
       mp_type_text:             "Текст",
       mp_type_reply:            "Ответ",
       mp_type_command:          "Команда",
-      mp_type_thread_start:     "Начало треда",
       mp_type_other:            "Другое",
-      mp_load_more:             "Загрузить ещё",
       mp_loading:               "Загрузка…",
       mp_no_results:            "Сообщения не найдены.",
       search_scope_hint:     "Поиск ограничен {n} загруженными сообщениями.",
@@ -6393,12 +6410,12 @@
       mp_selected_n:            "Выбрано: {n}",
       mp_create_task:           "Создать задачу удаления",
       mp_cancel_select:         "Отмена",
+      mp_select_all_loaded:      "Выбрать все загруженные",
       mp_token_warn:            "⚠️ Этот модуль получает ваш API-токен. Используйте только на доверенных устройствах.",
       mp_token_fail:            "Не удалось получить API-токен. Переключите канал и попробуйте снова.",
       mp_token_fetching:        "Получение токена…",
       mp_userid_fail:           "Не удалось получить ID пользователя.",
       mp_confirm_delete_single: "Удалить это сообщение? Действие необратимо.",
-      mp_confirm_delete_batch:  "Удалить {n} сообщений?\n{summary}\nДействие необратимо.",
       mp_undo_deleted:          "Сообщение удалено.",
       mp_err_401:               "Недействительный токен. Перезагрузите страницу.",
       mp_err_403:               "Не удалось удалить сообщение (недостаточно прав).",
@@ -6456,16 +6473,13 @@
       mp_create_task_filters:   "Фильтры: {types}",
       mp_create_task_count:     "Выбрано: {n}",
       mp_create_task_quota:     "Лимит: наследует глобальную настройку ({limit}/день)",
-      mp_create_task_label:     "Метка задачи (необязательно):",
       mp_create_task_warn:      "⚠️ Действие необратимо. Задача будет добавлена в очередь.",
       mp_create_task_confirm:   "Создать задачу",
       mp_img_expired:           "URL изображения мог устареть.",
-      mp_attachments_n:         "Вложений: {n}",
       mp_fav_add:               "В избранное (защита от удаления Задачей)",
       mp_fav_remove:            "Удалить из избранного",
       mp_fav_all_excluded:      "Все выбранные сообщения в избранном — Задача не создана.",
       mp_fav_filter_label:      "Избранное",
-      mp_fav_filter_tip:        "Показывать только избранные сообщения",
       mp_copy_link:             "Скопировать ссылку на сообщение",
       mp_idb_blocked:           "⚠️ Закройте другие вкладки Discord и повторите попытку",
       mod_tip_mosaic:           "Просмотр всех медиафайлов текущего сервера или канала. Требуется режим API Wormhole.",
@@ -6822,6 +6836,9 @@
       em_col_title: "Meine Sammlungen",
       em_col_add_success: "In \"{g}\" gespeichert!",
       em_col_add_duplicate: "Bereits in \"{g}\"",
+      em_paste_no_textbox: "Eingabefeld nicht gefunden, Link kopiert!",
+      em_paste_send_fail: "Senden fehlgeschlagen, Link kopiert",
+      em_gifcache_evict_notice: "ℹ️ Cache-Limit erreicht, ältere Einträge wurden entfernt. Das Limit kann bei Bedarf in den Paneleinstellungen angepasst werden.",
       em_col_tab_new: "Neuer Tab",
       em_col_tab_prompt: "Name des neuen Tabs:",
       em_col_empty_tab: "Dieser Tab ist leer.",
@@ -6961,9 +6978,7 @@
       mp_type_text:             "Text",
       mp_type_reply:            "Antwort",
       mp_type_command:          "Befehl",
-      mp_type_thread_start:     "Thread-Start",
       mp_type_other:            "Sonstige",
-      mp_load_more:             "Mehr laden",
       mp_loading:               "Lädt…",
       mp_no_results:            "Keine Nachrichten gefunden.",
       search_scope_hint:        "Suche beschränkt auf {n} geladene Nachrichten.",
@@ -6994,12 +7009,12 @@
       mp_selected_n:            "{n} ausgewählt",
       mp_create_task:           "Löschaufgabe erstellen",
       mp_cancel_select:         "Abbrechen",
+      mp_select_all_loaded:      "Alle geladenen auswählen",
       mp_token_warn:            "⚠️ Dieses Modul ruft deinen API-Token ab. Nur auf vertrauenswürdigen Geräten verwenden.",
       mp_token_fail:            "API-Token konnte nicht abgerufen werden. Kanal wechseln und erneut versuchen.",
       mp_token_fetching:        "Token wird abgerufen…",
       mp_userid_fail:           "Benutzer-ID konnte nicht abgerufen werden.",
       mp_confirm_delete_single: "Diese Nachricht löschen? Nicht rückgängig zu machen.",
-      mp_confirm_delete_batch:  "{n} Nachricht(en) löschen?\n{summary}\nNicht rückgängig zu machen.",
       mp_undo_deleted:          "Nachricht gelöscht.",
       mp_err_401:               "Ungültiger Token. Seite neu laden.",
       mp_err_403:               "Nachricht kann nicht gelöscht werden (unzureichende Berechtigungen).",
@@ -7057,16 +7072,13 @@
       mp_create_task_filters:   "Filter: {types}",
       mp_create_task_count:     "Ausgewählt: {n}",
       mp_create_task_quota:     "Limit: übernimmt globale Konfiguration ({limit}/Tag)",
-      mp_create_task_label:     "Aufgaben-Label (optional):",
       mp_create_task_warn:      "⚠️ Diese Aktion ist nicht rückgängig zu machen. Aufgabe wird in die Warteschlange gestellt.",
       mp_create_task_confirm:   "Aufgabe erstellen",
       mp_img_expired:           "Bild-URL ist möglicherweise abgelaufen.",
-      mp_attachments_n:         "{n} Anhang/Anhänge",
       mp_fav_add:               "Favorit (vor Aufgaben-Löschen geschützt)",
       mp_fav_remove:            "Aus Favoriten entfernen",
       mp_fav_all_excluded:      "Alle ausgewählten Nachrichten sind Favoriten — Aufgabe nicht erstellt.",
       mp_fav_filter_label:      "Favoriten",
-      mp_fav_filter_tip:        "Nur favorisierte Nachrichten anzeigen",
       mp_copy_link:             "Nachrichtenlink kopieren",
       mp_idb_blocked:           "⚠️ Bitte andere Discord-Tabs schließen und erneut versuchen",
       mod_tip_mosaic:           "Alle Medien des aktuellen Servers oder Kanals durchsuchen. Erfordert den Wormhole-API-Modus.",
@@ -9092,121 +9104,343 @@
       }
     }
 
-    function exportSettings() {
-      const forwardingData = GMStore.get("discord_forward_v8", []);
+    const EXPORT_MODULES = [
+      {
+        id: "A",
+        label: t("export_mod_a_label"),
+        desc: t("export_mod_a_desc"),
+        collect: () => ({
+          moduleToggles: { mod_forwarding: localStorage.getItem("mod_forwarding") },
+          forwardingData: GMStore.get("discord_forward_v8", []),
+          forwardingPref: GMStore.get("discord_forward_pref", true),
+        }),
+      },
+      {
+        id: "B",
+        label: t("export_mod_b_label"),
+        desc: t("export_mod_b_desc"),
+        collect: () => ({
+          moduleToggles: { mod_message: localStorage.getItem("mod_message") },
+          config: {
+            lang:                localStorage.getItem("copyMenuLanguage"),
+            lang_custom:         localStorage.getItem("copyMenuLanguage_custom"),
+            triggerMode:         localStorage.getItem("copyTriggerMode"),
+            menuStyle:           localStorage.getItem("copyMenuStyle"),
+            swapLogic:           localStorage.getItem("copySwapLogic"),
+            appendSpace:         localStorage.getItem("copyAppendSpace"),
+            appendNewLine:       localStorage.getItem("copyAppendNewLine"),
+            linkText:            localStorage.getItem("copyLinkText"),
+            ioMargin:            localStorage.getItem("copyIOMargin"),
+            transCacheSize:      localStorage.getItem("copyTransCacheSize"),
+            symbols:             safeParseJSON(localStorage.getItem("copySymbols"), []),
+          },
+        }),
+      },
+      {
+        id: "C",
+        label: t("export_mod_c_label"),
+        desc: t("export_mod_c_desc"),
+        collect: () => ({
+          moduleToggles: { mod_emoji: localStorage.getItem("mod_emoji") },
+          discord_emoji_favorites:    GMStore.get("discord_emoji_favorites",    [], true),
+          discord_gif_favorites:      GMStore.get("discord_gif_favorites",      [], true),
+          discord_sticker_favorites:  GMStore.get("discord_sticker_favorites",  [], true),
+          discord_emoji_collections:  GMStore.get("discord_emoji_collections",  {}, true),
+          discord_gif_collections:    GMStore.get("discord_gif_collections",    {}, true),
+          discord_sticker_collections:GMStore.get("discord_sticker_collections",{}, true),
+          discord_emoji_native_mode:  GMStore.get("discord_emoji_native_mode", true),
+        }),
+      },
+      {
+        id: "D",
+        label: t("export_mod_d_label"),
+        desc: t("export_mod_d_desc"),
+        collect: () => ({
+          moduleToggles: { mod_wormhole: localStorage.getItem("mod_wormhole") },
+          wormholes: GMStore.get("discord_wormholes_v2", null),
+          wormholePrefs: {
+            wh_api_mode: localStorage.getItem("wh_api_mode"),
+            wh_dock_position: localStorage.getItem("wh_dock_position"),
+            wh_send_autoclose: GMStore.get("wh_send_autoclose", "true"),
+            wh_send_goto: GMStore.get("wh_send_goto", "false"),
+            wh_send_show_toast: GMStore.get("wh_send_show_toast", "true"),
+            wormhole_focus_mode: localStorage.getItem("wormhole_focus_mode"),
+            wormhole_focus_size: localStorage.getItem("wormhole_focus_size"),
+          },
+          wormholeMonitorPrefs: {
+            wh_monitor_enabled:    GMStore.get("wh_monitor_enabled",    "false"),
+            wh_monitor_interval:   GMStore.get("wh_monitor_interval",   "30"),
+            wh_monitor_badge_style:GMStore.get("wh_monitor_badge_style","dot"),
+          },
+          wormholeFocusExtra: {
+            wormhole_focus_show_labels: localStorage.getItem("wormhole_focus_show_labels"),
+          },
+        }),
+      },
+      {
+        id: "E",
+        label: t("export_mod_e_label"),
+        desc: t("export_mod_e_desc"),
+        collect: () => ({
+          moduleToggles: { mod_header: localStorage.getItem("mod_header") },
+          headerModPrefs: {
+            antiHijack: localStorage.getItem("discord_header_mod_def_antiHijack"),
+            concealName: localStorage.getItem("discord_header_mod_def_concealName"),
+          },
+        }),
+      },
+      {
+        id: "F",
+        label: t("export_mod_f_label"),
+        desc: t("export_mod_f_desc"),
+        collect: () => ({
+          moduleToggles: { mod_webhook: localStorage.getItem("mod_webhook") },
+          webhookList: GMStore.get("discord_webhook_list", [], true),
+        }),
+      },
+      {
+        id: "G",
+        label: t("export_mod_g_label"),
+        desc: t("export_mod_g_desc"),
+        collect: () => ({
+          moduleToggles: {
+            mod_urlchecker: localStorage.getItem("mod_urlchecker"),
+            mod_scout:      localStorage.getItem("mod_scout"),
+          },
+          channelScoutData: {
+            cs_custom_tags:    GMStore.get("cs_custom_tags",    [], true),
+            cs_search_history: GMStore.get("cs_search_history", [], true),
+          },
+        }),
+      },
+      {
+        id: "H",
+        label: t("export_mod_h_label"),
+        desc: t("export_mod_h_desc"),
+        collect: () => ({
+          moduleToggles: { mod_blacklist: localStorage.getItem("mod_blacklist") },
+          blacklistData: GMStore.get("blacklist_users", [], true),
+          blacklistPrefs: {
+            bl_ghost_delay:          GMStore.get("bl_ghost_delay",          4),
+            bl_bot_relay:            GMStore.get("bl_bot_relay",            true),
+            bl_hide_discord_blocked: GMStore.get("bl_hide_discord_blocked", false),
+            bl_hide_discord_ignored: GMStore.get("bl_hide_discord_ignored", false),
+          },
+        }),
+      },
+      {
+        id: "I",
+        label: t("export_mod_i_label"),
+        desc: t("export_mod_i_desc"),
+        collect: () => ({
+          moduleToggles: { mod_myposts: localStorage.getItem("mod_myposts") },
+          myPostsPrefs: {
+            mp_quota_level:  GMStore.get("mp_quota_level",  "balanced"),
+            mp_quota_custom: GMStore.get("mp_quota_custom", null),
+          },
+        }),
+      },
+      {
+        id: "J",
+        label: t("export_mod_j_label"),
+        desc: t("export_mod_j_desc"),
+        collect: () => ({
+          moduleToggles: { mod_mosaic: localStorage.getItem("mod_mosaic") },
+          mosaicPrefs: {
+            ms_last_scan_scope: GMStore.get("ms_last_scan_scope", null),
+          },
+        }),
+      },
+    ];
 
-      const configData = {
-        lang:                localStorage.getItem("copyMenuLanguage"),
-        lang_custom:         localStorage.getItem("copyMenuLanguage_custom"),
-        triggerMode:         localStorage.getItem("copyTriggerMode"),
-        menuStyle:           localStorage.getItem("copyMenuStyle"),
-        swapLogic:           localStorage.getItem("copySwapLogic"),
-        appendSpace:         localStorage.getItem("copyAppendSpace"),
-        appendNewLine:       localStorage.getItem("copyAppendNewLine"),
-        linkText:            localStorage.getItem("copyLinkText"),
-        ioMargin:            localStorage.getItem("copyIOMargin"),
-        transCacheSize:      localStorage.getItem("copyTransCacheSize"),
-        dmtGifCacheMax:      localStorage.getItem("dmtGifCacheMax"),
-        symbols:             safeParseJSON(localStorage.getItem("copySymbols"), []),
-      };
+    const EXPORT_SELECTION_KEY = "discord_export_panel_selection";
+    const EXPORT_DEFAULT_SELECTION = ["A", "B", "C"];
 
-      const moduleCData = {
-        discord_emoji_favorites:    GMStore.get("discord_emoji_favorites",    [], true),
-        discord_gif_favorites:      GMStore.get("discord_gif_favorites",      [], true),
-        discord_sticker_favorites:  GMStore.get("discord_sticker_favorites",  [], true),
-        discord_emoji_collections:  GMStore.get("discord_emoji_collections",  {}, true),
-        discord_gif_collections:    GMStore.get("discord_gif_collections",    {}, true),
-        discord_sticker_collections:GMStore.get("discord_sticker_collections",{}, true),
-        discord_emoji_native_mode:  GMStore.get("discord_emoji_native_mode", true),
-      };
+    function buildExportData(selectedIds) {
+      const data = { ver: "EX7", moduleToggles: {} };
+      EXPORT_MODULES.forEach((m) => {
+        if (!selectedIds.includes(m.id)) return;
+        const chunk = m.collect();
+        if (chunk.moduleToggles) {
+          Object.assign(data.moduleToggles, chunk.moduleToggles);
+          delete chunk.moduleToggles;
+        }
+        Object.assign(data, chunk);
+      });
+      if (Object.keys(data.moduleToggles).length === 0) delete data.moduleToggles;
+      return data;
+    }
 
-      const moduleDData = GMStore.get("discord_wormholes_v2", null);
+    function showExportSelectionModal() {
+      return new Promise((resolve) => {
+        if (!document.getElementById("dmt-export-modal-style")) {
+          const s = document.createElement("style");
+          s.id = "dmt-export-modal-style";
+          s.textContent = `
+            .dmt-export-overlay {
+              position: fixed; inset: 0; z-index: 2147483647;
+              background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+              display: flex; align-items: center; justify-content: center;
+              pointer-events: auto; box-sizing: border-box;
+            }
+            .dmt-export-box {
+              background: var(--dmt-bg-primary, #2b2d31);
+              border: 1px solid rgba(255,255,255,0.1);
+              border-radius: 12px;
+              padding: 20px 22px 16px;
+              max-width: min(440px, 90vw);
+              width: 100%;
+              max-height: 80vh;
+              display: flex; flex-direction: column;
+              color: var(--dmt-text-primary, #dcddde);
+              font-family: sans-serif;
+              box-shadow: 0 16px 48px rgba(0,0,0,0.7);
+              box-sizing: border-box;
+            }
+            .dmt-export-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+            .dmt-export-subtitle { font-size: 12px; opacity: 0.65; margin-bottom: 12px; }
+            .dmt-export-quickrow { display: flex; gap: 8px; margin-bottom: 10px; }
+            .dmt-export-quickbtn {
+              font-size: 11px; padding: 3px 10px; border-radius: 4px; cursor: pointer;
+              background: rgba(255,255,255,0.08); border: none; color: inherit;
+              font-family: sans-serif;
+            }
+            .dmt-export-quickbtn:hover { background: rgba(255,255,255,0.15); }
+            .dmt-export-list { overflow-y: auto; flex: 1; margin-bottom: 14px; }
+            .dmt-export-item {
+              display: flex; align-items: flex-start; gap: 10px;
+              padding: 8px 6px; border-radius: 6px; cursor: pointer;
+            }
+            .dmt-export-item:hover { background: rgba(255,255,255,0.05); }
+            .dmt-export-item input { margin-top: 3px; cursor: pointer; }
+            .dmt-export-item-label { font-size: 13px; font-weight: 500; }
+            .dmt-export-item-desc { font-size: 11.5px; opacity: 0.6; margin-top: 2px; }
+            .dmt-export-btns { display: flex; justify-content: flex-end; gap: 8px; }
+            .dmt-export-btn {
+              padding: 7px 18px; border-radius: 6px; font-size: 13px; font-weight: 500;
+              cursor: pointer; border: none; transition: background 0.15s, filter 0.15s;
+              font-family: sans-serif;
+            }
+            .dmt-export-btn-cancel {
+              background: transparent; border: 1px solid rgba(255,255,255,0.15);
+              color: var(--dmt-text-primary, #dcddde);
+            }
+            .dmt-export-btn-cancel:hover { background: rgba(255,255,255,0.07); }
+            .dmt-export-btn-ok { background: var(--dmt-accent, #5865f2); color: #fff; }
+            .dmt-export-btn-ok:hover { filter: brightness(1.12); }
+          `;
+          document.head.appendChild(s);
+        }
 
-      const wormholePrefs = {
-        wh_api_mode: localStorage.getItem("wh_api_mode"),
-        wh_dock_position: localStorage.getItem("wh_dock_position"),
-        wh_send_autoclose: GMStore.get("wh_send_autoclose", "true"),
-        wh_send_goto: GMStore.get("wh_send_goto", "false"),
-        wh_send_show_toast: GMStore.get("wh_send_show_toast", "true"),
-        wormhole_focus_mode: localStorage.getItem("wormhole_focus_mode"),
-        wormhole_focus_size: localStorage.getItem("wormhole_focus_size"),
-      };
+        const savedSelection = GMStore.get(EXPORT_SELECTION_KEY, null);
+        const initialSelection = Array.isArray(savedSelection) && savedSelection.length > 0
+          ? savedSelection
+          : EXPORT_DEFAULT_SELECTION;
 
-      const headerModPrefs = {
-        antiHijack: localStorage.getItem("discord_header_mod_def_antiHijack"),
-        concealName: localStorage.getItem("discord_header_mod_def_concealName"),
-      };
+        const overlay = document.createElement("div");
+        overlay.className = "dmt-export-overlay";
 
-      const moduleToggles = {
-        mod_forwarding:  localStorage.getItem("mod_forwarding"),
-        mod_message:     localStorage.getItem("mod_message"),
-        mod_emoji:       localStorage.getItem("mod_emoji"),
-        mod_header:      localStorage.getItem("mod_header"),
-        mod_wormhole:    localStorage.getItem("mod_wormhole"),
-        mod_webhook:     localStorage.getItem("mod_webhook"),
-        mod_urlchecker:  localStorage.getItem("mod_urlchecker"),
-        mod_scout:       localStorage.getItem("mod_scout"),
-        mod_blacklist:   localStorage.getItem("mod_blacklist"),
-        mod_myposts:     localStorage.getItem("mod_myposts"),
-        mod_mosaic:      localStorage.getItem("mod_mosaic"),
-      };
+        const box = document.createElement("div");
+        box.className = "dmt-export-box";
 
-      const webhookList = GMStore.get("discord_webhook_list", [], true);
+        const title = document.createElement("div");
+        title.className = "dmt-export-title";
+        title.innerText = t("export_modal_title");
+        box.appendChild(title);
 
-      const forwardingPref = GMStore.get("discord_forward_pref", true);
+        const subtitle = document.createElement("div");
+        subtitle.className = "dmt-export-subtitle";
+        subtitle.innerText = t("export_modal_subtitle");
+        box.appendChild(subtitle);
 
-      const channelScoutData = {
-        cs_custom_tags:    GMStore.get("cs_custom_tags",    [], true),
-        cs_search_history: GMStore.get("cs_search_history", [], true),
-      };
+        const quickRow = document.createElement("div");
+        quickRow.className = "dmt-export-quickrow";
+        const selectAllBtn = document.createElement("button");
+        selectAllBtn.className = "dmt-export-quickbtn";
+        selectAllBtn.innerText = t("export_select_all");
+        const selectNoneBtn = document.createElement("button");
+        selectNoneBtn.className = "dmt-export-quickbtn";
+        selectNoneBtn.innerText = t("export_select_none");
+        quickRow.appendChild(selectAllBtn);
+        quickRow.appendChild(selectNoneBtn);
+        box.appendChild(quickRow);
 
-      const blacklistData = GMStore.get("blacklist_users", [], true);
+        const list = document.createElement("div");
+        list.className = "dmt-export-list";
+        const checkboxes = [];
+        EXPORT_MODULES.forEach((m) => {
+          const item = document.createElement("label");
+          item.className = "dmt-export-item";
 
-      const blacklistPrefs = {
-        bl_ghost_delay:          GMStore.get("bl_ghost_delay",          4),
-        bl_bot_relay:            GMStore.get("bl_bot_relay",            true),
-        bl_hide_discord_blocked: GMStore.get("bl_hide_discord_blocked", false),
-        bl_hide_discord_ignored: GMStore.get("bl_hide_discord_ignored", false),
-      };
+          const cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.checked = initialSelection.includes(m.id);
+          cb.dataset.moduleId = m.id;
+          checkboxes.push(cb);
 
-      const myPostsPrefs = {
-        mp_quota_level:  GMStore.get("mp_quota_level",  "balanced"),
-        mp_quota_custom: GMStore.get("mp_quota_custom", null),
-      };
+          const textWrap = document.createElement("div");
+          const lbl = document.createElement("div");
+          lbl.className = "dmt-export-item-label";
+          lbl.innerText = m.label;
+          const desc = document.createElement("div");
+          desc.className = "dmt-export-item-desc";
+          desc.innerText = m.desc;
+          textWrap.appendChild(lbl);
+          textWrap.appendChild(desc);
 
-      const wormholeMonitorPrefs = {
-        wh_monitor_enabled:    GMStore.get("wh_monitor_enabled",    "false"),
-        wh_monitor_interval:   GMStore.get("wh_monitor_interval",   "30"),
-        wh_monitor_badge_style:GMStore.get("wh_monitor_badge_style","dot"),
-      };
+          item.appendChild(cb);
+          item.appendChild(textWrap);
+          list.appendChild(item);
+        });
+        box.appendChild(list);
 
-      const wormholeFocusExtra = {
-        wormhole_focus_show_labels: localStorage.getItem("wormhole_focus_show_labels"),
-      };
+        selectAllBtn.onclick = () => checkboxes.forEach((cb) => (cb.checked = true));
+        selectNoneBtn.onclick = () => checkboxes.forEach((cb) => (cb.checked = false));
 
-      const mosaicPrefs = {
-        ms_last_scan_scope: GMStore.get("ms_last_scan_scope", null),
-      };
+        const btns = document.createElement("div");
+        btns.className = "dmt-export-btns";
+        const cancelBtn = document.createElement("button");
+        cancelBtn.className = "dmt-export-btn dmt-export-btn-cancel";
+        cancelBtn.innerText = t("export_cancel");
+        const okBtn = document.createElement("button");
+        okBtn.className = "dmt-export-btn dmt-export-btn-ok";
+        okBtn.innerText = t("export_confirm");
+        btns.appendChild(cancelBtn);
+        btns.appendChild(okBtn);
+        box.appendChild(btns);
 
-      const data = {
-        ver: "EX6",
-        config: configData,
-        forwardingData: forwardingData,
-        forwardingPref: forwardingPref,
-        ...moduleCData,
-        wormholes: moduleDData,
-        wormholePrefs: wormholePrefs,
-        wormholeMonitorPrefs: wormholeMonitorPrefs,
-        wormholeFocusExtra: wormholeFocusExtra,
-        headerModPrefs: headerModPrefs,
-        moduleToggles: moduleToggles,
-        webhookList: webhookList,
-        channelScoutData: channelScoutData,
-        blacklistData: blacklistData,
-        blacklistPrefs: blacklistPrefs,
-        myPostsPrefs: myPostsPrefs,
-        mosaicPrefs: mosaicPrefs,
-      };
+        overlay.appendChild(box);
+        dmtGetPortal().appendChild(overlay);
+
+        const onKey = (e) => { if (e.key === "Escape") { cleanup(); resolve(null); } };
+        const cleanup = () => {
+          document.removeEventListener("keydown", onKey);
+          overlay.remove();
+        };
+        document.addEventListener("keydown", onKey);
+
+        cancelBtn.onclick = () => { cleanup(); resolve(null); };
+        overlay.onclick = (e) => { if (e.target === overlay) { cleanup(); resolve(null); } };
+        okBtn.onclick = () => {
+          const selectedIds = checkboxes.filter((cb) => cb.checked).map((cb) => cb.dataset.moduleId);
+          if (selectedIds.length === 0) {
+            dmtShowToast(t("export_select_at_least_one"), { duration: 2000 });
+            return;
+          }
+          GMStore.set(EXPORT_SELECTION_KEY, selectedIds);
+          cleanup();
+          resolve(selectedIds);
+        };
+
+        setTimeout(() => okBtn.focus(), 50);
+      });
+    }
+
+    async function exportSettings() {
+      const selectedIds = await showExportSelectionModal();
+      if (!selectedIds) return;
+
+      const data = buildExportData(selectedIds);
 
       const blob = new Blob([JSON.stringify(data, null, 2)], {
         type: "application/json",
@@ -13068,6 +13302,9 @@
     const _RECENTLY_USED_DEFAULT = 3;
     const _RECENTLY_USED_MIN = 3;
     const _RECENTLY_USED_MAX_CAP = 10;
+    const _GIF_CACHE_MAX_DEFAULT = 120;
+    const _GIF_CACHE_MAX_MIN = 30;
+    const _GIF_CACHE_MAX_CAP = 500;
     const EMOJI_SETTINGS_KEY = "discord_emoji_module_settings";
 
     const EM_FLOAT_LAYOUT_KEY = "em_float_layout";
@@ -13093,6 +13330,9 @@
         recentlyUsedMax: Number.isFinite(raw.recentlyUsedMax)
           ? Math.min(_RECENTLY_USED_MAX_CAP, Math.max(_RECENTLY_USED_MIN, raw.recentlyUsedMax))
           : _RECENTLY_USED_DEFAULT,
+        gifCacheMax: Number.isFinite(raw.gifCacheMax)
+          ? Math.min(_GIF_CACHE_MAX_CAP, Math.max(_GIF_CACHE_MAX_MIN, raw.gifCacheMax))
+          : _GIF_CACHE_MAX_DEFAULT,
       };
     }
     function saveEmojiModuleSettings(patch) {
@@ -13164,7 +13404,7 @@
       const isDuplicate = cols[colName].some((existing) => {
         const existingKey =
           typeof existing === "object"
-            ? existing.url || existing.content
+            ? existing.url || existing.stableUrl || existing.content
             : existing;
         return existingKey === key;
       });
@@ -13227,10 +13467,10 @@
     const GIF_CACHE_PREFIX = "gifcache_";
     const GIF_CACHE_INDEX = "gifcache_index";
     const GIF_MAX_BYTES = 400 * 1024;
-    const GIF_CACHE_MAX_COUNT = Math.max(
-      10,
-      parseInt(localStorage.getItem("dmtGifCacheMax") || "120", 10) || 120
-    );
+    function getGifCacheMax() {
+      return getEmojiModuleSettings().gifCacheMax;
+    }
+    let _gifCacheEvictNotified = false;
 
     let _idbPromise = null;
     function openGifIDB() {
@@ -13316,13 +13556,19 @@
           if (!idx.includes(k)) {
             idx.push(k);
           }
-          while (idx.length > GIF_CACHE_MAX_COUNT) {
+          let evictedAny = false;
+          while (idx.length > getGifCacheMax()) {
             const evictKey = idx.shift();
             try { GMStore.del(GIF_CACHE_PREFIX + evictKey); } catch (_) {}
             try { await idbDelete(evictKey); } catch (_) {}
+            evictedAny = true;
             DEBUG && console.log("[GifCache] FIFO evict:", evictKey);
           }
           GMStore.set(GIF_CACHE_INDEX, idx, true);
+          if (evictedAny && !_gifCacheEvictNotified) {
+            _gifCacheEvictNotified = true;
+            showEmojiToast(t("em_gifcache_evict_notice"));
+          }
         } catch (_) {}
       } catch (e) {
         console.warn("[GifCache] write failed:", e);
@@ -13558,12 +13804,28 @@
 
         if (actualContent.includes(".mp4") || actualContent.includes(".webm")) {
           el = document.createElement("video");
-          el.src = displayUrl;
           el.muted = true;
           el.loop = true;
           el.autoplay = true;
+          el.dataset.src = displayUrl;
+          const vidObs = new IntersectionObserver((entries) => {
+            const entry = entries[0];
+            if (entry.isIntersecting) {
+              if (!el.src && el.dataset.src) {
+                el.src = el.dataset.src;
+                el.play().catch(() => {});
+              }
+            } else if (el.src) {
+              el.pause();
+              el.removeAttribute("src");
+              el.load();
+            }
+          }, { threshold: 0.1 });
+          vidObs.observe(el);
+          el._vidObs = vidObs;
         } else {
           el = document.createElement("img");
+          el.loading = "lazy";
           el.src = displayUrl;
 
           const _cacheTarget = actualContent || displayUrl;
@@ -13602,6 +13864,16 @@
       return el;
     }
 
+    function disconnectMediaObservers(container) {
+      if (!container) return;
+      container.querySelectorAll("video").forEach((v) => {
+        if (v._vidObs) {
+          v._vidObs.disconnect();
+          v._vidObs = null;
+        }
+      });
+    }
+
     function getSendableUrl(input, type) {
       let url = input;
       if (typeof input === "object" && input !== null) {
@@ -13634,7 +13906,7 @@
         if (!textarea) {
           console.warn("Textbox not found");
           GM_setClipboard(url);
-          showEmojiToast("無法找到輸入框，已複製連結！", url);
+          showEmojiToast(t("em_paste_no_textbox"), url);
           return;
         }
         const hasText =
@@ -13680,7 +13952,7 @@
         }
       } catch (e) {
         GM_setClipboard(url);
-        showEmojiToast("發送失敗，已複製連結", url);
+        showEmojiToast(t("em_paste_send_fail"), url);
       }
     }
 
@@ -14087,6 +14359,32 @@
       });
       body.appendChild(hint);
 
+      const gifCacheRow = document.createElement("div");
+      gifCacheRow.className = "my-settings-row";
+
+      const gifCacheLabel = document.createElement("label");
+      gifCacheLabel.className = "my-settings-label";
+      gifCacheLabel.innerText = t("em_settings_gif_cache_max");
+      gifCacheRow.appendChild(gifCacheLabel);
+
+      const gifCacheInput = document.createElement("input");
+      gifCacheInput.type = "number";
+      gifCacheInput.className = "my-settings-number-input";
+      gifCacheInput.min = String(_GIF_CACHE_MAX_MIN);
+      gifCacheInput.max = String(_GIF_CACHE_MAX_CAP);
+      gifCacheInput.value = String(settings.gifCacheMax);
+      gifCacheInput.addEventListener("mousedown", (e) => e.stopPropagation());
+      gifCacheRow.appendChild(gifCacheInput);
+      body.appendChild(gifCacheRow);
+
+      const gifCacheHint = document.createElement("div");
+      gifCacheHint.className = "my-settings-hint";
+      gifCacheHint.innerText = t("em_settings_gif_cache_max_hint", {
+        min: _GIF_CACHE_MAX_MIN,
+        max: _GIF_CACHE_MAX_CAP,
+      });
+      body.appendChild(gifCacheHint);
+
       modal.appendChild(body);
 
       const footer = document.createElement("div");
@@ -14100,7 +14398,11 @@
         const clamped = Number.isFinite(parsed)
           ? Math.min(_RECENTLY_USED_MAX_CAP, Math.max(_RECENTLY_USED_MIN, parsed))
           : _RECENTLY_USED_DEFAULT;
-        saveEmojiModuleSettings({ recentlyUsedMax: clamped });
+        const gifParsed = parseInt(gifCacheInput.value, 10);
+        const gifClamped = Number.isFinite(gifParsed)
+          ? Math.min(_GIF_CACHE_MAX_CAP, Math.max(_GIF_CACHE_MAX_MIN, gifParsed))
+          : _GIF_CACHE_MAX_DEFAULT;
+        saveEmojiModuleSettings({ recentlyUsedMax: clamped, gifCacheMax: gifClamped });
         modal.remove();
         showEmojiToast(t("em_settings_saved"));
       };
@@ -14127,6 +14429,7 @@
     function renderKeywordDropdown(input, list, btn, type) {
       const dropdown = document.querySelector(".my-popover-menu");
       if (!dropdown) return;
+      disconnectMediaObservers(dropdown);
       dropdown.innerHTML = "";
       dropdown.style.padding = "0";
       const container = document.createElement("div");
@@ -14252,6 +14555,7 @@
     function renderTabsView(input, type) {
       const dropdown = document.querySelector(".my-popover-menu");
       if (!dropdown) return;
+      disconnectMediaObservers(dropdown);
       dropdown.innerHTML = "";
       dropdown.classList.remove("input-mode");
       dropdown.classList.add("collection-mode");
@@ -14861,7 +15165,11 @@
 
     function showRecentUsedOverlay(type, anchorEl, onChipClick) {
       clearTimeout(_recentHideTimer);
-      if (_recentOverlayEl) { _recentOverlayEl.remove(); _recentOverlayEl = null; }
+      if (_recentOverlayEl) {
+        disconnectMediaObservers(_recentOverlayEl);
+        _recentOverlayEl.remove();
+        _recentOverlayEl = null;
+      }
 
       const recent = getRecentlyUsed(type);
       if (!recent.length) return;
@@ -14956,12 +15264,14 @@
       const el = _recentOverlayEl || document.getElementById('dmt-recent-overlay');
       if (!el) return;
       if (immediate) {
+        disconnectMediaObservers(el);
         el.remove();
         if (el === _recentOverlayEl) _recentOverlayEl = null;
         return;
       }
       el.style.opacity = '0';
       _recentHideTimer = setTimeout(() => {
+        disconnectMediaObservers(el);
         el.remove();
         if (el === _recentOverlayEl) _recentOverlayEl = null;
       }, 240);
@@ -15790,6 +16100,7 @@
 
       const showQuickTypeMenu = (triggerBtn, inputElement) => {
         const dropdown = document.querySelector(".my-popover-menu");
+        disconnectMediaObservers(dropdown);
         dropdown.innerHTML = "";
         dropdown.className = "my-popover-menu input-mode show";
         dropdown.style.padding = "4px";
@@ -24202,6 +24513,36 @@ unsafeWindow.fetch = function(...args) {
       return includeDate ? d + " " + hhmm : hhmm;
     }
 
+    function _getChannelName(channelId) {
+      try {
+        const cid = channelId || location.pathname.match(/\/channels\/[^/]+\/(\d+)/)?.[1];
+        if (!cid) return null;
+        const a = document.querySelector(`a[href*="/${cid}"]`);
+        if (!a) return null;
+        const li = a.closest("li[data-dnd-name]");
+        const dndName = li?.getAttribute("data-dnd-name")?.trim();
+        if (dndName) return dndName;
+        const nameEl = a.querySelector('[class*="name_"]:not([class*="hiddenVisually"])');
+        const txt = nameEl?.textContent?.trim();
+        if (txt) return txt;
+      } catch (_) {}
+      return null;
+    }
+
+    const _chanNameCache = new Map();
+    async function _fetchChannelNameAPI(channelId) {
+      if (_chanNameCache.has(channelId)) return _chanNameCache.get(channelId);
+      try {
+        const res = await _gmFetch("GET", `${API_BASE}/channels/${channelId}`);
+        if (res.status !== 200) { _chanNameCache.set(channelId, null); return null; }
+        const name = JSON.parse(res.responseText)?.name || null;
+        _chanNameCache.set(channelId, name);
+        return name;
+      } catch (_) {
+        return null;
+      }
+    }
+
     function _fmtDateKey(dateKey) {
       return _fmtTs(new Date(dateKey + "T00:00:00"), true, true);
     }
@@ -24234,6 +24575,10 @@ unsafeWindow.fetch = function(...args) {
     let _browseTotal  = null;
     let _browseGen    = 0;
     let _browseScope  = "channel";
+    let _browseCtxSnapshot = null;
+    let _ctxChangedNotified = false;
+    let _browseChanFilter = "all";
+    let _forceFullScan = false;
     let _browseView   = "list";
     let _selectedIds  = new Set();
     let _anchorIdx    = null;
@@ -24244,9 +24589,14 @@ unsafeWindow.fetch = function(...args) {
     let _setupBrowseSentinel = null;
     let _mpRefreshBtn = null;
     let _mpStatusBar  = null;
+    let _chanFilterRowEl = null;
+    let _chanFilterSelEl = null;
     let _mpUndoBuffer = null;
     let _mpUndoTimer  = null;
     let _favIds = new Set(GMStore.get(SK_FAVS, [], true));
+    let _err403LastShown = 0;
+    let _errNetLastShown  = 0;
+    const _ERR_NOTIFY_COOLDOWN_MS = 60000;
 
     const mp = (key, params = {}) => t("mp_" + key, params);
 
@@ -24273,6 +24623,11 @@ unsafeWindow.fetch = function(...args) {
       log[today] = (log[today] || 0) + 1;
       const cutoff = Date.now() - 30 * 86400000;
       Object.keys(log).forEach(k => { if (new Date(k).getTime() < cutoff) delete log[k]; });
+      GMStore.set(SK_QUOTA_LOG, log, true);
+    }
+    function _resetQuotaToday() {
+      const log = GMStore.get(SK_QUOTA_LOG, {}, true);
+      log[_todayKey()] = 0;
       GMStore.set(SK_QUOTA_LOG, log, true);
     }
     function _getGlobalQuota() {
@@ -24331,6 +24686,10 @@ unsafeWindow.fetch = function(...args) {
         } catch (_) {}
       }
       return !!(_token && _userId);
+    }
+
+    function _credErrMsg() {
+      return (!_token) ? mp("token_fail") : mp("userid_fail");
     }
 
     function _gmFetch(method, url, body) {
@@ -24400,7 +24759,12 @@ unsafeWindow.fetch = function(...args) {
           _searchDelay = _decay(_searchDelay, SEARCH_BASE);
           return JSON.parse(res.responseText);
         } catch (e) {
-          if (i < retries - 1) await _sleep(1000 * Math.pow(2, i));
+          if (i < retries - 1) { await _sleep(1000 * Math.pow(2, i)); continue; }
+          const _now = Date.now();
+          if (_now - _errNetLastShown > _ERR_NOTIFY_COOLDOWN_MS) {
+            _errNetLastShown = _now;
+            dmtShowToast("⚠️ " + mp("err_net"), { duration: 4000 });
+          }
         }
       }
       return null;
@@ -24419,12 +24783,24 @@ unsafeWindow.fetch = function(...args) {
             await _sleep(w); i--; continue;
           }
           if (res.status === 401) { _handleExpiredToken(); return false; }
-          if (res.status === 403) return false;
+          if (res.status === 403) {
+            const _now = Date.now();
+            if (_now - _err403LastShown > _ERR_NOTIFY_COOLDOWN_MS) {
+              _err403LastShown = _now;
+              dmtShowToast("⚠️ " + mp("err_403"), { duration: 4000 });
+            }
+            return false;
+          }
           if (res.status >= 500) { await _sleep(1000 * Math.pow(2, i)); continue; }
           _deleteDelay = _decay(_deleteDelay, DELETE_BASE);
           return res.status === 204;
         } catch (e) {
-          if (i < retries - 1) await _sleep(1000 * Math.pow(2, i));
+          if (i < retries - 1) { await _sleep(1000 * Math.pow(2, i)); continue; }
+          const _now = Date.now();
+          if (_now - _errNetLastShown > _ERR_NOTIFY_COOLDOWN_MS) {
+            _errNetLastShown = _now;
+            dmtShowToast("⚠️ " + mp("err_net"), { duration: 4000 });
+          }
         }
       }
       return false;
@@ -24445,7 +24821,7 @@ unsafeWindow.fetch = function(...args) {
     }
 
     async function _searchMyPosts(opts = {}) {
-      const ctx = _getCtx();
+      const ctx = opts.ctxOverride || _getCtx();
       if (!ctx || !_userId) return null;
       const { scope = _browseScope, offset = 0, skipDelay = false } = opts;
       const params = {
@@ -24476,6 +24852,9 @@ unsafeWindow.fetch = function(...args) {
         if (types.includes(msg.type)) return f[g] !== false;
       }
       return true;
+    }
+    function _passesChanFilter(msg) {
+      return _browseChanFilter === "all" || msg.channel_id === _browseChanFilter;
     }
 
     function _dateKey(msg) { return msg.timestamp.slice(0, 10); }
@@ -24643,6 +25022,7 @@ unsafeWindow.fetch = function(...args) {
         "cursor:pointer;color:var(--dmt-text-muted,#949ba4);border-bottom:2px solid transparent;",
         "transition:color .15s,border-color .15s;}",
         "#dmt-mp-panel .mp-tab.active{color:var(--dmt-accent,#5865f2);border-bottom-color:var(--dmt-accent,#5865f2);}",
+        "#dmt-mp-panel .mp-tab.mp-tab-locked{opacity:.35;cursor:not-allowed;pointer-events:none;}",
 
         "#dmt-mp-panel .mp-scope-btn{flex:1;padding:4px 8px;border-radius:6px;",
         "border:1px solid rgba(255,255,255,.1);background:transparent;color:var(--dmt-text-muted,#949ba4);",
@@ -25184,6 +25564,19 @@ unsafeWindow.fetch = function(...args) {
       tasksArea.className = "mp-tasks-body";
       tasksArea.style.display = "none";
 
+      const _switchToTab = (key) => {
+        _activeTab = key;
+        GMStore.set(SK_LAST_TAB, key, true);
+        tabsRow.querySelectorAll(".mp-tab").forEach(t => t.classList.toggle("active", t.dataset.tab === key));
+        browseArea.style.display  = key === "browse"  ? "flex" : "none";
+        favsArea.style.display    = key === "favs"    ? "flex" : "none";
+        mediaArea.style.display   = key === "media"   ? "flex" : "none";
+        tasksArea.style.display   = key === "tasks"   ? ""    : "none";
+        if (key === "tasks") _renderTasksTab(tasksArea);
+        if (key === "media") _renderMediaTab(mediaArea);
+        if (key === "favs")  _renderFavsTab(favsArea);
+      };
+
       const tabDefs = [
         { key: "browse", labelKey: "tab_browse" },
         { key: "favs",   label: "💗 Favs"          },
@@ -25196,16 +25589,8 @@ unsafeWindow.fetch = function(...args) {
         tab.textContent = label || mp(labelKey); tab.dataset.tab = key;
         if (key === "favs") tab.title = mp("fav_filter_label") || "Favorites";
         tab.onclick = () => {
-          _activeTab = key;
-          GMStore.set(SK_LAST_TAB, key, true);
-          tabsRow.querySelectorAll(".mp-tab").forEach(t => t.classList.toggle("active", t.dataset.tab === key));
-          browseArea.style.display = key === "browse" ? "flex" : "none";
-          favsArea.style.display   = key === "favs"   ? "flex" : "none";
-          mediaArea.style.display  = key === "media"  ? "flex" : "none";
-          tasksArea.style.display  = key === "tasks"  ? ""    : "none";
-          if (key === "tasks") _renderTasksTab(tasksArea);
-          if (key === "media") _renderMediaTab(mediaArea);
-          if (key === "favs")  _renderFavsTab(favsArea);
+          if (tab.classList.contains("mp-tab-locked")) return;
+          _switchToTab(key);
         };
         tabsRow.appendChild(tab);
       });
@@ -25235,6 +25620,8 @@ unsafeWindow.fetch = function(...args) {
           _stopRequested = true; _prefetchActive = false;
           _abortWait?.();
           _browseGen++;
+          _browseChanFilter = "all";
+          if (_chanFilterRowEl) _chanFilterRowEl.style.display = "none";
           setTimeout(() => { _stopRequested = false; _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput); }, 0);
         };
         scopeRow.appendChild(btn);
@@ -25254,6 +25641,9 @@ unsafeWindow.fetch = function(...args) {
         _stopRequested = true; _prefetchActive = false;
         _abortWait?.();
         _browseGen++;
+        _forceFullScan = (_browseScope === "server");
+        _browseChanFilter = "all";
+        if (_chanFilterRowEl) _chanFilterRowEl.style.display = "none";
         setTimeout(() => {
           _stopRequested = false;
           _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput)
@@ -25270,6 +25660,19 @@ unsafeWindow.fetch = function(...args) {
       cacheBtn.textContent   = "📦";
       cacheBtn.onclick = () => _buildCacheModal();
       scopeRow.appendChild(cacheBtn);
+
+      _chanFilterRowEl = document.createElement("div");
+      _chanFilterRowEl.style.cssText = "display:none;align-items:center;gap:6px;padding:0 12px;margin-top:4px;";
+      const chanFilterLabel = document.createElement("span");
+      chanFilterLabel.style.cssText = "font-size:11px;color:var(--dmt-text-muted,#949ba4);flex-shrink:0;";
+      chanFilterLabel.textContent = mp("chan_filter_label");
+      _chanFilterSelEl = document.createElement("select");
+      _chanFilterSelEl.style.cssText = "background:#1e1f22;border:1px solid rgba(255,255,255,0.15);color:#dbdee1;border-radius:6px;padding:3px 6px;font-size:12px;cursor:pointer;flex:1;min-width:0;";
+      _chanFilterSelEl.onchange = () => {
+        _browseChanFilter = _chanFilterSelEl.value;
+        _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
+      };
+      _chanFilterRowEl.append(chanFilterLabel, _chanFilterSelEl);
 
       const searchRow = document.createElement("div");
       searchRow.className = "mp-search-row";
@@ -25404,7 +25807,7 @@ unsafeWindow.fetch = function(...args) {
               _fetchPage(true).then(() => {
                 const q = (searchInput?.value || "").toLowerCase();
                 const allFiltered = _browseData.filter(m =>
-                  _passesTypeFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
+                  _passesTypeFilter(m) && _passesChanFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
                 );
                 const newIds = new Set(_browseData.slice(prevLen).map(m => m.id));
                 const newFiltered = allFiltered.filter(m => newIds.has(m.id));
@@ -25427,6 +25830,21 @@ unsafeWindow.fetch = function(...args) {
       _mpStatusBar = statusBar;
       const selCount = document.createElement("span");
       selCount.className = "mp-sel-count";
+      const selectAllLoadedBtn = document.createElement("button");
+      selectAllLoadedBtn.className = "mp-sbtn ghost";
+      selectAllLoadedBtn.textContent = mp("select_all_loaded");
+      selectAllLoadedBtn.onclick = () => {
+        const allIds = [...msgList.querySelectorAll(".mp-msg-row[data-msg-id]")].map(r => r.dataset.msgId);
+        if (allIds.length === 0) return;
+        const allSel = allIds.every(id => _selectedIds.has(id));
+        allIds.forEach(id => allSel ? _selectedIds.delete(id) : _selectedIds.add(id));
+        msgList.querySelectorAll(".mp-msg-row[data-msg-id]").forEach(r => {
+          const id = r.dataset.msgId;
+          r.classList.toggle("selected", _selectedIds.has(id));
+          const cb = r.querySelector(".mp-msg-cb"); if (cb) cb.checked = _selectedIds.has(id);
+        });
+        _updateSB(selCount, createBtn, cancelBtn);
+      };
       const createBtn = document.createElement("button");
       createBtn.className = "mp-sbtn danger";
       createBtn.textContent = mp("create_task");
@@ -25445,9 +25863,9 @@ unsafeWindow.fetch = function(...args) {
           if (cb) cb.checked = false;
         });
       };
-      statusBar.append(selCount, cancelBtn, createBtn);
+      statusBar.append(selectAllLoadedBtn, selCount, cancelBtn, createBtn);
 
-      browseArea.append(scopeRow, searchRow, typeRow, msgList, browseSentinel, statusBar);
+      browseArea.append(scopeRow, _chanFilterRowEl, searchRow, typeRow, msgList, browseSentinel, statusBar);
 
       panel.append(titlebar, tabsRow, browseArea, favsArea, mediaArea, tasksArea);
       _panelEl = panel;
@@ -25529,12 +25947,16 @@ unsafeWindow.fetch = function(...args) {
 
     async function _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput) {
       const capturedGen = _browseGen;
+      _browseCtxSnapshot = _getCtx();
+      _ctxChangedNotified = false;
+      const isFullScan = _forceFullScan;
+      _forceFullScan = false;
       msgList.innerHTML = "";
 
       const scope = _scopeKey();
-      if (scope) {
+      if (scope && !isFullScan) {
         try {
-          const ctx = _getCtx();
+          const ctx = _browseCtxSnapshot;
           const filterForScope = arr => (_browseScope === "channel" && ctx?.channelId)
             ? arr.filter(m => m.channel_id === ctx.channelId)
             : arr;
@@ -25571,7 +25993,7 @@ unsafeWindow.fetch = function(...args) {
       const ok = await _ensureCredentials();
       if (!ok || capturedGen !== _browseGen) {
         msgList.innerHTML = "";
-        if (!ok) msgList.appendChild(_makeMsgPlaceholder("mp-token-warn", mp("token_fail")));
+        if (!ok) msgList.appendChild(_makeMsgPlaceholder("mp-token-warn", _credErrMsg()));
         return;
       }
       _browseData = []; _browseOffset = 0; _browseTotal = null;
@@ -25585,13 +26007,16 @@ unsafeWindow.fetch = function(...args) {
       }
 
       _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
-      _startPrefetch(msgList, selCount, createBtn, cancelBtn, searchInput, _mpStatusBar);
+      const prefetchPromise = _startPrefetch(msgList, selCount, createBtn, cancelBtn, searchInput, _mpStatusBar, isFullScan);
+      if (isFullScan) {
+        prefetchPromise.then(() => _refreshChanFilterOptions());
+      }
     }
 
     let _prefetchActive = false;
-    async function _startPrefetch(msgList, selCount, createBtn, cancelBtn, searchInput, statusBar) {
+    async function _startPrefetch(msgList, selCount, createBtn, cancelBtn, searchInput, statusBar, ignoreLimit = false) {
       if (_prefetchActive) return;
-      const limit = parseInt(GMStore.get(SK_PREFETCH_LIMIT, "200", true), 10) || 200;
+      const limit = ignoreLimit ? Infinity : (parseInt(GMStore.get(SK_PREFETCH_LIMIT, "200", true), 10) || 200);
       if (limit <= 0) return;
       _prefetchActive = true;
       if (statusBar) _updatePrefetchProgress(statusBar);
@@ -25602,9 +26027,10 @@ unsafeWindow.fetch = function(...args) {
           const prevLen = _browseData.length;
           await _fetchPage(true);
           if (_stopRequested) break;
+          if (_browseData.length === prevLen) break;
           const q = (searchInput?.value || "").toLowerCase();
           const allFiltered = _browseData.filter(m =>
-            _passesTypeFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
+            _passesTypeFilter(m) && _passesChanFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
           );
           const newIds = new Set(_browseData.slice(prevLen).map(m => m.id));
           const newFiltered = allFiltered.filter(m => newIds.has(m.id));
@@ -25616,6 +26042,51 @@ unsafeWindow.fetch = function(...args) {
       } finally {
         _prefetchActive = false;
         if (statusBar) _updatePrefetchProgress(statusBar);
+      }
+    }
+
+    async function _refreshChanFilterOptions() {
+      if (!_chanFilterRowEl || !_chanFilterSelEl) return;
+      const counts = new Map();
+      _browseData.forEach(m => counts.set(m.channel_id, (counts.get(m.channel_id) || 0) + 1));
+
+      if (counts.size < 2) {
+        _chanFilterRowEl.style.display = "none";
+        _browseChanFilter = "all";
+        return;
+      }
+
+      const prevSelection = _browseChanFilter;
+      _chanFilterSelEl.innerHTML = "";
+      const optAll = document.createElement("option");
+      optAll.value = "all";
+      optAll.textContent = mp("chan_filter_all", { n: _browseData.length });
+      _chanFilterSelEl.appendChild(optAll);
+
+      const unresolved = [];
+      [...counts.entries()].sort((a, b) => b[1] - a[1]).forEach(([cid, cnt]) => {
+        const o = document.createElement("option");
+        o.value = cid;
+        o.dataset.cid = cid;
+        const name = _getChannelName(cid);
+        o.textContent = (name ? `# ${name}` : `#${cid}`) + ` (${cnt})`;
+        if (!name) unresolved.push(cid);
+        _chanFilterSelEl.appendChild(o);
+      });
+      _browseChanFilter = counts.has(prevSelection) ? prevSelection : "all";
+      _chanFilterSelEl.value = _browseChanFilter;
+      _chanFilterRowEl.style.display = "flex";
+
+      if (unresolved.length > 0) {
+        for (const cid of unresolved) {
+          const name = await _fetchChannelNameAPI(cid);
+          if (!_chanFilterSelEl.isConnected) break;
+          if (name) {
+            const opt = _chanFilterSelEl.querySelector(`option[data-cid="${cid}"]`);
+            if (opt) opt.textContent = opt.textContent.replace(`#${cid}`, `# ${name}`);
+          }
+          await _sleep(300);
+        }
       }
     }
 
@@ -25699,6 +26170,16 @@ unsafeWindow.fetch = function(...args) {
     }
 
     async function _fetchPage(skipDelay = false) {
+      const nowCtx = _getCtx();
+      const snap = _browseCtxSnapshot;
+      const ctxChanged = snap && nowCtx && (nowCtx.guildId !== snap.guildId || nowCtx.channelId !== snap.channelId);
+      if (ctxChanged) {
+        if (!_ctxChangedNotified) {
+          _ctxChangedNotified = true;
+          dmtShowToast("⚠️ " + mp("browse_ctx_changed"), { duration: 3000 });
+        }
+        return;
+      }
       const data = await _searchMyPosts({ scope: _browseScope, offset: _browseOffset, skipDelay });
       if (!data) return;
       _browseTotal = data.total_results || 0;
@@ -25733,7 +26214,7 @@ unsafeWindow.fetch = function(...args) {
           _readSyncMeta(scope).then(meta => {
             if (meta?.isFullySynced) {
               _idbSearch(scope, q).then(results => {
-                const filtered = results.filter(m => _passesTypeFilter(m));
+                const filtered = results.filter(m => _passesTypeFilter(m) && _passesChanFilter(m));
                 msgList.innerHTML = "";
                 if (filtered.length === 0) {
                   msgList.appendChild(Object.assign(document.createElement("div"), {
@@ -25772,7 +26253,7 @@ unsafeWindow.fetch = function(...args) {
 
     function _renderMessagesFallback(msgList, selCount, createBtn, cancelBtn, q) {
       const filtered = _browseData.filter(m =>
-        _passesTypeFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
+        _passesTypeFilter(m) && _passesChanFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
       );
       msgList.innerHTML = "";
 
@@ -26442,7 +26923,7 @@ unsafeWindow.fetch = function(...args) {
         const ok = await _ensureCredentials();
         if (!ok) {
           grid.innerHTML = "";
-          grid.appendChild(_makeMsgPlaceholder("mp-token-warn", mp("token_fail")));
+          grid.appendChild(_makeMsgPlaceholder("mp-token-warn", _credErrMsg()));
           _mediaLoading = false;
           if (statusBar) statusBar.style.display = "none";
           return;
@@ -27199,6 +27680,18 @@ unsafeWindow.fetch = function(...args) {
       el.appendChild(wrap);
     }
 
+    function _pauseRunningTask(taskId) {
+      if (taskId === _runningTask) { _stopRequested = true; _abortWait?.(); }
+      _setTaskStatus(taskId, "paused");
+    }
+    async function _cancelTaskWithConfirm(taskId) {
+      const ok = await dmtConfirm(mp("task_cancel_confirm"), { danger: true });
+      if (!ok) return false;
+      if (taskId === _runningTask) { _stopRequested = true; _abortWait?.(); }
+      _removeTask(taskId);
+      return true;
+    }
+
     function _taskCard(task, container) {
       const card = document.createElement("div");
       card.className = "mp-task-card" + (task.id === _runningTask ? " running" : "");
@@ -27225,15 +27718,13 @@ unsafeWindow.fetch = function(...args) {
           acts.appendChild(rb);
         } else {
           const pb = Object.assign(document.createElement("button"), { className: "mp-tbtn pause", textContent: mp("task_pause") });
-          pb.onclick = () => { _stopRequested = true; _abortWait?.(); _setTaskStatus(task.id, "paused"); _renderTasksTab(container); };
+          pb.onclick = () => { _pauseRunningTask(task.id); _renderTasksTab(container); };
           acts.appendChild(pb);
         }
         const cb2 = Object.assign(document.createElement("button"), { className: "mp-tbtn cancel", textContent: mp("task_cancel") });
         cb2.onclick = async () => {
-          const ok = await dmtConfirm(mp("task_cancel_confirm"), { danger: true });
-          if (!ok) return;
-          if (task.id === _runningTask) { _stopRequested = true; _abortWait?.(); }
-          _removeTask(task.id); _renderTasksTab(container);
+          const cancelled = await _cancelTaskWithConfirm(task.id);
+          if (cancelled) _renderTasksTab(container);
         };
         acts.appendChild(cb2);
       }
@@ -27307,7 +27798,7 @@ unsafeWindow.fetch = function(...args) {
       const task  = tasks.find(t => t.id === taskId);
       if (!task || task.status === "done") return;
       const ok = await _ensureCredentials();
-      if (!ok) { dmtShowToast(mp("token_fail"), { duration: 4000 }); return; }
+      if (!ok) { dmtShowToast(_credErrMsg(), { duration: 4000 }); return; }
 
       _runningTask   = taskId;
       _stopRequested = false;
@@ -27317,10 +27808,9 @@ unsafeWindow.fetch = function(...args) {
       const quota   = _getTaskQuota(task);
       let   pending = task.pendingIds || [];
       let   pIdx    = task.offset;
-      let   quotaOverride = false;
 
       while (pIdx < pending.length && !_stopRequested) {
-        if (!quotaOverride && _getQuotaToday() >= quota) {
+        if (_getQuotaToday() >= quota) {
           _setTaskStatus(taskId, "paused"); _runningTask = null;
           const left = pending.length - pIdx;
           const days = Math.ceil(left / quota);
@@ -27329,8 +27819,10 @@ unsafeWindow.fetch = function(...args) {
             + "\n" + mp("task_eta", { days }),
             { confirmText: mp("quota_continue"), cancelText: mp("quota_tomorrow"), danger: true }
           );
-          if (!cont) return;
-          quotaOverride = true;
+          if (!cont) {
+            return;
+          }
+          _resetQuotaToday();
           _runningTask = taskId;
           _setTaskStatus(taskId, "active");
         }
@@ -27343,7 +27835,9 @@ unsafeWindow.fetch = function(...args) {
         if (!chId) { pIdx++; task.offset = pIdx; continue; }
 
         const success = await _apiDelete(chId, msgId);
-        if (success) { task.deletedCount++; _bumpQuota(); }
+        if (success) {
+          task.deletedCount++; _bumpQuota();
+        }
         task.offset = ++pIdx;
 
         if (pIdx % 5 === 0) {
@@ -30439,11 +30933,25 @@ if (type === "warn" && scanLimit !== null) {
         if (v === _msRangeKey) o.selected = true;
         _msRangeSelEl.appendChild(o);
       });
+      toolbar.appendChild(_msRangeSelEl);
+
+      const MS_LONG_RANGE_KEYS = ["3w", "1m"];
+      const rangeHintEl = document.createElement("span");
+      rangeHintEl.textContent = "⚠ " + tOr("ms_range_hint_badge", "May need multiple scans");
+      rangeHintEl.style.cssText = "font-size:11px;cursor:help;flex-shrink:0;display:none;white-space:nowrap;background:rgba(250,166,26,0.15);color:#faa61a;border:1px solid rgba(250,166,26,0.4);border-radius:4px;padding:2px 7px;font-weight:500;";
+      rangeHintEl.title = tOr("ms_range_hint_long",
+        "Large servers may need multiple scans to fully cover this range (auto-stops every {cap} items as a safety cap — just click Scan again to continue)",
+        { cap: MS_SCAN_ITEM_CAP });
+      toolbar.appendChild(rangeHintEl);
+      const _msUpdateRangeHint = () => {
+        rangeHintEl.style.display = MS_LONG_RANGE_KEYS.includes(_msRangeSelEl.value) ? "inline-block" : "none";
+      };
+      _msUpdateRangeHint();
       _msRangeSelEl.addEventListener("change", () => {
         _msRangeKey = _msRangeSelEl.value;
         if (_msCustomRowEl) _msCustomRowEl.style.display = _msRangeKey === "custom" ? "flex" : "none";
+        _msUpdateRangeHint();
       });
-      toolbar.appendChild(_msRangeSelEl);
 
       const spacer = document.createElement("div");
       spacer.style.cssText = "flex:1;min-width:0;";
