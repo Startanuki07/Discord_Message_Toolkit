@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.8.0.16
+// @version      2.8.0.19
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -789,6 +789,86 @@
     });
   }
 
+  function dmtConfirm3(message, opts = {}) {
+    return new Promise((resolve) => {
+      const lang = (typeof getConfig === "function" ? getConfig().lang : null)
+        || navigator.language || "en";
+      const _cancelMap = { "zh-TW": "取消", "zh-CN": "取消", ja: "キャンセル", ko: "취소", de: "Abbrechen", es: "Cancelar", "pt-BR": "Cancelar", fr: "Annuler", ru: "Отмена" };
+      const _langKey   = lang.split("-")[0];
+      const defaultCancel = _cancelMap[lang] || _cancelMap[_langKey] || "Cancel";
+
+      const { cancelText = defaultCancel, primaryText = "OK", dangerText = "OK" } = opts;
+
+      const overlay = document.createElement("div");
+      overlay.style.cssText = [
+        "position:fixed", "inset:0", "z-index:2147483647",
+        "background:rgba(0,0,0,0.6)", "backdrop-filter:blur(4px)",
+        "display:flex", "align-items:center", "justify-content:center",
+        "pointer-events:auto", "box-sizing:border-box",
+        "animation:dmt-cfm-in 0.15s ease",
+      ].join(";");
+
+      const box = document.createElement("div");
+      box.style.cssText = [
+        "background:#2b2d31", "border:1px solid rgba(255,255,255,0.1)",
+        "border-radius:12px", "padding:22px 24px 18px",
+        "max-width:min(420px,90vw)", "width:420px",
+        "color:#dcddde", "font-family:sans-serif",
+        "font-size:14px", "line-height:1.55",
+        "box-shadow:0 16px 48px rgba(0,0,0,0.7)",
+        "box-sizing:border-box", "animation:dmt-cfm-slide 0.18s cubic-bezier(.19,1,.22,1)",
+      ].join(";");
+
+      const msg = document.createElement("div");
+      msg.style.cssText = "white-space:pre-wrap;margin-bottom:18px;color:#dcddde;font-size:14px;line-height:1.55;";
+      msg.textContent = message;
+
+      const btns = document.createElement("div");
+      btns.style.cssText = "display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;";
+
+      const mkBtn = (text, bg, color) => {
+        const b = document.createElement("button");
+        b.style.cssText = [
+          "padding:7px 18px", "border-radius:6px",
+          "font-size:13px", "font-weight:500", "cursor:pointer",
+          "border:none", "transition:background 0.15s,filter 0.15s",
+          "background:" + bg, "color:" + color, "font-family:sans-serif",
+        ].join(";");
+        b.textContent = text;
+        b.onmouseenter = () => { b.style.filter = "brightness(1.12)"; };
+        b.onmouseleave = () => { b.style.filter = ""; };
+        return b;
+      };
+
+      const cancelBtn  = mkBtn(cancelText,  "transparent", "#dcddde");
+      cancelBtn.style.border = "1px solid rgba(255,255,255,0.15)";
+      const primaryBtn = mkBtn(primaryText, "var(--dmt-accent, #5865f2)", "#fff");
+      const dangerBtn  = mkBtn(dangerText,  "#ed4245", "#fff");
+
+      const onKey = (e) => { if (e.key === "Escape") close("cancel"); };
+
+      const close = (result) => {
+        document.removeEventListener("keydown", onKey);
+        overlay.remove();
+        resolve(result);
+      };
+
+      cancelBtn.onclick  = () => close("cancel");
+      primaryBtn.onclick = () => close("primary");
+      dangerBtn.onclick  = () => close("danger");
+      overlay.addEventListener("click", (e) => { if (e.target === overlay) close("cancel"); });
+      document.addEventListener("keydown", onKey);
+
+      btns.append(cancelBtn, primaryBtn, dangerBtn);
+      box.append(msg, btns);
+      overlay.appendChild(box);
+      dmtGetPortal().appendChild(overlay);
+      overlay.style.pointerEvents = "auto";
+
+      setTimeout(() => primaryBtn.focus(), 50);
+    });
+  }
+
   function dmtPrompt(message, defaultValue = "", opts = {}) {
     return new Promise((resolve) => {
       if (!document.getElementById("dmt-prompt-style")) {
@@ -1131,6 +1211,7 @@
       to_tnktok: "🛠️ to tnktok",
       to_threads: "🧵 to threads.com",
       to_fixthreads: "🔁 to fixthreads",
+      to_fzthreads: "🔁 to fzthreads",
       to_fx_bilibili: "📺 to FX Bilibili",
       to_vx_bilibili: "📼 to VX Bilibili",
       to_b23: "🔗 to b23.tv",
@@ -1605,6 +1686,8 @@
       mp_create_task_quota:     "Quota: inherit global ({limit}/day)",
       mp_create_task_warn:      "⚠️ Deleted messages cannot be recovered. Task will be queued.",
       mp_create_task_confirm:   "Create task",
+      mp_create_task_schedule:  "Queue for later",
+      mp_create_task_now:       "Run now",
       mp_img_expired:           "Image URL may have expired.",
       mp_fav_add:               "Favorite (protected from Task deletion)",
       mp_fav_remove:            "Unfavorite",
@@ -1780,6 +1863,7 @@
       to_tnktok: "🛠️ 轉為 tnktok",
       to_threads: "🧵 轉為 threads.com",
       to_fixthreads: "🔁 轉為 fixthreads",
+      to_fzthreads: "🔁 轉為 fzthreads",
       to_fx_bilibili: "📺 轉為 FX Bilibili",
       to_vx_bilibili: "📼 轉為 VX Bilibili",
       to_b23: "🔗 轉為 b23.tv",
@@ -2208,6 +2292,8 @@
       mp_create_task_quota:     "配額：繼承全域設定（{limit} 則/天）",
       mp_create_task_warn:      "⚠️ 刪除後無法復原。任務將加入佇列。",
       mp_create_task_confirm:   "確認建立",
+      mp_create_task_schedule:  "進入排程",
+      mp_create_task_now:       "立刻執行",
       mp_img_expired:           "圖片連結可能已過期。",
       mp_fav_add:               "收藏（保護此訊息不被 Task 刪除）",
       mp_fav_remove:            "取消收藏",
@@ -2392,6 +2478,7 @@
       to_tnktok: "🛠️ 转为 tnktok",
       to_threads: "🧵 转为 threads.com",
       to_fixthreads: "🔁 转为 fixthreads",
+      to_fzthreads: "🔁 转为 fzthreads",
       to_fx_bilibili: "📺 转为 FX Bilibili",
       to_vx_bilibili: "📼 转为 VX Bilibili",
       to_b23: "🔗 转为 b23.tv",
@@ -2862,6 +2949,8 @@
       mp_create_task_quota:     "上限：继承全局设置（{limit} 条/天）",
       mp_create_task_warn:      "⚠️ 此操作不可撤销，任务将加入队列。",
       mp_create_task_confirm:   "创建任务",
+      mp_create_task_schedule:  "加入排程",
+      mp_create_task_now:       "立即执行",
       mp_img_expired:           "图片链接可能已过期。",
       mp_fav_add:               "收藏（受保护，任务不会删除）",
       mp_fav_remove:            "取消收藏",
@@ -3004,6 +3093,7 @@
       to_tnktok: "🛠️ tnktok へ",
       to_threads: "🧵 threads.com へ",
       to_fixthreads: "🔁 fixthreads へ",
+      to_fzthreads: "🔁 fzthreads へ",
       to_fx_bilibili: "📺 FX Bilibili へ",
       to_vx_bilibili: "📼 VX Bilibili へ",
       to_b23: "🔗 b23.tv へ",
@@ -3474,6 +3564,8 @@
       mp_create_task_quota:     "上限：グローバル設定を継承（{limit} 件/日）",
       mp_create_task_warn:      "⚠️ 削除後は元に戻せません。タスクはキューに追加されます。",
       mp_create_task_confirm:   "タスクを作成",
+      mp_create_task_schedule:  "スケジュールに追加",
+      mp_create_task_now:       "今すぐ実行",
       mp_img_expired:           "画像URLが期限切れの可能性があります。",
       mp_fav_add:               "お気に入り（Taskによる削除から保護）",
       mp_fav_remove:            "お気に入りを解除",
@@ -3616,6 +3708,7 @@
       to_tnktok: "🛠️ tnktok으로",
       to_threads: "🧵 threads.com으로",
       to_fixthreads: "🔁 fixthreads으로",
+      to_fzthreads: "🔁 fzthreads으로",
       to_fx_bilibili: "📺 FX Bilibili로",
       to_vx_bilibili: "📼 VX Bilibili로",
       to_b23: "🔗 b23.tv로",
@@ -4083,6 +4176,8 @@
       mp_create_task_quota:     "한도: 전역 설정 상속 ({limit}개/일)",
       mp_create_task_warn:      "⚠️ 삭제 후 복구할 수 없습니다. 작업이 대기열에 추가됩니다.",
       mp_create_task_confirm:   "작업 만들기",
+      mp_create_task_schedule:  "예약에 추가",
+      mp_create_task_now:       "지금 실행",
       mp_img_expired:           "이미지 URL이 만료되었을 수 있습니다.",
       mp_fav_add:               "즐겨찾기 (Task 삭제로부터 보호)",
       mp_fav_remove:            "즐겨찾기 해제",
@@ -4219,6 +4314,7 @@
       to_tnktok: "🛠️ tnktok",
       to_threads: "🧵 threads.com",
       to_fixthreads: "🔁 fixthreads",
+      to_fzthreads: "🔁 fzthreads",
       to_fx_bilibili: "📺 FX Bilibili",
       to_vx_bilibili: "📼 VX Bilibili",
       to_b23: "🔗 b23.tv",
@@ -4640,6 +4736,8 @@
       mp_create_task_quota:     "Límite: hereda configuración global ({limit}/día)",
       mp_create_task_warn:      "⚠️ Esta acción no se puede deshacer. La tarea se añadirá a la cola.",
       mp_create_task_confirm:   "Crear tarea",
+      mp_create_task_schedule:  "Programar para después",
+      mp_create_task_now:       "Ejecutar ahora",
       mp_img_expired:           "La URL de la imagen puede haber caducado.",
       mp_fav_add:               "Favorito (protegido de eliminación por Tarea)",
       mp_fav_remove:            "Quitar de favoritos",
@@ -4831,6 +4929,7 @@
       to_tnktok: "🛠️ tnktok",
       to_threads: "🧵 threads.com",
       to_fixthreads: "🔁 fixthreads",
+      to_fzthreads: "🔁 fzthreads",
       to_fx_bilibili: "📺 FX Bilibili",
       to_vx_bilibili: "📼 VX Bilibili",
       to_b23: "🔗 b23.tv",
@@ -5250,6 +5349,8 @@
       mp_create_task_quota:     "Limite: herda configuração global ({limit}/dia)",
       mp_create_task_warn:      "⚠️ Esta ação não pode ser desfeita. A tarefa será adicionada à fila.",
       mp_create_task_confirm:   "Criar tarefa",
+      mp_create_task_schedule:  "Agendar para depois",
+      mp_create_task_now:       "Executar agora",
       mp_img_expired:           "A URL da imagem pode ter expirado.",
       mp_fav_add:               "Favorito (protegido de exclusão por Tarefa)",
       mp_fav_remove:            "Remover dos favoritos",
@@ -5443,6 +5544,7 @@
       to_tnktok: "🛠️ tnktok",
       to_threads: "🧵 threads.com",
       to_fixthreads: "🔁 fixthreads",
+      to_fzthreads: "🔁 fzthreads",
       to_fx_bilibili: "📺 FX Bilibili",
       to_vx_bilibili: "📼 VX Bilibili",
       to_b23: "🔗 b23.tv",
@@ -5865,6 +5967,8 @@
       mp_create_task_quota:     "Limite : hérite de la configuration globale ({limit}/jour)",
       mp_create_task_warn:      "⚠️ Cette action est irréversible. La tâche sera ajoutée à la file.",
       mp_create_task_confirm:   "Créer la tâche",
+      mp_create_task_schedule:  "Planifier plus tard",
+      mp_create_task_now:       "Exécuter maintenant",
       mp_img_expired:           "L'URL de l'image a peut-être expiré.",
       mp_fav_add:               "Favori (protégé contre la suppression par Tâche)",
       mp_fav_remove:            "Retirer des favoris",
@@ -6057,6 +6161,7 @@
       to_tnktok: "🛠️ tnktok",
       to_threads: "🧵 threads.com",
       to_fixthreads: "🔁 fixthreads",
+      to_fzthreads: "🔁 fzthreads",
       to_fx_bilibili: "📺 FX Bilibili",
       to_vx_bilibili: "📼 VX Bilibili",
       to_b23: "🔗 b23.tv",
@@ -6475,6 +6580,8 @@
       mp_create_task_quota:     "Лимит: наследует глобальную настройку ({limit}/день)",
       mp_create_task_warn:      "⚠️ Действие необратимо. Задача будет добавлена в очередь.",
       mp_create_task_confirm:   "Создать задачу",
+      mp_create_task_schedule:  "Запланировать",
+      mp_create_task_now:       "Выполнить сейчас",
       mp_img_expired:           "URL изображения мог устареть.",
       mp_fav_add:               "В избранное (защита от удаления Задачей)",
       mp_fav_remove:            "Удалить из избранного",
@@ -6667,6 +6774,7 @@
       to_tnktok: "🛠️ tnktok",
       to_threads: "🧵 threads.com",
       to_fixthreads: "🔁 fixthreads",
+      to_fzthreads: "🔁 fzthreads",
       to_fx_bilibili: "📺 FX Bilibili",
       to_vx_bilibili: "📼 VX Bilibili",
       to_b23: "🔗 b23.tv",
@@ -7074,6 +7182,8 @@
       mp_create_task_quota:     "Limit: übernimmt globale Konfiguration ({limit}/Tag)",
       mp_create_task_warn:      "⚠️ Diese Aktion ist nicht rückgängig zu machen. Aufgabe wird in die Warteschlange gestellt.",
       mp_create_task_confirm:   "Aufgabe erstellen",
+      mp_create_task_schedule:  "Für später einplanen",
+      mp_create_task_now:       "Jetzt ausführen",
       mp_img_expired:           "Bild-URL ist möglicherweise abgelaufen.",
       mp_fav_add:               "Favorit (vor Aufgaben-Löschen geschützt)",
       mp_fav_remove:            "Aus Favoriten entfernen",
@@ -12003,11 +12113,12 @@
           {
             type: "threads",
             label: "Threads",
-            domains: ["threads.com", "threads.net", "fixthreads.seria.moe"],
+            domains: ["threads.com", "threads.net", "fixthreads.seria.moe", "fzthreads.com"],
             labels: {
               "threads.com": "to_threads",
               "threads.net": "to_threads",
               "fixthreads.seria.moe": "to_fixthreads",
+              "fzthreads.com": "to_fzthreads",
             },
           },
           {
@@ -24578,19 +24689,22 @@ unsafeWindow.fetch = function(...args) {
     let _browseCtxSnapshot = null;
     let _ctxChangedNotified = false;
     let _browseChanFilter = "all";
-    let _forceFullScan = false;
+    let _forceRefresh = false;
     let _browseView   = "list";
     let _selectedIds  = new Set();
     let _anchorIdx    = null;
     let _abortWait    = null;
     let _runningTask  = null;
     let _stopRequested = false;
+    let _mpTasksArea  = null;
     let _typeFilter   = null;
     let _setupBrowseSentinel = null;
     let _mpRefreshBtn = null;
     let _mpStatusBar  = null;
     let _chanFilterRowEl = null;
     let _chanFilterSelEl = null;
+    let _mpInlineProgressEl = null;
+    let _mpInlineDeleteTaskId = null;
     let _mpUndoBuffer = null;
     let _mpUndoTimer  = null;
     let _favIds = new Set(GMStore.get(SK_FAVS, [], true));
@@ -25212,6 +25326,13 @@ unsafeWindow.fetch = function(...args) {
         "color:var(--dmt-text-muted,#949ba4);font-size:13px;}",
         "#dmt-mp-panel .mp-statusbar{display:flex;align-items:center;gap:8px;padding:7px 12px;",
         "border-top:1px solid rgba(255,255,255,.07);background:var(--dmt-bg-secondary,#1e1f22);flex-shrink:0;}",
+        "#dmt-mp-panel .mp-inline-progress{display:flex;align-items:center;gap:8px;padding:8px 12px;",
+        "font-size:12px;color:#ed4245;background:rgba(237,66,69,.08);",
+        "border-top:1px solid rgba(237,66,69,.25);flex-shrink:0;}",
+        "#dmt-mp-panel .mp-inline-progress .mp-ip-bar-track{flex:1;height:5px;",
+        "background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden;}",
+        "#dmt-mp-panel .mp-inline-progress .mp-ip-bar-fill{height:100%;background:#ed4245;",
+        "transition:width .3s;width:0%;}",
         "#dmt-mp-panel .mp-sel-count{flex:1;font-size:12px;color:var(--dmt-text-muted,#949ba4);}",
         "#dmt-mp-panel .mp-sbtn{padding:4px 12px;border-radius:6px;border:none;",
         "font-size:12px;font-weight:600;cursor:pointer;transition:filter .15s;}",
@@ -25544,6 +25665,9 @@ unsafeWindow.fetch = function(...args) {
         _setupBrowseSentinel = null;
         _mpRefreshBtn = null;
         _mpStatusBar = null;
+        _mpTasksArea = null;
+        _mpInlineProgressEl = null;
+        _mpInlineDeleteTaskId = null;
         _stopRequested = true; _prefetchActive = false;
         _abortWait?.();
         panel.remove(); _panelEl = null;
@@ -25563,6 +25687,7 @@ unsafeWindow.fetch = function(...args) {
       const tasksArea = document.createElement("div");
       tasksArea.className = "mp-tasks-body";
       tasksArea.style.display = "none";
+      _mpTasksArea = tasksArea;
 
       const _switchToTab = (key) => {
         _activeTab = key;
@@ -25641,7 +25766,7 @@ unsafeWindow.fetch = function(...args) {
         _stopRequested = true; _prefetchActive = false;
         _abortWait?.();
         _browseGen++;
-        _forceFullScan = (_browseScope === "server");
+        _forceRefresh = true;
         _browseChanFilter = "all";
         if (_chanFilterRowEl) _chanFilterRowEl.style.display = "none";
         setTimeout(() => {
@@ -25800,6 +25925,7 @@ unsafeWindow.fetch = function(...args) {
         if (_prefetchActive) return;
         if (_browseObs) { _browseObs.disconnect(); _browseObs = null; }
         if (_browseTotal !== null && _browseOffset < _browseTotal && _browseData.length < _browseTotal) {
+          const capturedGen = _browseGen;
           _browseObs = new IntersectionObserver(entries => {
             if (entries[0].isIntersecting && !_prefetchActive && _browseTotal !== null && _browseOffset < _browseTotal) {
               _browseObs.disconnect(); _browseObs = null;
@@ -25814,6 +25940,7 @@ unsafeWindow.fetch = function(...args) {
                 if (newFiltered.length > 0) {
                   _appendFilteredRows(msgList, newFiltered, allFiltered, selCount, createBtn, cancelBtn);
                 }
+                _refreshChanFilterOptions(capturedGen);
                 if (_browseTotal !== null && _browseOffset < _browseTotal) _setupBrowseSentinel();
               }).catch(e => {
                 DEBUG && console.warn("[Browse] sentinel _fetchPage failed, re-mounting sentinel:", e);
@@ -25865,7 +25992,11 @@ unsafeWindow.fetch = function(...args) {
       };
       statusBar.append(selectAllLoadedBtn, selCount, cancelBtn, createBtn);
 
-      browseArea.append(scopeRow, _chanFilterRowEl, searchRow, typeRow, msgList, browseSentinel, statusBar);
+      _mpInlineProgressEl = document.createElement("div");
+      _mpInlineProgressEl.className = "mp-inline-progress";
+      _mpInlineProgressEl.style.display = "none";
+
+      browseArea.append(scopeRow, _chanFilterRowEl, searchRow, typeRow, msgList, browseSentinel, statusBar, _mpInlineProgressEl);
 
       panel.append(titlebar, tabsRow, browseArea, favsArea, mediaArea, tasksArea);
       _panelEl = panel;
@@ -25949,12 +26080,12 @@ unsafeWindow.fetch = function(...args) {
       const capturedGen = _browseGen;
       _browseCtxSnapshot = _getCtx();
       _ctxChangedNotified = false;
-      const isFullScan = _forceFullScan;
-      _forceFullScan = false;
+      const isForceRefresh = _forceRefresh;
+      _forceRefresh = false;
       msgList.innerHTML = "";
 
       const scope = _scopeKey();
-      if (scope && !isFullScan) {
+      if (scope && !isForceRefresh) {
         try {
           const ctx = _browseCtxSnapshot;
           const filterForScope = arr => (_browseScope === "channel" && ctx?.channelId)
@@ -26007,18 +26138,17 @@ unsafeWindow.fetch = function(...args) {
       }
 
       _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
-      const prefetchPromise = _startPrefetch(msgList, selCount, createBtn, cancelBtn, searchInput, _mpStatusBar, isFullScan);
-      if (isFullScan) {
-        prefetchPromise.then(() => _refreshChanFilterOptions());
-      }
+      _refreshChanFilterOptions(capturedGen);
+      _startPrefetch(msgList, selCount, createBtn, cancelBtn, searchInput, _mpStatusBar);
     }
 
     let _prefetchActive = false;
-    async function _startPrefetch(msgList, selCount, createBtn, cancelBtn, searchInput, statusBar, ignoreLimit = false) {
+    async function _startPrefetch(msgList, selCount, createBtn, cancelBtn, searchInput, statusBar) {
       if (_prefetchActive) return;
-      const limit = ignoreLimit ? Infinity : (parseInt(GMStore.get(SK_PREFETCH_LIMIT, "200", true), 10) || 200);
+      const limit = parseInt(GMStore.get(SK_PREFETCH_LIMIT, "200", true), 10) || 200;
       if (limit <= 0) return;
       _prefetchActive = true;
+      const capturedGen = _browseGen;
       if (statusBar) _updatePrefetchProgress(statusBar);
       try {
         while (!_stopRequested && _browseTotal !== null && _browseData.length < _browseTotal && _browseData.length < limit) {
@@ -26038,6 +26168,7 @@ unsafeWindow.fetch = function(...args) {
             _appendFilteredRows(msgList, newFiltered, allFiltered, selCount, createBtn, cancelBtn);
           }
           if (statusBar) _updatePrefetchProgress(statusBar);
+          _refreshChanFilterOptions(capturedGen);
         }
       } finally {
         _prefetchActive = false;
@@ -26045,8 +26176,9 @@ unsafeWindow.fetch = function(...args) {
       }
     }
 
-    async function _refreshChanFilterOptions() {
+    async function _refreshChanFilterOptions(capturedGen) {
       if (!_chanFilterRowEl || !_chanFilterSelEl) return;
+      if (capturedGen !== undefined && capturedGen !== _browseGen) return;
       const counts = new Map();
       _browseData.forEach(m => counts.set(m.channel_id, (counts.get(m.channel_id) || 0) + 1));
 
@@ -26056,22 +26188,31 @@ unsafeWindow.fetch = function(...args) {
         return;
       }
 
+      const isFullyLoaded = _browseTotal !== null && _browseData.length >= _browseTotal;
       const prevSelection = _browseChanFilter;
-      _chanFilterSelEl.innerHTML = "";
-      const optAll = document.createElement("option");
-      optAll.value = "all";
-      optAll.textContent = mp("chan_filter_all", { n: _browseData.length });
-      _chanFilterSelEl.appendChild(optAll);
+
+      let optAll = _chanFilterSelEl.querySelector('option[value="all"]');
+      if (!optAll) {
+        optAll = document.createElement("option");
+        optAll.value = "all";
+        _chanFilterSelEl.insertBefore(optAll, _chanFilterSelEl.firstChild);
+      }
+      optAll.textContent = mp("chan_filter_all", { n: _browseData.length }) + (isFullyLoaded ? "" : ` (${mp("loading")})`);
 
       const unresolved = [];
       [...counts.entries()].sort((a, b) => b[1] - a[1]).forEach(([cid, cnt]) => {
-        const o = document.createElement("option");
-        o.value = cid;
-        o.dataset.cid = cid;
+        let o = _chanFilterSelEl.querySelector(`option[data-cid="${cid}"]`);
         const name = _getChannelName(cid);
-        o.textContent = (name ? `# ${name}` : `#${cid}`) + ` (${cnt})`;
-        if (!name) unresolved.push(cid);
-        _chanFilterSelEl.appendChild(o);
+        if (!o) {
+          o = document.createElement("option");
+          o.value = cid;
+          o.dataset.cid = cid;
+          _chanFilterSelEl.appendChild(o);
+        }
+        const namedPart = o.dataset.resolvedName || name;
+        if (name && !o.dataset.resolvedName) o.dataset.resolvedName = name;
+        o.textContent = (namedPart ? `# ${namedPart}` : `#${cid}`) + ` (${cnt})`;
+        if (!namedPart) unresolved.push(cid);
       });
       _browseChanFilter = counts.has(prevSelection) ? prevSelection : "all";
       _chanFilterSelEl.value = _browseChanFilter;
@@ -26081,9 +26222,13 @@ unsafeWindow.fetch = function(...args) {
         for (const cid of unresolved) {
           const name = await _fetchChannelNameAPI(cid);
           if (!_chanFilterSelEl.isConnected) break;
+          if (capturedGen !== undefined && capturedGen !== _browseGen) break;
           if (name) {
             const opt = _chanFilterSelEl.querySelector(`option[data-cid="${cid}"]`);
-            if (opt) opt.textContent = opt.textContent.replace(`#${cid}`, `# ${name}`);
+            if (opt) {
+              opt.dataset.resolvedName = name;
+              opt.textContent = opt.textContent.replace(`#${cid}`, `# ${name}`);
+            }
           }
           await _sleep(300);
         }
@@ -27664,6 +27809,30 @@ unsafeWindow.fetch = function(...args) {
       }
     }
 
+    function _updateInlineProgress(task, done, total, finished) {
+      if (!_mpInlineProgressEl || _mpInlineDeleteTaskId !== task.id) return;
+      _mpInlineProgressEl.style.display = "flex";
+      _mpInlineProgressEl.innerHTML = "";
+      const label = document.createElement("span");
+      label.textContent = "🗑 " + mp("task_progress", { done, total: total || "?" });
+      const track = document.createElement("div");
+      track.className = "mp-ip-bar-track";
+      const fill = document.createElement("div");
+      fill.className = "mp-ip-bar-fill";
+      fill.style.width = (total > 0 ? Math.min(100, Math.round(done / total * 100)) : 0) + "%";
+      track.appendChild(fill);
+      _mpInlineProgressEl.append(label, track);
+      if (finished) {
+        const el = _mpInlineProgressEl;
+        setTimeout(() => {
+          if (_mpInlineProgressEl === el) {
+            _mpInlineProgressEl.style.display = "none";
+            _mpInlineDeleteTaskId = null;
+          }
+        }, 3000);
+      }
+    }
+
     function _refreshQProg(el) {
       const limit = _getGlobalQuota(), done = _getQuotaToday();
       const pct = Math.min(100, Math.round(done / limit * 100));
@@ -27754,10 +27923,11 @@ unsafeWindow.fetch = function(...args) {
         "", mp("create_task_warn"),
       ].join("\n");
       try {
-        const ok = await dmtConfirm(mp("create_task_title") + "\n\n" + body,
-          { confirmText: mp("create_task_confirm"), danger: true }
-        );
-        if (!ok) return;
+        const choice = await dmtConfirm3(mp("create_task_title") + "\n\n" + body, {
+          primaryText: mp("create_task_schedule"),
+          dangerText:  mp("create_task_now"),
+        });
+        if (choice === "cancel") return;
         const favExcluded = [..._selectedIds].filter(id => _favIds.has(id));
         const pendingIdList = [..._selectedIds]
           .filter(id => !_favIds.has(id))
@@ -27783,10 +27953,17 @@ unsafeWindow.fetch = function(...args) {
         };
         const ts = _getTasks(); ts.push(task); _saveTasks(ts);
         _selectedIds.clear();
-        dmtShowToast(mp("task_created"), { duration: 2000 });
-        _panelEl?.querySelectorAll(".mp-tab").forEach(tab => {
-          if (tab.dataset.tab === "tasks") tab.click();
-        });
+
+        if (choice === "danger") {
+          dmtShowToast(mp("task_created"), { duration: 1500 });
+          _mpInlineDeleteTaskId = task.id;
+          _runTask(task.id, _mpTasksArea);
+        } else {
+          dmtShowToast(mp("task_created"), { duration: 2000 });
+          _panelEl?.querySelectorAll(".mp-tab").forEach(tab => {
+            if (tab.dataset.tab === "tasks") tab.click();
+          });
+        }
       } catch (e) {
         DEBUG && console.warn("[MyPosts] _openCreateTaskDialog error:", e);
       }
@@ -27808,6 +27985,8 @@ unsafeWindow.fetch = function(...args) {
       const quota   = _getTaskQuota(task);
       let   pending = task.pendingIds || [];
       let   pIdx    = task.offset;
+
+      _updateInlineProgress(task, pIdx, pending.length, false);
 
       while (pIdx < pending.length && !_stopRequested) {
         if (_getQuotaToday() >= quota) {
@@ -27844,6 +28023,7 @@ unsafeWindow.fetch = function(...args) {
           const ts2 = _getTasks(); const i2 = ts2.findIndex(t => t.id === taskId);
           if (i2 >= 0) { ts2[i2] = task; _saveTasks(ts2); }
           _renderTasksTab(tasksContainer);
+          _updateInlineProgress(task, pIdx, pending.length, false);
         }
         if (_stopRequested) break;
       }
@@ -27855,6 +28035,7 @@ unsafeWindow.fetch = function(...args) {
         if (ft[fi].status === "done")
           dmtShowToast(mp("task_done_toast", { n: task.deletedCount }), { duration: 4000 });
       }
+      _updateInlineProgress(task, pIdx, pending.length, true);
       _runningTask = null;
       _renderTasksTab(tasksContainer);
     }
@@ -28021,6 +28202,9 @@ unsafeWindow.fetch = function(...args) {
       "fxbilibili.com":   "bilibili.com",
       "vxbilibili.com":   "bilibili.com",
       "phixiv.net":       "pixiv.net",
+      "threads.net":            "threads.com",
+      "fixthreads.seria.moe":   "threads.com",
+      "fzthreads.com":          "threads.com",
     };
 
     function normalizeURL(raw) {
