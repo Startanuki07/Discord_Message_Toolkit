@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.8.0.24
+// @version      2.8.0.25
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -24716,6 +24716,7 @@ unsafeWindow.fetch = function(...args) {
     let _browseTotal  = null;
     let _browseGen    = 0;
     let _browseUnlockedLimit = 0;
+    let _browseObs    = null;
     let _browseScope  = "channel";
     let _browseCtxSnapshot = null;
     let _ctxChangedNotified = false;
@@ -25967,30 +25968,39 @@ unsafeWindow.fetch = function(...args) {
       const msgList = document.createElement("div");
       msgList.className = "mp-body";
 
-      let _browseObs = null;
       const browseSentinel = document.createElement("div");
       browseSentinel.style.cssText = "height:1px;width:100%;";
+
+      let _sentinelPausedForUnlock = false;
+      let _scrollListenerBound = false;
+      let _scrollThrottleTs = 0;
+      const SCROLL_UNLOCK_THROTTLE_MS = 200;
+
+      function _onMsgListScroll() {
+        if (!_sentinelPausedForUnlock) return;
+        const now = Date.now();
+        if (now - _scrollThrottleTs < SCROLL_UNLOCK_THROTTLE_MS) return;
+        _scrollThrottleTs = now;
+        _sentinelPausedForUnlock = false;
+        _setupBrowseSentinel();
+      }
 
       _setupBrowseSentinel = function() {
         if (_prefetchActive) return;
         if (_browseObs) { _browseObs.disconnect(); _browseObs = null; }
+        if (!_scrollListenerBound) {
+          _scrollListenerBound = true;
+          msgList.addEventListener("scroll", _onMsgListScroll, { passive: true });
+        }
         if (_browseTotal !== null && _browseOffset < _browseTotal && _browseData.length < _browseTotal) {
           const capturedGen = _browseGen;
-          let _pausedWaitingExit = false;
           _browseObs = new IntersectionObserver(entries => {
-            const isIn = entries[0].isIntersecting;
-            if (_prefetchActive || _browseTotal === null || _browseOffset >= _browseTotal) return;
-
-            if (!isIn) {
-              if (_pausedWaitingExit) _pausedWaitingExit = false;
-              return;
-            }
-
-            if (_pausedWaitingExit) return;
+            if (!entries[0].isIntersecting || _prefetchActive || _browseTotal === null || _browseOffset >= _browseTotal) return;
 
             if (_browseData.length >= _browseUnlockedLimit) {
               _browseUnlockedLimit += (parseInt(GMStore.get(SK_PREFETCH_LIMIT, "200", true), 10) || 200);
-              _pausedWaitingExit = true;
+              _sentinelPausedForUnlock = true;
+              _browseObs.disconnect(); _browseObs = null;
               _updatePrefetchProgress(statusBar);
               return;
             }
@@ -26019,7 +26029,7 @@ unsafeWindow.fetch = function(...args) {
               _updatePrefetchProgress(statusBar);
               _setupBrowseSentinel();
             });
-          }, { threshold: 0.1, rootMargin: "200px" });
+          }, { root: msgList, threshold: 0.1, rootMargin: "200px" });
           _browseObs.observe(browseSentinel);
         }
       };
@@ -26074,6 +26084,10 @@ unsafeWindow.fetch = function(...args) {
       _panelEl = panel;
       document.body.appendChild(panel);
       _makeDraggable(panel, titlebar);
+      {
+        const _prevCleanup2 = panel._mpCleanup;
+        panel._mpCleanup = () => { _prevCleanup2(); msgList.removeEventListener("scroll", _onMsgListScroll); };
+      }
 
       browseArea.style.display = _activeTab === "browse" ? "flex" : "none";
       favsArea.style.display   = _activeTab === "favs"   ? "flex" : "none";
