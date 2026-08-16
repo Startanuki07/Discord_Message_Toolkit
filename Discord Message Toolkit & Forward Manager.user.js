@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.8.0.25
+// @version      2.8.0.29
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -1613,7 +1613,6 @@
       mp_cache_clear_scope:     "Clear this scope",
       mp_cache_clearing:        "Clearing…",
       mp_cache_cleared:         "Cleared ✓",
-      mp_cache_resync:          "🔄 Force full resync",
       mp_cache_clear_all:       "🗑 Clear all cache",
       mu_settings_preview:      "Preview",
       wm_focus_label_section:   "Label",
@@ -2222,7 +2221,6 @@
       mp_cache_clear_scope:     "清除此範圍",
       mp_cache_clearing:        "清除中…",
       mp_cache_cleared:         "已清除 ✓",
-      mp_cache_resync:          "🔄 強制完整重新同步",
       mp_cache_clear_all:       "🗑 清除全部快取",
       mu_settings_preview:      "預覽",
       wm_focus_label_section:   "標籤",
@@ -2883,7 +2881,6 @@
       mp_cache_clear_scope:     "清除此范围",
       mp_cache_clearing:        "清除中…",
       mp_cache_cleared:         "已清除 ✓",
-      mp_cache_resync:          "🔄 强制完整重新同步",
       mp_cache_clear_all:       "🗑 清除全部缓存",
       mu_settings_preview:      "预览",
       wm_focus_label_section:   "标签",
@@ -3501,7 +3498,6 @@
       mp_cache_clear_scope:     "このスコープをクリア",
       mp_cache_clearing:        "クリア中…",
       mp_cache_cleared:         "クリア済み ✓",
-      mp_cache_resync:          "🔄 完全再同期を強制",
       mp_cache_clear_all:       "🗑 全キャッシュをクリア",
       mu_settings_preview:      "プレビュー",
       wm_focus_label_section:   "ラベル",
@@ -4116,7 +4112,6 @@
       mp_cache_clear_scope:     "이 범위 지우기",
       mp_cache_clearing:        "지우는 중…",
       mp_cache_cleared:         "지워짐 ✓",
-      mp_cache_resync:          "🔄 전체 재동기화 강제",
       mp_cache_clear_all:       "🗑 전체 캐시 지우기",
       mu_settings_preview:      "미리보기",
       wm_focus_label_section:   "레이블",
@@ -4680,7 +4675,6 @@
       mp_cache_clear_scope:     "Limpiar este ámbito",
       mp_cache_clearing:        "Limpiando…",
       mp_cache_cleared:         "Limpiado ✓",
-      mp_cache_resync:          "🔄 Forzar resincronización completa",
       mp_cache_clear_all:       "🗑 Limpiar todo el caché",
       mu_settings_preview:      "Vista previa",
       wm_focus_label_section:   "Etiqueta",
@@ -5296,7 +5290,6 @@
       mp_cache_clear_scope:     "Limpar este escopo",
       mp_cache_clearing:        "Limpando…",
       mp_cache_cleared:         "Limpo ✓",
-      mp_cache_resync:          "🔄 Forçar ressincronização completa",
       mp_cache_clear_all:       "🗑 Limpar todo o cache",
       mu_settings_preview:      "Pré-visualização",
       wm_focus_label_section:   "Rótulo",
@@ -5917,7 +5910,6 @@
       mp_cache_clear_scope:     "Effacer cette portée",
       mp_cache_clearing:        "Effacement…",
       mp_cache_cleared:         "Effacé ✓",
-      mp_cache_resync:          "🔄 Forcer la resynchronisation complète",
       mp_cache_clear_all:       "🗑 Effacer tout le cache",
       mu_settings_preview:      "Aperçu",
       wm_focus_label_section:   "Étiquette",
@@ -6533,7 +6525,6 @@
       mp_cache_clear_scope:     "Очистить эту область",
       mp_cache_clearing:        "Очистка…",
       mp_cache_cleared:         "Очищено ✓",
-      mp_cache_resync:          "🔄 Принудительная полная синхронизация",
       mp_cache_clear_all:       "🗑 Очистить весь кэш",
       mu_settings_preview:      "Предпросмотр",
       wm_focus_label_section:   "Метка",
@@ -7138,7 +7129,6 @@
       mp_cache_clear_scope:     "Diesen Bereich leeren",
       mp_cache_clearing:        "Leeren…",
       mp_cache_cleared:         "Geleert ✓",
-      mp_cache_resync:          "🔄 Vollständige Neusynchronisierung erzwingen",
       mp_cache_clear_all:       "🗑 Gesamten Cache leeren",
       mu_settings_preview:      "Vorschau",
       wm_focus_label_section:   "Label",
@@ -24509,6 +24499,31 @@ unsafeWindow.fetch = function(...args) {
       }
     }
 
+    async function _idbGetByScopeYM(scope, ym) {
+      try {
+        const db   = await _idbOpen();
+        const from = ym + "-01T00:00:00.000Z";
+        const [_y, _m] = ym.split("-").map(Number);
+        const _lastDay = new Date(Date.UTC(_y, _m, 0)).getUTCDate();
+        const to   = `${ym}-${String(_lastDay).padStart(2, "0")}T23:59:59.999Z`;
+        return await new Promise((resolve, reject) => {
+          const results = [];
+          const tx  = db.transaction("messages", "readonly");
+          const idx = tx.objectStore("messages").index("scope_ts");
+          const req = idx.openCursor(IDBKeyRange.bound([scope, from], [scope, to]));
+          req.onsuccess = e => {
+            const cursor = e.target.result;
+            if (cursor) { results.push(cursor.value); cursor.continue(); }
+            else { results.sort((a, b) => b.timestamp.localeCompare(a.timestamp)); resolve(results); }
+          };
+          req.onerror = e => reject(e.target.error);
+        });
+      } catch (err) {
+        DEBUG && console.warn("[IDB] getByScopeYM failed:", err);
+        return [];
+      }
+    }
+
     async function _idbClearScope(scope) {
       try {
         const db = await _idbOpen();
@@ -24551,6 +24566,70 @@ unsafeWindow.fetch = function(...args) {
         DEBUG && console.warn("[IDB] clearAll failed:", err);
       }
     }
+
+    function _csvEscape(val) {
+      const s = String(val ?? "");
+      if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    }
+
+    function _flattenMediaUrls(msg) {
+      const urls = [];
+      (msg.attachments || []).forEach(a => { if (a.url) urls.push(a.url); });
+      (msg.embeds || []).forEach(e => {
+        if (e.thumbnail?.url) urls.push(e.thumbnail.url);
+        if (e.image?.url) urls.push(e.image.url);
+      });
+      return urls.join("; ");
+    }
+
+    function _exportBuildCSV(messages) {
+      const header = ["timestamp", "channel_id", "author", "content", "media_urls", "message_id"];
+      const rows = [header.map(_csvEscape).join(",")];
+      for (const m of messages) {
+        const authorName = m.author?.global_name || m.author?.username || "";
+        rows.push([
+          m.timestamp || "",
+          m.channel_id || "",
+          authorName,
+          m.content || "",
+          _flattenMediaUrls(m),
+          m.id || "",
+        ].map(_csvEscape).join(","));
+      }
+      return "\ufeff" + rows.join("\r\n");
+    }
+
+    function _exportBuildJSON(messages) {
+      return JSON.stringify(messages, null, 2);
+    }
+
+    function _exportDownload(content, filename, mimeType) {
+      const blob = new Blob([content], { type: mimeType });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href = url; a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function _exportMessages(messages, format, labelForFilename) {
+      if (!messages || messages.length === 0) {
+        dmtShowToast("⚠️ " + tOr("mp_export_empty", "No messages to export"), { duration: 2500 });
+        return;
+      }
+      const safeLabel = String(labelForFilename).replace(/[^a-zA-Z0-9_-]/g, "_");
+      const dateStamp = new Date().toISOString().slice(0, 10);
+      if (format === "csv") {
+        _exportDownload(_exportBuildCSV(messages), `discord-myposts-${safeLabel}-${dateStamp}.csv`, "text/csv;charset=utf-8");
+      } else {
+        _exportDownload(_exportBuildJSON(messages), `discord-myposts-${safeLabel}-${dateStamp}.json`, "application/json;charset=utf-8");
+      }
+      dmtShowToast(`✅ ${tOr("mp_export_done", "Exported")} ${messages.length.toLocaleString()} ${tOr("mp_cache_msgs", "msgs")}`, { duration: 2500 });
+    }
+
     function _scopeKey() {
       const ctx = _getCtx();
       if (!ctx) return null;
@@ -25502,6 +25581,33 @@ unsafeWindow.fetch = function(...args) {
     async function _buildCacheModal() {
       document.getElementById("dmt-cache-modal")?.remove();
 
+      function _showExportFormatMenu(anchorBtn, onPick) {
+        document.getElementById("dmt-export-fmt-menu")?.remove();
+        const menu = document.createElement("div");
+        menu.id = "dmt-export-fmt-menu";
+        const rect = anchorBtn.getBoundingClientRect();
+        menu.style.cssText = [
+          `position:fixed;top:${rect.bottom + 4}px;left:${Math.max(4, rect.right - 90)}px;`,
+          "z-index:100000;background:var(--dmt-panel-bg,#2b2d31);border:1px solid var(--dmt-divider,#1e1f22);",
+          "border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.4);overflow:hidden;min-width:86px;",
+          "pointer-events:auto;",
+        ].join("");
+        ["JSON", "CSV"].forEach(fmt => {
+          const item = document.createElement("button");
+          item.textContent = fmt;
+          item.style.cssText = "display:block;width:100%;text-align:left;padding:6px 12px;font-size:12px;background:none;border:none;color:var(--dmt-text,#dbdee1);cursor:pointer;";
+          item.onmouseenter = () => item.style.background = "var(--dmt-row-hover,rgba(255,255,255,.08))";
+          item.onmouseleave = () => item.style.background = "none";
+          item.onclick = () => { menu.remove(); onPick(fmt.toLowerCase()); };
+          menu.appendChild(item);
+        });
+        dmtGetPortal().appendChild(menu);
+        const closeOnOutside = e => {
+          if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener("mousedown", closeOnOutside, true); }
+        };
+        setTimeout(() => document.addEventListener("mousedown", closeOnOutside, true), 0);
+      }
+
       const overlay = document.createElement("div");
       overlay.id = "dmt-cache-modal";
       overlay.style.cssText = [
@@ -25531,7 +25637,24 @@ unsafeWindow.fetch = function(...args) {
       hdr.append(hdrTitle, closeBtn);
 
       const body = document.createElement("div");
-      body.style.cssText = "flex:1;overflow-y:auto;padding:12px 16px;";
+      body.id = "dmt-cache-modal-body";
+      body.style.cssText = "flex:1;overflow-y:auto;padding:12px 16px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent;";
+
+      if (!document.getElementById("dmt-cache-modal-scrollbar-style")) {
+        const scrollbarStyle = document.createElement("style");
+        scrollbarStyle.id = "dmt-cache-modal-scrollbar-style";
+        scrollbarStyle.textContent = `
+          #dmt-cache-modal-body::-webkit-scrollbar { width: 6px; }
+          #dmt-cache-modal-body::-webkit-scrollbar-track { background: transparent; }
+          #dmt-cache-modal-body::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.15); border-radius: 3px;
+          }
+          #dmt-cache-modal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.3);
+          }
+        `;
+        document.head.appendChild(scrollbarStyle);
+      }
 
       body.textContent = tOr("mp_loading", "Loading…");
       panel.append(hdr, body);
@@ -25602,6 +25725,17 @@ unsafeWindow.fetch = function(...args) {
             const countLabel = document.createElement("span");
             countLabel.textContent = count.toLocaleString() + (tOr("mp_cache_msgs", " msgs"));
             countLabel.style.cssText = "font-size:11px;color:var(--dmt-text-muted,#949ba4);";
+            const exportBtn = document.createElement("button");
+            exportBtn.textContent = tOr("mp_cache_export", "Export");
+            exportBtn.style.cssText = "font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid var(--dmt-accent,#5865f2);background:none;color:var(--dmt-accent,#5865f2);cursor:pointer;";
+            exportBtn.onclick = () => {
+              _showExportFormatMenu(exportBtn, async (format) => {
+                exportBtn.disabled = true;
+                const msgs = await _idbGetByScopeYM(sc.scope_key, ym);
+                _exportMessages(msgs, format, `${sc.scope_key.replace(/[:@]/g, "-")}-${ym}`);
+                exportBtn.disabled = false;
+              });
+            };
             const delBtn = document.createElement("button");
             delBtn.textContent = tOr("mp_cache_delete", "Delete");
             delBtn.style.cssText = "font-size:11px;padding:2px 8px;border-radius:4px;border:1px solid var(--dmt-danger,#ed4245);background:none;color:var(--dmt-danger,#ed4245);cursor:pointer;";
@@ -25612,9 +25746,23 @@ unsafeWindow.fetch = function(...args) {
               countLabel.textContent = (tOr("mp_cache_deleted", "Deleted ")) + n;
               delBtn.textContent = "✓";
             };
-            row.append(ymLabel, countLabel, delBtn);
+            row.append(ymLabel, countLabel, exportBtn, delBtn);
             monthTable.appendChild(row);
           }
+
+          const exportAllBtn = document.createElement("button");
+          exportAllBtn.textContent = tOr("mp_cache_export_all", "Export all");
+          exportAllBtn.style.cssText = "font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid var(--dmt-accent,#5865f2);background:none;color:var(--dmt-accent,#5865f2);cursor:pointer;";
+          exportAllBtn.onclick = () => {
+            _showExportFormatMenu(exportAllBtn, async (format) => {
+              exportAllBtn.disabled = true;
+              exportAllBtn.textContent = tOr("mp_cache_exporting", "Exporting…");
+              const msgs = await _idbGetByScope(sc.scope_key);
+              _exportMessages(msgs, format, `${sc.scope_key.replace(/[:@]/g, "-")}-all`);
+              exportAllBtn.disabled = false;
+              exportAllBtn.textContent = tOr("mp_cache_export_all", "Export all");
+            });
+          };
 
           const clearScopeBtn = document.createElement("button");
           clearScopeBtn.textContent = tOr("mp_cache_clear_scope", "Clear this scope");
@@ -25627,7 +25775,11 @@ unsafeWindow.fetch = function(...args) {
             clearScopeBtn.textContent = tOr("mp_cache_cleared", "Cleared ✓");
           };
 
-          scopeBlock.append(scopeHdr, metaLine, monthTable, clearScopeBtn);
+          const scopeBtnRow = document.createElement("div");
+          scopeBtnRow.style.cssText = "display:flex;gap:8px;";
+          scopeBtnRow.append(exportAllBtn, clearScopeBtn);
+
+          scopeBlock.append(scopeHdr, metaLine, monthTable, scopeBtnRow);
           body.appendChild(scopeBlock);
 
           if (sc !== stats.scopes[stats.scopes.length - 1]) {
@@ -25641,28 +25793,6 @@ unsafeWindow.fetch = function(...args) {
       const footer = document.createElement("div");
       footer.style.cssText = "padding:10px 16px;border-top:1px solid var(--dmt-divider,#1e1f22);display:flex;gap:8px;justify-content:flex-end;align-items:center;";
 
-      const resyncBtn = document.createElement("button");
-      resyncBtn.textContent = tOr("mp_cache_resync", "🔄 Force full resync");
-      resyncBtn.title = "Clear cache for current scope and re-fetch all messages from the API.";
-      resyncBtn.style.cssText = "font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--dmt-text-muted,#949ba4);background:none;color:var(--dmt-text-muted,#949ba4);cursor:pointer;";
-      resyncBtn.onclick = async () => {
-        const scope = _scopeKey();
-        if (!scope) return;
-        if (!await dmtConfirm("Clear cache for this scope and re-fetch all messages from Discord?\nThis may take a while depending on your message count.")) return;
-        resyncBtn.disabled = true; resyncBtn.textContent = tOr("mp_cache_clearing", "Clearing…");
-        await _idbClearScope(scope);
-        overlay.remove();
-        _browseData = []; _browseOffset = 0; _browseTotal = null; _browseUnlockedLimit = 0;
-        _browseGen++;
-        _stopRequested = false; _prefetchActive = false;
-        const msgList = _panelEl?.querySelector(".mp-body");
-        const selCount   = _panelEl?.querySelector(".mp-sel-count");
-        const createBtn  = _panelEl?.querySelector(".mp-create-btn");
-        const cancelBtn  = _panelEl?.querySelector(".mp-cancel-btn");
-        const searchInput = _panelEl?.querySelector(".mp-search");
-        if (msgList) _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput);
-      };
-
       const clearAllBtn = document.createElement("button");
       clearAllBtn.textContent = tOr("mp_cache_clear_all", "🗑 Clear all cache");
       clearAllBtn.style.cssText = "font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--dmt-danger,#ed4245);background:none;color:var(--dmt-danger,#ed4245);cursor:pointer;";
@@ -25672,7 +25802,7 @@ unsafeWindow.fetch = function(...args) {
         await _idbClearAll();
         overlay.remove();
       };
-      footer.append(resyncBtn, clearAllBtn);
+      footer.append(clearAllBtn);
       panel.appendChild(footer);
     }
 
@@ -26983,7 +27113,7 @@ unsafeWindow.fetch = function(...args) {
     let _lbIndex      = 0;
 
     function _renderMediaTab(container) {
-      container.querySelectorAll("[data-has-vid-obs]").forEach(el => el._vidObs?.disconnect());
+      _mpDisconnectVidObs(container);
       container.innerHTML = "";
       _mediaData = []; _mediaOffset = 0; _mediaTotal = null; _mediaLoading = false;
       if (_mediaObs) { _mediaObs.disconnect(); _mediaObs = null; }
@@ -27012,6 +27142,7 @@ unsafeWindow.fetch = function(...args) {
           _mediaData = []; _mediaOffset = 0; _mediaTotal = null;
           _mediaLoading = false;
           if (_mediaObs) { _mediaObs.disconnect(); _mediaObs = null; }
+          _mpDisconnectVidObs(grid);
           grid.innerHTML = "";
           const skF = document.createDocumentFragment();
           for (let i = 0; i < 6; i++) skF.appendChild(_makeSkeletonCard());
@@ -27062,6 +27193,7 @@ unsafeWindow.fetch = function(...args) {
         _mediaData = []; _mediaOffset = 0; _mediaTotal = null;
         _mediaLoading = false;
         if (_mediaObs) { _mediaObs.disconnect(); _mediaObs = null; }
+        _mpDisconnectVidObs(grid);
         grid.innerHTML = "";
         const skFrag = document.createDocumentFragment();
         for (let i = 0; i < 6; i++) skFrag.appendChild(_makeSkeletonCard());
@@ -27157,6 +27289,14 @@ unsafeWindow.fetch = function(...args) {
       }
     }
 
+    function _mpDisconnectVidObs(container) {
+      if (!container) return;
+      container.querySelectorAll("[data-has-vid-obs]").forEach(el => {
+        el._vidObs?.disconnect();
+        el._vidObs = null;
+      });
+    }
+
     async function _loadMediaPage(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText) {
       if (_mediaLoading) return;
       if (_mediaTotal !== null && _mediaOffset >= _mediaTotal) {
@@ -27174,9 +27314,11 @@ unsafeWindow.fetch = function(...args) {
       }
 
       if (_mediaOffset === 0) {
+        _mpDisconnectVidObs(grid);
         grid.innerHTML = "";
         const ok = await _ensureCredentials();
         if (!ok) {
+          _mpDisconnectVidObs(grid);
           grid.innerHTML = "";
           grid.appendChild(_makeMsgPlaceholder("mp-token-warn", _credErrMsg()));
           _mediaLoading = false;
@@ -29777,6 +29919,7 @@ if (type === "warn" && scanLimit !== null) {
     let _msToken        = null;
     let _msScanAbort    = false;
     let _msPanelEl      = null;
+    let _msPanelResizeObs = null;
     let _msNavDebounce  = null;
     let _msOnUrlChange  = null;
     let _msGridItems    = [];
@@ -31015,6 +31158,8 @@ if (type === "warn" && scanLimit !== null) {
         _msDocked = false; _msDockSide = null; _msDockPeeked = false; _msDockSnapshot = null;
         clearTimeout(_msLayoutSaveTimer);
         _msLayoutSaveTimer = null;
+        _msPanelResizeObs?.disconnect();
+        _msPanelResizeObs = null;
         return;
       }
       const { scope, guildId, channelId } = _msDetectScope();
@@ -31331,6 +31476,8 @@ if (type === "warn" && scanLimit !== null) {
         if (typeof navigation !== "undefined") {
           navigation.removeEventListener("navigate", _msOnUrlChange);
         }
+        _msPanelResizeObs?.disconnect();
+        _msPanelResizeObs = null;
         panel.remove(); _msPanelEl = null;
         _msScanBtnEl = _msStatusBarEl = _msProgressEl = _msGridContEl = null;
         _msScopeSelEl = _msTypeSelEl = null;
@@ -31725,8 +31872,9 @@ if (type === "warn" && scanLimit !== null) {
           saveMosaicLayoutSettings({ width: panel.offsetWidth, height: panel.offsetHeight });
         }, 400);
       };
-      const _msPanelRO = new ResizeObserver(_msRecalcCols);
-      _msPanelRO.observe(panel);
+      _msPanelResizeObs?.disconnect();
+      _msPanelResizeObs = new ResizeObserver(_msRecalcCols);
+      _msPanelResizeObs.observe(panel);
 
       const footerBar = document.createElement("div");
       footerBar.style.cssText = [
