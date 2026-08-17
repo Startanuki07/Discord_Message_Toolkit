@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.8.0.36
+// @version      2.8.0.40
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -56,7 +56,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.8.0.36";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.8.0.40";
 
   const GMStore = {
     
@@ -25985,6 +25985,9 @@ unsafeWindow.fetch = function(...args) {
         if (key === "tasks") _renderTasksTab(tasksArea);
         if (key === "media") _renderMediaTab(mediaArea);
         if (key === "favs")  _renderFavsTab(favsArea);
+        if (key === "browse" && _browseData.length === 0) {
+          _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput);
+        }
       };
 
       const tabDefs = [
@@ -26337,10 +26340,11 @@ unsafeWindow.fetch = function(...args) {
       else _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput);
 
       if (_activeTab !== "browse" && _browseData.length === 0) {
+        const capturedGen = _browseGen;
         _ensureCredentials().then(ok => {
-          if (!ok || _stopRequested) return;
+          if (!ok || _stopRequested || capturedGen !== _browseGen) return;
           _fetchPage(true).then(() => {
-            if (_stopRequested) return;
+            if (_stopRequested || capturedGen !== _browseGen) return;
             _browseUnlockedLimit = parseInt(GMStore.get(SK_PREFETCH_LIMIT, "200", true), 10) || 200;
           });
         });
@@ -26673,8 +26677,9 @@ unsafeWindow.fetch = function(...args) {
         }
         return;
       }
+      const capturedGen = _browseGen;
       const data = await _searchMyPosts({ scope: _browseScope, offset: _browseOffset, skipDelay });
-      if (!data) return;
+      if (!data || capturedGen !== _browseGen) return;
       _browseTotal = data.total_results || 0;
       const raw = data.messages || [];
       const msgs = raw.flat().filter(m => m.author?.id === _userId && DELETABLE_TYPES.has(m.type));
@@ -28474,7 +28479,12 @@ unsafeWindow.fetch = function(...args) {
       _mpObs.disconnect();
       clearTimeout(_mpDebounce);
       document.removeEventListener("keydown", _onKeydown);
-      _panelEl?.remove();
+      clearInterval(_mpFavsPollTimer); _mpFavsPollTimer = null;
+      if (_panelEl) {
+        if (typeof _panelEl._mpCleanup === "function") _panelEl._mpCleanup();
+        _panelEl.remove();
+        _panelEl = null;
+      }
     };
     CleanupRegistry.add(_moduleIMainCleanup);
     ModuleCleanupRegistry.add("mod_myposts", _moduleIMainCleanup);
@@ -30042,6 +30052,7 @@ if (type === "warn" && scanLimit !== null) {
     let _msPanelResizeObs = null;
     let _msNavDebounce  = null;
     let _msOnUrlChange  = null;
+    let panelEsc = null;
     let _msGridItems    = [];
     let _msGridCursor   = null;
     let _msGridAll      = false;
@@ -31280,6 +31291,7 @@ if (type === "warn" && scanLimit !== null) {
         _msLayoutSaveTimer = null;
         _msPanelResizeObs?.disconnect();
         _msPanelResizeObs = null;
+        document.removeEventListener("keydown", panelEsc, false);
         return;
       }
       const { scope, guildId, channelId } = _msDetectScope();
@@ -32137,7 +32149,7 @@ if (type === "warn" && scanLimit !== null) {
         _msDockRetractTimer = null;
       });
 
-      const panelEsc = e => { if (e.key === "Escape") closeBtn.click(); };
+      panelEsc = e => { if (e.key === "Escape") closeBtn.click(); };
       document.addEventListener("keydown", panelEsc, false);
 
       _msPanelEl = panel;
@@ -32229,6 +32241,7 @@ if (type === "warn" && scanLimit !== null) {
     const _moduleJCleanup = () => {
       _msMutObs?.disconnect();
       clearTimeout(_msInjectDebounce);
+      document.removeEventListener("keydown", panelEsc, false);
       _msPanelEl?.remove();
       _msStop();
       clearTimeout(_msScrollTimer);
