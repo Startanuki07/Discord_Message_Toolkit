@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.8.0.29
+// @version      2.8.0.36
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -56,7 +56,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.7.9.1";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.8.0.36";
 
   const GMStore = {
     
@@ -452,6 +452,7 @@
   }
   function setModEnabled(storageKey, enabled) {
     localStorage.setItem(storageKey, String(enabled));
+    if (!enabled) ModuleCleanupRegistry.runFor(storageKey);
   }
 
   function getConfig() {
@@ -499,6 +500,29 @@
     };
     window.addEventListener("beforeunload", () => registry.runAll(), { once: true });
     return registry;
+  })();
+
+  const ModuleCleanupRegistry = (() => {
+    const _table = new Map();
+    return {
+      
+      add(storageKey, fn) {
+        if (typeof fn !== "function" || !storageKey) return;
+        if (!_table.has(storageKey)) _table.set(storageKey, []);
+        _table.get(storageKey).push(fn);
+      },
+      
+      runFor(storageKey) {
+        const fns = _table.get(storageKey);
+        if (!fns || !fns.length) return;
+        fns.forEach((fn) => {
+          try { fn(); } catch (e) {
+            DEBUG && console.warn(`[ModuleCleanupRegistry] cleanup error for "${storageKey}":`, e);
+          }
+        });
+        _table.delete(storageKey);
+      },
+    };
   })();
 
   let _wormholeInstance = null;
@@ -1251,6 +1275,7 @@
       tip_symbols: "Custom Strings View",
       tip_lang: "Language",
       tip_manual: "Manual",
+      mod_manual_debug_toggle: "Debug Mode",
       mod_msg_warn_title: "⚠️ Disable Message Utility?",
       mod_msg_warn_body:
         "Message Utility (⠿) is the core of this script.\\nAfter disabling, all ⠿ buttons will disappear.\\n\\nTo re-enable: right-click the Tampermonkey icon → 'Enable ⠿ Message Utility'.",
@@ -1905,6 +1930,7 @@
       tip_symbols: "自定義字串",
       tip_lang: "切換語言",
       tip_manual: "使用說明",
+      mod_manual_debug_toggle: "除錯模式",
       mod_msg_warn_title: "⚠️ 確定停用訊息工具？",
       mod_msg_warn_body:
         "⠿ 訊息工具是本腳本的核心功能。\\n停用後，所有訊息的 ⠿ 按鈕將會消失。\\n\\n若要重新啟用：右鍵點擊 Tampermonkey 圖示 → 選擇「啟用 ⠿ 訊息工具」。",
@@ -2522,6 +2548,7 @@
       tip_symbols: "自定义字符串",
       tip_lang: "切换语言",
       tip_manual: "使用说明",
+      mod_manual_debug_toggle: "调试模式",
       mod_msg_warn_title: "⚠️ 确定停用消息工具？",
       mod_msg_warn_body:
         "⠿ 消息工具是本脚本的核心功能。\\n停用后，所有消息的 ⠿ 按钮将会消失。\\n\\n若要重新启用：右键点击 Tampermonkey 图标 → 选择「启用 ⠿ 消息工具」。",
@@ -3140,6 +3167,7 @@
       tip_symbols: "カスタム文字列",
       tip_lang: "言語切替",
       tip_manual: "マニュアル",
+      mod_manual_debug_toggle: "デバッグモード",
       mod_msg_warn_title: "⚠️ メッセージユーティリティを無効にしますか？",
       mod_msg_warn_body:
         "⠿ メッセージユーティリティはこのスクリプトの核心機能です。\\n無効にすると、すべてのメッセージの ⠿ ボタンが消えます。\\n\\n再有効化には：Tampermonkeyアイコンを右クリック → 「⠿ メッセージユーティリティを有効にする」を選択。",
@@ -3756,6 +3784,7 @@
       tip_symbols: "사용자 정의 문자열 보기",
       tip_lang: "언어 변경",
       tip_manual: "매뉴얼",
+      mod_manual_debug_toggle: "디버그 모드",
       mod_msg_warn_title: "⚠️ 메시지 유틸리티를 비활성화하시겠습니까?",
       mod_msg_warn_body:
         "⠿ 메시지 유틸리티는 이 스크립트의 핵심 기능입니다.\\n비활성화하면 모든 메시지의 ⠿ 버튼이 사라집니다.\\n\\n다시 활성화하려면: Tampermonkey 아이콘 우클릭 → '⠿ 메시지 유틸리티 활성화' 선택.",
@@ -4365,6 +4394,7 @@
       tip_symbols: "Ver cadenas personalizadas",
       tip_lang: "Cambiar idioma",
       tip_manual: "Manual",
+      mod_manual_debug_toggle: "Modo de depuración",
       mod_msg_warn_title: "⚠️ ¿Deshabilitar Utilidad de Mensajes?",
       mod_msg_warn_body:
         "⠿ La Utilidad de Mensajes es la función principal.\\nSi la deshabilitas, desaparecerá el botón ⠿ en todos los mensajes.",
@@ -4982,6 +5012,7 @@
       tip_symbols: "Ver strings personalizadas",
       tip_lang: "Alterar idioma",
       tip_manual: "Manual",
+      mod_manual_debug_toggle: "Modo de depuração",
       mod_msg_warn_title: "⚠️ Desativar Utilitário de Mensagens?",
       mod_msg_warn_body:
         "⠿ O Utilitário de Mensagens é a função principal.\\nSe desativado, o botão ⠿ desaparecerá de todas as mensagens.",
@@ -5599,6 +5630,7 @@
       tip_symbols: "Voir les chaînes personnalisées",
       tip_lang: "Changer de langue",
       tip_manual: "Manuel",
+      mod_manual_debug_toggle: "Mode débogage",
       mod_msg_warn_title: "⚠️ Désactiver l'Utilitaire de Messages ?",
       mod_msg_warn_body:
         "⠿ L'Utilitaire de Messages est la fonction principale.\\nSi désactivé, le bouton ⠿ disparaîtra de tous les messages.",
@@ -6218,6 +6250,7 @@
       tip_symbols: "Просмотреть пользовательские строки",
       tip_lang: "Сменить язык",
       tip_manual: "Руководство",
+      mod_manual_debug_toggle: "Режим отладки",
       mod_msg_warn_title: "⚠️ Отключить утилиту сообщений?",
       mod_msg_warn_body:
         "⠿ Утилита сообщений является основной функцией.\\nПри отключении кнопка ⠿ исчезнет со всех сообщений.",
@@ -6833,6 +6866,7 @@
       tip_symbols: "Benutzerdefinierte Zeichenketten",
       tip_lang: "Sprache wechseln",
       tip_manual: "Handbuch",
+      mod_manual_debug_toggle: "Debug-Modus",
       mod_msg_warn_title: "⚠️ Nachrichtendienstprogramm deaktivieren?",
       mod_msg_warn_body:
         "⠿ Das Nachrichtendienstprogramm ist die Kernfunktion.\\nWenn deaktiviert, verschwindet die ⠿-Schaltfläche von allen Nachrichten.",
@@ -7607,22 +7641,19 @@
       }
     }
 
-    document.addEventListener(
-      "click",
-      (e) => {
-        if (!e.target.closest(".dropdown-container-wrapper")) {
-          document
-            .querySelectorAll(".my-dropdown-menu")
-            .forEach((m) => m.classList.remove("show"));
-        }
+    const _fmGlobalClickHandler = (e) => {
+      if (!e.target.closest(".dropdown-container-wrapper")) {
+        document
+          .querySelectorAll(".my-dropdown-menu")
+          .forEach((m) => m.classList.remove("show"));
+      }
 
-        const forwardBtn = e.target.closest(
-          'div[aria-label="轉發"], div[aria-label="Forward"], div[aria-label="转发"], div[aria-label="転送"], div[aria-label="전달"]',
-        );
-        if (forwardBtn) handleForwardOpen();
-      },
-      true,
-    );
+      const forwardBtn = e.target.closest(
+        'div[aria-label="轉發"], div[aria-label="Forward"], div[aria-label="转发"], div[aria-label="転送"], div[aria-label="전달"]',
+      );
+      if (forwardBtn) handleForwardOpen();
+    };
+    document.addEventListener("click", _fmGlobalClickHandler, true);
 
     function cleanup() {
       searchTimers.forEach((timer) => clearTimeout(timer));
@@ -7631,9 +7662,12 @@
       activeObservers.forEach((observer) => observer.disconnect());
       activeObservers.clear();
 
+      document.removeEventListener("click", _fmGlobalClickHandler, true);
+
       DEBUG && console.log("[ForwardingManager] Cleanup complete");
     }
     CleanupRegistry.add(cleanup);
+    ModuleCleanupRegistry.add("mod_forwarding", cleanup);
 
     function isNSFWChannel(row) {
       try {
@@ -11165,6 +11199,12 @@
           hint.textContent = `${mod.icon} ${getLang(mod.label)} — ${actionLabel}`;
           document.body.appendChild(hint);
           setTimeout(() => hint.remove(), 2000);
+
+          setTimeout(() => {
+            dmtConfirm(t("rescue_reload_msg")).then((ok) => {
+              if (ok) location.reload();
+            });
+          }, 250);
         };
 
         row.appendChild(label);
@@ -11249,8 +11289,19 @@
       head.innerHTML = `<span>📖 ${t("tip_manual")}</span><span style="cursor:pointer;font-size:18px;color:#72767d;" id="mod-manual-close">✕</span>`;
 
       const body = document.createElement("div");
+      body.className = "mm-body-scroll";
       body.style.cssText = "overflow-y: auto; padding: 16px 18px; flex: 1; display:flex; flex-direction:column; gap:14px;";
       body.innerHTML = t("manual_content_sections");
+
+      const footer = document.createElement("div");
+      footer.className = "mm-footer";
+      const debugChecked = GMStore.get("debugModeEnabled", false) === true;
+      footer.innerHTML = `
+        <label class="mm-debug-label" id="mod-manual-debug-label">
+          <input type="checkbox" id="mod-manual-debug-cb" ${debugChecked ? "checked" : ""}>
+          <span>🐛 ${t("mod_manual_debug_toggle")}</span>
+        </label>
+      `;
 
       const mmStyle = document.createElement("style");
       mmStyle.textContent = `
@@ -11273,11 +11324,23 @@
         #mod-manual-modal .mm-tag{background:rgba(88,101,242,.25);color:#a5b4fc;border-radius:3px;padding:0 5px;font-size:10px;font-weight:700;flex-shrink:0}
         #mod-manual-modal .mm-tag.g{background:rgba(35,165,90,.25);color:#57f287}
         #mod-manual-modal .mm-tag.y{background:rgba(240,178,50,.25);color:#f0b232}
+        
+        #mod-manual-modal .mm-body-scroll{scrollbar-width:thin;scrollbar-color:rgba(88,101,242,.45) transparent}
+        #mod-manual-modal .mm-body-scroll::-webkit-scrollbar{width:8px}
+        #mod-manual-modal .mm-body-scroll::-webkit-scrollbar-track{background:transparent}
+        #mod-manual-modal .mm-body-scroll::-webkit-scrollbar-thumb{background:rgba(88,101,242,.35);border-radius:4px;border:2px solid transparent;background-clip:padding-box}
+        #mod-manual-modal .mm-body-scroll::-webkit-scrollbar-thumb:hover{background:rgba(88,101,242,.6);border:2px solid transparent;background-clip:padding-box}
+        
+        #mod-manual-modal .mm-footer{flex-shrink:0;padding:10px 18px;border-top:1px solid rgba(255,255,255,.07);background:rgba(0,0,0,.12);display:flex;align-items:center}
+        #mod-manual-modal .mm-debug-label{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;font-size:12px;color:#80848e;transition:color .15s}
+        #mod-manual-modal .mm-debug-label:hover{color:#b5bac1}
+        #mod-manual-modal .mm-debug-label input[type=checkbox]{accent-color:#5865f2;cursor:pointer;width:13px;height:13px}
       `;
       document.head.appendChild(mmStyle);
 
       box.appendChild(head);
       box.appendChild(body);
+      box.appendChild(footer);
       overlay.appendChild(box);
       dmtGetPortal().appendChild(overlay);
       overlay.style.pointerEvents = "auto";
@@ -11287,6 +11350,18 @@
         if (e.target === overlay) close();
       });
       box.querySelector("#mod-manual-close").onclick = close;
+
+      const debugCb = footer.querySelector("#mod-manual-debug-cb");
+      debugCb.onchange = () => {
+        const next = debugCb.checked;
+        GMStore.set("debugModeEnabled", next);
+        dmtConfirm(t("rescue_reload_msg")).then((ok) => {
+          if (ok) {
+            setTimeout(() => location.reload(), 300);
+          } else {
+          }
+        });
+      };
     }
 
     function createDropdown(
@@ -12858,6 +12933,9 @@
     CleanupRegistry.add(() => {
       document.removeEventListener("click", _globalCloseMenuHandler);
     });
+    ModuleCleanupRegistry.add("mod_message", () => {
+      document.removeEventListener("click", _globalCloseMenuHandler);
+    });
 
     function init() {
       if (!config.lang) showLanguageSelector();
@@ -12947,28 +13025,28 @@
       };
       document.addEventListener("visibilitychange", _pollVisibilityHandler, { passive: true });
 
-      CleanupRegistry.add(() => {
+      const _fallbackMouseoverHandler = (e) => {
+        const msgNode = e.target.closest("div[data-list-item-id]");
+        if (msgNode && !msgNode.dataset.copyAttached) {
+          attachToMessage(msgNode);
+        }
+      };
+      document.addEventListener("mouseover", _fallbackMouseoverHandler, { passive: true });
+
+      const _moduleBCleanup = () => {
         io.disconnect();
         clearTimeout(_urlCheckTimer);
         clearTimeout(_cooldownTimer);
         document.removeEventListener("visibilitychange", _pollVisibilityHandler);
+        document.removeEventListener("mouseover", _fallbackMouseoverHandler);
         if (_usingNavigationApi) {
           navigation.removeEventListener("navigate", _handleUrlChange);
         } else {
           window.removeEventListener("popstate", _handleUrlChange);
         }
-      });
-
-      document.addEventListener(
-        "mouseover",
-        (e) => {
-          const msgNode = e.target.closest("div[data-list-item-id]");
-          if (msgNode && !msgNode.dataset.copyAttached) {
-            attachToMessage(msgNode);
-          }
-        },
-        { passive: true },
-      );
+      };
+      CleanupRegistry.add(_moduleBCleanup);
+      ModuleCleanupRegistry.add("mod_message", _moduleBCleanup);
 
       DEBUG &&
         console.log("[MessageUtility] Hybrid injection mode initialized");
@@ -14213,6 +14291,7 @@
     }
     document.addEventListener("mousedown", _onDocMousedown);
     CleanupRegistry.add(() => document.removeEventListener("mousedown", _onDocMousedown));
+    ModuleCleanupRegistry.add("mod_emoji", () => document.removeEventListener("mousedown", _onDocMousedown));
 
     function startTargetSelection(type, onUrlSelected, continuous = false) {
       closeAllMenus();
@@ -15624,10 +15703,12 @@
         return origSend.call(this, ...args);
       };
 
-      CleanupRegistry.add(() => {
+      const _emojiXhrRestore = () => {
         XMLHttpRequest.prototype.open = origOpen;
         XMLHttpRequest.prototype.send = origSend;
-      });
+      };
+      CleanupRegistry.add(_emojiXhrRestore);
+      ModuleCleanupRegistry.add("mod_emoji", _emojiXhrRestore);
     })();
 
     function getKlipyPageUrl(mediaEl) {
@@ -16140,6 +16221,7 @@
   };
       document.addEventListener("mouseover", _hoverInjectHandler, true);
       CleanupRegistry.add(() => document.removeEventListener("mouseover", _hoverInjectHandler, true));
+      ModuleCleanupRegistry.add("mod_emoji", () => document.removeEventListener("mouseover", _hoverInjectHandler, true));
 
       let _entitySaverDebounce = null;
       let _pendingNodes = [];
@@ -16373,10 +16455,12 @@
     const _chatEntitySaverObs  = initChatEntitySaver();
     const _chatInputButtonObs  = initChatInputButton();
 
-    CleanupRegistry.add(() => {
+    const _moduleCFinalCleanup = () => {
       _chatEntitySaverObs?.disconnect();
       _chatInputButtonObs?.disconnect();
-    });
+    };
+    CleanupRegistry.add(_moduleCFinalCleanup);
+    ModuleCleanupRegistry.add("mod_emoji", _moduleCFinalCleanup);
 
     setupTrigger();
   }
@@ -16859,6 +16943,7 @@
       _btnObserver.observe(document.body, { childList: true, subtree: true });
     }
     CleanupRegistry.add(() => _btnObserver.disconnect());
+    ModuleCleanupRegistry.add("mod_webhook", () => _btnObserver.disconnect());
 
     if (DEBUG) {
       window.webhookModule = {
@@ -17037,9 +17122,12 @@
       );
     };
     document.addEventListener("visibilitychange", _wormholeVisibilityHandler);
-    CleanupRegistry.add(() => {
+    const _moduleEVisibilityCleanup = () => {
       document.removeEventListener("visibilitychange", _wormholeVisibilityHandler);
-    });
+    };
+    CleanupRegistry.add(_moduleEVisibilityCleanup);
+    ModuleCleanupRegistry.add("mod_header", _moduleEVisibilityCleanup);
+    ModuleCleanupRegistry.add("mod_header", () => toggleAntiHijack(false));
 
     const concealHandler = (() => {
       const REPLACE_PREFIX = "_";
@@ -17247,10 +17335,12 @@
     });
     observer.observe(document.body, { childList: true, subtree: true });
 
-    CleanupRegistry.add(() => {
+    const _moduleEMainCleanup = () => {
       observer.disconnect();
       concealHandler.restore();
-    });
+    };
+    CleanupRegistry.add(_moduleEMainCleanup);
+    ModuleCleanupRegistry.add("mod_header", _moduleEMainCleanup);
 
     setTimeout(injectButtons, 2000);
   }
@@ -21627,6 +21717,7 @@ unsafeWindow.fetch = function(...args) {
     }
 
     destroy() {
+      this.stopMonitor();
       if (this.observer) {
         this.observer.disconnect();
         this.observer = null;
@@ -21646,6 +21737,7 @@ unsafeWindow.fetch = function(...args) {
       const wormholeModule = new WormholeModule();
       wormholeModule.initialize();
       _wormholeInstance = wormholeModule;
+      ModuleCleanupRegistry.add("mod_wormhole", () => wormholeModule.destroy());
 
       if (DEBUG) {
         window.wormholeModule = wormholeModule;
@@ -23086,6 +23178,7 @@ unsafeWindow.fetch = function(...args) {
     }
     document.addEventListener("click", _onDocClickCollapse, true);
     CleanupRegistry.add(() => document.removeEventListener("click", _onDocClickCollapse, true));
+    ModuleCleanupRegistry.add("mod_blacklist", () => document.removeEventListener("click", _onDocClickCollapse, true));
 
     blApplyAll();
     setTimeout(blApplyAll, 400);
@@ -23110,9 +23203,11 @@ unsafeWindow.fetch = function(...args) {
     }, 30000);
 
     CleanupRegistry.add(() => clearInterval(_blTempInterval));
+    ModuleCleanupRegistry.add("mod_blacklist", () => clearInterval(_blTempInterval));
 
     let _panelTick = null;
     CleanupRegistry.add(() => { if (_panelTick) { clearInterval(_panelTick); _panelTick = null; } });
+    ModuleCleanupRegistry.add("mod_blacklist", () => { if (_panelTick) { clearInterval(_panelTick); _panelTick = null; } });
     function openBlPanel() {
       if (document.getElementById(BL_PANEL_ID)) {
         closeBlPanel(); return;
@@ -24237,7 +24332,7 @@ unsafeWindow.fetch = function(...args) {
     }
     _syncDimListener();
 
-    CleanupRegistry.add(() => {
+    const _moduleHFullCleanup = () => {
       _blObserver.disconnect();
       _blMenuObserver.disconnect();
       document.removeEventListener("contextmenu", _onContextMenu, true);
@@ -24261,7 +24356,9 @@ unsafeWindow.fetch = function(...args) {
       document.querySelectorAll("[data-dmt-count]").forEach(el => {
         delete el.dataset.dmtCount;
       });
-    });
+    };
+    CleanupRegistry.add(_moduleHFullCleanup);
+    ModuleCleanupRegistry.add("mod_blacklist", _moduleHFullCleanup);
 
     DEBUG && console.log("[Blacklist] Module H initialized, entries:", blLoad().length);
   }
@@ -24796,6 +24893,7 @@ unsafeWindow.fetch = function(...args) {
     let _browseGen    = 0;
     let _browseUnlockedLimit = 0;
     let _browseObs    = null;
+    let _mpFavsPollTimer = null;
     let _browseScope  = "channel";
     let _browseCtxSnapshot = null;
     let _ctxChangedNotified = false;
@@ -25817,6 +25915,10 @@ unsafeWindow.fetch = function(...args) {
       _panelEl.querySelectorAll("[data-has-vid-obs]").forEach(el => {
         el._vidObs?.disconnect(); el._vidObs = null;
       });
+      clearInterval(_mpFavsPollTimer); _mpFavsPollTimer = null;
+      clearTimeout(_mpUndoTimer); _mpUndoTimer = null;
+      document.getElementById("dmt-mp-undo-toast")?.remove();
+      _mpUndoBuffer = null;
       if (typeof _panelEl._mpCleanup === "function") _panelEl._mpCleanup();
       _setupBrowseSentinel = null;
       _mpRefreshBtn = null;
@@ -25826,12 +25928,14 @@ unsafeWindow.fetch = function(...args) {
       _mpInlineDeleteTaskId = null;
       _stopRequested = true; _prefetchActive = false;
       _abortWait?.();
+      _browseData = []; _mediaData = [];
       _panelEl.remove(); _panelEl = null;
       return true;
     }
 
     function _buildPanel() {
       if (_panelEl) { if (typeof _panelEl._mpCleanup === "function") _panelEl._mpCleanup(); _panelEl.remove(); _panelEl = null; }
+      _stopRequested = false;
       _injectCSS();
 
       const panel = document.createElement("div");
@@ -26118,6 +26222,9 @@ unsafeWindow.fetch = function(...args) {
       _setupBrowseSentinel = function() {
         if (_prefetchActive) return;
         if (_browseObs) { _browseObs.disconnect(); _browseObs = null; }
+        if (browseSentinel.parentNode !== msgList || msgList.lastElementChild !== browseSentinel) {
+          msgList.appendChild(browseSentinel);
+        }
         if (!_scrollListenerBound) {
           _scrollListenerBound = true;
           msgList.addEventListener("scroll", _onMsgListScroll, { passive: true });
@@ -26208,7 +26315,8 @@ unsafeWindow.fetch = function(...args) {
       _mpInlineProgressEl.className = "mp-inline-progress";
       _mpInlineProgressEl.style.display = "none";
 
-      browseArea.append(scopeRow, _chanFilterRowEl, searchRow, typeRow, msgList, browseSentinel, statusBar, _mpInlineProgressEl);
+      msgList.appendChild(browseSentinel);
+      browseArea.append(scopeRow, _chanFilterRowEl, searchRow, typeRow, msgList, statusBar, _mpInlineProgressEl);
 
       panel.append(titlebar, tabsRow, browseArea, favsArea, mediaArea, tasksArea);
       _panelEl = panel;
@@ -27871,10 +27979,11 @@ unsafeWindow.fetch = function(...args) {
                 list.appendChild(skelFrag);
                 titleEl.textContent = "💗 Loading…";
                 let tries = 0;
-                const poll = setInterval(() => {
+                clearInterval(_mpFavsPollTimer);
+                _mpFavsPollTimer = setInterval(() => {
                   tries++;
                   if (_browseData.length > 0 || tries > 50 || _stopRequested) {
-                    clearInterval(poll);
+                    clearInterval(_mpFavsPollTimer); _mpFavsPollTimer = null;
                     if (_browseData.length > 0) _drawFavs();
                   }
                 }, 600);
@@ -27886,10 +27995,11 @@ unsafeWindow.fetch = function(...args) {
               list.appendChild(skelFrag);
               titleEl.textContent = "💗 Loading…";
               let tries = 0;
-              const poll = setInterval(() => {
+              clearInterval(_mpFavsPollTimer);
+              _mpFavsPollTimer = setInterval(() => {
                 tries++;
                 if (_browseData.length > 0 || tries > 50 || _stopRequested) {
-                  clearInterval(poll);
+                  clearInterval(_mpFavsPollTimer); _mpFavsPollTimer = null;
                   if (_browseData.length > 0) _drawFavs();
                 }
               }, 600);
@@ -27903,10 +28013,11 @@ unsafeWindow.fetch = function(...args) {
           titleEl.textContent = "💗 Loading…";
 
           let tries = 0;
-          const poll = setInterval(() => {
+          clearInterval(_mpFavsPollTimer);
+          _mpFavsPollTimer = setInterval(() => {
             tries++;
             if (_browseData.length > 0 || tries > 50 || _stopRequested) {
-              clearInterval(poll);
+              clearInterval(_mpFavsPollTimer); _mpFavsPollTimer = null;
               if (_browseData.length > 0) _drawFavs();
             }
           }, 600);
@@ -28359,12 +28470,14 @@ unsafeWindow.fetch = function(...args) {
     _injectBtnCSS();
     _injectBtn();
 
-    CleanupRegistry.add(() => {
+    const _moduleIMainCleanup = () => {
       _mpObs.disconnect();
       clearTimeout(_mpDebounce);
       document.removeEventListener("keydown", _onKeydown);
       _panelEl?.remove();
-    });
+    };
+    CleanupRegistry.add(_moduleIMainCleanup);
+    ModuleCleanupRegistry.add("mod_myposts", _moduleIMainCleanup);
 
     let _mpLastPath = location.pathname;
     function _mpOnNavChange() {
@@ -28386,10 +28499,12 @@ unsafeWindow.fetch = function(...args) {
     } else {
       window.addEventListener("popstate", _mpOnNavChange, { passive: true });
     }
-    CleanupRegistry.add(() => {
+    const _moduleINavCleanup = () => {
       if (typeof navigation !== "undefined") navigation.removeEventListener("navigate", _mpOnNavChange);
       else window.removeEventListener("popstate", _mpOnNavChange);
-    });
+    };
+    CleanupRegistry.add(_moduleINavCleanup);
+    ModuleCleanupRegistry.add("mod_myposts", _moduleINavCleanup);
 
     setTimeout(() => _ensureCredentials().catch(() => {}), 800);
 
@@ -29814,7 +29929,7 @@ if (type === "warn" && scanLimit !== null) {
     document.addEventListener("focusout", _onF2FocusOut, true);
     document.addEventListener("keydown",  _onF2Keydown,  true);
 
-    CleanupRegistry.add(() => {
+    const _moduleGFullCleanup = () => {
       if (typeof navigation !== "undefined") navigation.removeEventListener("navigate", _ucOnNavChange);
       else window.removeEventListener("popstate", _ucOnNavChange);
       document.removeEventListener("paste",    globalPasteHandler, true);
@@ -29826,16 +29941,21 @@ if (type === "warn" && scanLimit !== null) {
       _removeF2Hint(true);
       _csClose(true);
       removeBanner();
-    });
+    };
+    CleanupRegistry.add(_moduleGFullCleanup);
+    ModuleCleanupRegistry.add("mod_urlchecker", _moduleGFullCleanup);
+    ModuleCleanupRegistry.add("mod_scout", _moduleGFullCleanup);
 
     } else {
-      CleanupRegistry.add(() => {
+      const _moduleGBasicCleanup = () => {
         if (typeof navigation !== "undefined") navigation.removeEventListener("navigate", _ucOnNavChange);
         else window.removeEventListener("popstate", _ucOnNavChange);
         document.removeEventListener("paste", globalPasteHandler, true);
         clearTimeout(_debounceTimer);
         removeBanner();
-      });
+      };
+      CleanupRegistry.add(_moduleGBasicCleanup);
+      ModuleCleanupRegistry.add("mod_urlchecker", _moduleGBasicCleanup);
     }
 
     DEBUG && console.log("[URLChecker] Module G initialized, scan limit:", getScanLimit());
@@ -32106,13 +32226,15 @@ if (type === "warn" && scanLimit !== null) {
     };
     setTimeout(_msScanInit, 300);
 
-    CleanupRegistry.add(() => {
+    const _moduleJCleanup = () => {
       _msMutObs?.disconnect();
       clearTimeout(_msInjectDebounce);
       _msPanelEl?.remove();
       _msStop();
       clearTimeout(_msScrollTimer);
-    });
+    };
+    CleanupRegistry.add(_moduleJCleanup);
+    ModuleCleanupRegistry.add("mod_mosaic", _moduleJCleanup);
 
     DEBUG && console.log("[Mosaic] Module J initialized");
   }
@@ -32331,9 +32453,10 @@ if (type === "warn" && scanLimit !== null) {
     }
   }
 
-  if (DEBUG) {
+  const SHOW_LEGACY_DEBUG_MENU = false;
+  if (SHOW_LEGACY_DEBUG_MENU) {
     GM_registerMenuCommand(
-      `🐛 Toggle Debug Mode (ON)`,
+      DEBUG ? "🐛 Disable Debug Mode" : "🐛 Enable Debug Mode",
       () => {
         const current = GMStore.get("debugModeEnabled", false);
         GMStore.set("debugModeEnabled", !current);
@@ -32351,10 +32474,30 @@ if (type === "warn" && scanLimit !== null) {
         const status = MODULE_DEFS.map(
           (m) => `${m.icon}${isModEnabled(m.storageKey) ? "✓" : "✗"}`
         ).join(" ");
-        DEBUG && console.log("[Discord Utilities] Module Status:", status);
-        dmtShowToast(`Module Status: ${status}`, { duration: 4000 });
+        const debugFlag = DEBUG ? "ON" : "OFF";
+        DEBUG &&
+          console.log(
+            "[Discord Utilities] Module Status:", status,
+            "| Debug:", debugFlag, "| v" + SCRIPT_VERSION
+          );
+        dmtShowToast(`v${SCRIPT_VERSION} · Debug ${debugFlag} · ${status}`, { duration: 4500 });
       }
     );
+  }
+
+  if (DEBUG) {
+    window.dmtDebug = {
+      version: SCRIPT_VERSION,
+      name: SCRIPT_NAME,
+      debugEnabled: DEBUG,
+      moduleStatus: () =>
+        MODULE_DEFS.map(
+          (m) => `${m.icon}${isModEnabled(m.storageKey) ? "✓" : "✗"}`
+        ).join(" "),
+      testWormhole: typeof window.testWormhole === "function" ? window.testWormhole : undefined,
+      webhookModule: typeof window.webhookModule === "object" ? window.webhookModule : undefined,
+    };
+    DEBUG && console.log("[Discord Utilities] window.dmtDebug ready. Try window.dmtDebug.moduleStatus()");
   }
 
   window.addEventListener("error", (event) => {
