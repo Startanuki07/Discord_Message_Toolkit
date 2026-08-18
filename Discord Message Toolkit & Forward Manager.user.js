@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.8.0.40
+// @version      2.8.1.2
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -56,7 +56,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.8.0.40";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.8.1.2";
 
   const GMStore = {
     
@@ -24377,6 +24377,7 @@ unsafeWindow.fetch = function(...args) {
     const SK_LAST_TAB    = "mp_last_tab";
     const SK_PREFETCH_LIMIT = "mp_prefetch_limit";
     const SK_TIME_FORMAT = "mp_time_fmt";
+    const SK_MEDIA_CELL_MODE = "mp_media_cell_mode";
 
     const IDB_NAME = "dmt_cache";
     const IDB_VER  = 2;
@@ -25384,7 +25385,7 @@ unsafeWindow.fetch = function(...args) {
         "color:var(--dmt-text-primary,#dcddde);font-size:12px;outline:none;}",
         "#dmt-mp-panel .mp-media-search:focus{border-color:var(--dmt-accent,#5865f2);}",
 
-        "#dmt-mp-panel .mp-masonry{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:0 0 4px;align-content:start;contain:layout style;}",
+        "#dmt-mp-panel .mp-masonry{display:grid;grid-template-columns:repeat(var(--mp-media-cols,3),1fr);gap:3px;padding:0 0 4px;align-content:start;contain:layout style;}",
         "#dmt-mp-panel .mp-masonry-item{position:relative;aspect-ratio:1/1;",
         "border-radius:4px;overflow:hidden;cursor:pointer;background:rgba(255,255,255,.04);}",
         "#dmt-mp-panel .mp-masonry-item img,#dmt-mp-panel .mp-masonry-item video{",
@@ -27224,6 +27225,19 @@ unsafeWindow.fetch = function(...args) {
     let _mediaObs     = null;
     let _lbItems      = [];
     let _lbIndex      = 0;
+    const MEDIA_CELL_COLS_TIERS = { large: 2, medium: 3, small: 4 };
+    const MEDIA_CELL_COLS_ORDER = ["small", "medium", "large"];
+    const MEDIA_CELL_COLS_LABEL = { small: "S", medium: "M", large: "L" };
+
+    function _mediaCellCols() {
+      const mode = GMStore.get(SK_MEDIA_CELL_MODE, "medium");
+      return MEDIA_CELL_COLS_TIERS[mode] || MEDIA_CELL_COLS_TIERS.medium;
+    }
+
+    function _mediaCellMode() {
+      const mode = GMStore.get(SK_MEDIA_CELL_MODE, "medium");
+      return Object.prototype.hasOwnProperty.call(MEDIA_CELL_COLS_TIERS, mode) ? mode : "medium";
+    }
 
     function _renderMediaTab(container) {
       _mpDisconnectVidObs(container);
@@ -27339,13 +27353,32 @@ unsafeWindow.fetch = function(...args) {
         });
       };
 
-      toolbar.append(scopeWrap, typeWrap, searchEl, rBtn, mediaTimeFmtBtn);
+      const mediaCellSizeBtn = document.createElement("button");
+      mediaCellSizeBtn.className = "mp-type-icon-btn";
+      mediaCellSizeBtn.style.cssText = "padding:2px 6px;min-width:0;flex-shrink:0;font-weight:700;";
+      const _updateMediaCellSizeBtn = () => {
+        const mode = _mediaCellMode();
+        mediaCellSizeBtn.textContent = MEDIA_CELL_COLS_LABEL[mode];
+        mediaCellSizeBtn.title = tOr("media_cellsize_title", "Cell size: {mode} (click to change)", { mode });
+      };
+      _updateMediaCellSizeBtn();
+      mediaCellSizeBtn.onclick = () => {
+        const curMode = _mediaCellMode();
+        const nextIdx = (MEDIA_CELL_COLS_ORDER.indexOf(curMode) + 1) % MEDIA_CELL_COLS_ORDER.length;
+        const nextMode = MEDIA_CELL_COLS_ORDER[nextIdx];
+        GMStore.set(SK_MEDIA_CELL_MODE, nextMode);
+        grid.style.setProperty("--mp-media-cols", String(MEDIA_CELL_COLS_TIERS[nextMode]));
+        _updateMediaCellSizeBtn();
+      };
+
+      toolbar.append(scopeWrap, typeWrap, searchEl, rBtn, mediaCellSizeBtn, mediaTimeFmtBtn);
 
       const scrollWrap = document.createElement("div");
       scrollWrap.className = "mp-media-body";
 
       const grid = document.createElement("div");
       grid.className = "mp-masonry";
+      grid.style.setProperty("--mp-media-cols", String(_mediaCellCols()));
       scrollWrap.appendChild(grid);
 
       const sentinel = document.createElement("div");
@@ -28504,14 +28537,15 @@ unsafeWindow.fetch = function(...args) {
         setTimeout(() => _mpRefreshBtn?.classList.remove("needs-refresh"), 5000);
       }
     }
+    window.addEventListener("ms:locationchange", _mpOnNavChange, { passive: true });
+    window.addEventListener("popstate", _mpOnNavChange, { passive: true });
     if (typeof navigation !== "undefined") {
       navigation.addEventListener("navigate", _mpOnNavChange, { passive: true });
-    } else {
-      window.addEventListener("popstate", _mpOnNavChange, { passive: true });
     }
     const _moduleINavCleanup = () => {
+      window.removeEventListener("ms:locationchange", _mpOnNavChange);
+      window.removeEventListener("popstate", _mpOnNavChange);
       if (typeof navigation !== "undefined") navigation.removeEventListener("navigate", _mpOnNavChange);
-      else window.removeEventListener("popstate", _mpOnNavChange);
     };
     CleanupRegistry.add(_moduleINavCleanup);
     ModuleCleanupRegistry.add("mod_myposts", _moduleINavCleanup);
@@ -30295,13 +30329,26 @@ if (type === "warn" && scanLimit !== null) {
       try {
         const db = await _msIdbOpen();
         return await new Promise((resolve, reject) => {
-          const tx  = db.transaction(["media_stats","media_sync"], "readonly");
-          let statsVal = null, syncVal = null, done = 0;
-          const check = () => { if (++done === 2) resolve({ stats: statsVal, sync: syncVal }); };
-          const sr = tx.objectStore("media_stats").get(scopeKey);
-          const sy = tx.objectStore("media_sync").get(scopeKey);
-          sr.onsuccess = () => { statsVal = sr.result || null; check(); };
-          sy.onsuccess = () => { syncVal  = sy.result || null; check(); };
+          const tx  = db.transaction(["media_items","media_sync"], "readonly");
+          const idx = tx.objectStore("media_items").index("scope_type");
+          let imgCount = 0, vidCount = 0, gifCount = 0, syncVal = null, done = 0;
+          const check = () => {
+            if (++done === 4) {
+              const total = imgCount + vidCount + gifCount;
+              const stats = total > 0
+                ? { scope_key: scopeKey, image_count: imgCount, video_count: vidCount, gif_count: gifCount, total_count: total }
+                : null;
+              resolve({ stats, sync: syncVal });
+            }
+          };
+          const cImg = idx.count(IDBKeyRange.only([scopeKey, "image"]));
+          const cVid = idx.count(IDBKeyRange.only([scopeKey, "video"]));
+          const cGif = idx.count(IDBKeyRange.only([scopeKey, "gif"]));
+          const sy   = tx.objectStore("media_sync").get(scopeKey);
+          cImg.onsuccess = () => { imgCount = cImg.result || 0; check(); };
+          cVid.onsuccess = () => { vidCount = cVid.result || 0; check(); };
+          cGif.onsuccess = () => { gifCount = cGif.result || 0; check(); };
+          sy.onsuccess    = () => { syncVal  = sy.result || null; check(); };
           tx.onerror   = e => reject(e.target.error);
         });
       } catch (_) { return { stats: null, sync: null }; }
@@ -32280,6 +32327,24 @@ if (type === "warn" && scanLimit !== null) {
     (document.head || document.documentElement).appendChild(s);
   }
   _injectDesignTokens();
+
+  function _ensureHistoryPatched() {
+    if (history.pushState.__msWrapped) return;
+    const _origPush    = history.pushState.bind(history);
+    const _origReplace = history.replaceState.bind(history);
+    history.pushState = function (...args) {
+      const r = _origPush(...args);
+      window.dispatchEvent(new Event("ms:locationchange"));
+      return r;
+    };
+    history.pushState.__msWrapped = true;
+    history.replaceState = function (...args) {
+      const r = _origReplace(...args);
+      window.dispatchEvent(new Event("ms:locationchange"));
+      return r;
+    };
+  }
+  _ensureHistoryPatched();
 
   const initModules = [
     { name: "Forwarding", fn: initForwardingManager, key: "mod_forwarding" },
