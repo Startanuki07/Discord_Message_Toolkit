@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.8.1.2
+// @version      2.8.2.1
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -56,7 +56,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.8.1.2";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.8.2.1";
 
   const GMStore = {
     
@@ -1229,11 +1229,15 @@
       to_vxinstagram: "🔁 to vxinstagram",
       to_ddinstagram: "🔁 to ddinstagram",
       to_uuinstagram: "🔁 to uuinstagram",
+      to_oginstagram: "🔁 to oginstagram",
+      to_twitterwebviewer: "🔍 to twitterwebviewer",
+      to_facebook: "📘 to facebook.com",
       to_facebed: "🔁 to facebed.com",
       to_tiktok: "🎵 to tiktok.com",
       to_vxtiktok: "🔁 to vxtiktok",
       to_tnktok: "🛠️ to tnktok",
       to_threads: "🧵 to threads.com",
+      to_threads_net: "🧵 to threads.net",
       to_fixthreads: "🔁 to fixthreads",
       to_fzthreads: "🔁 to fzthreads",
       to_fx_bilibili: "📺 to FX Bilibili",
@@ -1884,11 +1888,15 @@
       to_vxinstagram: "🔁 轉為 vxinstagram",
       to_ddinstagram: "🔁 轉為 ddinstagram",
       to_uuinstagram: "🔁 轉為 uuinstagram",
+      to_oginstagram: "🔁 轉為 oginstagram",
+      to_twitterwebviewer: "🔍 轉為 twitterwebviewer",
+      to_facebook: "📘 轉為 facebook.com",
       to_facebed: "🔁 轉為 facebed.com",
       to_tiktok: "🎵 轉為 tiktok.com",
       to_vxtiktok: "🔁 轉為 vxtiktok",
       to_tnktok: "🛠️ 轉為 tnktok",
       to_threads: "🧵 轉為 threads.com",
+      to_threads_net: "🧵 轉為 threads.net",
       to_fixthreads: "🔁 轉為 fixthreads",
       to_fzthreads: "🔁 轉為 fzthreads",
       to_fx_bilibili: "📺 轉為 FX Bilibili",
@@ -2502,11 +2510,15 @@
       to_vxinstagram: "🔁 转为 vxinstagram",
       to_ddinstagram: "🔁 转为 ddinstagram",
       to_uuinstagram: "🔁 转为 uuinstagram",
+      to_oginstagram: "🔁 转为 oginstagram",
+      to_twitterwebviewer: "🔍 转为 twitterwebviewer",
+      to_facebook: "📘 转为 facebook.com",
       to_facebed: "🔁 转为 facebed.com",
       to_tiktok: "🎵 转为 tiktok.com",
       to_vxtiktok: "🔁 转为 vxtiktok",
       to_tnktok: "🛠️ 转为 tnktok",
       to_threads: "🧵 转为 threads.com",
+      to_threads_net: "🧵 转为 threads.net",
       to_fixthreads: "🔁 转为 fixthreads",
       to_fzthreads: "🔁 转为 fzthreads",
       to_fx_bilibili: "📺 转为 FX Bilibili",
@@ -3120,11 +3132,15 @@
       to_vxinstagram: "🔁 vxinstagram へ",
       to_ddinstagram: "🔁 ddinstagram へ",
       to_uuinstagram: "🔁 uuinstagram へ",
+      to_oginstagram: "🔁 oginstagram へ",
+      to_twitterwebviewer: "🔍 twitterwebviewer へ",
+      to_facebook: "📘 facebook.com へ",
       to_facebed: "🔁 facebed.com へ",
       to_tiktok: "🎵 tiktok.com へ",
       to_vxtiktok: "🔁 vxtiktok へ",
       to_tnktok: "🛠️ tnktok へ",
       to_threads: "🧵 threads.com へ",
+      to_threads_net: "🧵 threads.net へ",
       to_fixthreads: "🔁 fixthreads へ",
       to_fzthreads: "🔁 fzthreads へ",
       to_fx_bilibili: "📺 FX Bilibili へ",
@@ -3738,11 +3754,15 @@
       to_vxinstagram: "🔁 vxinstagram으로",
       to_ddinstagram: "🔁 ddinstagram으로",
       to_uuinstagram: "🔁 uuinstagram으로",
+      to_oginstagram: "🔁 oginstagram으로",
+      to_twitterwebviewer: "🔍 twitterwebviewer으로",
+      to_facebook: "📘 facebook.com으로",
       to_facebed: "🔁 facebed.com으로",
       to_tiktok: "🎵 tiktok.com으로",
       to_vxtiktok: "🔁 vxtiktok으로",
       to_tnktok: "🛠️ tnktok으로",
       to_threads: "🧵 threads.com으로",
+      to_threads_net: "🧵 threads.net으로",
       to_fixthreads: "🔁 fixthreads으로",
       to_fzthreads: "🔁 fzthreads으로",
       to_fx_bilibili: "📺 FX Bilibili로",
@@ -4347,11 +4367,15 @@
       to_vxinstagram: "🔁 vxinstagram",
       to_ddinstagram: "🔁 ddinstagram",
       to_uuinstagram: "🔁 uuinstagram",
+      to_oginstagram: "🔁 oginstagram",
+      to_twitterwebviewer: "🔍 twitterwebviewer",
+      to_facebook: "📘 facebook.com",
       to_facebed: "🔁 facebed.com",
       to_tiktok: "🎵 tiktok.com",
       to_vxtiktok: "🔁 vxtiktok",
       to_tnktok: "🛠️ tnktok",
       to_threads: "🧵 threads.com",
+      to_threads_net: "🧵 threads.net",
       to_fixthreads: "🔁 fixthreads",
       to_fzthreads: "🔁 fzthreads",
       to_fx_bilibili: "📺 FX Bilibili",
@@ -4965,11 +4989,15 @@
       to_vxinstagram: "🔁 vxinstagram",
       to_ddinstagram: "🔁 ddinstagram",
       to_uuinstagram: "🔁 uuinstagram",
+      to_oginstagram: "🔁 oginstagram",
+      to_twitterwebviewer: "🔍 twitterwebviewer",
+      to_facebook: "📘 facebook.com",
       to_facebed: "🔁 facebed.com",
       to_tiktok: "🎵 tiktok.com",
       to_vxtiktok: "🔁 vxtiktok",
       to_tnktok: "🛠️ tnktok",
       to_threads: "🧵 threads.com",
+      to_threads_net: "🧵 threads.net",
       to_fixthreads: "🔁 fixthreads",
       to_fzthreads: "🔁 fzthreads",
       to_fx_bilibili: "📺 FX Bilibili",
@@ -5583,11 +5611,15 @@
       to_vxinstagram: "🔁 vxinstagram",
       to_ddinstagram: "🔁 ddinstagram",
       to_uuinstagram: "🔁 uuinstagram",
+      to_oginstagram: "🔁 oginstagram",
+      to_twitterwebviewer: "🔍 twitterwebviewer",
+      to_facebook: "📘 facebook.com",
       to_facebed: "🔁 facebed.com",
       to_tiktok: "🎵 tiktok.com",
       to_vxtiktok: "🔁 vxtiktok",
       to_tnktok: "🛠️ tnktok",
       to_threads: "🧵 threads.com",
+      to_threads_net: "🧵 threads.net",
       to_fixthreads: "🔁 fixthreads",
       to_fzthreads: "🔁 fzthreads",
       to_fx_bilibili: "📺 FX Bilibili",
@@ -6203,11 +6235,15 @@
       to_vxinstagram: "🔁 vxinstagram",
       to_ddinstagram: "🔁 ddinstagram",
       to_uuinstagram: "🔁 uuinstagram",
+      to_oginstagram: "🔁 oginstagram",
+      to_twitterwebviewer: "🔍 twitterwebviewer",
+      to_facebook: "📘 facebook.com",
       to_facebed: "🔁 facebed.com",
       to_tiktok: "🎵 tiktok.com",
       to_vxtiktok: "🔁 vxtiktok",
       to_tnktok: "🛠️ tnktok",
       to_threads: "🧵 threads.com",
+      to_threads_net: "🧵 threads.net",
       to_fixthreads: "🔁 fixthreads",
       to_fzthreads: "🔁 fzthreads",
       to_fx_bilibili: "📺 FX Bilibili",
@@ -6819,11 +6855,15 @@
       to_vxinstagram: "🔁 vxinstagram",
       to_ddinstagram: "🔁 ddinstagram",
       to_uuinstagram: "🔁 uuinstagram",
+      to_oginstagram: "🔁 oginstagram",
+      to_twitterwebviewer: "🔍 twitterwebviewer",
+      to_facebook: "📘 facebook.com",
       to_facebed: "🔁 facebed.com",
       to_tiktok: "🎵 tiktok.com",
       to_vxtiktok: "🔁 vxtiktok",
       to_tnktok: "🛠️ tnktok",
       to_threads: "🧵 threads.com",
+      to_threads_net: "🧵 threads.net",
       to_fixthreads: "🔁 fixthreads",
       to_fzthreads: "🔁 fzthreads",
       to_fx_bilibili: "📺 FX Bilibili",
@@ -12186,6 +12226,7 @@
               "vxinstagram.com",
               "ddinstagram.com",
               "uuinstagram.com",
+              "oginstagram.com",
             ],
             labels: {
               "instagram.com":   "to_instagram",
@@ -12193,6 +12234,7 @@
               "vxinstagram.com": "to_vxinstagram",
               "ddinstagram.com": "to_ddinstagram",
               "uuinstagram.com": "to_uuinstagram",
+              "oginstagram.com": "to_oginstagram",
             },
           },
           {
@@ -12211,7 +12253,7 @@
             domains: ["threads.com", "threads.net", "fixthreads.seria.moe", "fzthreads.com"],
             labels: {
               "threads.com": "to_threads",
-              "threads.net": "to_threads",
+              "threads.net": "to_threads_net",
               "fixthreads.seria.moe": "to_fixthreads",
               "fzthreads.com": "to_fzthreads",
             },
@@ -12523,6 +12565,58 @@
               );
           }
         }
+
+        links.forEach((url) => {
+          const twStatusMatch = url.match(
+            /^https?:\/\/(?:www\.)?(?:twitter|x)\.com\/[^/?#]+\/status\/(\d+)/,
+          );
+          if (twStatusMatch) {
+            addItem(
+              "convert",
+              t("to_twitterwebviewer"),
+              `https://twitterwebviewer.com/?tweet=${twStatusMatch[1]}`,
+            );
+          } else {
+            const twProfileMatch = url.match(
+              /^https?:\/\/(?:www\.)?(?:twitter|x)\.com\/(?!i\/|search|hashtag|home|explore|notifications|messages|settings|intent\/)([a-zA-Z0-9_]{1,15})\/?(?:[?#].*)?$/,
+            );
+            if (twProfileMatch) {
+              addItem(
+                "convert",
+                t("to_twitterwebviewer"),
+                `https://twitterwebviewer.com/?user=${twProfileMatch[1]}`,
+              );
+            }
+          }
+        });
+
+        links.forEach((url) => {
+          if (!/^https?:\/\/(?:www\.)?twitterwebviewer\.com\//.test(url)) return;
+          let urlObj;
+          try { urlObj = new URL(url); } catch (_) { return; }
+          const tweetId = urlObj.searchParams.get("tweet");
+          const userName = urlObj.searchParams.get("user");
+          const twitterGroup = DOMAIN_GROUPS.find((g) => g.type === "twitter");
+          if (!twitterGroup) return;
+
+          if (tweetId && /^\d+$/.test(tweetId)) {
+            twitterGroup.domains.forEach((domain) => {
+              addItem(
+                "convert",
+                t(twitterGroup.labels[domain]),
+                `https://${domain}/i/status/${tweetId}`,
+              );
+            });
+          } else if (userName && /^[a-zA-Z0-9_]{1,15}$/.test(userName)) {
+            twitterGroup.domains.forEach((domain) => {
+              addItem(
+                "convert",
+                t(twitterGroup.labels[domain]),
+                `https://${domain}/${userName}`,
+              );
+            });
+          }
+        });
 
         links.forEach((url) => {
           const shortsMatch = url.match(
