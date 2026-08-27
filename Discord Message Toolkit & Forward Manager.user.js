@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.8.2.1
+// @version      2.8.2.2
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -12565,58 +12565,6 @@
               );
           }
         }
-
-        links.forEach((url) => {
-          const twStatusMatch = url.match(
-            /^https?:\/\/(?:www\.)?(?:twitter|x)\.com\/[^/?#]+\/status\/(\d+)/,
-          );
-          if (twStatusMatch) {
-            addItem(
-              "convert",
-              t("to_twitterwebviewer"),
-              `https://twitterwebviewer.com/?tweet=${twStatusMatch[1]}`,
-            );
-          } else {
-            const twProfileMatch = url.match(
-              /^https?:\/\/(?:www\.)?(?:twitter|x)\.com\/(?!i\/|search|hashtag|home|explore|notifications|messages|settings|intent\/)([a-zA-Z0-9_]{1,15})\/?(?:[?#].*)?$/,
-            );
-            if (twProfileMatch) {
-              addItem(
-                "convert",
-                t("to_twitterwebviewer"),
-                `https://twitterwebviewer.com/?user=${twProfileMatch[1]}`,
-              );
-            }
-          }
-        });
-
-        links.forEach((url) => {
-          if (!/^https?:\/\/(?:www\.)?twitterwebviewer\.com\//.test(url)) return;
-          let urlObj;
-          try { urlObj = new URL(url); } catch (_) { return; }
-          const tweetId = urlObj.searchParams.get("tweet");
-          const userName = urlObj.searchParams.get("user");
-          const twitterGroup = DOMAIN_GROUPS.find((g) => g.type === "twitter");
-          if (!twitterGroup) return;
-
-          if (tweetId && /^\d+$/.test(tweetId)) {
-            twitterGroup.domains.forEach((domain) => {
-              addItem(
-                "convert",
-                t(twitterGroup.labels[domain]),
-                `https://${domain}/i/status/${tweetId}`,
-              );
-            });
-          } else if (userName && /^[a-zA-Z0-9_]{1,15}$/.test(userName)) {
-            twitterGroup.domains.forEach((domain) => {
-              addItem(
-                "convert",
-                t(twitterGroup.labels[domain]),
-                `https://${domain}/${userName}`,
-              );
-            });
-          }
-        });
 
         links.forEach((url) => {
           const shortsMatch = url.match(
