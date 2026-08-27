@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.8.2.2
+// @version      2.8.2.6
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -56,7 +56,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.8.2.1";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.8.2.6";
 
   const GMStore = {
     
@@ -1204,6 +1204,7 @@
       insert_format_link: "📌 Insert [{t}](URL)",
       copy_hidden_format: "🙈 Copy Hidden (|| Text ||)",
       download_images: "⬇️ Download Images or Media",
+      tip_download_media: "Right-click to copy media URLs. Shift+Right-click to copy with [prefix](url) format.",
       download_zip: "📦 Download as ZIP",
       download_start: "🚀 Downloading...",
       download_zip_start: "📦 Zipping {n} files...",
@@ -1495,6 +1496,9 @@
       custom_lang_export: "📤 Export Text",
       custom_lang_import: "📥 Import Text",
       custom_lang_apply: "✅ Apply & Reload",
+      custom_lang_save_draft: "💾 Save Draft",
+      custom_lang_draft_saved: "Draft saved",
+      custom_lang_data_missing: "⚠️ Custom language is selected, but no saved data was found — showing English instead. Import a language file below to restore it.",
       custom_lang_loaded: "✅ Loaded: {name}",
       custom_lang_activate: '🌐 Apply "{name}"',
       custom_lang_json_error: "⚠️ JSON Error: {msg}",
@@ -1863,6 +1867,7 @@
       insert_format_link: "📌 插入 [{t}](網址) 格式",
       copy_hidden_format: "🙈 複製 隱藏格式（|| 內容 ||）",
       download_images: "⬇️ 下載本則圖片或媒體",
+      tip_download_media: "右鍵可複製媒體來源網址；Shift+右鍵可複製帶「[前綴](網址)」格式的版本。",
       download_zip: "📦 下載為 ZIP (批次打包)",
       download_start: "🚀 開始下載...",
       download_zip_start: "📦 正在打包 {n} 個檔案...",
@@ -2111,6 +2116,9 @@
       custom_lang_export: "📤 匯出文本",
       custom_lang_import: "📥 匯入文本",
       custom_lang_apply: "✅ 套用並重新整理",
+      custom_lang_save_draft: "💾 儲存草稿",
+      custom_lang_draft_saved: "草稿已儲存",
+      custom_lang_data_missing: "⚠️ 目前設定為自訂語言，但找不到已儲存的資料，暫時顯示英文。請在下方匯入語言檔以還原。",
       custom_lang_loaded: "✅ 已載入：{name}",
       custom_lang_activate: "🌐 套用「{name}」",
       custom_lang_json_error: "⚠️ JSON 格式錯誤：{msg}",
@@ -2485,6 +2493,7 @@
       insert_format_link: "📌 插入 [{t}](网址) 格式",
       copy_hidden_format: "🙈 复制 隐藏格式（|| 内容 ||）",
       download_images: "⬇️ 下载本条图片或媒体",
+      tip_download_media: "右键可复制媒体来源网址；Shift+右键可复制带「[前缀](网址)」格式的版本。",
       download_zip: "📦 下载为 ZIP (批量打包)",
       download_start: "🚀 开始下载...",
       download_zip_start: "📦 正在打包 {n} 个文件...",
@@ -2732,6 +2741,9 @@
       custom_lang_export: "📤 导出文本",
       custom_lang_import: "📥 导入文本",
       custom_lang_apply: "✅ 应用并刷新",
+      custom_lang_save_draft: "💾 保存草稿",
+      custom_lang_draft_saved: "草稿已保存",
+      custom_lang_data_missing: "⚠️ 目前设置为自定义语言，但找不到已保存的数据，暂时显示英文。请在下方导入语言文件以恢复。",
       custom_lang_loaded: "✅ 已载入：{name}",
       custom_lang_activate: "🌐 应用「{name}」",
       custom_lang_json_error: "⚠️ JSON 格式错误：{msg}",
@@ -3360,6 +3372,9 @@
       custom_lang_export: "📤 テキストをエクスポート",
       custom_lang_import: "📥 テキストをインポート",
       custom_lang_apply: "✅ 適用してリロード",
+      custom_lang_save_draft: "💾 下書きを保存",
+      custom_lang_draft_saved: "下書きを保存しました",
+      custom_lang_data_missing: "⚠️ カスタム言語が選択されていますが、保存されたデータが見つかりません。代わりに英語を表示しています。下記から言語ファイルをインポートして復元してください。",
       custom_lang_loaded: "✅ 読み込み済み：{name}",
       custom_lang_activate: "🌐「{name}」を適用",
       custom_lang_json_error: "⚠️ JSON エラー：{msg}",
@@ -3980,6 +3995,9 @@
       custom_lang_export: "📤 텍스트 내보내기",
       custom_lang_import: "📥 텍스트 가져오기",
       custom_lang_apply: "✅ 적용 및 새로고침",
+      custom_lang_save_draft: "💾 초안 저장",
+      custom_lang_draft_saved: "초안이 저장되었습니다",
+      custom_lang_data_missing: "⚠️ 사용자 지정 언어가 선택되어 있지만 저장된 데이터를 찾을 수 없습니다. 대신 영어로 표시합니다. 아래에서 언어 파일을 가져와 복원하세요.",
       custom_lang_loaded: "✅ 불러옴：{name}",
       custom_lang_activate: '🌐 "{name}" 적용',
       custom_lang_json_error: "⚠️ JSON 오류：{msg}",
@@ -4575,6 +4593,9 @@
       custom_lang_export: "📤 Exportar texto",
       custom_lang_import: "📥 Importar texto",
       custom_lang_apply: "✅ Aplicar y recargar",
+      custom_lang_save_draft: "💾 Guardar borrador",
+      custom_lang_draft_saved: "Borrador guardado",
+      custom_lang_data_missing: "⚠️ El idioma personalizado está seleccionado, pero no se encontraron datos guardados — mostrando inglés. Importa un archivo de idioma abajo para restaurarlo.",
       custom_lang_loaded: "✅ Cargado: {name}",
       custom_lang_activate: '🌐 Aplicar "{name}"',
       custom_lang_json_error: "⚠️ Error JSON: {msg}",
@@ -5195,6 +5216,9 @@
       custom_lang_export: "📤 Exportar texto",
       custom_lang_import: "📥 Importar texto",
       custom_lang_apply: "✅ Aplicar e recarregar",
+      custom_lang_save_draft: "💾 Salvar rascunho",
+      custom_lang_draft_saved: "Rascunho salvo",
+      custom_lang_data_missing: "⚠️ O idioma personalizado está selecionado, mas nenhum dado salvo foi encontrado — exibindo inglês. Importe um arquivo de idioma abaixo para restaurá-lo.",
       custom_lang_loaded: "✅ Carregado: {name}",
       custom_lang_activate: '🌐 Aplicar "{name}"',
       custom_lang_json_error: "⚠️ Erro JSON: {msg}",
@@ -5826,6 +5850,9 @@
       custom_lang_export: "📤 Exporter le texte",
       custom_lang_import: "📥 Importer le texte",
       custom_lang_apply: "✅ Appliquer et recharger",
+      custom_lang_save_draft: "💾 Enregistrer le brouillon",
+      custom_lang_draft_saved: "Brouillon enregistré",
+      custom_lang_data_missing: "⚠️ La langue personnalisée est sélectionnée, mais aucune donnée enregistrée n'a été trouvée — affichage en anglais. Importez un fichier de langue ci-dessous pour le restaurer.",
       custom_lang_loaded: "✅ Chargé : {name}",
       custom_lang_activate: "🌐 Appliquer « {name} »",
       custom_lang_json_error: "⚠️ Erreur JSON : {msg}",
@@ -6446,6 +6473,9 @@
       custom_lang_export: "📤 Экспорт текста",
       custom_lang_import: "📥 Импорт текста",
       custom_lang_apply: "✅ Применить и перезагрузить",
+      custom_lang_save_draft: "💾 Сохранить черновик",
+      custom_lang_draft_saved: "Черновик сохранён",
+      custom_lang_data_missing: "⚠️ Выбран пользовательский язык, но сохранённые данные не найдены — отображается английский. Импортируйте файл языка ниже, чтобы восстановить его.",
       custom_lang_loaded: "✅ Загружено: {name}",
       custom_lang_activate: "🌐 Применить «{name}»",
       custom_lang_json_error: "⚠️ Ошибка JSON: {msg}",
@@ -7061,6 +7091,9 @@
       custom_lang_export: "📤 Text exportieren",
       custom_lang_import: "📥 Text importieren",
       custom_lang_apply: "✅ Anwenden und neu laden",
+      custom_lang_save_draft: "💾 Entwurf speichern",
+      custom_lang_draft_saved: "Entwurf gespeichert",
+      custom_lang_data_missing: "⚠️ Benutzerdefinierte Sprache ist ausgewählt, aber es wurden keine gespeicherten Daten gefunden — Englisch wird stattdessen angezeigt. Importiere unten eine Sprachdatei, um sie wiederherzustellen.",
       custom_lang_loaded: "✅ Geladen: {name}",
       custom_lang_activate: "🌐 \"{name}\" anwenden",
       custom_lang_json_error: "⚠️ JSON-Fehler: {msg}",
@@ -8443,6 +8476,13 @@
         #msg-copy-lang-overlay button.lang-btn:active {
           transform:translateY(0); box-shadow:none;
         }
+        #msg-copy-lang-overlay button.lang-btn.is-current {
+          background:rgba(59,165,92,0.28); border-color:rgba(59,165,92,0.6);
+          color:#3ba55c; font-weight:600;
+        }
+        #msg-copy-lang-overlay button.lang-btn.is-current::after {
+          content:" ✓";
+        }
       `;
       document.head.appendChild(animStyle);
 
@@ -8520,7 +8560,7 @@
         .filter((lc) => lc !== "custom")
         .forEach((langCode) => {
           const btn = document.createElement("button");
-          btn.className = "lang-btn";
+          btn.className = "lang-btn" + (config.lang === langCode ? " is-current" : "");
           btn.innerText = TRANSLATIONS[langCode].name;
           btn.onclick = () => {
             config.lang = langCode;
@@ -8533,7 +8573,7 @@
         });
 
       const customLangBtn = document.createElement("button");
-      customLangBtn.className = "lang-btn";
+      customLangBtn.className = "lang-btn" + (config.lang === "custom" ? " is-current" : "");
       customLangBtn.innerText = "🌐 " + (_customLangData?.name || "Custom");
       btnContainer.appendChild(customLangBtn);
 
@@ -8551,6 +8591,14 @@
         "margin:0 0 10px; color:rgba(255,255,255,0.75); font-size:13px; line-height:1.6;";
       customTitle.innerHTML = `<b style="color:#5865F2">🌐 Custom</b><br>${t("custom_lang_desc")}`;
       customPanel.appendChild(customTitle);
+
+      if (config.lang === "custom" && !_customLangData) {
+        const missingWarn = document.createElement("p");
+        missingWarn.style.cssText =
+          "margin:0 0 10px; padding:8px 10px; background:rgba(237,66,69,0.12); border:1px solid rgba(237,66,69,0.35); border-radius:8px; color:#f87171; font-size:12px; line-height:1.5;";
+        missingWarn.textContent = t("custom_lang_data_missing");
+        customPanel.appendChild(missingWarn);
+      }
 
       const customBtnRow = document.createElement("div");
       customBtnRow.style.cssText =
@@ -8575,11 +8623,12 @@
         const exportData = {
           _note:
             "Translate the VALUES only. Do NOT change the KEYS. Keep {placeholders} like {n} {s} {t} untouched. Preserve HTML tags and class='...' attributes as-is. The 'name' field will be shown in the language selector.",
-          name: "My Custom Language",
+          name: _customLangData?.name || "My Custom Language",
         };
         const enTranslations = TRANSLATIONS["en"];
         for (const key of Object.keys(enTranslations)) {
-          if (key !== "name") exportData[key] = enTranslations[key];
+          if (key === "name") continue;
+          exportData[key] = _customLangData?.[key] ?? enTranslations[key];
         }
         const jsonStr = JSON.stringify(exportData, null, 2);
         const blob = new Blob([jsonStr], { type: "application/json" });
@@ -8623,10 +8672,66 @@
       importError.style.cssText =
         "color:#ed4245; font-size:12px; margin:4px 0 0; display:none;";
 
+      function _validateCustomLangJson(rawText) {
+        const parsed = JSON.parse(rawText.trim());
+        if (typeof parsed !== "object" || Array.isArray(parsed) || parsed === null)
+          throw new Error("must be a plain JSON object");
+        const invalidKeys = Object.entries(parsed).filter(
+          ([k, v]) => k !== "_note" && v !== null && typeof v !== "string"
+        );
+        if (invalidKeys.length > 0) {
+          throw new Error(
+            `non-string values found in keys: ${invalidKeys.map(([k]) => k).slice(0, 5).join(", ")}${invalidKeys.length > 5 ? "…" : ""}`
+          );
+        }
+        delete parsed["_note"];
+        const translationKeyCount = Object.keys(parsed).filter((k) => k !== "name").length;
+        if (translationKeyCount === 0) {
+          throw new Error("no translation keys found — the file appears to be empty");
+        }
+        return parsed;
+      }
+
+      const importBtnRow = document.createElement("div");
+      importBtnRow.style.cssText = "display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;";
+
+      const importSaveBtn = document.createElement("button");
+      importSaveBtn.innerText = t("custom_lang_save_draft");
+      importSaveBtn.style.cssText = `
+        padding:7px 14px; font-size:13px; cursor:pointer;
+        background:rgba(255,255,255,0.08); color:#dcddde;
+        border:1px solid rgba(255,255,255,0.16); border-radius:8px; transition:all 0.15s;
+      `;
+      importSaveBtn.onmouseenter = () => {
+        importSaveBtn.style.background = "rgba(255,255,255,0.14)";
+      };
+      importSaveBtn.onmouseleave = () => {
+        importSaveBtn.style.background = "rgba(255,255,255,0.08)";
+      };
+      importSaveBtn.onclick = () => {
+        try {
+          const parsed = _validateCustomLangJson(importTextarea.value);
+          localStorage.setItem("copyMenuLanguage_custom", JSON.stringify(parsed));
+          _customLangData = parsed;
+          importError.style.display = "none";
+          customLangBtn.innerText = "🌐 " + (_customLangData?.name || "Custom");
+          _renderActivateSection();
+          const savedNotice = document.createElement("p");
+          savedNotice.style.cssText =
+            "margin:6px 0 0; color:#3ba55c; font-size:12px;";
+          savedNotice.textContent = t("custom_lang_draft_saved");
+          importArea.appendChild(savedNotice);
+          setTimeout(() => savedNotice.remove(), 3000);
+        } catch (err) {
+          importError.textContent = t("custom_lang_json_error", { msg: err.message });
+          importError.style.display = "block";
+        }
+      };
+
       const importConfirmBtn = document.createElement("button");
       importConfirmBtn.innerText = t("custom_lang_apply");
       importConfirmBtn.style.cssText = `
-        margin-top:8px; padding:7px 14px; font-size:13px; cursor:pointer;
+        padding:7px 14px; font-size:13px; cursor:pointer;
         background:rgba(88,101,242,0.4); color:#fff;
         border:1px solid rgba(88,101,242,0.5); border-radius:8px; transition:all 0.15s;
       `;
@@ -8638,37 +8743,27 @@
       };
       importConfirmBtn.onclick = () => {
         try {
-          const parsed = JSON.parse(importTextarea.value.trim());
-          if (typeof parsed !== "object" || Array.isArray(parsed) || parsed === null)
-            throw new Error("must be a plain JSON object");
-          const invalidKeys = Object.entries(parsed).filter(
-            ([k, v]) => k !== "_note" && v !== null && typeof v !== "string"
-          );
-          if (invalidKeys.length > 0) {
-            throw new Error(
-              `non-string values found in keys: ${invalidKeys.map(([k]) => k).slice(0, 5).join(", ")}${invalidKeys.length > 5 ? "…" : ""}`
-            );
-          }
-          delete parsed["_note"];
-          localStorage.setItem(
-            "copyMenuLanguage_custom",
-            JSON.stringify(parsed),
-          );
-          localStorage.setItem("copyMenuLanguage", "custom");
-          _customLangData = parsed;
-          overlay.remove();
-          animStyle.remove();
-          location.reload();
-        } catch (err) {
-          importError.textContent = t("custom_lang_json_error", {
-            msg: err.message,
+          const parsed = _validateCustomLangJson(importTextarea.value);
+          importError.style.display = "none";
+          dmtConfirm(t("reload_confirm")).then((ok) => {
+            if (!ok) return;
+            localStorage.setItem("copyMenuLanguage_custom", JSON.stringify(parsed));
+            localStorage.setItem("copyMenuLanguage", "custom");
+            _customLangData = parsed;
+            overlay.remove();
+            animStyle.remove();
+            location.reload();
           });
+        } catch (err) {
+          importError.textContent = t("custom_lang_json_error", { msg: err.message });
           importError.style.display = "block";
         }
       };
+      importBtnRow.appendChild(importSaveBtn);
+      importBtnRow.appendChild(importConfirmBtn);
       importArea.appendChild(importTextarea);
       importArea.appendChild(importError);
-      importArea.appendChild(importConfirmBtn);
+      importArea.appendChild(importBtnRow);
 
       importBtn.onclick = () => {
         importArea.style.display =
@@ -8680,14 +8775,19 @@
       customPanel.appendChild(customBtnRow);
       customPanel.appendChild(importArea);
 
-      if (_customLangData) {
+      const activateSectionContainer = document.createElement("div");
+      function _renderActivateSection() {
+        activateSectionContainer.innerHTML = "";
+        if (!_customLangData) return;
         const langName = _customLangData.name || "Custom";
         const statusRow = document.createElement("p");
         statusRow.style.cssText =
           "margin:10px 0 0; color:#3ba55c; font-size:12px;";
-        statusRow.innerHTML = t("custom_lang_loaded", {
-          name: `<b>${escHtml(langName)}</b>`,
-        });
+        const rawTemplate = t("custom_lang_loaded");
+        statusRow.innerHTML = escHtml(rawTemplate).replace(
+          "{name}",
+          `<b>${escHtml(langName)}</b>`,
+        );
 
         const activateBtn = document.createElement("button");
         activateBtn.innerText = t("custom_lang_activate", { name: langName });
@@ -8703,14 +8803,19 @@
           activateBtn.style.background = "rgba(88,101,242,0.35)";
         };
         activateBtn.onclick = () => {
-          localStorage.setItem("copyMenuLanguage", "custom");
-          overlay.remove();
-          animStyle.remove();
-          location.reload();
+          dmtConfirm(t("reload_confirm")).then((ok) => {
+            if (!ok) return;
+            localStorage.setItem("copyMenuLanguage", "custom");
+            overlay.remove();
+            animStyle.remove();
+            location.reload();
+          });
         };
-        customPanel.appendChild(statusRow);
-        customPanel.appendChild(activateBtn);
+        activateSectionContainer.appendChild(statusRow);
+        activateSectionContainer.appendChild(activateBtn);
       }
+      _renderActivateSection();
+      customPanel.appendChild(activateSectionContainer);
 
       customLangBtn.onclick = () => {
         const isOpen = customPanel.style.display !== "none";
@@ -9972,6 +10077,7 @@
           "gbraid",
           "wbraid",
           "igsh",
+          "igsi",
           "fb_action_ids",
           "fb_action_types",
           "fb_ref",
@@ -9991,7 +10097,6 @@
           "annotation_id",
           "si",
           "s",
-          "t",
           "twclid",
           "ref",
           "ref_src",
@@ -11924,10 +12029,32 @@
 
         if (totalDownloadCount > 0) {
           const dlBtn = document.createElement("button");
-          dlBtn.textContent =
+          dlBtn.style.cssText = "display:flex; align-items:center; gap:7px;";
+
+          const dlBtnLabel = document.createElement("span");
+          dlBtnLabel.textContent =
             totalDownloadCount > 1
               ? `${t("download_images")} (${totalDownloadCount})`
               : t("download_images");
+          dlBtn.appendChild(dlBtnLabel);
+
+          const dlTipIcon = document.createElement("span");
+          dlTipIcon.style.cssText = `
+            display:inline-flex; align-items:center; justify-content:center;
+            width:14px; height:14px; border-radius:50%;
+            color:rgba(185,187,190,0.45); cursor:help; flex-shrink:0;
+            transition: color 0.15s;
+          `;
+          dlTipIcon.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 17v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="12" cy="8" r="0.5" fill="currentColor" stroke="currentColor" stroke-width="1.5"/>
+          </svg>`;
+          dlTipIcon.title = t("tip_download_media");
+          dlTipIcon.onmouseenter = () => { dlTipIcon.style.color = "rgba(185,187,190,0.9)"; };
+          dlTipIcon.onmouseleave = () => { dlTipIcon.style.color = "rgba(185,187,190,0.45)"; };
+          dlTipIcon.addEventListener("click", (e) => e.stopPropagation());
+          dlBtn.appendChild(dlTipIcon);
 
           dlBtn.onclick = (e) => {
             showToast(t("download_start"));
@@ -20500,7 +20627,7 @@ unsafeWindow.fetch = function(...args) {
     }
 
     async editGroup(group) {
-      const newName = await dmtPrompt(tOr("wm_edit_group", "編輯群組名稱:"), group.name);
+      const newName = await dmtPrompt(tOr("wm_edit_group", "Edit Group Name:"), group.name);
       if (newName && newName.trim() !== group.name) {
         const data = this.getData();
         const target = data.groups.find((g) => g.id === group.id);
