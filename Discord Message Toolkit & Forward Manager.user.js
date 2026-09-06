@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.8.2.16
+// @version      2.9.0.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -41,6 +41,10 @@
 // @connect     cdn.discordapp.com
 // @connect     media.discordapp.net
 // @connect     fixcdn.hyonsu.com
+// @connect     twimg.com
+// @connect     fbcdn.net
+// @connect     pximg.net
+// @connect     discordapp.net
 // 💡" fixcdn.hyonsu.com " Used only without API mode; the script asks for confirmation before connecting.
 // ==/UserScript==
 
@@ -56,7 +60,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.8.2.16";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.0.2";
 
   const GMStore = {
     
@@ -97,6 +101,7 @@
     "mod_blacklist":  "2.2.9",
     "mod_myposts":    "2.5.3",
     "bl_hide_notices": "2.6.5.8",
+    "mod_floatimage": "2.8.2.17",
   };
 
   function isFeatureNew(featureKey) {
@@ -443,6 +448,16 @@
         ru:      "Mosaic · Медиагалерея сервера",
       },
     },
+    {
+      key:            "modFloatImage",
+      storageKey:     "mod_floatimage",
+      icon:           "🪟",
+      defaultEnabled: false,
+      tip:            "mod_tip_floatimage",
+      label: {
+        "en-US": "Floating Image Window",
+      },
+    },
   ];
   function isModEnabled(storageKey) {
     const val = localStorage.getItem(storageKey);
@@ -526,6 +541,10 @@
   })();
 
   let _wormholeInstance = null;
+
+  let _floatImageInstance = null;
+
+  let _webhookInstance = null;
 
   function dmtShowToast(message, opts = {}) {
     const { duration = 2200, onClick = null, icon = null } = opts;
@@ -1195,6 +1214,23 @@
       reload_confirm: "Settings saved!\nReload page now to apply changes?",
       copy_text: "📋 Copy Text",
       copy_media_url: "🖼️ Copy Media URL",
+      float_image_menu: "🪟 Float This Image",
+      fi_hover_badge_tip: "Toggle the hover quick-button that appears on large images",
+      fi_state_on: "On",
+      fi_state_off: "Off",
+      fi_hover_on_toast: "✨ Hover quick-button enabled — hover a large image to see it",
+      fi_hover_off_toast: "Hover quick-button disabled",
+      fi_ctrl_download: "Download",
+      fi_ctrl_copy: "Copy image URL",
+      fi_ctrl_copied: "📋 Image URL copied",
+      fi_ctrl_close: "Close",
+      fi_download_fail: "Download failed",
+      fi_img_load_failed: "Image failed to load",
+      fi_close_all_tip: "Close all floating image windows",
+      fi_close_all_label: "🗑️ Close All",
+      fi_close_all_toast: "🗑️ All floating windows closed",
+      fi_new_badge_tip: "New: floated images now stack together automatically",
+      fi_new_badge_label: "New",
       no_content: "⚠️ No Content",
       copy_first_link: "🔗 Copy First Link",
       copy_markdown: "🧾 Copy as Markdown",
@@ -1550,6 +1586,7 @@
       mod_tip_blacklist:  "Dim messages from specific users so they fade into the background. Right-click any message to add the author.",
       mod_tip_myposts:    "Browse, filter, and schedule deletion of your own messages. Requires API token (fetched automatically on panel open).",
       mod_tip_mosaic:     "Browse all media in the current server or channel. Requires API token (same as My Posts).",
+      mod_tip_floatimage: "Float any image from a message onto a draggable floating window. Double-click a window to close it.",
 
       ms_token_warn:      "⚠️ Mosaic uses your API token to scan media. Use only on trusted devices.",
       ms_scope_server:    "Server",
@@ -9309,6 +9346,11 @@
         50%       { transform: scale(1.3); opacity: 0.7; }
     }
 
+    @keyframes dmt-fi-new-pulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(88,101,242,0.5); }
+        50%       { box-shadow: 0 0 0 4px rgba(88,101,242,0); }
+    }
+
     #dmt-conv-pref-panel {
         position: fixed; z-index: 2147483647;
         background: var(--dmt-bg-primary, #2b2d31);
@@ -10949,7 +10991,7 @@
       if (!img) return false;
       if (img.className.includes("avatar") || img.closest('[class*="avatar"]'))
         return false;
-      if (img.className.includes("emoji") || img.alt.match(/:\w+:/))
+      if (img.className.includes("emoji") || img.alt?.match(/:\w+:/))
         return false;
       if (img.naturalWidth > 0 && img.naturalWidth < 50) return false;
       return true;
@@ -11918,6 +11960,127 @@
         else if (mediaUrl) addItem("copy", t("copy_media_url"), mediaUrl);
         else addItem("copy", t("no_content"), "");
 
+        const _fiIsAvatarLikeUrl = /cdn\.discordapp\.com\/(avatars|embed\/avatars|emojis|role-icons|icons|banners)\//.test(
+          mediaUrl || "",
+        );
+        const _fiMediaEl = mediaUrl ? findMediaElementByUrl(container, mediaUrl) : null;
+        const _fiValidMedia =
+          mediaUrl &&
+          !_fiIsAvatarLikeUrl &&
+          (!_fiMediaEl || (_fiMediaEl.tagName === "IMG" && isValidContentImage(_fiMediaEl)));
+        if (_fiValidMedia && isModEnabled("mod_floatimage") && _floatImageInstance) {
+          const fiRow = document.createElement("div");
+          fiRow.style.cssText = "display:flex;align-items:center;gap:6px;";
+
+          const FI_NEW_BADGE_KEY = "fi_poker_stack";
+          const FI_NEW_BADGE_VERSION = "2.9.0.0";
+          const _fiIsFeatureNew = () =>
+            GMStore.get("new_badge_seen_" + FI_NEW_BADGE_KEY, null) !== FI_NEW_BADGE_VERSION;
+          const _fiMarkFeatureSeen = () =>
+            GMStore.set("new_badge_seen_" + FI_NEW_BADGE_KEY, FI_NEW_BADGE_VERSION);
+          let newBadge = null;
+
+          const fiBtn = document.createElement("button");
+          fiBtn.textContent = t("float_image_menu");
+          fiBtn.style.cssText = "flex:1;text-align:left;";
+          fiBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            _floatImageInstance.create(mediaUrl, e.clientX, e.clientY);
+            if (newBadge) {
+              _fiMarkFeatureSeen();
+              newBadge.remove();
+            }
+            closeGlobalMenu();
+          });
+          fiRow.appendChild(fiBtn);
+
+          if (_fiIsFeatureNew()) {
+            newBadge = document.createElement("span");
+            newBadge.title = t("fi_new_badge_tip");
+            newBadge.style.cssText = [
+              "display:inline-flex",
+              "align-items:center",
+              "padding:1px 6px",
+              "border-radius:8px",
+              "font-size:10px",
+              "font-weight:600",
+              "flex-shrink:0",
+              "color:#fff",
+              "background:var(--dmt-accent, #5865f2)",
+              "animation:dmt-fi-new-pulse 2s ease-in-out infinite",
+            ].join(";");
+            newBadge.textContent = t("fi_new_badge_label");
+            fiRow.appendChild(newBadge);
+          }
+
+          const hoverBadge = document.createElement("span");
+          hoverBadge.title = t("fi_hover_badge_tip");
+          hoverBadge.style.cssText = [
+            "display:inline-flex",
+            "align-items:center",
+            "gap:3px",
+            "padding:2px 7px",
+            "border-radius:10px",
+            "font-size:11px",
+            "cursor:pointer",
+            "flex-shrink:0",
+            "color:var(--dmt-text-muted, #949ba4)",
+          ].join(";");
+          const _fiRenderBadge = () => {
+            const on = _floatImageInstance.isHoverEnabled();
+            hoverBadge.style.background = on
+              ? "rgba(88,101,242,0.25)"
+              : "rgba(255,255,255,0.06)";
+            hoverBadge.style.color = on
+              ? "var(--dmt-accent, #5865f2)"
+              : "var(--dmt-text-muted, #949ba4)";
+            hoverBadge.textContent = `⚙️ ${on ? t("fi_state_on") : t("fi_state_off")}`;
+          };
+          _fiRenderBadge();
+          hoverBadge.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const nowOn = _floatImageInstance.toggleHover();
+            _fiRenderBadge();
+            dmtShowToast(nowOn ? t("fi_hover_on_toast") : t("fi_hover_off_toast"));
+          });
+          fiRow.appendChild(hoverBadge);
+
+          const closeAllBadge = document.createElement("span");
+          closeAllBadge.title = t("fi_close_all_tip");
+          closeAllBadge.style.cssText = [
+            "display:inline-flex",
+            "align-items:center",
+            "gap:3px",
+            "padding:2px 7px",
+            "border-radius:10px",
+            "font-size:11px",
+            "cursor:pointer",
+            "flex-shrink:0",
+            "color:var(--dmt-text-muted, #949ba4)",
+            "background:rgba(255,255,255,0.06)",
+          ].join(";");
+          const _fiRenderCloseAllBadge = () => {
+            const n = _floatImageInstance.count();
+            closeAllBadge.style.opacity = n > 0 ? "1" : "0.4";
+            closeAllBadge.style.cursor = n > 0 ? "pointer" : "default";
+            closeAllBadge.textContent = t("fi_close_all_label");
+          };
+          _fiRenderCloseAllBadge();
+          closeAllBadge.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (!(_floatImageInstance.count() > 0)) return;
+            _floatImageInstance.closeAll();
+            _fiRenderCloseAllBadge();
+            dmtShowToast(t("fi_close_all_toast"));
+          });
+          fiRow.appendChild(closeAllBadge);
+
+          sections.system.push(fiRow);
+        }
+
         const _attachmentSeenPaths = new Set();
         const attachmentLinks = Array.from(
           container.querySelectorAll('a[class*="originalLink"]'),
@@ -12709,7 +12872,7 @@
           }
         });
 
-        if (typeof window.webhookModule !== "undefined" && window.webhookModule.getWebhooks().length > 0) {
+        if (_webhookInstance && _webhookInstance.getWebhooks().length > 0) {
 
           const _getMsgPermalink = () => {
             const listId = container.getAttribute("data-list-item-id") || "";
@@ -12731,11 +12894,11 @@
           };
 
           const _getSrcPref = (id) => {
-            const wh = window.webhookModule.getWebhooks().find((w) => w.id === id);
+            const wh = _webhookInstance.getWebhooks().find((w) => w.id === id);
             return wh?.keepSource === true;
           };
           const _setSrcPref = (id, val) => {
-            const list = window.webhookModule.getWebhooks().map((w) =>
+            const list = _webhookInstance.getWebhooks().map((w) =>
               w.id === id ? { ...w, keepSource: val } : w
             );
             GMStore.set("discord_webhook_list", list, true);
@@ -12758,7 +12921,7 @@
               "margin-left:12px",
             ].join(";");
 
-            window.webhookModule.getWebhooks().forEach((wh) => {
+            _webhookInstance.getWebhooks().forEach((wh) => {
               const row = document.createElement("div");
               row.style.cssText = [
                 "display:flex", "align-items:center",
@@ -12845,7 +13008,7 @@
             const channelUrl = (wh.guild_id && wh.channel_id)
               ? `https://discord.com/channels/${wh.guild_id}/${wh.channel_id}`
               : null;
-            window.webhookModule.sendContent(wh.url, payload, wh.name, channelUrl);
+            _webhookInstance.sendContent(wh.url, payload, wh.name, channelUrl);
           }));
 
           sections.webhook.push(makeWebhookParent(t("wh_send_urls"), (wh, keepSource) => {
@@ -12868,7 +13031,7 @@
             const channelUrl = (wh.guild_id && wh.channel_id)
               ? `https://discord.com/channels/${wh.guild_id}/${wh.channel_id}`
               : null;
-            window.webhookModule.sendUrls(wh.url, allUrls, wh.name, channelUrl);
+            _webhookInstance.sendUrls(wh.url, allUrls, wh.name, channelUrl);
           }));
         }
 
@@ -17111,14 +17274,19 @@
       _btnObserver.observe(document.body, { childList: true, subtree: true });
     }
     CleanupRegistry.add(() => _btnObserver.disconnect());
-    ModuleCleanupRegistry.add("mod_webhook", () => _btnObserver.disconnect());
+    ModuleCleanupRegistry.add("mod_webhook", () => {
+      _btnObserver.disconnect();
+      _webhookInstance = null;
+      if (DEBUG) delete window.webhookModule;
+    });
 
+    _webhookInstance = {
+      getWebhooks: getData,
+      sendContent,
+      sendUrls,
+    };
     if (DEBUG) {
-      window.webhookModule = {
-        getWebhooks: getData,
-        sendContent,
-        sendUrls,
-      };
+      window.webhookModule = _webhookInstance;
     }
 
     DEBUG && console.log("[WebhookManager] Ready. Webhooks:", getData().length);
@@ -32515,6 +32683,642 @@ if (type === "warn" && scanLimit !== null) {
   }
   _ensureHistoryPatched();
 
+  function initFloatImage() {
+    const SK_FI_WINDOWS = "fi_windows";
+    let _fiCounter = 0;
+    const _fiInstances = new Map();
+    let _fiDraggingId = null, _fiDragOffsetX = 0, _fiDragOffsetY = 0;
+    const _FI_STACK_CAP = 5;
+    const _FI_STACK_OFFSET = 14;
+    const _FI_STACK_ROTATE = 3;
+    const _FI_STACK_OVERLAP_RATIO = 0.35;
+    const _FI_STACK_DRAG_THRESHOLD = 6;
+    let _fiStackSeq = 0;
+    let _fiDragStartX = 0, _fiDragStartY = 0, _fiDragHadStack = false, _fiDragDetached = false;
+
+    function _fiBestQualityUrl(url) {
+      if (!url) return url;
+      try {
+        const u = new URL(url);
+        const h = u.hostname;
+        let s = url;
+        if (h.includes("twimg.com")) {
+          u.searchParams.set("name", "orig");
+          return u.toString();
+        }
+        if (h.includes("pximg.net") || h.includes("pixiv.net"))
+          return s.replace(/\/c\/\d+x\d+(_\d+)?\//, "/").replace(/_master1200/, "").replace(/_square1200/, "");
+        if (h.includes("blogspot") || h.includes("googleusercontent"))
+          return s.replace(/\/(s\d+|w\d+-h\d+)(-[a-z]+)?\//, "/s0/");
+        if (h.includes("staticflickr")) return s.replace(/_[mnwz]\.jpg$/, "_b.jpg");
+        if (/fbcdn|instagram/.test(h)) return s.replace(/\/[ps]\d+x\d+\//, "/").replace(/_n\./, "_o.");
+        if (h.includes("redd.it") || h.includes("reddit.com"))
+          return s.replace(/\?.*$/, "").replace("preview.redd.it", "i.redd.it");
+        if (h.includes("discordapp") || h.includes("discord.com")) {
+          u.searchParams.delete("width");
+          u.searchParams.delete("height");
+          u.searchParams.delete("format");
+          u.searchParams.delete("quality");
+          return u.toString();
+        }
+        if (h.includes("wikipedia") || h.includes("wikimedia"))
+          return s.replace("/thumb/", "/").replace(/\/\d+px-.+$/, "");
+        if (h.includes("imgur.com"))
+          return s.replace(/([a-zA-Z0-9]{5,7})[sbml]\.(jpg|png|gif|webp)/, "$1.$2");
+        if (h.includes("unsplash.com")) {
+          u.searchParams.delete("w");
+          u.searchParams.delete("h");
+          u.searchParams.delete("q");
+          return u.toString();
+        }
+        if (h.includes("weibo")) return s.replace(/\/(Mw|thumb|small|mw\d+|square)\//, "/large/");
+        if (h.includes("steampowered")) return s.replace(/\.\d+x\d+\.jpg/, ".jpg");
+        if (h.includes("imgbox")) return s.replace(/_t\./, "_o.").replace(/\/[st]\//, "/i/");
+        if (s.includes("/wp-content/uploads/"))
+          return s.replace("-scaled", "").replace(/-\d+x\d+(\.[a-zA-Z]+)$/, "$1");
+        if (/(_thumb|_small|_min|_preview|_sample)|\/thumbs?\//i.test(s))
+          return s.replace(/[-_]\d+x\d+(?=\.)/g, "").replace(/(_thumb|_small|_min|_preview|_sample)/gi, "").replace(/\/thumbs?\//gi, "/");
+        if (h.includes("alicdn")) return s.replace(/_\d+x\d+\.jpg.*/, "");
+        if (h.includes("360buyimg")) return s.replace(/\/n\d+\//, "/n0/");
+      } catch (e) {}
+      return url;
+    }
+
+    function _fiBringToFront(win) {
+      const portal = dmtGetPortal();
+      if (portal.lastElementChild !== win) portal.appendChild(win);
+    }
+
+    function _fiAnchorRect(inst) {
+      const img = inst.el.querySelector("img");
+      const loaded = !img || img.complete;
+      return {
+        left: parseFloat(inst.el.style.left) || 0,
+        top: parseFloat(inst.el.style.top) || 0,
+        width: inst.el.offsetWidth,
+        height: loaded ? inst.el.offsetHeight : inst.el.offsetWidth,
+      };
+    }
+
+    function _fiOverlapRatio(a, b) {
+      const ix = Math.max(0, Math.min(a.left + a.width, b.left + b.width) - Math.max(a.left, b.left));
+      const iy = Math.max(0, Math.min(a.top + a.height, b.top + b.height) - Math.max(a.top, b.top));
+      const inter = ix * iy;
+      const minArea = Math.min(a.width * a.height, b.width * b.height);
+      return minArea > 0 ? inter / minArea : 0;
+    }
+
+    function _fiStackMembers(stackId) {
+      const members = [];
+      _fiInstances.forEach((inst, id) => {
+        if (inst.stackId === stackId) members.push(id);
+      });
+      members.sort((a, b) => _fiInstances.get(a).stackIndex - _fiInstances.get(b).stackIndex);
+      return members;
+    }
+
+    function _fiStackAnchorRect(stackId) {
+      const members = _fiStackMembers(stackId);
+      return members.length ? _fiAnchorRect(_fiInstances.get(members[0])) : null;
+    }
+
+    function _fiApplyStackTransform(win, stackIndex) {
+      win.style.transform = stackIndex
+        ? `translate(${stackIndex * _FI_STACK_OFFSET}px, ${stackIndex * _FI_STACK_OFFSET}px) rotate(${stackIndex * _FI_STACK_ROTATE}deg)`
+        : "";
+    }
+
+    function _fiReflowStack(stackId, orderedIds, anchorLeft, anchorTop) {
+      const portal = dmtGetPortal();
+      const grouped = orderedIds.length > 1;
+      orderedIds.forEach((id, idx) => {
+        const inst = _fiInstances.get(id);
+        if (!inst) return;
+        inst.stackId = grouped ? stackId : null;
+        inst.stackIndex = grouped ? idx : 0;
+        if (anchorLeft != null) inst.el.style.left = Math.round(anchorLeft) + "px";
+        if (anchorTop != null) inst.el.style.top = Math.round(anchorTop) + "px";
+        _fiApplyStackTransform(inst.el, inst.stackIndex);
+        portal.appendChild(inst.el);
+      });
+    }
+
+    function _fiBringToFrontInStack(id) {
+      const inst = _fiInstances.get(id);
+      if (!inst || inst.stackId == null) {
+        if (inst) _fiBringToFront(inst.el);
+        return;
+      }
+      const members = _fiStackMembers(inst.stackId).filter((m) => m !== id);
+      members.push(id);
+      _fiReflowStack(inst.stackId, members);
+    }
+
+    function _fiFindJoinableStack(rect, excludeId) {
+      let best = null, bestRatio = 0, blockedFull = false;
+      const seen = new Set();
+      _fiInstances.forEach((inst, id) => {
+        if (id === excludeId) return;
+        const gid = inst.stackId || id;
+        if (seen.has(gid)) return;
+        seen.add(gid);
+        const members = inst.stackId ? _fiStackMembers(inst.stackId) : [id];
+        const anchorRect = inst.stackId ? _fiStackAnchorRect(inst.stackId) : _fiAnchorRect(inst);
+        if (!anchorRect) return;
+        const ratio = _fiOverlapRatio(rect, anchorRect);
+        if (ratio < _FI_STACK_OVERLAP_RATIO) return;
+        if (members.length >= _FI_STACK_CAP) {
+          blockedFull = true;
+          return;
+        }
+        if (ratio > bestRatio) {
+          bestRatio = ratio;
+          best = { stackId: inst.stackId, members, anchorRect };
+        }
+      });
+      return { join: best, blockedFull: !best && blockedFull };
+    }
+
+    function _fiDownload(url) {
+      let filename = "image";
+      try {
+        filename = decodeURIComponent(url.split("/").pop().split("?")[0]) || "image";
+      } catch (e) {}
+      GM_xmlhttpRequest({
+        method: "GET",
+        url,
+        responseType: "blob",
+        onload: (res) => {
+          if (res.status < 200 || res.status >= 300) {
+            dmtShowToast(t("fi_download_fail"));
+            return;
+          }
+          const blobUrl = URL.createObjectURL(res.response);
+          const a = document.createElement("a");
+          a.href = blobUrl;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+        },
+        onerror: () => dmtShowToast(t("fi_download_fail")),
+      });
+    }
+
+    function _fiPersistAll() {
+      const list = Array.from(_fiInstances.entries()).map(([id, inst]) => ({
+        id,
+        url: inst.url,
+        left: Math.round(parseFloat(inst.el.style.left)) || 0,
+        top: Math.round(parseFloat(inst.el.style.top)) || 0,
+        stackId: inst.stackId,
+        stackIndex: inst.stackIndex,
+      }));
+      GMStore.set(SK_FI_WINDOWS, list, true);
+    }
+
+    function _fiClose(id) {
+      const inst = _fiInstances.get(id);
+      if (!inst) return;
+      const stackId = inst.stackId;
+      inst.cleanup();
+      inst.el.remove();
+      _fiInstances.delete(id);
+      if (stackId != null) _fiReflowStack(stackId, _fiStackMembers(stackId));
+      _fiPersistAll();
+    }
+
+    const _fiClampPos = (px, py, w, h) => [
+      Math.max(0, Math.min(window.innerWidth - (w ? Math.max(40, w * 0.15) : 40), px)),
+      Math.max(0, Math.min(window.innerHeight - (h ? Math.max(40, h * 0.15) : 40), py)),
+    ];
+
+    function _fiCreate(url, x, y, restoreId, restoreLeft, restoreTop, restoreStackId, restoreStackIndex) {
+      const upgradedUrl = _fiBestQualityUrl(url);
+      const id = restoreId || `fi_${Date.now()}_${++_fiCounter}`;
+      const _FI_BASE_W = 200, _FI_MIN_ZOOM = 0.5, _FI_MAX_ZOOM = 3, _FI_ZOOM_STEP = 0.1;
+      let zoomFactor = 1;
+      const rawLeft = restoreLeft != null ? restoreLeft : Math.round(x - 100);
+      const rawTop = restoreTop != null ? restoreTop : Math.round(y - 100);
+      const [left, top] = _fiClampPos(rawLeft, rawTop);
+
+      let finalLeft = left, finalTop = top, stackId = null, joinMembers = null;
+      if (restoreStackId) {
+        stackId = restoreStackId;
+      } else {
+        const result = _fiFindJoinableStack({ left, top, width: _FI_BASE_W, height: _FI_BASE_W }, null);
+        if (result.join) {
+          finalLeft = result.join.anchorRect.left;
+          finalTop = result.join.anchorRect.top;
+          stackId = result.join.stackId || `fistack_${++_fiStackSeq}`;
+          joinMembers = result.join.members;
+        } else if (result.blockedFull) {
+          [finalLeft, finalTop] = _fiClampPos(finalLeft + 24, finalTop + 24);
+        }
+      }
+
+      const win = document.createElement("div");
+      win.className = "dmt-fi-window";
+      win.dataset.fiId = id;
+      win.style.cssText = [
+        "position:fixed",
+        `left:${finalLeft}px`,
+        `top:${finalTop}px`,
+        `width:${_FI_BASE_W}px`,
+        "border-radius:8px",
+        "overflow:hidden",
+        "background:var(--dmt-bg-primary, #2b2d31)",
+        "border:1px solid var(--dmt-bg-deep, #1e1f22)",
+        "box-shadow:0 8px 24px rgba(0,0,0,0.45)",
+        "cursor:grab",
+        "pointer-events:auto",
+        "user-select:none",
+      ].join(";");
+
+      const img = document.createElement("img");
+      img.src = upgradedUrl;
+      img.draggable = false;
+      img.style.cssText =
+        "display:block;width:100%;height:auto;max-height:70vh;object-fit:contain;pointer-events:none;";
+      let triedFallback = upgradedUrl === url;
+      img.onerror = () => {
+        if (!triedFallback) {
+          triedFallback = true;
+          img.src = url;
+          return;
+        }
+        img.onerror = null;
+        img.style.display = "none";
+        const fallback = document.createElement("div");
+        fallback.style.cssText = [
+          "display:flex",
+          "align-items:center",
+          "justify-content:center",
+          "min-height:90px",
+          "padding:16px",
+          "color:var(--dmt-text-muted, #949ba4)",
+          "font-size:12px",
+          "text-align:center",
+        ].join(";");
+        fallback.textContent = t("fi_img_load_failed");
+        win.appendChild(fallback);
+      };
+      win.appendChild(img);
+
+      const ac = new AbortController();
+
+      const controls = document.createElement("div");
+      controls.className = "dmt-fi-controls";
+      controls.style.cssText = [
+        "position:absolute",
+        "top:4px",
+        "right:4px",
+        "display:none",
+        "gap:4px",
+        "z-index:2",
+      ].join(";");
+      const _fiMakeCtrlBtn = (svg, title, onClick) => {
+        const b = document.createElement("div");
+        b.title = title;
+        b.style.cssText = [
+          "width:22px",
+          "height:22px",
+          "border-radius:5px",
+          "background:rgba(0,0,0,0.6)",
+          "border:1px solid rgba(255,255,255,0.25)",
+          "display:flex",
+          "align-items:center",
+          "justify-content:center",
+          "cursor:pointer",
+          "opacity:0.8",
+          "pointer-events:auto",
+          "color:#fff",
+        ].join(";");
+        b.innerHTML = svg;
+        b.addEventListener("mouseenter", () => (b.style.opacity = "1"), { signal: ac.signal });
+        b.addEventListener("mouseleave", () => (b.style.opacity = "0.8"), { signal: ac.signal });
+        b.addEventListener(
+          "click",
+          (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onClick();
+          },
+          { signal: ac.signal },
+        );
+        return b;
+      };
+      controls.appendChild(
+        _fiMakeCtrlBtn(
+          '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+          t("fi_ctrl_download"),
+          () => _fiDownload(img.src),
+        ),
+      );
+      controls.appendChild(
+        _fiMakeCtrlBtn(
+          '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+          t("fi_ctrl_copy"),
+          () => {
+            GM_setClipboard(img.src, "text");
+            dmtShowToast(t("fi_ctrl_copied"));
+          },
+        ),
+      );
+      controls.appendChild(
+        _fiMakeCtrlBtn(
+          '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+          t("fi_ctrl_close"),
+          () => _fiClose(id),
+        ),
+      );
+      win.appendChild(controls);
+      controls.addEventListener("mousedown", (e) => e.stopPropagation(), { signal: ac.signal });
+      controls.addEventListener("dblclick", (e) => e.stopPropagation(), { signal: ac.signal });
+      win.addEventListener("mouseenter", () => (controls.style.display = "flex"), { signal: ac.signal });
+      win.addEventListener("mouseleave", () => (controls.style.display = "none"), { signal: ac.signal });
+
+      dmtGetPortal().appendChild(win);
+
+      win.addEventListener(
+        "mousedown",
+        (e) => {
+          if (e.button !== 0) return;
+          _fiDraggingId = id;
+          win.style.cursor = "grabbing";
+          const r = win.getBoundingClientRect();
+          _fiDragOffsetX = e.clientX - r.left;
+          _fiDragOffsetY = e.clientY - r.top;
+          _fiDragStartX = e.clientX;
+          _fiDragStartY = e.clientY;
+          const dragInst = _fiInstances.get(id);
+          _fiDragHadStack = !!(dragInst && dragInst.stackId != null);
+          _fiDragDetached = false;
+          if (_fiDragHadStack) _fiBringToFrontInStack(id);
+          else _fiBringToFront(win);
+          e.preventDefault();
+        },
+        { signal: ac.signal },
+      );
+      win.addEventListener("dblclick", () => _fiClose(id), { signal: ac.signal });
+      win.addEventListener(
+        "wheel",
+        (e) => {
+          e.preventDefault();
+          const wheelInst = _fiInstances.get(id);
+          if (wheelInst && wheelInst.stackId != null) {
+            const oldStackId = wheelInst.stackId;
+            win.style.transform = "";
+            _fiReflowStack(oldStackId, _fiStackMembers(oldStackId).filter((m) => m !== id));
+            wheelInst.stackId = null;
+            wheelInst.stackIndex = 0;
+          }
+          const dir = e.deltaY < 0 ? 1 : -1;
+          zoomFactor = Math.min(_FI_MAX_ZOOM, Math.max(_FI_MIN_ZOOM, zoomFactor + dir * _FI_ZOOM_STEP));
+          win.style.width = Math.round(_FI_BASE_W * zoomFactor) + "px";
+          const r = win.getBoundingClientRect();
+          const [nx, ny] = _fiClampPos(r.left, r.top, r.width, r.height);
+          if (nx !== r.left) win.style.left = nx + "px";
+          if (ny !== r.top) win.style.top = ny + "px";
+        },
+        { signal: ac.signal, passive: false },
+      );
+      win.addEventListener("dragstart", (e) => e.preventDefault(), { signal: ac.signal });
+
+      _fiInstances.set(id, { el: win, url: upgradedUrl, cleanup: () => ac.abort(), stackId: null, stackIndex: 0 });
+      if (restoreStackId) {
+        const inst = _fiInstances.get(id);
+        inst.stackId = stackId;
+        inst.stackIndex = restoreStackIndex || 0;
+        _fiApplyStackTransform(win, inst.stackIndex);
+      } else if (joinMembers) {
+        _fiReflowStack(stackId, joinMembers.concat([id]), finalLeft, finalTop);
+      }
+      return id;
+    }
+
+    const _fiDragAC = new AbortController();
+    document.addEventListener(
+      "mousemove",
+      (e) => {
+        if (_fiDraggingId == null) return;
+        const inst = _fiInstances.get(_fiDraggingId);
+        if (!inst) { _fiDraggingId = null; return; }
+        if (_fiDragHadStack && !_fiDragDetached) {
+          const dx = e.clientX - _fiDragStartX, dy = e.clientY - _fiDragStartY;
+          if (Math.hypot(dx, dy) >= _FI_STACK_DRAG_THRESHOLD) {
+            const oldStackId = inst.stackId;
+            inst.el.style.transform = "";
+            _fiReflowStack(oldStackId, _fiStackMembers(oldStackId).filter((m) => m !== _fiDraggingId));
+            inst.stackId = null;
+            inst.stackIndex = 0;
+            _fiDragDetached = true;
+          }
+        }
+        const [nx, ny] = _fiClampPos(
+          e.clientX - _fiDragOffsetX,
+          e.clientY - _fiDragOffsetY,
+          inst.el.offsetWidth,
+          inst.el.offsetHeight,
+        );
+        inst.el.style.left = nx + "px";
+        inst.el.style.top = ny + "px";
+      },
+      { signal: _fiDragAC.signal },
+    );
+    document.addEventListener(
+      "mouseup",
+      () => {
+        if (_fiDraggingId == null) return;
+        const inst = _fiInstances.get(_fiDraggingId);
+        if (inst) {
+          inst.el.style.cursor = "grab";
+          if (_fiDragDetached) {
+            const rect = _fiAnchorRect(inst);
+            const result = _fiFindJoinableStack(rect, _fiDraggingId);
+            if (result.join) {
+              const stackId = result.join.stackId || `fistack_${++_fiStackSeq}`;
+              _fiReflowStack(
+                stackId,
+                result.join.members.concat([_fiDraggingId]),
+                result.join.anchorRect.left,
+                result.join.anchorRect.top,
+              );
+            } else if (result.blockedFull) {
+              const [nx, ny] = _fiClampPos(rect.left + 24, rect.top + 24, rect.width, rect.height);
+              inst.el.style.left = nx + "px";
+              inst.el.style.top = ny + "px";
+            }
+          }
+        }
+        _fiDraggingId = null;
+        _fiDragHadStack = false;
+        _fiDragDetached = false;
+        _fiPersistAll();
+      },
+      { signal: _fiDragAC.signal },
+    );
+
+    function _fiRestoreAll() {
+      const list = GMStore.get(SK_FI_WINDOWS, [], true);
+      if (!Array.isArray(list)) return;
+      const sorted = list.slice().sort((a, b) => {
+        const sa = a.stackId || "", sb = b.stackId || "";
+        if (sa !== sb) return sa < sb ? -1 : 1;
+        return (a.stackIndex || 0) - (b.stackIndex || 0);
+      });
+      sorted.forEach((item) => {
+        if (!item || !item.url) return;
+        _fiCreate(item.url, 0, 0, item.id, item.left, item.top, item.stackId, item.stackIndex);
+      });
+    }
+
+    let _fiHoverEnabled = GMStore.get("fi_hover_enabled", false);
+    let _fiHoverTarget = null;
+    let _fiHoverSourceEl = null;
+    const _fiHoverAC = new AbortController();
+
+    const _fiHoverBtn = document.createElement("div");
+    _fiHoverBtn.className = "dmt-fi-hoverbtn";
+    _fiHoverBtn.title = "Float this image";
+    _fiHoverBtn.style.cssText = [
+      "position:fixed",
+      "display:none",
+      "align-items:center",
+      "justify-content:center",
+      "width:26px",
+      "height:26px",
+      "border-radius:6px",
+      "background:rgba(0,0,0,0.55)",
+      "border:1px solid rgba(255,255,255,0.25)",
+      "color:var(--dmt-text-primary, #dcddde)",
+      "cursor:pointer",
+      "opacity:0.7",
+      "pointer-events:auto",
+      "transition:opacity .12s,transform .12s",
+    ].join(";");
+    _fiHoverBtn.innerHTML =
+      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+
+    function _fiHoverHide() {
+      _fiHoverTarget = null;
+      _fiHoverSourceEl = null;
+      _fiHoverBtn.style.display = "none";
+    }
+
+    function _fiIsCandidateImg(img) {
+      if (!img || img.tagName !== "IMG" || !img.src) return false;
+      if (img.closest(".dmt-fi-window")) return false;
+      if (img.className.includes("avatar") || img.closest('[class*="avatar"]')) return false;
+      if (img.className.includes("emoji") || (img.alt && /:\w+:/.test(img.alt))) return false;
+      const r = img.getBoundingClientRect();
+      return r.width >= 80 && r.height >= 80;
+    }
+
+    _fiHoverBtn.addEventListener(
+      "mouseenter",
+      () => {
+        _fiHoverBtn.style.opacity = "1";
+        _fiHoverBtn.style.transform = "scale(1.08)";
+      },
+      { signal: _fiHoverAC.signal },
+    );
+    _fiHoverBtn.addEventListener("mouseleave", () => _fiHoverHide(), { signal: _fiHoverAC.signal });
+    _fiHoverBtn.addEventListener(
+      "click",
+      (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (_fiHoverTarget) {
+          const r = _fiHoverTarget.getBoundingClientRect();
+          _fiCreate(_fiHoverTarget.src, r.right - 20, r.top + 20);
+          _fiPersistAll();
+        }
+        _fiHoverHide();
+      },
+      { signal: _fiHoverAC.signal },
+    );
+    dmtGetPortal().appendChild(_fiHoverBtn);
+
+    document.addEventListener(
+      "mouseover",
+      (e) => {
+        if (!_fiHoverEnabled) return;
+        let img =
+          e.target.tagName === "IMG" ? e.target : e.target.querySelector?.("img") || null;
+        if (!img) {
+          const stack = document.elementsFromPoint(e.clientX, e.clientY);
+          img = stack.find((el) => el.tagName === "IMG") || null;
+        }
+        if (!_fiIsCandidateImg(img)) return;
+        _fiHoverTarget = img;
+        _fiHoverSourceEl = e.target;
+        const r = img.getBoundingClientRect();
+        _fiHoverBtn.style.left = Math.round(r.right - 30) + "px";
+        _fiHoverBtn.style.top = Math.round(r.top + 6) + "px";
+        _fiHoverBtn.style.display = "flex";
+      },
+      { capture: true, signal: _fiHoverAC.signal },
+    );
+    document.addEventListener(
+      "mouseout",
+      (e) => {
+        if (!_fiHoverTarget || e.target !== _fiHoverSourceEl) return;
+        const related = e.relatedTarget;
+        if (related === _fiHoverBtn || _fiHoverBtn.contains(related)) return;
+        _fiHoverHide();
+      },
+      { capture: true, signal: _fiHoverAC.signal },
+    );
+    document.addEventListener("scroll", () => _fiHoverHide(), {
+      capture: true,
+      passive: true,
+      signal: _fiHoverAC.signal,
+    });
+
+    function _fiCloseAll() {
+      _fiInstances.forEach((inst) => {
+        inst.cleanup();
+        inst.el.remove();
+      });
+      _fiInstances.clear();
+    }
+
+    _floatImageInstance = {
+      create: (url, x, y) => {
+        _fiCreate(url, x, y);
+        _fiPersistAll();
+      },
+      toggleHover: () => {
+        _fiHoverEnabled = !_fiHoverEnabled;
+        GMStore.set("fi_hover_enabled", _fiHoverEnabled);
+        if (!_fiHoverEnabled) _fiHoverHide();
+        return _fiHoverEnabled;
+      },
+      isHoverEnabled: () => _fiHoverEnabled,
+      closeAll: () => {
+        _fiCloseAll();
+        _fiPersistAll();
+      },
+      count: () => _fiInstances.size,
+    };
+    if (DEBUG) {
+      window.dmtFloatImageModule = _floatImageInstance;
+    }
+
+    _fiRestoreAll();
+
+    ModuleCleanupRegistry.add("mod_floatimage", () => {
+      _fiCloseAll();
+      _fiHoverAC.abort();
+      _fiHoverBtn.remove();
+      _fiDragAC.abort();
+      _floatImageInstance = null;
+      if (DEBUG) delete window.dmtFloatImageModule;
+    });
+  }
+
   const initModules = [
     { name: "Forwarding", fn: initForwardingManager, key: "mod_forwarding" },
     { name: "Message", fn: initMessageUtility, key: "mod_message" },
@@ -32525,6 +33329,7 @@ if (type === "warn" && scanLimit !== null) {
     { name: "Blacklist",  fn: initBlacklist,  key: "mod_blacklist"  },
     { name: "MyPosts",   fn: initMyPostsManager, key: "mod_myposts" },
     { name: "Mosaic",    fn: initMosaicGallery,  key: "mod_mosaic"  },
+    { name: "FloatImage", fn: initFloatImage, key: "mod_floatimage" },
   ];
 
   initModules.forEach(({ name, fn, key }) => {
