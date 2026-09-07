@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.0.0
+// @version      2.9.0.6
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -60,7 +60,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.0.2";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.0.6";
 
   const GMStore = {
     
@@ -32690,11 +32690,15 @@ if (type === "warn" && scanLimit !== null) {
     let _fiDraggingId = null, _fiDragOffsetX = 0, _fiDragOffsetY = 0;
     const _FI_STACK_CAP = 5;
     const _FI_STACK_OFFSET = 14;
-    const _FI_STACK_ROTATE = 3;
+    const _FI_STACK_ROTATE = 7;
     const _FI_STACK_OVERLAP_RATIO = 0.35;
     const _FI_STACK_DRAG_THRESHOLD = 6;
+    const _FI_BASE_W = 200;
+    const _FI_IMG_STYLE_NATURAL =
+      "display:block;width:100%;height:auto;max-height:70vh;object-fit:contain;pointer-events:none;";
+    const _FI_IMG_STYLE_STACKED = "display:block;width:100%;height:100%;object-fit:cover;pointer-events:none;";
     let _fiStackSeq = 0;
-    let _fiDragStartX = 0, _fiDragStartY = 0, _fiDragHadStack = false, _fiDragDetached = false;
+    let _fiDragStartX = 0, _fiDragStartY = 0, _fiDragHadStack = false, _fiDragDetached = false, _fiDragMoved = false;
 
     function _fiBestQualityUrl(url) {
       if (!url) return url;
@@ -32788,9 +32792,25 @@ if (type === "warn" && scanLimit !== null) {
         : "";
     }
 
+    function _fiRevertToNatural(el) {
+      el.style.transform = "";
+      el.style.height = "";
+      const img = el.querySelector("img");
+      if (img) img.style.cssText = _FI_IMG_STYLE_NATURAL;
+    }
+
     function _fiReflowStack(stackId, orderedIds, anchorLeft, anchorTop) {
       const portal = dmtGetPortal();
       const grouped = orderedIds.length > 1;
+      const anchorInst = grouped ? _fiInstances.get(orderedIds[0]) : null;
+      const anchorImg = anchorInst && anchorInst.el.querySelector("img");
+      const ratioH =
+        anchorImg && anchorImg.complete && anchorImg.naturalWidth
+          ? Math.min(
+              Math.round(_FI_BASE_W * (anchorImg.naturalHeight / anchorImg.naturalWidth)),
+              Math.round(window.innerHeight * 0.7),
+            )
+          : null;
       orderedIds.forEach((id, idx) => {
         const inst = _fiInstances.get(id);
         if (!inst) return;
@@ -32799,6 +32819,13 @@ if (type === "warn" && scanLimit !== null) {
         if (anchorLeft != null) inst.el.style.left = Math.round(anchorLeft) + "px";
         if (anchorTop != null) inst.el.style.top = Math.round(anchorTop) + "px";
         _fiApplyStackTransform(inst.el, inst.stackIndex);
+        if (idx === 0 || !ratioH) {
+          _fiRevertToNatural(inst.el);
+        } else {
+          inst.el.style.height = ratioH + "px";
+          const img = inst.el.querySelector("img");
+          if (img) img.style.cssText = _FI_IMG_STYLE_STACKED;
+        }
         portal.appendChild(inst.el);
       });
     }
@@ -32897,7 +32924,7 @@ if (type === "warn" && scanLimit !== null) {
     function _fiCreate(url, x, y, restoreId, restoreLeft, restoreTop, restoreStackId, restoreStackIndex) {
       const upgradedUrl = _fiBestQualityUrl(url);
       const id = restoreId || `fi_${Date.now()}_${++_fiCounter}`;
-      const _FI_BASE_W = 200, _FI_MIN_ZOOM = 0.5, _FI_MAX_ZOOM = 3, _FI_ZOOM_STEP = 0.1;
+      const _FI_MIN_ZOOM = 0.5, _FI_MAX_ZOOM = 3, _FI_ZOOM_STEP = 0.1;
       let zoomFactor = 1;
       const rawLeft = restoreLeft != null ? restoreLeft : Math.round(x - 100);
       const rawTop = restoreTop != null ? restoreTop : Math.round(y - 100);
@@ -32939,8 +32966,7 @@ if (type === "warn" && scanLimit !== null) {
       const img = document.createElement("img");
       img.src = upgradedUrl;
       img.draggable = false;
-      img.style.cssText =
-        "display:block;width:100%;height:auto;max-height:70vh;object-fit:contain;pointer-events:none;";
+      img.style.cssText = _FI_IMG_STYLE_NATURAL;
       let triedFallback = upgradedUrl === url;
       img.onerror = () => {
         if (!triedFallback) {
@@ -33055,6 +33081,7 @@ if (type === "warn" && scanLimit !== null) {
           const dragInst = _fiInstances.get(id);
           _fiDragHadStack = !!(dragInst && dragInst.stackId != null);
           _fiDragDetached = false;
+          _fiDragMoved = false;
           if (_fiDragHadStack) _fiBringToFrontInStack(id);
           else _fiBringToFront(win);
           e.preventDefault();
@@ -33069,7 +33096,7 @@ if (type === "warn" && scanLimit !== null) {
           const wheelInst = _fiInstances.get(id);
           if (wheelInst && wheelInst.stackId != null) {
             const oldStackId = wheelInst.stackId;
-            win.style.transform = "";
+            _fiRevertToNatural(win);
             _fiReflowStack(oldStackId, _fiStackMembers(oldStackId).filter((m) => m !== id));
             wheelInst.stackId = null;
             wheelInst.stackIndex = 0;
@@ -33105,15 +33132,18 @@ if (type === "warn" && scanLimit !== null) {
         if (_fiDraggingId == null) return;
         const inst = _fiInstances.get(_fiDraggingId);
         if (!inst) { _fiDraggingId = null; return; }
-        if (_fiDragHadStack && !_fiDragDetached) {
+        if (!_fiDragMoved) {
           const dx = e.clientX - _fiDragStartX, dy = e.clientY - _fiDragStartY;
           if (Math.hypot(dx, dy) >= _FI_STACK_DRAG_THRESHOLD) {
-            const oldStackId = inst.stackId;
-            inst.el.style.transform = "";
-            _fiReflowStack(oldStackId, _fiStackMembers(oldStackId).filter((m) => m !== _fiDraggingId));
-            inst.stackId = null;
-            inst.stackIndex = 0;
-            _fiDragDetached = true;
+            _fiDragMoved = true;
+            if (_fiDragHadStack && !_fiDragDetached) {
+              const oldStackId = inst.stackId;
+              _fiRevertToNatural(inst.el);
+              _fiReflowStack(oldStackId, _fiStackMembers(oldStackId).filter((m) => m !== _fiDraggingId));
+              inst.stackId = null;
+              inst.stackIndex = 0;
+              _fiDragDetached = true;
+            }
           }
         }
         const [nx, ny] = _fiClampPos(
@@ -33134,7 +33164,7 @@ if (type === "warn" && scanLimit !== null) {
         const inst = _fiInstances.get(_fiDraggingId);
         if (inst) {
           inst.el.style.cursor = "grab";
-          if (_fiDragDetached) {
+          if (_fiDragMoved) {
             const rect = _fiAnchorRect(inst);
             const result = _fiFindJoinableStack(rect, _fiDraggingId);
             if (result.join) {
@@ -33155,6 +33185,7 @@ if (type === "warn" && scanLimit !== null) {
         _fiDraggingId = null;
         _fiDragHadStack = false;
         _fiDragDetached = false;
+        _fiDragMoved = false;
         _fiPersistAll();
       },
       { signal: _fiDragAC.signal },
@@ -33283,6 +33314,7 @@ if (type === "warn" && scanLimit !== null) {
         inst.el.remove();
       });
       _fiInstances.clear();
+      _fiPersistAll();
     }
 
     _floatImageInstance = {
