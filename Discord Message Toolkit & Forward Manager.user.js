@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.0.6
+// @version      2.9.0.11
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -46,6 +46,7 @@
 // @connect     pximg.net
 // @connect     discordapp.net
 // 💡" fixcdn.hyonsu.com " Used only without API mode; the script asks for confirmation before connecting.
+// 💡 twimg.com / fbcdn.net / pximg.net: Support image quality enhancement and downloads for Twitter / Instagram / Pixiv images; discordapp.net (all subdomains): Required to support Discord’s external media proxy domains (e.g. images-ext-N.discordapp.net and media.discordapp.net).
 // ==/UserScript==
 
 (function () {
@@ -60,7 +61,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.0.6";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.0.11";
 
   const GMStore = {
     
@@ -102,6 +103,7 @@
     "mod_myposts":    "2.5.3",
     "bl_hide_notices": "2.6.5.8",
     "mod_floatimage": "2.8.2.17",
+    "fi_poker_stack": "2.9.0.0",
   };
 
   function isFeatureNew(featureKey) {
@@ -126,8 +128,21 @@
         "z-index:2147483647",
       ].join(";");
       document.documentElement.appendChild(p);
+
+      const persistentLayer = document.createElement("div");
+      persistentLayer.id = "dmt-portal-persistent";
+      p.appendChild(persistentLayer);
+
+      const transientLayer = document.createElement("div");
+      transientLayer.id = "dmt-portal-transient";
+      p.appendChild(transientLayer);
     }
-    return p;
+    return document.getElementById("dmt-portal-transient");
+  }
+
+  function dmtGetPersistentLayer() {
+    dmtGetPortal();
+    return document.getElementById("dmt-portal-persistent");
   }
 
   function renderNewBadge(featureKey) {
@@ -1231,6 +1246,9 @@
       fi_close_all_toast: "🗑️ All floating windows closed",
       fi_new_badge_tip: "New: floated images now stack together automatically",
       fi_new_badge_label: "New",
+      fi_stack_handle_tip: "Drag to move the whole stack",
+      fi_menu_info_tip:
+        "Drag the window to move it, or drag it near another to stack them. When 2+ images are stacked, drag the small handle at the corner to move the whole stack. Scroll to zoom, double-click to close.",
       no_content: "⚠️ No Content",
       copy_first_link: "🔗 Copy First Link",
       copy_markdown: "🧾 Copy as Markdown",
@@ -10087,6 +10105,16 @@
       return text.match(regex) || [];
     }
 
+    const CLEAN_URL_X_DOMAINS = [
+      "twitter.com",
+      "x.com",
+      "vxtwitter.com",
+      "fixupx.com",
+      "fxtwitter.com",
+      "cunnyx.com",
+      "fixvx.com",
+    ];
+
     function cleanUrl(urlStr) {
       try {
         const url = new URL(urlStr);
@@ -10136,6 +10164,11 @@
           "openExternalBrowser",
         ];
         paramsToRemove.forEach((p) => url.searchParams.delete(p));
+        const hostname = url.hostname.toLowerCase();
+        const isXDomain = CLEAN_URL_X_DOMAINS.some(
+          (d) => hostname === d || hostname.endsWith("." + d),
+        );
+        if (isXDomain) url.searchParams.delete("t");
         if (/\/video-$/.test(url.pathname)) {
           url.pathname = url.pathname.replace(/\/video-$/, "");
         }
@@ -11972,30 +12005,46 @@
           const fiRow = document.createElement("div");
           fiRow.style.cssText = "display:flex;align-items:center;gap:6px;";
 
-          const FI_NEW_BADGE_KEY = "fi_poker_stack";
-          const FI_NEW_BADGE_VERSION = "2.9.0.0";
-          const _fiIsFeatureNew = () =>
-            GMStore.get("new_badge_seen_" + FI_NEW_BADGE_KEY, null) !== FI_NEW_BADGE_VERSION;
-          const _fiMarkFeatureSeen = () =>
-            GMStore.set("new_badge_seen_" + FI_NEW_BADGE_KEY, FI_NEW_BADGE_VERSION);
           let newBadge = null;
 
           const fiBtn = document.createElement("button");
-          fiBtn.textContent = t("float_image_menu");
-          fiBtn.style.cssText = "flex:1;text-align:left;";
+          fiBtn.style.cssText = "flex:1;display:flex;align-items:center;gap:7px;text-align:left;";
+
+          const fiBtnLabel = document.createElement("span");
+          fiBtnLabel.textContent = t("float_image_menu");
+          fiBtn.appendChild(fiBtnLabel);
+
+          const fiTipIcon = document.createElement("span");
+          fiTipIcon.style.cssText = `
+            display:inline-flex; align-items:center; justify-content:center;
+            width:14px; height:14px; border-radius:50%;
+            color:rgba(185,187,190,0.45); cursor:help; flex-shrink:0;
+            transition: color 0.15s;
+          `;
+          fiTipIcon.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 17v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <circle cx="12" cy="8" r="0.5" fill="currentColor" stroke="currentColor" stroke-width="1.5"/>
+          </svg>`;
+          fiTipIcon.title = t("fi_menu_info_tip");
+          fiTipIcon.onmouseenter = () => { fiTipIcon.style.color = "rgba(185,187,190,0.9)"; };
+          fiTipIcon.onmouseleave = () => { fiTipIcon.style.color = "rgba(185,187,190,0.45)"; };
+          fiTipIcon.addEventListener("click", (e) => e.stopPropagation());
+          fiBtn.appendChild(fiTipIcon);
+
           fiBtn.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
             _floatImageInstance.create(mediaUrl, e.clientX, e.clientY);
             if (newBadge) {
-              _fiMarkFeatureSeen();
+              markFeatureSeen("fi_poker_stack");
               newBadge.remove();
             }
             closeGlobalMenu();
           });
           fiRow.appendChild(fiBtn);
 
-          if (_fiIsFeatureNew()) {
+          if (isFeatureNew("fi_poker_stack")) {
             newBadge = document.createElement("span");
             newBadge.title = t("fi_new_badge_tip");
             newBadge.style.cssText = [
@@ -26480,7 +26529,7 @@ unsafeWindow.fetch = function(...args) {
       helpBtn.className = "mp-type-icon-btn";
       helpBtn.style.cssText = "padding:2px 5px;min-width:0;flex-shrink:0;";
       helpBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>';
-      helpBtn.title = "Keyboard shortcuts & tips";
+      helpBtn.title = "Click to view keyboard shortcuts & tips";
       helpBtn.onclick = e => {
         e.stopPropagation();
         const existing = document.getElementById("mp-help-popup");
@@ -32688,12 +32737,16 @@ if (type === "warn" && scanLimit !== null) {
     let _fiCounter = 0;
     const _fiInstances = new Map();
     let _fiDraggingId = null, _fiDragOffsetX = 0, _fiDragOffsetY = 0;
+    let _fiDragCachedW = 0, _fiDragCachedH = 0;
+    let _fiGroupDragCachedW = 0, _fiGroupDragCachedH = 0;
     const _FI_STACK_CAP = 5;
     const _FI_STACK_OFFSET = 14;
     const _FI_STACK_ROTATE = 7;
     const _FI_STACK_OVERLAP_RATIO = 0.35;
     const _FI_STACK_DRAG_THRESHOLD = 6;
     const _FI_BASE_W = 200;
+    const _fiStackHandles = new Map();
+    let _fiGroupDraggingStackId = null, _fiGroupDragOffsetX = 0, _fiGroupDragOffsetY = 0;
     const _FI_IMG_STYLE_NATURAL =
       "display:block;width:100%;height:auto;max-height:70vh;object-fit:contain;pointer-events:none;";
     const _FI_IMG_STYLE_STACKED = "display:block;width:100%;height:100%;object-fit:cover;pointer-events:none;";
@@ -32749,7 +32802,7 @@ if (type === "warn" && scanLimit !== null) {
     }
 
     function _fiBringToFront(win) {
-      const portal = dmtGetPortal();
+      const portal = dmtGetPersistentLayer();
       if (portal.lastElementChild !== win) portal.appendChild(win);
     }
 
@@ -32799,8 +32852,73 @@ if (type === "warn" && scanLimit !== null) {
       if (img) img.style.cssText = _FI_IMG_STYLE_NATURAL;
     }
 
+    const _FI_HANDLE_SIZE = 22;
+    const _FI_HANDLE_OFFSET = _FI_HANDLE_SIZE / 2;
+
+    function _fiEnsureStackHandle(stackId, anchorRect) {
+      let handle = _fiStackHandles.get(stackId);
+      if (!handle) {
+        handle = document.createElement("div");
+        handle.className = "dmt-fi-stack-handle";
+        handle.title = t("fi_stack_handle_tip");
+        handle.style.cssText = [
+          "position:fixed",
+          "display:none",
+          "align-items:center",
+          "justify-content:center",
+          `width:${_FI_HANDLE_SIZE}px`,
+          `height:${_FI_HANDLE_SIZE}px`,
+          "border-radius:50%",
+          "background:rgba(255,255,255,0.28)",
+          "border:1px solid rgba(255,255,255,0.4)",
+          "cursor:grab",
+          "pointer-events:auto",
+          "backdrop-filter:blur(1px)",
+        ].join(";");
+        handle.innerHTML =
+          '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="7" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="7" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="17" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="17" r="1.2" fill="currentColor" stroke="none"/></svg>';
+        handle.addEventListener("mouseenter", () => { handle.style.display = "flex"; }, { signal: _fiDragAC.signal });
+        handle.addEventListener("mouseleave", () => { handle.style.display = "none"; }, { signal: _fiDragAC.signal });
+        handle.addEventListener(
+          "mousedown",
+          (e) => {
+            if (e.button !== 0) return;
+            if (_fiDraggingId != null) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const members = _fiStackMembers(stackId);
+            if (!members.length) return;
+            const anchorInst = _fiInstances.get(members[0]);
+            const anchorRectNow = _fiAnchorRect(anchorInst);
+            _fiGroupDraggingStackId = stackId;
+            _fiGroupDragOffsetX = e.clientX - anchorRectNow.left;
+            _fiGroupDragOffsetY = e.clientY - anchorRectNow.top;
+            _fiGroupDragCachedW = anchorRectNow.width;
+            _fiGroupDragCachedH = anchorRectNow.height;
+            handle.style.cursor = "grabbing";
+          },
+          { signal: _fiDragAC.signal },
+        );
+        _fiStackHandles.set(stackId, handle);
+      }
+      if (anchorRect) {
+        handle.style.left = Math.round(anchorRect.left - _FI_HANDLE_OFFSET) + "px";
+        handle.style.top = Math.round(anchorRect.top + anchorRect.height - _FI_HANDLE_OFFSET) + "px";
+      }
+      dmtGetPersistentLayer().appendChild(handle);
+      return handle;
+    }
+
+    function _fiRemoveStackHandle(stackId) {
+      const handle = _fiStackHandles.get(stackId);
+      if (handle) {
+        handle.remove();
+        _fiStackHandles.delete(stackId);
+      }
+    }
+
     function _fiReflowStack(stackId, orderedIds, anchorLeft, anchorTop) {
-      const portal = dmtGetPortal();
+      const portal = dmtGetPersistentLayer();
       const grouped = orderedIds.length > 1;
       const anchorInst = grouped ? _fiInstances.get(orderedIds[0]) : null;
       const anchorImg = anchorInst && anchorInst.el.querySelector("img");
@@ -32828,6 +32946,12 @@ if (type === "warn" && scanLimit !== null) {
         }
         portal.appendChild(inst.el);
       });
+      if (grouped) {
+        const freshAnchorRect = _fiAnchorRect(_fiInstances.get(orderedIds[0]));
+        _fiEnsureStackHandle(stackId, freshAnchorRect);
+      } else {
+        _fiRemoveStackHandle(stackId);
+      }
     }
 
     function _fiBringToFrontInStack(id) {
@@ -33062,20 +33186,47 @@ if (type === "warn" && scanLimit !== null) {
       win.appendChild(controls);
       controls.addEventListener("mousedown", (e) => e.stopPropagation(), { signal: ac.signal });
       controls.addEventListener("dblclick", (e) => e.stopPropagation(), { signal: ac.signal });
-      win.addEventListener("mouseenter", () => (controls.style.display = "flex"), { signal: ac.signal });
-      win.addEventListener("mouseleave", () => (controls.style.display = "none"), { signal: ac.signal });
+      win.addEventListener(
+        "mouseenter",
+        () => {
+          controls.style.display = "flex";
+          const curInst = _fiInstances.get(id);
+          if (curInst && curInst.stackId != null) {
+            const handle = _fiStackHandles.get(curInst.stackId);
+            if (handle) handle.style.display = "flex";
+          }
+        },
+        { signal: ac.signal },
+      );
+      win.addEventListener(
+        "mouseleave",
+        (e) => {
+          controls.style.display = "none";
+          const curInst = _fiInstances.get(id);
+          if (curInst && curInst.stackId != null) {
+            const handle = _fiStackHandles.get(curInst.stackId);
+            if (handle && !(e.relatedTarget && (e.relatedTarget === handle || handle.contains(e.relatedTarget)))) {
+              handle.style.display = "none";
+            }
+          }
+        },
+        { signal: ac.signal },
+      );
 
-      dmtGetPortal().appendChild(win);
+      dmtGetPersistentLayer().appendChild(win);
 
       win.addEventListener(
         "mousedown",
         (e) => {
           if (e.button !== 0) return;
+          if (_fiGroupDraggingStackId != null) return;
           _fiDraggingId = id;
           win.style.cursor = "grabbing";
           const r = win.getBoundingClientRect();
           _fiDragOffsetX = e.clientX - r.left;
           _fiDragOffsetY = e.clientY - r.top;
+          _fiDragCachedW = r.width;
+          _fiDragCachedH = r.height;
           _fiDragStartX = e.clientX;
           _fiDragStartY = e.clientY;
           const dragInst = _fiInstances.get(id);
@@ -33108,6 +33259,10 @@ if (type === "warn" && scanLimit !== null) {
           const [nx, ny] = _fiClampPos(r.left, r.top, r.width, r.height);
           if (nx !== r.left) win.style.left = nx + "px";
           if (ny !== r.top) win.style.top = ny + "px";
+          if (_fiDraggingId === id) {
+            _fiDragCachedW = r.width;
+            _fiDragCachedH = r.height;
+          }
         },
         { signal: ac.signal, passive: false },
       );
@@ -33129,6 +33284,26 @@ if (type === "warn" && scanLimit !== null) {
     document.addEventListener(
       "mousemove",
       (e) => {
+        if (_fiGroupDraggingStackId != null) {
+          const members = _fiStackMembers(_fiGroupDraggingStackId);
+          if (!members.length) { _fiGroupDraggingStackId = null; return; }
+          const [nx, ny] = _fiClampPos(
+            e.clientX - _fiGroupDragOffsetX,
+            e.clientY - _fiGroupDragOffsetY,
+            _fiGroupDragCachedW,
+            _fiGroupDragCachedH,
+          );
+          members.forEach((mid) => {
+            const m = _fiInstances.get(mid);
+            if (m) { m.el.style.left = nx + "px"; m.el.style.top = ny + "px"; }
+          });
+          const handle = _fiStackHandles.get(_fiGroupDraggingStackId);
+          if (handle) {
+            handle.style.left = Math.round(nx - _FI_HANDLE_OFFSET) + "px";
+            handle.style.top = Math.round(ny + _fiGroupDragCachedH - _FI_HANDLE_OFFSET) + "px";
+          }
+          return;
+        }
         if (_fiDraggingId == null) return;
         const inst = _fiInstances.get(_fiDraggingId);
         if (!inst) { _fiDraggingId = null; return; }
@@ -33149,8 +33324,8 @@ if (type === "warn" && scanLimit !== null) {
         const [nx, ny] = _fiClampPos(
           e.clientX - _fiDragOffsetX,
           e.clientY - _fiDragOffsetY,
-          inst.el.offsetWidth,
-          inst.el.offsetHeight,
+          _fiDragCachedW,
+          _fiDragCachedH,
         );
         inst.el.style.left = nx + "px";
         inst.el.style.top = ny + "px";
@@ -33160,6 +33335,15 @@ if (type === "warn" && scanLimit !== null) {
     document.addEventListener(
       "mouseup",
       () => {
+        if (_fiGroupDraggingStackId != null) {
+          const handle = _fiStackHandles.get(_fiGroupDraggingStackId);
+          if (handle) handle.style.cursor = "grab";
+          _fiGroupDraggingStackId = null;
+          _fiGroupDragCachedW = 0;
+          _fiGroupDragCachedH = 0;
+          _fiPersistAll();
+          return;
+        }
         if (_fiDraggingId == null) return;
         const inst = _fiInstances.get(_fiDraggingId);
         if (inst) {
@@ -33186,6 +33370,8 @@ if (type === "warn" && scanLimit !== null) {
         _fiDragHadStack = false;
         _fiDragDetached = false;
         _fiDragMoved = false;
+        _fiDragCachedW = 0;
+        _fiDragCachedH = 0;
         _fiPersistAll();
       },
       { signal: _fiDragAC.signal },
@@ -33202,6 +33388,17 @@ if (type === "warn" && scanLimit !== null) {
       sorted.forEach((item) => {
         if (!item || !item.url) return;
         _fiCreate(item.url, 0, 0, item.id, item.left, item.top, item.stackId, item.stackIndex);
+      });
+      const seenStackIds = new Set();
+      _fiInstances.forEach((inst) => {
+        if (inst.stackId != null && !seenStackIds.has(inst.stackId)) {
+          seenStackIds.add(inst.stackId);
+          const members = _fiStackMembers(inst.stackId);
+          if (members.length > 1) {
+            const anchorRect = _fiAnchorRect(_fiInstances.get(members[0]));
+            _fiEnsureStackHandle(inst.stackId, anchorRect);
+          }
+        }
       });
     }
 
@@ -33314,6 +33511,8 @@ if (type === "warn" && scanLimit !== null) {
         inst.el.remove();
       });
       _fiInstances.clear();
+      _fiStackHandles.forEach((handle) => handle.remove());
+      _fiStackHandles.clear();
       _fiPersistAll();
     }
 
