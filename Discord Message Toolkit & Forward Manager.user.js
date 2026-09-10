@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.0.11
+// @version      2.9.0.15
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -1247,6 +1247,12 @@
       fi_new_badge_tip: "New: floated images now stack together automatically",
       fi_new_badge_label: "New",
       fi_stack_handle_tip: "Drag to move the whole stack",
+      fi_style_badge_tip: "Adjust the stacking style (rotation, offset, stack limit)",
+      fi_style_rotate_label: "Rotation angle",
+      fi_style_offset_label: "Offset distance",
+      fi_style_cap_label: "Max per stack",
+      fi_style_reset_label: "Reset to Default",
+      fi_style_reset_toast: "✨ Stacking style reset to default",
       fi_menu_info_tip:
         "Drag the window to move it, or drag it near another to stack them. When 2+ images are stacked, drag the small handle at the corner to move the whole stack. Scroll to zoom, double-click to close.",
       no_content: "⚠️ No Content",
@@ -12084,7 +12090,7 @@
             hoverBadge.style.color = on
               ? "var(--dmt-accent, #5865f2)"
               : "var(--dmt-text-muted, #949ba4)";
-            hoverBadge.textContent = `⚙️ ${on ? t("fi_state_on") : t("fi_state_off")}`;
+            hoverBadge.textContent = `✨ ${on ? t("fi_state_on") : t("fi_state_off")}`;
           };
           _fiRenderBadge();
           hoverBadge.addEventListener("click", (e) => {
@@ -12095,6 +12101,204 @@
             dmtShowToast(nowOn ? t("fi_hover_on_toast") : t("fi_hover_off_toast"));
           });
           fiRow.appendChild(hoverBadge);
+
+          const styleBtn = document.createElement("span");
+          styleBtn.title = t("fi_style_badge_tip");
+          styleBtn.style.cssText = [
+            "display:inline-flex",
+            "align-items:center",
+            "justify-content:center",
+            "width:18px",
+            "height:18px",
+            "flex-shrink:0",
+            "cursor:pointer",
+            "color:var(--dmt-text-muted, #949ba4)",
+            "transition:color .15s",
+          ].join(";");
+          styleBtn.innerHTML =
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>';
+          styleBtn.addEventListener("mouseenter", () => {
+            styleBtn.style.color = "var(--dmt-text-primary, #dcddde)";
+          });
+          styleBtn.addEventListener("mouseleave", () => {
+            styleBtn.style.color = "var(--dmt-text-muted, #949ba4)";
+          });
+
+          let fiStylePopover = null;
+          let fiStyleObserver = null;
+          let fiStyleClickAC = null;
+
+          function _fiClosePopover() {
+            if (fiStyleObserver) {
+              fiStyleObserver.disconnect();
+              fiStyleObserver = null;
+            }
+            if (fiStyleClickAC) {
+              fiStyleClickAC.abort();
+              fiStyleClickAC = null;
+            }
+            if (fiStylePopover) {
+              fiStylePopover.remove();
+              fiStylePopover = null;
+            }
+          }
+
+          function _fiOpenPopover() {
+            if (fiStylePopover) return;
+            const pop = document.createElement("div");
+            pop.style.cssText = [
+              "position:fixed",
+              "z-index:2147483647",
+              "display:flex",
+              "flex-direction:column",
+              "gap:10px",
+              "width:220px",
+              "padding:12px",
+              "border-radius:8px",
+              "background:var(--dmt-bg-primary, #2b2d31)",
+              "border:1px solid var(--dmt-bg-deep, #1e1f22)",
+              "box-shadow:0 8px 16px rgba(0,0,0,0.5)",
+              "font-size:12px",
+              "color:var(--dmt-text-primary, #dcddde)",
+            ].join(";");
+            pop.addEventListener("click", (e) => e.stopPropagation());
+            pop.addEventListener("mousedown", (e) => e.stopPropagation());
+
+            const btnRect = styleBtn.getBoundingClientRect();
+            const POP_W_ESTIMATE = 246;
+            const POP_H_ESTIMATE = 230;
+            const openUpward = btnRect.bottom + POP_H_ESTIMATE > window.innerHeight;
+            pop.style.left =
+              Math.round(Math.max(8, Math.min(btnRect.left, window.innerWidth - POP_W_ESTIMATE - 8))) + "px";
+            if (openUpward) {
+              pop.style.bottom = Math.round(window.innerHeight - btnRect.top + 6) + "px";
+            } else {
+              pop.style.top = Math.round(btnRect.bottom + 6) + "px";
+            }
+
+            const style = _floatImageInstance.getStackStyle();
+
+            function _fiSliderRow(labelKey, value, min, max, step, onInput, onCommit) {
+              const row = document.createElement("div");
+              row.style.cssText = "display:flex;flex-direction:column;gap:4px;";
+              const labelLine = document.createElement("div");
+              labelLine.style.cssText =
+                "display:flex;justify-content:space-between;color:var(--dmt-text-muted, #949ba4);";
+              const labelText = document.createElement("span");
+              labelText.textContent = t(labelKey);
+              const valueText = document.createElement("span");
+              valueText.textContent = String(value);
+              labelLine.appendChild(labelText);
+              labelLine.appendChild(valueText);
+              const slider = document.createElement("input");
+              slider.type = "range";
+              slider.min = String(min);
+              slider.max = String(max);
+              slider.step = String(step);
+              slider.value = String(value);
+              slider.style.cssText = "width:100%;accent-color:var(--dmt-accent, #5865f2);";
+              slider.addEventListener("input", () => {
+                const v = Number(slider.value);
+                valueText.textContent = String(v);
+                onInput(v);
+              });
+              slider.addEventListener("change", () => {
+                onCommit(Number(slider.value));
+              });
+              row.appendChild(labelLine);
+              row.appendChild(slider);
+              return { row, slider, valueText };
+            }
+
+            const rotateRow = _fiSliderRow(
+              "fi_style_rotate_label", style.rotate, 0, 20, 1,
+              (v) => _floatImageInstance.setStackStyle({ rotate: v }, false),
+              (v) => _floatImageInstance.setStackStyle({ rotate: v }, true),
+            );
+            const offsetRow = _fiSliderRow(
+              "fi_style_offset_label", style.offset, 0, 40, 1,
+              (v) => _floatImageInstance.setStackStyle({ offset: v }, false),
+              (v) => _floatImageInstance.setStackStyle({ offset: v }, true),
+            );
+            const capRow = _fiSliderRow(
+              "fi_style_cap_label", style.cap, 2, 10, 1,
+              (v) => _floatImageInstance.setStackStyle({ cap: v }, false),
+              (v) => _floatImageInstance.setStackStyle({ cap: v }, true),
+            );
+            pop.appendChild(rotateRow.row);
+            pop.appendChild(offsetRow.row);
+            pop.appendChild(capRow.row);
+
+            const resetBtn = document.createElement("button");
+            resetBtn.type = "button";
+            resetBtn.textContent = t("fi_style_reset_label");
+            resetBtn.style.cssText = [
+              "margin-top:2px",
+              "padding:5px 0",
+              "border:1px solid rgba(255,255,255,0.12)",
+              "border-radius:6px",
+              "background:transparent",
+              "color:var(--dmt-text-muted, #949ba4)",
+              "cursor:pointer",
+              "font-size:11px",
+            ].join(";");
+            resetBtn.addEventListener("click", (e) => {
+              e.stopPropagation();
+              const reset = _floatImageInstance.resetStackStyle();
+              rotateRow.slider.value = String(reset.rotate);
+              rotateRow.valueText.textContent = String(reset.rotate);
+              offsetRow.slider.value = String(reset.offset);
+              offsetRow.valueText.textContent = String(reset.offset);
+              capRow.slider.value = String(reset.cap);
+              capRow.valueText.textContent = String(reset.cap);
+              dmtShowToast(t("fi_style_reset_toast"));
+            });
+            pop.appendChild(resetBtn);
+
+            dmtGetPortal().appendChild(pop);
+            fiStylePopover = pop;
+
+            const realW = pop.offsetWidth;
+            const realH = pop.offsetHeight;
+            const correctedLeft = Math.round(
+              Math.max(8, Math.min(btnRect.left, window.innerWidth - realW - 8)),
+            );
+            pop.style.left = correctedLeft + "px";
+            if (openUpward) {
+              if (btnRect.top - realH - 6 < 8) {
+                pop.style.bottom = "";
+                pop.style.top = Math.round(btnRect.bottom + 6) + "px";
+              }
+            } else if (btnRect.bottom + realH + 6 > window.innerHeight) {
+              pop.style.top = "";
+              pop.style.bottom = Math.round(window.innerHeight - btnRect.top + 6) + "px";
+            }
+
+            const menuRoot = fiRow.closest(".msg-copy-portal-menu") || document.body;
+            fiStyleObserver = new MutationObserver(() => {
+              if (!fiRow.isConnected) _fiClosePopover();
+            });
+            fiStyleObserver.observe(menuRoot, { childList: true, subtree: true });
+
+            fiStyleClickAC = new AbortController();
+            document.addEventListener(
+              "click",
+              (e) => {
+                if (e.target === styleBtn || styleBtn.contains(e.target)) return;
+                if (fiStylePopover && fiStylePopover.contains(e.target)) return;
+                _fiClosePopover();
+              },
+              { capture: true, signal: fiStyleClickAC.signal },
+            );
+          }
+
+          styleBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (fiStylePopover) _fiClosePopover();
+            else _fiOpenPopover();
+          });
+          fiRow.appendChild(styleBtn);
 
           const closeAllBadge = document.createElement("span");
           closeAllBadge.title = t("fi_close_all_tip");
@@ -32739,9 +32943,9 @@ if (type === "warn" && scanLimit !== null) {
     let _fiDraggingId = null, _fiDragOffsetX = 0, _fiDragOffsetY = 0;
     let _fiDragCachedW = 0, _fiDragCachedH = 0;
     let _fiGroupDragCachedW = 0, _fiGroupDragCachedH = 0;
-    const _FI_STACK_CAP = 5;
-    const _FI_STACK_OFFSET = 14;
-    const _FI_STACK_ROTATE = 7;
+    let _FI_STACK_CAP = GMStore.get("fi_stack_cap", 5);
+    let _FI_STACK_OFFSET = GMStore.get("fi_stack_offset", 14);
+    let _FI_STACK_ROTATE = GMStore.get("fi_stack_rotate", 7);
     const _FI_STACK_OVERLAP_RATIO = 0.35;
     const _FI_STACK_DRAG_THRESHOLD = 6;
     const _FI_BASE_W = 200;
@@ -32843,6 +33047,12 @@ if (type === "warn" && scanLimit !== null) {
       win.style.transform = stackIndex
         ? `translate(${stackIndex * _FI_STACK_OFFSET}px, ${stackIndex * _FI_STACK_OFFSET}px) rotate(${stackIndex * _FI_STACK_ROTATE}deg)`
         : "";
+    }
+
+    function _fiApplyAllStackTransforms() {
+      _fiInstances.forEach((inst) => {
+        _fiApplyStackTransform(inst.el, inst.stackIndex);
+      });
     }
 
     function _fiRevertToNatural(el) {
@@ -33427,7 +33637,7 @@ if (type === "warn" && scanLimit !== null) {
       "transition:opacity .12s,transform .12s",
     ].join(";");
     _fiHoverBtn.innerHTML =
-      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+      '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/></svg>';
 
     function _fiHoverHide() {
       _fiHoverTarget = null;
@@ -33460,7 +33670,7 @@ if (type === "warn" && scanLimit !== null) {
         e.stopPropagation();
         if (_fiHoverTarget) {
           const r = _fiHoverTarget.getBoundingClientRect();
-          _fiCreate(_fiHoverTarget.src, r.right - 20, r.top + 20);
+          _fiCreate(_fiHoverTarget.src, r.right - 20, r.bottom - 20);
           _fiPersistAll();
         }
         _fiHoverHide();
@@ -33484,7 +33694,7 @@ if (type === "warn" && scanLimit !== null) {
         _fiHoverSourceEl = e.target;
         const r = img.getBoundingClientRect();
         _fiHoverBtn.style.left = Math.round(r.right - 30) + "px";
-        _fiHoverBtn.style.top = Math.round(r.top + 6) + "px";
+        _fiHoverBtn.style.top = Math.round(r.bottom - 32) + "px";
         _fiHoverBtn.style.display = "flex";
       },
       { capture: true, signal: _fiHoverAC.signal },
@@ -33533,6 +33743,36 @@ if (type === "warn" && scanLimit !== null) {
         _fiPersistAll();
       },
       count: () => _fiInstances.size,
+      getStackStyle: () => ({
+        cap: _FI_STACK_CAP,
+        offset: _FI_STACK_OFFSET,
+        rotate: _FI_STACK_ROTATE,
+      }),
+      setStackStyle: ({ cap, offset, rotate } = {}, persist = true) => {
+        if (cap != null) {
+          _FI_STACK_CAP = cap;
+          if (persist) GMStore.set("fi_stack_cap", cap);
+        }
+        if (offset != null) {
+          _FI_STACK_OFFSET = offset;
+          if (persist) GMStore.set("fi_stack_offset", offset);
+        }
+        if (rotate != null) {
+          _FI_STACK_ROTATE = rotate;
+          if (persist) GMStore.set("fi_stack_rotate", rotate);
+        }
+        _fiApplyAllStackTransforms();
+      },
+      resetStackStyle: () => {
+        _FI_STACK_CAP = 5;
+        _FI_STACK_OFFSET = 14;
+        _FI_STACK_ROTATE = 7;
+        GMStore.set("fi_stack_cap", _FI_STACK_CAP);
+        GMStore.set("fi_stack_offset", _FI_STACK_OFFSET);
+        GMStore.set("fi_stack_rotate", _FI_STACK_ROTATE);
+        _fiApplyAllStackTransforms();
+        return { cap: _FI_STACK_CAP, offset: _FI_STACK_OFFSET, rotate: _FI_STACK_ROTATE };
+      },
     };
     if (DEBUG) {
       window.dmtFloatImageModule = _floatImageInstance;
