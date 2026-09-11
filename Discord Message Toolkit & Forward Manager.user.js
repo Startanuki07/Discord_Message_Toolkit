@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.2.0
+// @version      2.9.2.4
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -63,7 +63,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.2.2";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.2.4";
 
   const GMStore = {
     
@@ -1250,6 +1250,8 @@
       fi_new_badge_tip: "New: floated images now stack together automatically",
       fi_new_badge_label: "New",
       fi_stack_handle_tip: "Drag to move the whole stack",
+      fi_lightbox_btn_tip: "Browse all floating images in a lightbox",
+      fi_lb_exit: "Exit lightbox",
       fi_style_badge_tip: "Adjust the stacking style (rotation, offset, stack limit)",
       fi_style_rotate_label: "Rotation angle",
       fi_style_offset_label: "Offset distance",
@@ -32933,6 +32935,7 @@ if (type === "warn" && scanLimit !== null) {
     const _FI_STACK_DRAG_THRESHOLD = 6;
     const _FI_BASE_W = 200;
     const _fiStackHandles = new Map();
+    const _fiLightboxBtns = new Map();
     let _fiGroupDraggingStackId = null, _fiGroupDragOffsetX = 0, _fiGroupDragOffsetY = 0;
     const _FI_IMG_STYLE_NATURAL =
       "display:block;width:100%;height:auto;max-height:70vh;object-fit:contain;pointer-events:none;";
@@ -33071,7 +33074,15 @@ if (type === "warn" && scanLimit !== null) {
         handle.innerHTML =
           '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="7" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="7" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="17" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="17" r="1.2" fill="currentColor" stroke="none"/></svg>';
         handle.addEventListener("mouseenter", () => { handle.style.display = "flex"; }, { signal: _fiDragAC.signal });
-        handle.addEventListener("mouseleave", () => { handle.style.display = "none"; }, { signal: _fiDragAC.signal });
+        handle.addEventListener(
+          "mouseleave",
+          (e) => {
+            const lbBtn = _fiLightboxBtns.get(stackId);
+            if (lbBtn && e.relatedTarget && (e.relatedTarget === lbBtn || lbBtn.contains(e.relatedTarget))) return;
+            handle.style.display = "none";
+          },
+          { signal: _fiDragAC.signal },
+        );
         handle.addEventListener(
           "mousedown",
           (e) => {
@@ -33110,6 +33121,71 @@ if (type === "warn" && scanLimit !== null) {
       }
     }
 
+    const _FI_LB_BTN_SIZE = 18;
+    const _FI_LB_BTN_DIST = 26;
+
+    function _fiEnsureLightboxBtn(stackId, anchorRect) {
+      let btn = _fiLightboxBtns.get(stackId);
+      if (!btn) {
+        btn = document.createElement("div");
+        btn.className = "dmt-fi-lightbox-btn";
+        btn.title = t("fi_lightbox_btn_tip");
+        btn.style.cssText = [
+          "position:fixed",
+          "display:none",
+          "align-items:center",
+          "justify-content:center",
+          `width:${_FI_LB_BTN_SIZE}px`,
+          `height:${_FI_LB_BTN_SIZE}px`,
+          "border-radius:50%",
+          "background:rgba(88,101,242,0.55)",
+          "border:1px solid rgba(255,255,255,0.45)",
+          "cursor:pointer",
+          "pointer-events:auto",
+          "backdrop-filter:blur(1px)",
+        ].join(";");
+        btn.innerHTML =
+          '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>';
+        btn.addEventListener("mouseenter", () => { btn.style.display = "flex"; }, { signal: _fiDragAC.signal });
+        btn.addEventListener(
+          "mouseleave",
+          (e) => {
+            const handle = _fiStackHandles.get(stackId);
+            if (handle && e.relatedTarget && (e.relatedTarget === handle || handle.contains(e.relatedTarget))) return;
+            btn.style.display = "none";
+          },
+          { signal: _fiDragAC.signal },
+        );
+        btn.addEventListener(
+          "click",
+          (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            _fiOpenLightbox(stackId);
+          },
+          { signal: _fiDragAC.signal },
+        );
+        _fiLightboxBtns.set(stackId, btn);
+      }
+      if (anchorRect) {
+        const handleCenterX = anchorRect.left - _FI_HANDLE_OFFSET + _FI_HANDLE_SIZE / 2;
+        const handleCenterY = anchorRect.top + anchorRect.height - _FI_HANDLE_OFFSET + _FI_HANDLE_SIZE / 2;
+        const offset = _FI_LB_BTN_DIST * Math.SQRT1_2;
+        btn.style.left = Math.round(handleCenterX - offset - _FI_LB_BTN_SIZE / 2) + "px";
+        btn.style.top = Math.round(handleCenterY - offset - _FI_LB_BTN_SIZE / 2) + "px";
+      }
+      dmtGetPersistentLayer().appendChild(btn);
+      return btn;
+    }
+
+    function _fiRemoveLightboxBtn(stackId) {
+      const btn = _fiLightboxBtns.get(stackId);
+      if (btn) {
+        btn.remove();
+        _fiLightboxBtns.delete(stackId);
+      }
+    }
+
     function _fiReflowStack(stackId, orderedIds, anchorLeft, anchorTop) {
       const portal = dmtGetPersistentLayer();
       const grouped = orderedIds.length > 1;
@@ -33142,8 +33218,10 @@ if (type === "warn" && scanLimit !== null) {
       if (grouped) {
         const freshAnchorRect = _fiAnchorRect(_fiInstances.get(orderedIds[0]));
         _fiEnsureStackHandle(stackId, freshAnchorRect);
+        _fiEnsureLightboxBtn(stackId, freshAnchorRect);
       } else {
         _fiRemoveStackHandle(stackId);
+        _fiRemoveLightboxBtn(stackId);
       }
     }
 
@@ -33401,7 +33479,9 @@ if (type === "warn" && scanLimit !== null) {
         const members = _fiStackMembers(curInst.stackId);
         if (members[0] !== id) return;
         if (!_fiStackHandles.has(curInst.stackId)) return;
-        _fiEnsureStackHandle(curInst.stackId, _fiAnchorRect(curInst));
+        const freshRect = _fiAnchorRect(curInst);
+        _fiEnsureStackHandle(curInst.stackId, freshRect);
+        _fiEnsureLightboxBtn(curInst.stackId, freshRect);
       };
       win.appendChild(img);
 
@@ -33497,6 +33577,8 @@ if (type === "warn" && scanLimit !== null) {
           if (curInst && curInst.stackId != null) {
             const handle = _fiStackHandles.get(curInst.stackId);
             if (handle) handle.style.display = "flex";
+            const lbBtn = _fiLightboxBtns.get(curInst.stackId);
+            if (lbBtn) lbBtn.style.display = "flex";
           }
         },
         { signal: ac.signal },
@@ -33509,9 +33591,12 @@ if (type === "warn" && scanLimit !== null) {
           const curInst = _fiInstances.get(id);
           if (curInst && curInst.stackId != null) {
             const handle = _fiStackHandles.get(curInst.stackId);
-            if (handle && !(e.relatedTarget && (e.relatedTarget === handle || handle.contains(e.relatedTarget)))) {
-              handle.style.display = "none";
-            }
+            const lbBtn = _fiLightboxBtns.get(curInst.stackId);
+            const target = e.relatedTarget;
+            const enteringHandle = target && handle && (target === handle || handle.contains(target));
+            const enteringLbBtn = target && lbBtn && (target === lbBtn || lbBtn.contains(target));
+            if (handle && !enteringHandle && !enteringLbBtn) handle.style.display = "none";
+            if (lbBtn && !enteringHandle && !enteringLbBtn) lbBtn.style.display = "none";
           }
         },
         { signal: ac.signal },
@@ -33607,6 +33692,14 @@ if (type === "warn" && scanLimit !== null) {
           if (handle) {
             handle.style.left = Math.round(nx - _FI_HANDLE_OFFSET) + "px";
             handle.style.top = Math.round(ny + _fiGroupDragCachedH - _FI_HANDLE_OFFSET) + "px";
+          }
+          const lbBtn = _fiLightboxBtns.get(_fiGroupDraggingStackId);
+          if (lbBtn && handle) {
+            const handleCenterX = nx - _FI_HANDLE_OFFSET + _FI_HANDLE_SIZE / 2;
+            const handleCenterY = ny + _fiGroupDragCachedH - _FI_HANDLE_OFFSET + _FI_HANDLE_SIZE / 2;
+            const offset = _FI_LB_BTN_DIST * Math.SQRT1_2;
+            lbBtn.style.left = Math.round(handleCenterX - offset - _FI_LB_BTN_SIZE / 2) + "px";
+            lbBtn.style.top = Math.round(handleCenterY - offset - _FI_LB_BTN_SIZE / 2) + "px";
           }
           return;
         }
@@ -33711,6 +33804,7 @@ if (type === "warn" && scanLimit !== null) {
           if (members.length > 1) {
             const anchorRect = _fiAnchorRect(_fiInstances.get(members[0]));
             _fiEnsureStackHandle(inst.stackId, anchorRect);
+            _fiEnsureLightboxBtn(inst.stackId, anchorRect);
           }
         }
       });
@@ -33818,6 +33912,415 @@ if (type === "warn" && scanLimit !== null) {
       passive: true,
       signal: _fiHoverAC.signal,
     });
+
+    function _fiCollectForLightbox(originStackId) {
+      const originItems = [];
+      const otherItems = [];
+      const seenStackIds = new Set();
+      _fiInstances.forEach((inst, id) => {
+        const item = { url: inst.url, fiId: id };
+        if (originStackId != null && inst.stackId === originStackId) {
+          originItems.push(item);
+        } else {
+          otherItems.push(item);
+        }
+      });
+      originItems.sort((a, b) => {
+        const ia = _fiInstances.get(a.fiId).stackIndex || 0;
+        const ib = _fiInstances.get(b.fiId).stackIndex || 0;
+        return ia - ib;
+      });
+      return originItems.concat(otherItems);
+    }
+
+    function _fiOpenLightbox(originStackId) {
+      const items = _fiCollectForLightbox(originStackId);
+      if (!items.length) return;
+      _fiRenderLightbox(items);
+    }
+
+    function _fiEnsureLightboxStyle() {
+      if (document.getElementById("dmt-fi-lb-style")) return;
+      const s = document.createElement("style");
+      s.id = "dmt-fi-lb-style";
+      s.textContent = `
+        #dmt-fi-lightbox { opacity: 0; transition: opacity 0.22s ease; }
+        #dmt-fi-lightbox.dmt-fi-lb-in { opacity: 1; }
+        #dmt-fi-lightbox .dmt-fi-lb-card.dmt-fi-lb-animated {
+          transition: transform 0.38s cubic-bezier(0.34,1.18,0.64,1), opacity 0.26s ease;
+          will-change: transform, opacity;
+        }
+        #dmt-fi-lightbox .dmt-fi-lb-card { cursor: pointer; z-index: var(--dmt-lb-z, 1); }
+        #dmt-fi-lightbox .dmt-fi-lb-card.dmt-fi-lb-focused { cursor: default; }
+        #dmt-fi-lightbox .dmt-fi-lb-card {
+          box-shadow: 0 12px 36px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.07);
+        }
+        #dmt-fi-lightbox .dmt-fi-lb-card.dmt-fi-lb-focused {
+          box-shadow: 0 28px 80px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.18);
+        }
+        .dmt-fi-lb-nav-fade-btn { opacity: 0.55; transition: opacity 0.2s, background 0.2s; }
+        .dmt-fi-lb-nav-fade-btn:hover { opacity: 1; }
+      `;
+      document.head.appendChild(s);
+    }
+
+    function _fiRenderLightbox(items) {
+      const old = document.getElementById("dmt-fi-lightbox");
+      if (old) old.remove();
+      _fiEnsureLightboxStyle();
+
+      const persistentLayer = dmtGetPersistentLayer();
+      persistentLayer.style.display = "none";
+
+      let items_ = items.slice();
+      let focused = 0;
+      let _rafId = null;
+
+      const VW = window.innerWidth;
+      const VH = window.innerHeight;
+      const CARD_W = Math.min(VW * 0.5, 580);
+      const CARD_H = Math.min(VH * 0.88, 1000);
+      const SPREAD = Math.min(CARD_W * 0.4, 200);
+
+      function calcTransform(pos) {
+        const abs = Math.abs(pos);
+        return {
+          dx: pos * SPREAD,
+          rot: pos * 9,
+          scale: Math.max(0.68, 1 - abs * 0.12),
+          zIndex: 20 - abs * 2,
+          opacity: abs >= 3 ? 0.5 : 1,
+          focused: pos === 0,
+        };
+      }
+
+      const modal = document.createElement("div");
+      modal.id = "dmt-fi-lightbox";
+      modal.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.95); z-index: 9999999;
+        display: flex; align-items: center; justify-content: center;
+        overflow: hidden; overscroll-behavior: contain;
+      `;
+      modal.addEventListener("wheel", (e) => { e.preventDefault(); e.stopPropagation(); }, { passive: false });
+      modal.addEventListener("touchmove", (e) => { e.preventDefault(); }, { passive: false });
+
+      let keyHandler = () => {};
+      const dragAC = new AbortController();
+
+      function closeLightbox() {
+        modal.classList.remove("dmt-fi-lb-in");
+        setTimeout(() => { modal.remove(); }, 220);
+        document.removeEventListener("keydown", keyHandler);
+        dragAC.abort();
+        persistentLayer.style.display = "";
+      }
+
+      const stage = document.createElement("div");
+      stage.style.cssText = `position: relative; width: ${CARD_W}px; height: ${CARD_H}px; flex-shrink: 0; overflow: visible;`;
+
+      const SVG_LB_DOWNLOAD = `<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v10M6 9l4 4 4-4"/><line x1="3" y1="17" x2="17" y2="17"/></svg>`;
+      const SVG_LB_COPY_LINK = `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 9.5a2.5 2.5 0 0 0 3.5 0l2-2a2.5 2.5 0 0 0-3.5-3.5l-1 1"/><path d="M9.5 6.5a2.5 2.5 0 0 0-3.5 0l-2 2a2.5 2.5 0 0 0 3.5 3.5l1-1"/></svg>`;
+      const SVG_LB_CLOSE = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`;
+      const SVG_LB_NEWTAB = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>`;
+      const SVG_LB_EXIT = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 3 9 9 3 9"/><polyline points="15 3 15 9 21 9"/><polyline points="3 15 9 15 9 21"/><polyline points="21 15 15 15 15 21"/></svg>`;
+
+      function _fiMakeLbCardBtn(svg, title, onClick) {
+        const b = document.createElement("div");
+        b.className = "dmt-fi-lb-card-btn";
+        b.title = title;
+        b.setAttribute("aria-label", title);
+        b.style.cssText = [
+          "width:22px",
+          "height:22px",
+          "border-radius:5px",
+          "background:rgba(0,0,0,0.55)",
+          "border:1px solid rgba(255,255,255,0.25)",
+          "display:flex",
+          "align-items:center",
+          "justify-content:center",
+          "cursor:pointer",
+          "opacity:0.75",
+          "pointer-events:auto",
+          "color:#fff",
+          "transition:opacity 0.15s,background 0.15s",
+        ].join(";");
+        b.innerHTML = svg;
+        b.addEventListener("mouseenter", () => { b.style.opacity = "1"; b.style.background = "rgba(255,255,255,0.22)"; }, { signal: dragAC.signal });
+        b.addEventListener("mouseleave", () => { b.style.opacity = "0.75"; b.style.background = "rgba(0,0,0,0.55)"; }, { signal: dragAC.signal });
+        b.addEventListener(
+          "click",
+          (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onClick();
+          },
+          { signal: dragAC.signal },
+        );
+        b.addEventListener("mousedown", (e) => e.stopPropagation(), { signal: dragAC.signal });
+        b.addEventListener("dblclick", (e) => e.stopPropagation(), { signal: dragAC.signal });
+        return b;
+      }
+
+      let cards = items_.map((item, i) => {
+        const card = document.createElement("div");
+        card.className = "dmt-fi-lb-card";
+        card.style.cssText = `
+          position: absolute; left: 0; top: 0;
+          width: ${CARD_W}px; height: ${CARD_H}px;
+          border-radius: 14px; overflow: hidden;
+          background: radial-gradient(ellipse at 50% 38%, #1e1e1e 0%, #0a0a0a 100%);
+          transform: translateY(${VH * 0.6}px) scale(0.72) translateZ(0);
+          opacity: 0;
+        `;
+        const img = document.createElement("img");
+        img.src = item.url;
+        img.decoding = "async";
+        img.loading = i === 0 ? "eager" : "lazy";
+        img.draggable = false;
+        img.style.cssText = `
+          width: 100%; height: 100%; object-fit: contain; display: block;
+          background: transparent; pointer-events: auto;
+          user-select: none; -webkit-user-drag: none;
+        `;
+        card.appendChild(img);
+
+        const cardBtnRow = document.createElement("div");
+        cardBtnRow.style.cssText = `
+          position: absolute; top: 10px; right: 10px; z-index: 5;
+          display: flex; gap: 4px;
+          opacity: 0; pointer-events: none; transition: opacity 0.15s;
+        `;
+        const cardCopyBtn = _fiMakeLbCardBtn(SVG_LB_COPY_LINK, t("fi_ctrl_copy"), () => {
+          GM_setClipboard(item.url, "text");
+          dmtShowToast(t("fi_ctrl_copied"));
+        });
+        const cardDlBtn = _fiMakeLbCardBtn(SVG_LB_DOWNLOAD, t("fi_ctrl_download"), () => _fiDownload(item.url));
+        const cardCloseBtn = _fiMakeLbCardBtn(SVG_LB_CLOSE, t("fi_ctrl_close"), () => _fiRemoveLightboxItem(item.fiId));
+        cardBtnRow.appendChild(cardCopyBtn);
+        cardBtnRow.appendChild(cardDlBtn);
+        cardBtnRow.appendChild(cardCloseBtn);
+        card.appendChild(cardBtnRow);
+
+        const cardNewTabBtn = _fiMakeLbCardBtn(SVG_LB_NEWTAB, t("fi_ctrl_newtab"), () => window.open(item.url, "_blank", "noopener,noreferrer"));
+        cardNewTabBtn.style.position = "absolute";
+        cardNewTabBtn.style.top = "36px";
+        cardNewTabBtn.style.right = "10px";
+        cardNewTabBtn.style.zIndex = "5";
+        cardNewTabBtn.style.opacity = "0";
+        cardNewTabBtn.style.pointerEvents = "none";
+        cardNewTabBtn.style.transition = "opacity 0.15s";
+        card.appendChild(cardNewTabBtn);
+
+        card.addEventListener("mouseenter", () => {
+          cardBtnRow.style.opacity = "1"; cardBtnRow.style.pointerEvents = "auto";
+          cardNewTabBtn.style.opacity = "1"; cardNewTabBtn.style.pointerEvents = "auto";
+        });
+        card.addEventListener("mouseleave", () => {
+          cardBtnRow.style.opacity = "0"; cardBtnRow.style.pointerEvents = "none";
+          cardNewTabBtn.style.opacity = "0"; cardNewTabBtn.style.pointerEvents = "none";
+        });
+
+        card.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const idx = cards.indexOf(card);
+          if (idx !== focused) { focused = idx; scheduleUpdate(); }
+        });
+        stage.appendChild(card);
+        return card;
+      });
+
+      const dotsWrap = document.createElement("div");
+      dotsWrap.style.cssText = `
+        position: absolute; bottom: 22px; left: 50%; transform: translateX(-50%);
+        display: flex; gap: 8px; z-index: 30;
+      `;
+      let dots = items_.map((_, i) => {
+        const dot = document.createElement("div");
+        dot.style.cssText = `
+          width: 7px; height: 7px; border-radius: 50%;
+          background: rgba(255,255,255,0.95); cursor: pointer; opacity: 0.35;
+          transition: opacity 0.22s, transform 0.22s;
+        `;
+        dot.addEventListener("click", (e) => { e.stopPropagation(); focused = i; scheduleUpdate(); });
+        dotsWrap.appendChild(dot);
+        return dot;
+      });
+
+      const counter = document.createElement("div");
+      counter.style.cssText = `
+        position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+        background: rgba(0,0,0,0.72); color: rgba(255,255,255,0.85);
+        padding: 4px 14px; border-radius: 9999px;
+        font: 13px/1.5 system-ui, sans-serif; z-index: 30;
+        pointer-events: none; white-space: nowrap;
+      `;
+
+      function _fiRemoveLightboxItem(fiId) {
+        const idx = items_.findIndex((it) => it.fiId === fiId);
+        if (idx === -1) return;
+        _fiClose(fiId);
+        items_.splice(idx, 1);
+        if (!items_.length) { closeLightbox(); return; }
+        const removedCard = cards[idx];
+        const removedDot = dots[idx];
+        cards.splice(idx, 1);
+        dots.splice(idx, 1);
+        removedCard.remove();
+        removedDot.remove();
+        if (idx < focused) {
+          focused -= 1;
+        } else if (idx === focused && focused >= items_.length) {
+          focused = items_.length - 1;
+        }
+        scheduleUpdate();
+      }
+
+      const exitBtn = document.createElement("button");
+      exitBtn.innerHTML = SVG_LB_EXIT;
+      exitBtn.title = t("fi_lb_exit");
+      exitBtn.setAttribute("aria-label", t("fi_lb_exit"));
+      exitBtn.style.cssText = `
+        position: absolute; top: 20px; right: 25px;
+        background: rgba(0,0,0,0.6); color: white; border: none;
+        width: 40px; height: 40px; border-radius: 50%;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        transition: background 0.2s; z-index: 30;
+      `;
+      exitBtn.onmouseenter = () => (exitBtn.style.background = "rgba(255,255,255,0.25)");
+      exitBtn.onmouseleave = () => (exitBtn.style.background = "rgba(0,0,0,0.6)");
+      exitBtn.onclick = (e) => { e.stopPropagation(); closeLightbox(); };
+
+      modal.onclick = (e) => {
+        const hit = e.composedPath().some(
+          (el) => el !== modal && el instanceof Element &&
+            (el.tagName === "IMG" || el.tagName === "BUTTON" ||
+              (el.className && typeof el.className === "string" && el.className.includes("dmt-fi-lb-"))),
+        );
+        if (!hit) closeLightbox();
+      };
+
+      let zoom = 1, tx = 0, ty = 0, dragActive = false, dragStart = null;
+      const _getZoomImg = () => {
+        const fc = modal.querySelector(".dmt-fi-lb-card.dmt-fi-lb-focused");
+        return fc ? fc.querySelector("img") : null;
+      };
+      const _applyZoom = () => {
+        const img = _getZoomImg();
+        if (!img) return;
+        img.style.transform = `scale(${zoom}) translate(${tx / zoom}px, ${ty / zoom}px)`;
+        img.style.cursor = zoom > 1 ? "grab" : "";
+      };
+      const _resetZoom = () => {
+        zoom = 1; tx = 0; ty = 0;
+        const img = _getZoomImg();
+        if (img) { img.style.transform = ""; img.style.cursor = ""; }
+      };
+      modal.addEventListener("wheel", (e) => {
+        e.preventDefault(); e.stopPropagation();
+        zoom = Math.min(8, Math.max(0.2, zoom * (e.deltaY < 0 ? 1.1 : 0.9)));
+        if (zoom <= 1.02) { _resetZoom(); return; }
+        _applyZoom();
+      }, { passive: false });
+      modal.addEventListener("dblclick", (e) => {
+        if (!e.target.closest(".dmt-fi-lb-card")) return;
+        e.stopPropagation(); _resetZoom();
+      });
+      modal.addEventListener("mousedown", (e) => {
+        if (zoom <= 1 || !e.target.closest(".dmt-fi-lb-card img")) return;
+        e.preventDefault(); e.stopPropagation();
+        dragActive = true; dragStart = { x: e.clientX - tx, y: e.clientY - ty };
+        e.target.style.cursor = "grabbing";
+      });
+      window.addEventListener("mousemove", (e) => {
+        if (!dragActive) return;
+        tx = e.clientX - dragStart.x; ty = e.clientY - dragStart.y; _applyZoom();
+      }, { signal: dragAC.signal });
+      window.addEventListener("mouseup", () => {
+        if (!dragActive) return;
+        dragActive = false;
+        const img = _getZoomImg(); if (img && zoom > 1) img.style.cursor = "grab";
+      }, { signal: dragAC.signal });
+
+      const _LB_SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " ", "PageUp", "PageDown", "Home", "End"]);
+      keyHandler = (e) => {
+        if (_LB_SCROLL_KEYS.has(e.key)) e.preventDefault();
+        if (e.key === "Escape") { closeLightbox(); return; }
+        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+          focused = focused < items_.length - 1 ? focused + 1 : 0;
+          _resetZoom(); scheduleUpdate();
+        }
+        if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+          focused = focused > 0 ? focused - 1 : items_.length - 1;
+          _resetZoom(); scheduleUpdate();
+        }
+      };
+      document.addEventListener("keydown", keyHandler);
+
+      const NAV_BTN_BASE = `
+        position: absolute; top: 50%; transform: translateY(-50%);
+        background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+        color: white; border: none; width: 46px; height: 46px; border-radius: 50%;
+        cursor: pointer; display: flex; align-items: center; justify-content: center;
+        transition: background 0.2s; z-index: 30;
+      `;
+      const SVG_PREV = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,18 9,12 15,6"/></svg>`;
+      const SVG_NEXT = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,18 15,12 9,6"/></svg>`;
+      let prevBtn = null, nextBtn = null;
+      if (items_.length > 1) {
+        prevBtn = document.createElement("button");
+        prevBtn.className = "dmt-fi-lb-nav-fade-btn";
+        prevBtn.innerHTML = SVG_PREV;
+        prevBtn.style.cssText = NAV_BTN_BASE + "left: 20px;";
+        prevBtn.onclick = (e) => {
+          e.stopPropagation();
+          focused = focused > 0 ? focused - 1 : items_.length - 1;
+          _resetZoom(); scheduleUpdate();
+        };
+        nextBtn = document.createElement("button");
+        nextBtn.className = "dmt-fi-lb-nav-fade-btn";
+        nextBtn.innerHTML = SVG_NEXT;
+        nextBtn.style.cssText = NAV_BTN_BASE + "right: 20px;";
+        nextBtn.onclick = (e) => {
+          e.stopPropagation();
+          focused = focused < items_.length - 1 ? focused + 1 : 0;
+          _resetZoom(); scheduleUpdate();
+        };
+      }
+
+      function scheduleUpdate() {
+        if (_rafId) return;
+        _rafId = requestAnimationFrame(() => { _rafId = null; _flushUpdate(); });
+      }
+      function _flushUpdate() {
+        cards.forEach((card, i) => {
+          const { dx, rot, scale, zIndex, opacity, focused: isFocused } = calcTransform(i - focused);
+          card.style.transform = `translateX(${dx}px) rotate(${rot}deg) scale(${scale}) translateZ(0)`;
+          card.style.opacity = String(opacity);
+          card.style.zIndex = String(zIndex);
+          card.classList.toggle("dmt-fi-lb-focused", isFocused);
+        });
+        dots.forEach((dot, i) => {
+          dot.style.opacity = i === focused ? "1" : "0.35";
+          dot.style.transform = i === focused ? "scale(1.4)" : "scale(1)";
+        });
+        counter.textContent = `${focused + 1} / ${items_.length}`;
+      }
+
+      stage.appendChild(dotsWrap);
+      modal.appendChild(stage);
+      modal.appendChild(counter);
+      modal.appendChild(exitBtn);
+      if (prevBtn) modal.appendChild(prevBtn);
+      if (nextBtn) modal.appendChild(nextBtn);
+      document.body.appendChild(modal);
+
+      requestAnimationFrame(() => {
+        cards.forEach((card) => card.classList.add("dmt-fi-lb-animated"));
+        _flushUpdate();
+        requestAnimationFrame(() => modal.classList.add("dmt-fi-lb-in"));
+      });
+    }
 
     function _fiCloseAll() {
       _fiStopAllThrows();
