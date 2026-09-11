@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.0.15
+// @version      2.9.1.6
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -45,8 +45,10 @@
 // @connect     fbcdn.net
 // @connect     pximg.net
 // @connect     discordapp.net
+// @connect     *
 // 💡" fixcdn.hyonsu.com " Used only without API mode; the script asks for confirmation before connecting.
 // 💡 twimg.com / fbcdn.net / pximg.net: Support image quality enhancement and downloads for Twitter / Instagram / Pixiv images; discordapp.net (all subdomains): Required to support Discord’s external media proxy domains (e.g. images-ext-N.discordapp.net and media.discordapp.net).
+// 💡 "@connect *": Embeds can originate from any third-party fixer/mirror domain (vxtwitter.com, instagramx.com, fzthreads.com, etc.) that cannot be fully enumerated in advance. Domains listed above connect silently; any other domain triggers a one-time browser confirmation prompt (per Tampermonkey/Violentmonkey's own recommended practice for scripts with unbounded target domains), after which most script managers offer an "always allow" option.
 // ==/UserScript==
 
 (function () {
@@ -1253,6 +1255,7 @@
       fi_style_cap_label: "Max per stack",
       fi_style_reset_label: "Reset to Default",
       fi_style_reset_toast: "✨ Stacking style reset to default",
+      fi_style_throw_label: "Throw with inertia",
       fi_menu_info_tip:
         "Drag the window to move it, or drag it near another to stack them. When 2+ images are stacked, drag the small handle at the corner to move the whole stack. Scroll to zoom, double-click to close.",
       no_content: "⚠️ No Content",
@@ -10550,6 +10553,52 @@
       return false;
     }
 
+    function _dmtIsDiscordEmbedHintQuery(queryString) {
+      const params = new URLSearchParams(queryString);
+      return params.has("width") && params.has("height");
+    }
+    function _dmtBuildExternalUrl(protoIdx, segs) {
+      let base = `${segs[protoIdx]}://${segs.slice(protoIdx + 1).join("/")}`;
+      const qIdx = base.indexOf("?");
+      const tailQuery = qIdx !== -1 ? base.slice(qIdx + 1) : null;
+      const hintCandidate = protoIdx > 1 ? segs.slice(1, protoIdx).join("/") : null;
+      const hint = (hintCandidate && hintCandidate.startsWith("?")) ? hintCandidate : null;
+      if (tailQuery !== null && _dmtIsDiscordEmbedHintQuery(tailQuery)) {
+        base = base.slice(0, qIdx);
+        if (hint) base += hint;
+      }
+      return base.replace(/%3A/g, ":");
+    }
+    function _dmtExtractExternalUrl(rawUrlString) {
+      const match = rawUrlString.match(/\/external\/([\s\S]+)/);
+      if (!match) return null;
+      try {
+        const decoded = decodeURIComponent(match[1]);
+        const parts = decoded.split("/");
+        const _dmtLastProtocolIdx = (segs) => {
+          let idx = -1;
+          for (let i = 0; i < segs.length; i++) {
+            if (segs[i] === "http" || segs[i] === "https") idx = i;
+          }
+          return idx;
+        };
+        const protocolIdx = _dmtLastProtocolIdx(parts);
+        if (protocolIdx !== -1) {
+          return _dmtBuildExternalUrl(protocolIdx, parts);
+        }
+        if (parts.length >= 3 && parts[0].length >= 40) {
+          const rem = parts.slice(1);
+          const pi2 = _dmtLastProtocolIdx(rem);
+          if (pi2 !== -1) return _dmtBuildExternalUrl(pi2, rem);
+          if (rem.length >= 2) return `https://${rem.join("/")}`.replace(/%3A/g, ":");
+        }
+        if (decoded.startsWith("http://") || decoded.startsWith("https://")) return decoded;
+        return null;
+      } catch (_) {
+        return null;
+      }
+    }
+
     function resolveRealFileUrl(linkElement) {
       let href = linkElement.href;
 
@@ -10559,99 +10608,16 @@
         const safeSrc = linkElement.dataset.safeSrc;
 
         if (safeSrc.includes("/external/")) {
-          try {
-            const match = safeSrc.match(/\/external\/([^?]+)/);
-            if (match) {
-              const encodedPath = match[1];
-              const decoded = decodeURIComponent(encodedPath);
-
-              const parts = decoded.split("/");
-              const protocolIdx = parts.findIndex(
-                (p) => p === "http" || p === "https",
-              );
-
-              if (protocolIdx !== -1) {
-                const protocol = parts[protocolIdx];
-                const urlPath = parts.slice(protocolIdx + 1).join("/");
-                const sourceUrl = `${protocol}://${urlPath}`;
-                return sourceUrl.replace(/%3A/g, ":");
-              }
-
-              if (parts.length >= 3 && parts[0].length >= 40) {
-                const remainingParts = parts.slice(1);
-                const protoIdx2 = remainingParts.findIndex(
-                  (p) => p === "http" || p === "https",
-                );
-
-                if (protoIdx2 !== -1) {
-                  const protocol = remainingParts[protoIdx2];
-                  const urlPath = remainingParts.slice(protoIdx2 + 1).join("/");
-                  return `${protocol}://${urlPath}`.replace(/%3A/g, ":");
-                }
-
-                if (remainingParts.length >= 2) {
-                  return `https://${remainingParts.join("/")}`.replace(
-                    /%3A/g,
-                    ":",
-                  );
-                }
-              }
-
-              if (
-                decoded.startsWith("http://") ||
-                decoded.startsWith("https://")
-              ) {
-                return decoded;
-              }
-            }
-          } catch (e) {
-            console.warn("[resolveRealFileUrl] Parse error:", e);
-          }
+          const resolved = _dmtExtractExternalUrl(safeSrc);
+          if (resolved) return resolved;
         }
 
         if (safeSrc.startsWith("http")) return safeSrc;
       }
 
       if (href.includes("/external/")) {
-        try {
-          const match = href.match(/\/external\/([^?]+)/);
-          if (match) {
-            const encodedPath = match[1];
-            const decoded = decodeURIComponent(encodedPath);
-
-            const parts = decoded.split("/");
-            const protocolIdx = parts.findIndex(
-              (p) => p === "http" || p === "https",
-            );
-
-            if (protocolIdx !== -1) {
-              const protocol = parts[protocolIdx];
-              const urlPath = parts.slice(protocolIdx + 1).join("/");
-              return `${protocol}://${urlPath}`.replace(/%3A/g, ":");
-            }
-
-            if (parts.length >= 3 && parts[0].length >= 40) {
-              const remainingParts = parts.slice(1);
-              const protoIdx2 = remainingParts.findIndex(
-                (p) => p === "http" || p === "https",
-              );
-
-              if (protoIdx2 !== -1) {
-                return `${remainingParts[protoIdx2]}://${remainingParts.slice(protoIdx2 + 1).join("/")}`.replace(
-                  /%3A/g,
-                  ":",
-                );
-              }
-
-              if (remainingParts.length >= 2) {
-                return `https://${remainingParts.join("/")}`.replace(
-                  /%3A/g,
-                  ":",
-                );
-              }
-            }
-          }
-        } catch (e) {}
+        const resolved = _dmtExtractExternalUrl(href);
+        if (resolved) return resolved;
       }
 
       if (isLikelyMediaFile(href)) return href;
@@ -12163,6 +12129,9 @@
             ].join(";");
             pop.addEventListener("click", (e) => e.stopPropagation());
             pop.addEventListener("mousedown", (e) => e.stopPropagation());
+            pop.style.pointerEvents = "auto";
+            pop.addEventListener("mouseenter", cancelCloseGlobalMenu);
+            pop.addEventListener("mouseleave", scheduleCloseGlobalMenu);
 
             const btnRect = styleBtn.getBoundingClientRect();
             const POP_W_ESTIMATE = 246;
@@ -12209,6 +12178,29 @@
               row.appendChild(slider);
               return { row, slider, valueText };
             }
+
+            function _fiToggleRow(labelKey, checked, onChange) {
+              const row = document.createElement("label");
+              row.style.cssText =
+                "display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--dmt-text-muted, #949ba4);";
+              const checkbox = document.createElement("input");
+              checkbox.type = "checkbox";
+              checkbox.checked = checked;
+              checkbox.style.cssText = "accent-color:var(--dmt-accent, #5865f2);cursor:pointer;";
+              checkbox.addEventListener("change", () => onChange(checkbox.checked));
+              const labelText = document.createElement("span");
+              labelText.textContent = t(labelKey);
+              row.appendChild(checkbox);
+              row.appendChild(labelText);
+              return { row, checkbox };
+            }
+
+            const throwRow = _fiToggleRow(
+              "fi_style_throw_label",
+              _floatImageInstance.getThrowEnabled(),
+              (v) => _floatImageInstance.setThrowEnabled(v),
+            );
+            pop.appendChild(throwRow.row);
 
             const rotateRow = _fiSliderRow(
               "fi_style_rotate_label", style.rotate, 0, 20, 1,
@@ -12500,6 +12492,9 @@
 
             embedVideos.forEach((video, i) => {
               let rawUrl = video.src || video.querySelector("source")?.src;
+              if (rawUrl && rawUrl.includes("/external/")) {
+                rawUrl = _dmtExtractExternalUrl(rawUrl) || rawUrl;
+              }
 
               setTimeout(
                 () => animateFlyToTopRight(video, e.clientX, e.clientY),
@@ -12579,25 +12574,8 @@
           };
 
           const extractSourceUrl = (proxyUrl) => {
-            try {
-              const cleanUrl = proxyUrl.split("?")[0];
-              const match = cleanUrl.match(/\/external\/([^?]+)/);
-              if (!match) return proxyUrl;
-              const decoded = decodeURIComponent(match[1]);
-              const parts = decoded.split("/");
-              const protocolIdx = parts.findIndex((p) => p === "http" || p === "https");
-              if (protocolIdx !== -1) {
-                return `${parts[protocolIdx]}://${parts.slice(protocolIdx + 1).join("/")}`.replace(/%3A/g, ":");
-              }
-              if (parts.length >= 3 && parts[0].length >= 40) {
-                const rem = parts.slice(1);
-                const pi2 = rem.findIndex((p) => p === "http" || p === "https");
-                if (pi2 !== -1) return `${rem[pi2]}://${rem.slice(pi2 + 1).join("/")}`.replace(/%3A/g, ":");
-                if (rem.length >= 2) return `https://${rem.join("/")}`.replace(/%3A/g, ":");
-              }
-              if (decoded.startsWith("http://") || decoded.startsWith("https://")) return decoded;
-              return cleanUrl;
-            } catch (_) { return proxyUrl.split("?")[0]; }
+            const resolved = _dmtExtractExternalUrl(proxyUrl);
+            return resolved || proxyUrl;
           };
 
           const _collectMediaUrls = () => {
@@ -32943,9 +32921,21 @@ if (type === "warn" && scanLimit !== null) {
     let _fiDraggingId = null, _fiDragOffsetX = 0, _fiDragOffsetY = 0;
     let _fiDragCachedW = 0, _fiDragCachedH = 0;
     let _fiGroupDragCachedW = 0, _fiGroupDragCachedH = 0;
-    let _FI_STACK_CAP = GMStore.get("fi_stack_cap", 5);
-    let _FI_STACK_OFFSET = GMStore.get("fi_stack_offset", 14);
-    let _FI_STACK_ROTATE = GMStore.get("fi_stack_rotate", 7);
+    const _FI_STACK_CAP_DEFAULT = 5;
+    const _FI_STACK_OFFSET_DEFAULT = 14;
+    const _FI_STACK_ROTATE_DEFAULT = 7;
+    let _FI_STACK_CAP = GMStore.get("fi_stack_cap", _FI_STACK_CAP_DEFAULT);
+    let _FI_STACK_OFFSET = GMStore.get("fi_stack_offset", _FI_STACK_OFFSET_DEFAULT);
+    let _FI_STACK_ROTATE = GMStore.get("fi_stack_rotate", _FI_STACK_ROTATE_DEFAULT);
+
+    let _fiThrowEnabled = GMStore.get("fi_throw_enabled", false);
+    let _fiMoveHistory = [];
+    let _fiThrowState = new Map();
+    const _FI_THROW_FRICTION = 0.92;
+    const _FI_THROW_MIN_VELOCITY = 0.5;
+    const _FI_THROW_BOUNCE_DAMPING = 0.5;
+    const _FI_THROW_VELOCITY_THRESHOLD = 3;
+    const _FI_THROW_SAMPLE_WINDOW_MS = 100;
     const _FI_STACK_OVERLAP_RATIO = 0.35;
     const _FI_STACK_DRAG_THRESHOLD = 6;
     const _FI_BASE_W = 200;
@@ -33200,6 +33190,26 @@ if (type === "warn" && scanLimit !== null) {
       return { join: best, blockedFull: !best && blockedFull };
     }
 
+    function _fiTryJoinAfterDrag(id) {
+      const inst = _fiInstances.get(id);
+      if (!inst) return;
+      const rect = _fiAnchorRect(inst);
+      const result = _fiFindJoinableStack(rect, id);
+      if (result.join) {
+        const stackId = result.join.stackId || `fistack_${++_fiStackSeq}`;
+        _fiReflowStack(
+          stackId,
+          result.join.members.concat([id]),
+          result.join.anchorRect.left,
+          result.join.anchorRect.top,
+        );
+      } else if (result.blockedFull) {
+        const [nx, ny] = _fiClampPos(rect.left + 24, rect.top + 24, rect.width, rect.height);
+        inst.el.style.left = nx + "px";
+        inst.el.style.top = ny + "px";
+      }
+    }
+
     function _fiDownload(url) {
       let filename = "image";
       try {
@@ -33243,6 +33253,7 @@ if (type === "warn" && scanLimit !== null) {
       const inst = _fiInstances.get(id);
       if (!inst) return;
       const stackId = inst.stackId;
+      if (_fiThrowState.has(id)) _fiStopThrow(id);
       inst.cleanup();
       inst.el.remove();
       _fiInstances.delete(id);
@@ -33254,6 +33265,73 @@ if (type === "warn" && scanLimit !== null) {
       Math.max(0, Math.min(window.innerWidth - (w ? Math.max(40, w * 0.15) : 40), px)),
       Math.max(0, Math.min(window.innerHeight - (h ? Math.max(40, h * 0.15) : 40), py)),
     ];
+
+    const _fiThrowBounds = (w, h) => ({
+      minX: 0,
+      maxX: window.innerWidth - (w ? Math.max(40, w * 0.15) : 40),
+      minY: 0,
+      maxY: window.innerHeight - (h ? Math.max(40, h * 0.15) : 40),
+    });
+
+    function _fiStopThrow(id) {
+      const rafId = _fiThrowState.get(id);
+      if (rafId != null) {
+        cancelAnimationFrame(rafId);
+        _fiThrowState.delete(id);
+      }
+    }
+
+    function _fiStopAllThrows() {
+      _fiThrowState.forEach((rafId) => cancelAnimationFrame(rafId));
+      _fiThrowState.clear();
+    }
+
+    function _fiStartThrow(id, vx, vy) {
+      const inst = _fiInstances.get(id);
+      if (!inst) return;
+      _fiStopThrow(id);
+      const w = inst.el.offsetWidth;
+      const h = inst.el.offsetHeight;
+      const bounds = _fiThrowBounds(w, h);
+
+      function step() {
+        const curInst = _fiInstances.get(id);
+        if (!curInst) { _fiStopThrow(id); return; }
+
+        let left = (parseFloat(curInst.el.style.left) || 0) + vx;
+        let top = (parseFloat(curInst.el.style.top) || 0) + vy;
+
+        if (left < bounds.minX) {
+          left = bounds.minX;
+          vx = -vx * _FI_THROW_BOUNCE_DAMPING;
+        } else if (left > bounds.maxX) {
+          left = bounds.maxX;
+          vx = -vx * _FI_THROW_BOUNCE_DAMPING;
+        }
+        if (top < bounds.minY) {
+          top = bounds.minY;
+          vy = -vy * _FI_THROW_BOUNCE_DAMPING;
+        } else if (top > bounds.maxY) {
+          top = bounds.maxY;
+          vy = -vy * _FI_THROW_BOUNCE_DAMPING;
+        }
+
+        curInst.el.style.left = left + "px";
+        curInst.el.style.top = top + "px";
+
+        vx *= _FI_THROW_FRICTION;
+        vy *= _FI_THROW_FRICTION;
+
+        if (Math.hypot(vx, vy) < _FI_THROW_MIN_VELOCITY) {
+          _fiStopThrow(id);
+          _fiTryJoinAfterDrag(id);
+          _fiPersistAll();
+          return;
+        }
+        _fiThrowState.set(id, requestAnimationFrame(step));
+      }
+      _fiThrowState.set(id, requestAnimationFrame(step));
+    }
 
     function _fiCreate(url, x, y, restoreId, restoreLeft, restoreTop, restoreStackId, restoreStackIndex) {
       const upgradedUrl = _fiBestQualityUrl(url);
@@ -33430,6 +33508,7 @@ if (type === "warn" && scanLimit !== null) {
         (e) => {
           if (e.button !== 0) return;
           if (_fiGroupDraggingStackId != null) return;
+          if (_fiThrowState.has(id)) _fiStopThrow(id);
           _fiDraggingId = id;
           win.style.cursor = "grabbing";
           const r = win.getBoundingClientRect();
@@ -33443,6 +33522,7 @@ if (type === "warn" && scanLimit !== null) {
           _fiDragHadStack = !!(dragInst && dragInst.stackId != null);
           _fiDragDetached = false;
           _fiDragMoved = false;
+          _fiMoveHistory = [{ x: e.clientX, y: e.clientY, t: performance.now() }];
           if (_fiDragHadStack) _fiBringToFrontInStack(id);
           else _fiBringToFront(win);
           e.preventDefault();
@@ -33539,6 +33619,13 @@ if (type === "warn" && scanLimit !== null) {
         );
         inst.el.style.left = nx + "px";
         inst.el.style.top = ny + "px";
+        if (_fiThrowEnabled) {
+          const now = performance.now();
+          _fiMoveHistory.push({ x: e.clientX, y: e.clientY, t: now });
+          while (_fiMoveHistory.length > 1 && now - _fiMoveHistory[0].t > _FI_THROW_SAMPLE_WINDOW_MS) {
+            _fiMoveHistory.shift();
+          }
+        }
       },
       { signal: _fiDragAC.signal },
     );
@@ -33559,20 +33646,20 @@ if (type === "warn" && scanLimit !== null) {
         if (inst) {
           inst.el.style.cursor = "grab";
           if (_fiDragMoved) {
-            const rect = _fiAnchorRect(inst);
-            const result = _fiFindJoinableStack(rect, _fiDraggingId);
-            if (result.join) {
-              const stackId = result.join.stackId || `fistack_${++_fiStackSeq}`;
-              _fiReflowStack(
-                stackId,
-                result.join.members.concat([_fiDraggingId]),
-                result.join.anchorRect.left,
-                result.join.anchorRect.top,
-              );
-            } else if (result.blockedFull) {
-              const [nx, ny] = _fiClampPos(rect.left + 24, rect.top + 24, rect.width, rect.height);
-              inst.el.style.left = nx + "px";
-              inst.el.style.top = ny + "px";
+            let vx = 0, vy = 0;
+            if (_fiThrowEnabled && _fiMoveHistory.length >= 2) {
+              const first = _fiMoveHistory[0];
+              const last = _fiMoveHistory[_fiMoveHistory.length - 1];
+              const dt = last.t - first.t;
+              if (dt > 0) {
+                vx = ((last.x - first.x) / dt) * 16.67;
+                vy = ((last.y - first.y) / dt) * 16.67;
+              }
+            }
+            if (Math.hypot(vx, vy) >= _FI_THROW_VELOCITY_THRESHOLD) {
+              _fiStartThrow(_fiDraggingId, vx, vy);
+            } else {
+              _fiTryJoinAfterDrag(_fiDraggingId);
             }
           }
         }
@@ -33582,6 +33669,7 @@ if (type === "warn" && scanLimit !== null) {
         _fiDragMoved = false;
         _fiDragCachedW = 0;
         _fiDragCachedH = 0;
+        _fiMoveHistory = [];
         _fiPersistAll();
       },
       { signal: _fiDragAC.signal },
@@ -33716,6 +33804,7 @@ if (type === "warn" && scanLimit !== null) {
     });
 
     function _fiCloseAll() {
+      _fiStopAllThrows();
       _fiInstances.forEach((inst) => {
         inst.cleanup();
         inst.el.remove();
@@ -33764,14 +33853,19 @@ if (type === "warn" && scanLimit !== null) {
         _fiApplyAllStackTransforms();
       },
       resetStackStyle: () => {
-        _FI_STACK_CAP = 5;
-        _FI_STACK_OFFSET = 14;
-        _FI_STACK_ROTATE = 7;
+        _FI_STACK_CAP = _FI_STACK_CAP_DEFAULT;
+        _FI_STACK_OFFSET = _FI_STACK_OFFSET_DEFAULT;
+        _FI_STACK_ROTATE = _FI_STACK_ROTATE_DEFAULT;
         GMStore.set("fi_stack_cap", _FI_STACK_CAP);
         GMStore.set("fi_stack_offset", _FI_STACK_OFFSET);
         GMStore.set("fi_stack_rotate", _FI_STACK_ROTATE);
         _fiApplyAllStackTransforms();
         return { cap: _FI_STACK_CAP, offset: _FI_STACK_OFFSET, rotate: _FI_STACK_ROTATE };
+      },
+      getThrowEnabled: () => _fiThrowEnabled,
+      setThrowEnabled: (v) => {
+        _fiThrowEnabled = !!v;
+        GMStore.set("fi_throw_enabled", _fiThrowEnabled);
       },
     };
     if (DEBUG) {
