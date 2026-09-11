@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.1.6
+// @version      2.9.2.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -63,7 +63,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.0.11";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.2.2";
 
   const GMStore = {
     
@@ -1240,6 +1240,7 @@
       fi_ctrl_download: "Download",
       fi_ctrl_copy: "Copy image URL",
       fi_ctrl_copied: "📋 Image URL copied",
+      fi_ctrl_newtab: "Open in new tab",
       fi_ctrl_close: "Close",
       fi_download_fail: "Download failed",
       fi_img_load_failed: "Image failed to load",
@@ -16229,20 +16230,13 @@
 
     (function _installKlipyXhrInterceptor() {
       const origOpen = XMLHttpRequest.prototype.open;
-      const origSend = XMLHttpRequest.prototype.send;
 
       XMLHttpRequest.prototype.open = function (method, url, ...rest) {
-        this._klipyUrl =
+        if (
           typeof url === "string" &&
           url.includes("discord.com/api") &&
           url.includes("klipy")
-            ? url
-            : null;
-        return origOpen.call(this, method, url, ...rest);
-      };
-
-      XMLHttpRequest.prototype.send = function (...args) {
-        if (this._klipyUrl) {
+        ) {
           this.addEventListener("load", function () {
             try {
               const data = JSON.parse(this.responseText);
@@ -16262,12 +16256,11 @@
             } catch (_) {}
           });
         }
-        return origSend.call(this, ...args);
+        return origOpen.call(this, method, url, ...rest);
       };
 
       const _emojiXhrRestore = () => {
         XMLHttpRequest.prototype.open = origOpen;
-        XMLHttpRequest.prototype.send = origSend;
       };
       CleanupRegistry.add(_emojiXhrRestore);
       ModuleCleanupRegistry.add("mod_emoji", _emojiXhrRestore);
@@ -33402,6 +33395,14 @@ if (type === "warn" && scanLimit !== null) {
         fallback.textContent = t("fi_img_load_failed");
         win.appendChild(fallback);
       };
+      img.onload = () => {
+        const curInst = _fiInstances.get(id);
+        if (!curInst || curInst.stackId == null) return;
+        const members = _fiStackMembers(curInst.stackId);
+        if (members[0] !== id) return;
+        if (!_fiStackHandles.has(curInst.stackId)) return;
+        _fiEnsureStackHandle(curInst.stackId, _fiAnchorRect(curInst));
+      };
       win.appendChild(img);
 
       const ac = new AbortController();
@@ -33423,19 +33424,19 @@ if (type === "warn" && scanLimit !== null) {
           "width:22px",
           "height:22px",
           "border-radius:5px",
-          "background:rgba(0,0,0,0.6)",
+          "background:rgba(0,0,0,0.42)",
           "border:1px solid rgba(255,255,255,0.25)",
           "display:flex",
           "align-items:center",
           "justify-content:center",
           "cursor:pointer",
-          "opacity:0.8",
+          "opacity:0.65",
           "pointer-events:auto",
           "color:#fff",
         ].join(";");
         b.innerHTML = svg;
         b.addEventListener("mouseenter", () => (b.style.opacity = "1"), { signal: ac.signal });
-        b.addEventListener("mouseleave", () => (b.style.opacity = "0.8"), { signal: ac.signal });
+        b.addEventListener("mouseleave", () => (b.style.opacity = "0.65"), { signal: ac.signal });
         b.addEventListener(
           "click",
           (e) => {
@@ -33472,12 +33473,26 @@ if (type === "warn" && scanLimit !== null) {
         ),
       );
       win.appendChild(controls);
+      const newTabBtn = _fiMakeCtrlBtn(
+        '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>',
+        t("fi_ctrl_newtab"),
+        () => window.open(img.src, "_blank", "noopener,noreferrer"),
+      );
+      newTabBtn.style.position = "absolute";
+      newTabBtn.style.top = "30px";
+      newTabBtn.style.right = "4px";
+      newTabBtn.style.display = "none";
+      newTabBtn.style.zIndex = "2";
+      win.appendChild(newTabBtn);
       controls.addEventListener("mousedown", (e) => e.stopPropagation(), { signal: ac.signal });
       controls.addEventListener("dblclick", (e) => e.stopPropagation(), { signal: ac.signal });
+      newTabBtn.addEventListener("mousedown", (e) => e.stopPropagation(), { signal: ac.signal });
+      newTabBtn.addEventListener("dblclick", (e) => e.stopPropagation(), { signal: ac.signal });
       win.addEventListener(
         "mouseenter",
         () => {
           controls.style.display = "flex";
+          newTabBtn.style.display = "flex";
           const curInst = _fiInstances.get(id);
           if (curInst && curInst.stackId != null) {
             const handle = _fiStackHandles.get(curInst.stackId);
@@ -33490,6 +33505,7 @@ if (type === "warn" && scanLimit !== null) {
         "mouseleave",
         (e) => {
           controls.style.display = "none";
+          newTabBtn.style.display = "none";
           const curInst = _fiInstances.get(id);
           if (curInst && curInst.stackId != null) {
             const handle = _fiStackHandles.get(curInst.stackId);
