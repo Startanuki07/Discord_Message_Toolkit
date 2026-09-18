@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.2.4
+// @version      2.9.2.14
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -63,7 +63,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.2.4";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.2.14";
 
   const GMStore = {
     
@@ -1305,6 +1305,7 @@
       to_threads_net: "🧵 to threads.net",
       to_fixthreads: "🔁 to fixthreads",
       to_fzthreads: "🔁 to fzthreads",
+      to_vxthreads: "🔁 to vxthreads",
       to_fx_bilibili: "📺 to FX Bilibili",
       to_vx_bilibili: "📼 to VX Bilibili",
       to_b23: "🔗 to b23.tv",
@@ -1967,6 +1968,7 @@
       to_threads_net: "🧵 轉為 threads.net",
       to_fixthreads: "🔁 轉為 fixthreads",
       to_fzthreads: "🔁 轉為 fzthreads",
+      to_vxthreads: "🔁 轉為 vxthreads",
       to_fx_bilibili: "📺 轉為 FX Bilibili",
       to_vx_bilibili: "📼 轉為 VX Bilibili",
       to_b23: "🔗 轉為 b23.tv",
@@ -2591,6 +2593,7 @@
       to_threads_net: "🧵 转为 threads.net",
       to_fixthreads: "🔁 转为 fixthreads",
       to_fzthreads: "🔁 转为 fzthreads",
+      to_vxthreads: "🔁 转为 vxthreads",
       to_fx_bilibili: "📺 转为 FX Bilibili",
       to_vx_bilibili: "📼 转为 VX Bilibili",
       to_b23: "🔗 转为 b23.tv",
@@ -3215,6 +3218,7 @@
       to_threads_net: "🧵 threads.net へ",
       to_fixthreads: "🔁 fixthreads へ",
       to_fzthreads: "🔁 fzthreads へ",
+      to_vxthreads: "🔁 vxthreads へ",
       to_fx_bilibili: "📺 FX Bilibili へ",
       to_vx_bilibili: "📼 VX Bilibili へ",
       to_b23: "🔗 b23.tv へ",
@@ -3839,6 +3843,7 @@
       to_threads_net: "🧵 threads.net으로",
       to_fixthreads: "🔁 fixthreads으로",
       to_fzthreads: "🔁 fzthreads으로",
+      to_vxthreads: "🔁 vxthreads으로",
       to_fx_bilibili: "📺 FX Bilibili로",
       to_vx_bilibili: "📼 VX Bilibili로",
       to_b23: "🔗 b23.tv로",
@@ -4454,6 +4459,7 @@
       to_threads_net: "🧵 threads.net",
       to_fixthreads: "🔁 fixthreads",
       to_fzthreads: "🔁 fzthreads",
+      to_vxthreads: "🔁 vxthreads",
       to_fx_bilibili: "📺 FX Bilibili",
       to_vx_bilibili: "📼 VX Bilibili",
       to_b23: "🔗 b23.tv",
@@ -5078,6 +5084,7 @@
       to_threads_net: "🧵 threads.net",
       to_fixthreads: "🔁 fixthreads",
       to_fzthreads: "🔁 fzthreads",
+      to_vxthreads: "🔁 vxthreads",
       to_fx_bilibili: "📺 FX Bilibili",
       to_vx_bilibili: "📼 VX Bilibili",
       to_b23: "🔗 b23.tv",
@@ -5702,6 +5709,7 @@
       to_threads_net: "🧵 threads.net",
       to_fixthreads: "🔁 fixthreads",
       to_fzthreads: "🔁 fzthreads",
+      to_vxthreads: "🔁 vxthreads",
       to_fx_bilibili: "📺 FX Bilibili",
       to_vx_bilibili: "📼 VX Bilibili",
       to_b23: "🔗 b23.tv",
@@ -6328,6 +6336,7 @@
       to_threads_net: "🧵 threads.net",
       to_fixthreads: "🔁 fixthreads",
       to_fzthreads: "🔁 fzthreads",
+      to_vxthreads: "🔁 vxthreads",
       to_fx_bilibili: "📺 FX Bilibili",
       to_vx_bilibili: "📼 VX Bilibili",
       to_b23: "🔗 b23.tv",
@@ -6950,6 +6959,7 @@
       to_threads_net: "🧵 threads.net",
       to_fixthreads: "🔁 fixthreads",
       to_fzthreads: "🔁 fzthreads",
+      to_vxthreads: "🔁 vxthreads",
       to_fx_bilibili: "📺 FX Bilibili",
       to_vx_bilibili: "📼 VX Bilibili",
       to_b23: "🔗 b23.tv",
@@ -10569,8 +10579,17 @@
       if (tailQuery !== null && _dmtIsDiscordEmbedHintQuery(tailQuery)) {
         base = base.slice(0, qIdx);
         if (hint) base += hint;
+      } else if (tailQuery === null && hint) {
+        base += hint;
       }
-      return base.replace(/%3A/g, ":");
+      base = base.replace(/%3A/g, ":");
+      const vxTvidMatch = base.match(
+        /^https?:\/\/(?:www\.)?(?:vxtwitter|fixvx)\.com\/tvid\/(.+)$/i,
+      );
+      if (vxTvidMatch) {
+        base = `https://video.twimg.com/${vxTvidMatch[1]}.mp4`;
+      }
+      return base;
     }
     function _dmtExtractExternalUrl(rawUrlString) {
       const match = rawUrlString.match(/\/external\/([\s\S]+)/);
@@ -12766,12 +12785,13 @@
           {
             type: "threads",
             label: "Threads",
-            domains: ["threads.com", "threads.net", "fixthreads.seria.moe", "fzthreads.com"],
+            domains: ["threads.com", "threads.net", "fixthreads.seria.moe", "fzthreads.com", "vxthreads.com"],
             labels: {
               "threads.com": "to_threads",
               "threads.net": "to_threads_net",
               "fixthreads.seria.moe": "to_fixthreads",
               "fzthreads.com": "to_fzthreads",
+              "vxthreads.com": "to_vxthreads",
             },
           },
           {
@@ -12969,6 +12989,14 @@
           if (items.length === 1) processor(items[0], false);
           else processor(items, true);
         };
+        const stripQueryForThreads = (type, path) => {
+          if (type !== "threads" || path.startsWith("/intent/")) return path;
+          const noQuery = path.split("?")[0];
+          const postMatch = noQuery.match(
+            /^(\/@[^/]+\/post\/[a-zA-Z0-9_-]+|\/t\/[a-zA-Z0-9_-]+)/,
+          );
+          return postMatch ? postMatch[1] : noQuery;
+        };
         DOMAIN_GROUPS.forEach((group) => {
           processGroup(group.type, (data, isBatch) => {
             const prefs = getConvPrefs(group.type);
@@ -12978,7 +13006,7 @@
                 if (sourceDomains.size === 1 && sourceDomains.has(domain)) return;
                 if (prefs.length > 0 && !prefs.includes(domain)) return;
                 const allConverted = data
-                  .map((d) => `https://${domain}${d.path}`)
+                  .map((d) => `https://${domain}${stripQueryForThreads(group.type, d.path)}`)
                   .join("\n");
                 addItem(
                   "convert",
@@ -12993,7 +13021,7 @@
                   addItem(
                     "convert",
                     t(group.labels[domain]),
-                    `https://${domain}${data.path}`,
+                    `https://${domain}${stripQueryForThreads(group.type, data.path)}`,
                   );
                 }
               });
@@ -13427,7 +13455,7 @@
         }, { once: true });
       };
 
-      const discordBtnContainer = (() => {
+      const _msFindDiscordBtnContainer = () => {
         for (const child of msg.children) {
           const childClass =
             typeof child.className === "string"
@@ -13455,12 +13483,28 @@
           }
         }
         return null;
-      })();
+      };
+      let discordBtnContainer = _msFindDiscordBtnContainer();
       if (discordBtnContainer) {
         discordBtnContainer.insertAdjacentElement("afterend", btn);
       } else {
         msg.appendChild(btn);
       }
+
+      const _msRecalcCopyBtnRight = () => {
+        if (!discordBtnContainer || !discordBtnContainer.isConnected) {
+          discordBtnContainer = _msFindDiscordBtnContainer();
+        }
+        if (!discordBtnContainer) return;
+        const inner =
+          discordBtnContainer.querySelector('div[class*="buttonsInner"]') ||
+          discordBtnContainer.querySelector('div[class*="buttons__"]');
+        if (!inner) return;
+        const innerWidth = inner.offsetWidth;
+        if (!innerWidth) return;
+        btn.style.right = `${innerWidth + 8}px`;
+      };
+      msg.addEventListener("mouseenter", _msRecalcCopyBtnRight);
 
       btn.addEventListener("mouseenter", () => {
         config = getConfig();
@@ -29179,6 +29223,7 @@ unsafeWindow.fetch = function(...args) {
       "threads.net":            "threads.com",
       "fixthreads.seria.moe":   "threads.com",
       "fzthreads.com":          "threads.com",
+      "vxthreads.com":          "threads.com",
     };
 
     function normalizeURL(raw) {
@@ -32913,6 +32958,7 @@ if (type === "warn" && scanLimit !== null) {
     const SK_FI_WINDOWS = "fi_windows";
     let _fiCounter = 0;
     const _fiInstances = new Map();
+    let _fiActiveLightboxClose = null;
     let _fiDraggingId = null, _fiDragOffsetX = 0, _fiDragOffsetY = 0;
     let _fiDragCachedW = 0, _fiDragCachedH = 0;
     let _fiGroupDragCachedW = 0, _fiGroupDragCachedH = 0;
@@ -33846,6 +33892,7 @@ if (type === "warn" && scanLimit !== null) {
     function _fiIsCandidateImg(img) {
       if (!img || img.tagName !== "IMG" || !img.src) return false;
       if (img.closest(".dmt-fi-window")) return false;
+      if (img.closest("#dmt-fi-lightbox")) return false;
       if (img.className.includes("avatar") || img.closest('[class*="avatar"]')) return false;
       if (img.className.includes("emoji") || (img.alt && /:\w+:/.test(img.alt))) return false;
       const r = img.getBoundingClientRect();
@@ -33965,8 +34012,7 @@ if (type === "warn" && scanLimit !== null) {
     }
 
     function _fiRenderLightbox(items) {
-      const old = document.getElementById("dmt-fi-lightbox");
-      if (old) old.remove();
+      if (_fiActiveLightboxClose) _fiActiveLightboxClose();
       _fiEnsureLightboxStyle();
 
       const persistentLayer = dmtGetPersistentLayer();
@@ -34011,9 +34057,9 @@ if (type === "warn" && scanLimit !== null) {
       function closeLightbox() {
         modal.classList.remove("dmt-fi-lb-in");
         setTimeout(() => { modal.remove(); }, 220);
-        document.removeEventListener("keydown", keyHandler);
         dragAC.abort();
         persistentLayer.style.display = "";
+        if (_fiActiveLightboxClose === closeLightbox) _fiActiveLightboxClose = null;
       }
 
       const stage = document.createElement("div");
@@ -34255,7 +34301,7 @@ if (type === "warn" && scanLimit !== null) {
           _resetZoom(); scheduleUpdate();
         }
       };
-      document.addEventListener("keydown", keyHandler);
+      document.addEventListener("keydown", keyHandler, { signal: dragAC.signal });
 
       const NAV_BTN_BASE = `
         position: absolute; top: 50%; transform: translateY(-50%);
@@ -34314,6 +34360,8 @@ if (type === "warn" && scanLimit !== null) {
       if (prevBtn) modal.appendChild(prevBtn);
       if (nextBtn) modal.appendChild(nextBtn);
       document.body.appendChild(modal);
+
+      _fiActiveLightboxClose = closeLightbox;
 
       requestAnimationFrame(() => {
         cards.forEach((card) => card.classList.add("dmt-fi-lb-animated"));
@@ -34394,10 +34442,12 @@ if (type === "warn" && scanLimit !== null) {
     _fiRestoreAll();
 
     ModuleCleanupRegistry.add("mod_floatimage", () => {
+      if (_fiActiveLightboxClose) _fiActiveLightboxClose();
       _fiCloseAll();
       _fiHoverAC.abort();
       _fiHoverBtn.remove();
       _fiDragAC.abort();
+      document.getElementById("dmt-fi-lb-style")?.remove();
       _floatImageInstance = null;
       if (DEBUG) delete window.dmtFloatImageModule;
     });
