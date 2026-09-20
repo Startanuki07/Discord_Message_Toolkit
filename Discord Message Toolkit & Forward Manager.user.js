@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.2.14
+// @version      2.9.3.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -63,7 +63,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.2.14";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.3.0";
 
   const GMStore = {
     
@@ -473,6 +473,15 @@
       tip:            "mod_tip_floatimage",
       label: {
         "en-US": "Floating Image Window",
+        "zh-TW": "浮動圖片視窗",
+        "zh-CN": "浮动图片窗口",
+        ja:      "フロート画像ウィンドウ",
+        ko:      "떠 있는 이미지 창",
+        de:      "Schwebendes Bildfenster",
+        es:      "Ventana de imagen flotante",
+        "pt-BR": "Janela de imagem flutuante",
+        fr:      "Fenêtre d'image flottante",
+        ru:      "Плавающее окно изображения",
       },
     },
   ];
@@ -1251,6 +1260,7 @@
       fi_new_badge_label: "New",
       fi_stack_handle_tip: "Drag to move the whole stack",
       fi_lightbox_btn_tip: "Browse all floating images in a lightbox",
+      fi_hover_btn_tip: "Float this image",
       fi_lb_exit: "Exit lightbox",
       fi_style_badge_tip: "Adjust the stacking style (rotation, offset, stack limit)",
       fi_style_rotate_label: "Rotation angle",
@@ -1924,6 +1934,36 @@
       reload_confirm: "語言設定已儲存！\n是否立即重新整理頁面以套用變更？",
       copy_text: "📋 複製文字內容",
       copy_media_url: "🖼️ 複製媒體網址",
+      float_image_menu: "🪟 浮動此圖片",
+      fi_hover_badge_tip: "切換大圖上出現的懸停快捷按鈕",
+      fi_state_on: "開",
+      fi_state_off: "關",
+      fi_hover_on_toast: "✨ 已啟用懸停快捷按鈕 — 將滑鼠移到大圖上即可看到",
+      fi_hover_off_toast: "已停用懸停快捷按鈕",
+      fi_ctrl_download: "下載",
+      fi_ctrl_copy: "複製圖片網址",
+      fi_ctrl_copied: "📋 已複製圖片網址",
+      fi_ctrl_newtab: "在新分頁開啟",
+      fi_ctrl_close: "關閉",
+      fi_download_fail: "下載失敗",
+      fi_img_load_failed: "圖片載入失敗",
+      fi_close_all_tip: "關閉所有浮動圖片視窗",
+      fi_close_all_label: "🗑️ 全部關閉",
+      fi_close_all_toast: "🗑️ 已關閉所有浮動視窗",
+      fi_new_badge_tip: "新功能：浮動的圖片現在會自動疊放在一起",
+      fi_new_badge_label: "新",
+      fi_stack_handle_tip: "拖曳以移動整疊圖片",
+      fi_lightbox_btn_tip: "以燈箱瀏覽所有浮動圖片",
+      fi_hover_btn_tip: "浮動此圖片",
+      fi_lb_exit: "離開燈箱",
+      fi_style_badge_tip: "調整疊放樣式（旋轉角度、位移量、每疊上限）",
+      fi_style_rotate_label: "旋轉角度",
+      fi_style_offset_label: "位移量",
+      fi_style_cap_label: "每疊上限",
+      fi_style_reset_label: "還原預設",
+      fi_style_reset_toast: "✨ 已將疊放樣式還原為預設",
+      fi_style_throw_label: "拋擲慣性",
+      fi_menu_info_tip: "拖曳視窗可移動位置，拖到另一張附近可疊放在一起。當 2 張以上圖片疊放時，拖曳角落的小把手即可移動整疊。滾輪可縮放，雙擊可關閉。",
       no_content: "⚠️ 無可複製內容",
       copy_first_link: "🔗 複製第一個連結 (已淨化)",
       copy_markdown: "🧾 複製為 Markdown",
@@ -2237,6 +2277,7 @@
       mod_tip_blacklist:  "將特定使用者的訊息弱化至背景，讓它們不再吸引注意。對任何訊息按右鍵即可新增。",
       mod_tip_myposts:    "瀏覽、篩選並排程刪除自己的發文。開啟面板時自動取得 API Token，使用內建排程功能可限制每日刪除則數。",
       mod_tip_mosaic:     "瀏覽目前伺服器或頻道的所有媒體。需要 API Token（與個人訊息管理相同）。",
+      mod_tip_floatimage: "將訊息中的任何圖片浮動到可拖曳的視窗上。雙擊視窗即可關閉。",
 
       ms_token_warn:      "⚠️ Mosaic 使用你的 API Token 掃描媒體，請僅在可信任的裝置上使用。",
       ms_scope_server:    "伺服器",
@@ -2549,6 +2590,36 @@
       reload_confirm: "语言设置已保存！\n是否立即刷新页面以应用更改？",
       copy_text: "📋 复制文字内容",
       copy_media_url: "🖼️ 复制媒体网址",
+      float_image_menu: "🪟 浮动此图片",
+      fi_hover_badge_tip: "切换大图上出现的悬停快捷按钮",
+      fi_state_on: "开",
+      fi_state_off: "关",
+      fi_hover_on_toast: "✨ 已启用悬停快捷按钮 — 将鼠标移到大图上即可看到",
+      fi_hover_off_toast: "已停用悬停快捷按钮",
+      fi_ctrl_download: "下载",
+      fi_ctrl_copy: "复制图片网址",
+      fi_ctrl_copied: "📋 已复制图片网址",
+      fi_ctrl_newtab: "在新标签页打开",
+      fi_ctrl_close: "关闭",
+      fi_download_fail: "下载失败",
+      fi_img_load_failed: "图片加载失败",
+      fi_close_all_tip: "关闭所有浮动图片窗口",
+      fi_close_all_label: "🗑️ 全部关闭",
+      fi_close_all_toast: "🗑️ 已关闭所有浮动窗口",
+      fi_new_badge_tip: "新功能：浮动的图片现在会自动叠放在一起",
+      fi_new_badge_label: "新",
+      fi_stack_handle_tip: "拖动以移动整叠图片",
+      fi_lightbox_btn_tip: "以灯箱浏览所有浮动图片",
+      fi_hover_btn_tip: "浮动此图片",
+      fi_lb_exit: "退出灯箱",
+      fi_style_badge_tip: "调整叠放样式（旋转角度、位移量、每叠上限）",
+      fi_style_rotate_label: "旋转角度",
+      fi_style_offset_label: "位移量",
+      fi_style_cap_label: "每叠上限",
+      fi_style_reset_label: "恢复默认",
+      fi_style_reset_toast: "✨ 已将叠放样式恢复为默认",
+      fi_style_throw_label: "抛掷惯性",
+      fi_menu_info_tip: "拖动窗口可移动位置，拖到另一张附近可叠放在一起。当 2 张以上图片叠放时，拖动角落的小把手即可移动整叠。滚轮可缩放，双击可关闭。",
       no_content: "⚠️ 无可复制内容",
       copy_first_link: "🔗 复制第一个链接 (已净化)",
       copy_markdown: "🧾 复制为 Markdown",
@@ -2860,6 +2931,7 @@
       mod_tip_blacklist:  "将特定用户的消息弱化至背景，让其不再引人注意。右键任意消息即可添加。",
       mod_tip_myposts:    "浏览、筛选并安排删除自己的消息。打开面板时自动获取 API Token，内置配额功能可限制每日删除数量。",
       mod_tip_mosaic:     "浏览当前服务器或频道的所有媒体。需要 API Token（与个人消息管理相同）。",
+      mod_tip_floatimage: "将消息中的任何图片浮动到可拖动的窗口上。双击窗口即可关闭。",
 
       ms_token_warn:      "⚠️ Mosaic 使用你的 API Token 扫描媒体，请仅在可信任的设备上使用。",
       ms_scope_server:    "服务器",
@@ -3174,6 +3246,36 @@
         "設定を保存しました！\nすぐにページを再読み込みしますか？",
       copy_text: "📋 テキストをコピー",
       copy_media_url: "🖼️ メディアURLをコピー",
+      float_image_menu: "🪟 この画像をフロート表示",
+      fi_hover_badge_tip: "大きな画像に表示されるホバークイックボタンを切り替え",
+      fi_state_on: "オン",
+      fi_state_off: "オフ",
+      fi_hover_on_toast: "✨ ホバークイックボタンを有効にしました — 大きな画像にマウスを重ねると表示されます",
+      fi_hover_off_toast: "ホバークイックボタンを無効にしました",
+      fi_ctrl_download: "ダウンロード",
+      fi_ctrl_copy: "画像URLをコピー",
+      fi_ctrl_copied: "📋 画像URLをコピーしました",
+      fi_ctrl_newtab: "新しいタブで開く",
+      fi_ctrl_close: "閉じる",
+      fi_download_fail: "ダウンロードに失敗しました",
+      fi_img_load_failed: "画像を読み込めませんでした",
+      fi_close_all_tip: "すべてのフロート画像ウィンドウを閉じる",
+      fi_close_all_label: "🗑️ すべて閉じる",
+      fi_close_all_toast: "🗑️ すべてのフロートウィンドウを閉じました",
+      fi_new_badge_tip: "新機能：フロートした画像が自動的に重なって表示されるようになりました",
+      fi_new_badge_label: "新",
+      fi_stack_handle_tip: "ドラッグしてスタック全体を移動",
+      fi_lightbox_btn_tip: "すべてのフロート画像をライトボックスで閲覧",
+      fi_hover_btn_tip: "この画像をフロート表示",
+      fi_lb_exit: "ライトボックスを終了",
+      fi_style_badge_tip: "スタックのスタイルを調整（回転角度・オフセット・スタック上限）",
+      fi_style_rotate_label: "回転角度",
+      fi_style_offset_label: "オフセット距離",
+      fi_style_cap_label: "スタックあたりの上限",
+      fi_style_reset_label: "デフォルトに戻す",
+      fi_style_reset_toast: "✨ スタックのスタイルをデフォルトに戻しました",
+      fi_style_throw_label: "慣性で投げる",
+      fi_menu_info_tip: "ウィンドウをドラッグして移動、別のウィンドウの近くにドラッグすると重ねられます。2枚以上重なっているときは、角の小さなハンドルをドラッグするとスタック全体を移動できます。スクロールでズーム、ダブルクリックで閉じます。",
       no_content: "⚠️ コンテンツなし",
       copy_first_link: "🔗 最初のリンクをコピー (浄化済)",
       copy_markdown: "🧾 Markdownとしてコピー",
@@ -3491,6 +3593,7 @@
       mod_tip_blacklist:  "特定ユーザーのメッセージを薄く表示して目立たなくする。右クリックから追加可能。",
       mod_tip_myposts:    "自分の投稿を閲覧・絞り込み・制限削除。パネルを開くと自動で API Token を取得します。",
       mod_tip_mosaic:     "現在のサーバーまたはチャンネルのメディアを一覧表示します。My Posts と同じ API トークンが必要です。",
+      mod_tip_floatimage: "メッセージ内の任意の画像を、ドラッグ可能なフロートウィンドウに表示します。ウィンドウをダブルクリックで閉じます。",
 
       ms_token_warn:      "⚠️ Mosaic は API トークンを使用してメディアをスキャンします。信頼できるデバイスでのみ使用してください。",
       ms_scope_server:    "サーバー",
@@ -3799,6 +3902,36 @@
         "설정이 저장되었습니다!\n지금 페이지를 새로 고치시겠습니까?",
       copy_text: "📋 텍스트 복사",
       copy_media_url: "🖼️ 미디어 URL 복사",
+      float_image_menu: "🪟 이 이미지 띄우기",
+      fi_hover_badge_tip: "큰 이미지에 나타나는 호버 빠른 버튼을 켜거나 끕니다",
+      fi_state_on: "켜짐",
+      fi_state_off: "꺼짐",
+      fi_hover_on_toast: "✨ 호버 빠른 버튼이 켜졌습니다 — 큰 이미지 위에 마우스를 올리면 표시됩니다",
+      fi_hover_off_toast: "호버 빠른 버튼이 꺼졌습니다",
+      fi_ctrl_download: "다운로드",
+      fi_ctrl_copy: "이미지 URL 복사",
+      fi_ctrl_copied: "📋 이미지 URL이 복사되었습니다",
+      fi_ctrl_newtab: "새 탭에서 열기",
+      fi_ctrl_close: "닫기",
+      fi_download_fail: "다운로드 실패",
+      fi_img_load_failed: "이미지를 불러오지 못했습니다",
+      fi_close_all_tip: "모든 떠 있는 이미지 창 닫기",
+      fi_close_all_label: "🗑️ 모두 닫기",
+      fi_close_all_toast: "🗑️ 모든 떠 있는 창을 닫았습니다",
+      fi_new_badge_tip: "새 기능: 띄운 이미지가 이제 자동으로 겹쳐서 쌓입니다",
+      fi_new_badge_label: "신규",
+      fi_stack_handle_tip: "드래그하여 스택 전체 이동",
+      fi_lightbox_btn_tip: "떠 있는 모든 이미지를 라이트박스로 보기",
+      fi_hover_btn_tip: "이 이미지 띄우기",
+      fi_lb_exit: "라이트박스 종료",
+      fi_style_badge_tip: "스택 스타일 조정 (회전 각도, 오프셋, 스택 상한)",
+      fi_style_rotate_label: "회전 각도",
+      fi_style_offset_label: "오프셋 거리",
+      fi_style_cap_label: "스택당 최대 개수",
+      fi_style_reset_label: "기본값으로 재설정",
+      fi_style_reset_toast: "✨ 스택 스타일을 기본값으로 재설정했습니다",
+      fi_style_throw_label: "관성으로 던지기",
+      fi_menu_info_tip: "창을 드래그하여 이동하거나, 다른 창 근처로 드래그하면 겹쳐 쌓을 수 있습니다. 2개 이상 쌓여 있을 때는 모서리의 작은 핸들을 드래그하면 스택 전체를 이동할 수 있습니다. 스크롤로 확대/축소, 더블클릭으로 닫습니다.",
       no_content: "⚠️ 콘텐츠 없음",
       copy_first_link: "🔗 첫 번째 링크 복사 (Clean)",
       copy_markdown: "🧾 마크다운으로 복사",
@@ -4157,6 +4290,7 @@
       mod_tip_blacklist:  "특정 사용자의 메시지를 흐릿하게 표시합니다. 메시지를 우클릭하여 작성자를 추가하세요.",
       mod_tip_myposts:    "내 메시지를 탐색, 필터링 및 삭제 예약합니다. 패널 열기 시 API 토큰이 자동으로 가져와집니다.",
       mod_tip_mosaic:     "현재 서버 또는 채널의 미디어를 열람합니다. My Posts와 동일한 API 토큰이 필요합니다.",
+      mod_tip_floatimage: "메시지의 모든 이미지를 드래그 가능한 떠 있는 창으로 띄웁니다. 창을 더블클릭하면 닫힙니다.",
 
       ms_token_warn:      "⚠️ Mosaic은 API 토큰을 사용하여 미디어를 스캔합니다. 신뢰할 수 있는 기기에서만 사용하세요.",
       ms_scope_server:    "서버",
@@ -4415,6 +4549,36 @@
       reload_confirm: "¡Configuración guardada!\n¿Recargar la página ahora?",
       copy_text: "📋 Copiar texto",
       copy_media_url: "🖼️ Copiar URL de medios",
+      float_image_menu: "🪟 Flotar esta imagen",
+      fi_hover_badge_tip: "Activa o desactiva el botón rápido que aparece al pasar el cursor sobre imágenes grandes",
+      fi_state_on: "Sí",
+      fi_state_off: "No",
+      fi_hover_on_toast: "✨ Botón rápido activado — pasa el cursor sobre una imagen grande para verlo",
+      fi_hover_off_toast: "Botón rápido desactivado",
+      fi_ctrl_download: "Descargar",
+      fi_ctrl_copy: "Copiar URL de la imagen",
+      fi_ctrl_copied: "📋 URL de la imagen copiada",
+      fi_ctrl_newtab: "Abrir en una pestaña nueva",
+      fi_ctrl_close: "Cerrar",
+      fi_download_fail: "Error al descargar",
+      fi_img_load_failed: "No se pudo cargar la imagen",
+      fi_close_all_tip: "Cerrar todas las ventanas de imágenes flotantes",
+      fi_close_all_label: "🗑️ Cerrar todo",
+      fi_close_all_toast: "🗑️ Todas las ventanas flotantes cerradas",
+      fi_new_badge_tip: "Novedad: las imágenes flotantes ahora se apilan automáticamente",
+      fi_new_badge_label: "Nuevo",
+      fi_stack_handle_tip: "Arrastra para mover toda la pila",
+      fi_lightbox_btn_tip: "Ver todas las imágenes flotantes en un visor",
+      fi_hover_btn_tip: "Flotar esta imagen",
+      fi_lb_exit: "Salir del visor",
+      fi_style_badge_tip: "Ajustar el estilo de apilado (rotación, desplazamiento, límite por pila)",
+      fi_style_rotate_label: "Ángulo de rotación",
+      fi_style_offset_label: "Distancia de desplazamiento",
+      fi_style_cap_label: "Máx. por pila",
+      fi_style_reset_label: "Restablecer valores",
+      fi_style_reset_toast: "✨ Estilo de apilado restablecido",
+      fi_style_throw_label: "Lanzar con inercia",
+      fi_menu_info_tip: "Arrastra la ventana para moverla, o llévala junto a otra para apilarlas. Con 2 o más imágenes apiladas, arrastra el pequeño tirador de la esquina para mover toda la pila. Desplaza la rueda para hacer zoom y haz doble clic para cerrar.",
       no_content: "⚠️ Sin contenido",
       copy_first_link: "🔗 Copiar primer enlace (limpio)",
       copy_markdown: "🧾 Copiar como Markdown",
@@ -4897,6 +5061,7 @@
       mp_copy_link:             "Copiar enlace del mensaje",
       mp_idb_blocked:           "⚠️ Cierra otras pestañas de Discord y vuelve a intentarlo",
       mod_tip_mosaic:           "Explora todos los archivos multimedia del servidor o canal actual. Requiere el modo API de Wormhole.",
+      mod_tip_floatimage: "Muestra cualquier imagen de un mensaje en una ventana flotante que puedes arrastrar. Haz doble clic en una ventana para cerrarla.",
       ms_token_warn:            "⚠️ Mosaic usa tu token de API para escanear archivos multimedia. Úsalo solo en entornos de confianza.",
       ms_scope_server:          "Servidor",
       ms_scope_channel:         "Canal",
@@ -5040,6 +5205,36 @@
       reload_confirm: "Configurações salvas!\nRecarregar a página agora?",
       copy_text: "📋 Copiar texto",
       copy_media_url: "🖼️ Copiar URL de mídia",
+      float_image_menu: "🪟 Flutuar esta imagem",
+      fi_hover_badge_tip: "Ativa ou desativa o botão rápido que aparece ao passar o mouse sobre imagens grandes",
+      fi_state_on: "Sim",
+      fi_state_off: "Não",
+      fi_hover_on_toast: "✨ Botão rápido ativado — passe o mouse sobre uma imagem grande para vê-lo",
+      fi_hover_off_toast: "Botão rápido desativado",
+      fi_ctrl_download: "Baixar",
+      fi_ctrl_copy: "Copiar URL da imagem",
+      fi_ctrl_copied: "📋 URL da imagem copiada",
+      fi_ctrl_newtab: "Abrir em nova guia",
+      fi_ctrl_close: "Fechar",
+      fi_download_fail: "Falha no download",
+      fi_img_load_failed: "Não foi possível carregar a imagem",
+      fi_close_all_tip: "Fechar todas as janelas de imagens flutuantes",
+      fi_close_all_label: "🗑️ Fechar tudo",
+      fi_close_all_toast: "🗑️ Todas as janelas flutuantes fechadas",
+      fi_new_badge_tip: "Novidade: as imagens flutuantes agora se empilham automaticamente",
+      fi_new_badge_label: "Novo",
+      fi_stack_handle_tip: "Arraste para mover toda a pilha",
+      fi_lightbox_btn_tip: "Ver todas as imagens flutuantes em um visualizador",
+      fi_hover_btn_tip: "Flutuar esta imagem",
+      fi_lb_exit: "Sair do visualizador",
+      fi_style_badge_tip: "Ajustar o estilo de empilhamento (rotação, deslocamento, limite por pilha)",
+      fi_style_rotate_label: "Ângulo de rotação",
+      fi_style_offset_label: "Distância de deslocamento",
+      fi_style_cap_label: "Máx. por pilha",
+      fi_style_reset_label: "Restaurar padrão",
+      fi_style_reset_toast: "✨ Estilo de empilhamento restaurado ao padrão",
+      fi_style_throw_label: "Arremessar com inércia",
+      fi_menu_info_tip: "Arraste a janela para movê-la, ou leve-a perto de outra para empilhá-las. Com 2 ou mais imagens empilhadas, arraste a pequena alça no canto para mover a pilha inteira. Role para dar zoom e clique duas vezes para fechar.",
       no_content: "⚠️ Sem conteúdo",
       copy_first_link: "🔗 Copiar primeiro link (limpo)",
       copy_markdown: "🧾 Copiar como Markdown",
@@ -5520,6 +5715,7 @@
       mp_copy_link:             "Copiar link da mensagem",
       mp_idb_blocked:           "⚠️ Feche outras abas do Discord e tente novamente",
       mod_tip_mosaic:           "Navegue por toda a mídia do servidor ou canal atual. Requer o modo API do Wormhole.",
+      mod_tip_floatimage: "Exibe qualquer imagem de uma mensagem em uma janela flutuante arrastável. Clique duas vezes em uma janela para fechá-la.",
       ms_token_warn:            "⚠️ O Mosaic usa seu token de API para escanear mídia. Use apenas em ambientes confiáveis.",
       ms_scope_server:          "Servidor",
       ms_scope_channel:         "Canal",
@@ -5665,6 +5861,36 @@
         "Paramètres sauvegardés !\nRecharger la page maintenant ?",
       copy_text: "📋 Copier le texte",
       copy_media_url: "🖼️ Copier l'URL des médias",
+      float_image_menu: "🪟 Détacher cette image",
+      fi_hover_badge_tip: "Active ou désactive le bouton rapide qui apparaît au survol des grandes images",
+      fi_state_on: "Oui",
+      fi_state_off: "Non",
+      fi_hover_on_toast: "✨ Bouton rapide activé — survolez une grande image pour le voir",
+      fi_hover_off_toast: "Bouton rapide désactivé",
+      fi_ctrl_download: "Télécharger",
+      fi_ctrl_copy: "Copier l'URL de l'image",
+      fi_ctrl_copied: "📋 URL de l'image copiée",
+      fi_ctrl_newtab: "Ouvrir dans un nouvel onglet",
+      fi_ctrl_close: "Fermer",
+      fi_download_fail: "Échec du téléchargement",
+      fi_img_load_failed: "Impossible de charger l'image",
+      fi_close_all_tip: "Fermer toutes les fenêtres d'images flottantes",
+      fi_close_all_label: "🗑️ Tout fermer",
+      fi_close_all_toast: "🗑️ Toutes les fenêtres flottantes fermées",
+      fi_new_badge_tip: "Nouveau : les images flottantes s'empilent désormais automatiquement",
+      fi_new_badge_label: "Nouveau",
+      fi_stack_handle_tip: "Faites glisser pour déplacer toute la pile",
+      fi_lightbox_btn_tip: "Parcourir toutes les images flottantes dans une visionneuse",
+      fi_hover_btn_tip: "Détacher cette image",
+      fi_lb_exit: "Quitter la visionneuse",
+      fi_style_badge_tip: "Ajuster le style d'empilement (rotation, décalage, limite par pile)",
+      fi_style_rotate_label: "Angle de rotation",
+      fi_style_offset_label: "Distance de décalage",
+      fi_style_cap_label: "Max. par pile",
+      fi_style_reset_label: "Rétablir par défaut",
+      fi_style_reset_toast: "✨ Style d'empilement rétabli par défaut",
+      fi_style_throw_label: "Lancer avec inertie",
+      fi_menu_info_tip: "Faites glisser la fenêtre pour la déplacer, ou approchez-la d'une autre pour les empiler. Quand 2 images ou plus sont empilées, faites glisser la petite poignée du coin pour déplacer toute la pile. Molette pour zoomer, double-clic pour fermer.",
       no_content: "⚠️ Aucun contenu",
       copy_first_link: "🔗 Copier le premier lien (propre)",
       copy_markdown: "🧾 Copier en Markdown",
@@ -6148,6 +6374,7 @@
       mp_copy_link:             "Copier le lien du message",
       mp_idb_blocked:           "⚠️ Veuillez fermer les autres onglets Discord et réessayer",
       mod_tip_mosaic:           "Parcourez tous les médias du serveur ou du canal actuel. Nécessite le mode API Wormhole.",
+      mod_tip_floatimage: "Affiche n'importe quelle image d'un message dans une fenêtre flottante déplaçable. Double-cliquez sur une fenêtre pour la fermer.",
       ms_token_warn:            "⚠️ Mosaic utilise votre jeton API pour scanner les médias. À utiliser uniquement dans un environnement de confiance.",
       ms_scope_server:          "Serveur",
       ms_scope_channel:         "Canal",
@@ -6292,6 +6519,36 @@
       reload_confirm: "Настройки сохранены!\nПерезагрузить страницу сейчас?",
       copy_text: "📋 Копировать текст",
       copy_media_url: "🖼️ Копировать URL медиа",
+      float_image_menu: "🪟 Вынести изображение",
+      fi_hover_badge_tip: "Включить или выключить быструю кнопку, появляющуюся при наведении на крупные изображения",
+      fi_state_on: "Вкл",
+      fi_state_off: "Выкл",
+      fi_hover_on_toast: "✨ Быстрая кнопка включена — наведите курсор на крупное изображение, чтобы увидеть её",
+      fi_hover_off_toast: "Быстрая кнопка отключена",
+      fi_ctrl_download: "Скачать",
+      fi_ctrl_copy: "Копировать URL изображения",
+      fi_ctrl_copied: "📋 URL изображения скопирован",
+      fi_ctrl_newtab: "Открыть в новой вкладке",
+      fi_ctrl_close: "Закрыть",
+      fi_download_fail: "Ошибка загрузки",
+      fi_img_load_failed: "Не удалось загрузить изображение",
+      fi_close_all_tip: "Закрыть все плавающие окна изображений",
+      fi_close_all_label: "🗑️ Закрыть все",
+      fi_close_all_toast: "🗑️ Все плавающие окна закрыты",
+      fi_new_badge_tip: "Новинка: вынесенные изображения теперь автоматически складываются в стопку",
+      fi_new_badge_label: "Новое",
+      fi_stack_handle_tip: "Перетащите, чтобы переместить всю стопку",
+      fi_lightbox_btn_tip: "Просмотреть все плавающие изображения в лайтбоксе",
+      fi_hover_btn_tip: "Вынести изображение",
+      fi_lb_exit: "Выйти из лайтбокса",
+      fi_style_badge_tip: "Настроить стиль стопки (угол поворота, смещение, лимит стопки)",
+      fi_style_rotate_label: "Угол поворота",
+      fi_style_offset_label: "Величина смещения",
+      fi_style_cap_label: "Макс. в стопке",
+      fi_style_reset_label: "Сбросить по умолчанию",
+      fi_style_reset_toast: "✨ Стиль стопки сброшен по умолчанию",
+      fi_style_throw_label: "Бросок с инерцией",
+      fi_menu_info_tip: "Перетащите окно, чтобы переместить его, или поднесите к другому, чтобы сложить их в стопку. Когда сложено 2 и более изображений, потяните за маленькую ручку в углу, чтобы переместить всю стопку. Колесо мыши — масштаб, двойной щелчок — закрыть.",
       no_content: "⚠️ Нет содержимого",
       copy_first_link: "🔗 Копировать первую ссылку (чистую)",
       copy_markdown: "🧾 Копировать как Markdown",
@@ -6771,6 +7028,7 @@
       mp_copy_link:             "Скопировать ссылку на сообщение",
       mp_idb_blocked:           "⚠️ Закройте другие вкладки Discord и повторите попытку",
       mod_tip_mosaic:           "Просмотр всех медиафайлов текущего сервера или канала. Требуется режим API Wormhole.",
+      mod_tip_floatimage: "Выводит любое изображение из сообщения в перетаскиваемое плавающее окно. Дважды щёлкните окно, чтобы закрыть его.",
       ms_token_warn:            "⚠️ Mosaic использует ваш API-токен для сканирования медиафайлов. Используйте только в доверенной среде.",
       ms_scope_server:          "Сервер",
       ms_scope_channel:         "Канал",
@@ -6915,6 +7173,36 @@
         "Einstellungen gespeichert!\nSeite jetzt neu laden?",
       copy_text: "📋 Text kopieren",
       copy_media_url: "🖼️ Medien-URL kopieren",
+      float_image_menu: "🪟 Bild schweben lassen",
+      fi_hover_badge_tip: "Schaltet den Schnellbutton ein/aus, der beim Überfahren großer Bilder erscheint",
+      fi_state_on: "An",
+      fi_state_off: "Aus",
+      fi_hover_on_toast: "✨ Schnellbutton aktiviert — fahre mit der Maus über ein großes Bild, um ihn zu sehen",
+      fi_hover_off_toast: "Schnellbutton deaktiviert",
+      fi_ctrl_download: "Herunterladen",
+      fi_ctrl_copy: "Bild-URL kopieren",
+      fi_ctrl_copied: "📋 Bild-URL kopiert",
+      fi_ctrl_newtab: "In neuem Tab öffnen",
+      fi_ctrl_close: "Schließen",
+      fi_download_fail: "Download fehlgeschlagen",
+      fi_img_load_failed: "Bild konnte nicht geladen werden",
+      fi_close_all_tip: "Alle schwebenden Bildfenster schließen",
+      fi_close_all_label: "🗑️ Alle schließen",
+      fi_close_all_toast: "🗑️ Alle schwebenden Fenster geschlossen",
+      fi_new_badge_tip: "Neu: Schwebende Bilder werden jetzt automatisch gestapelt",
+      fi_new_badge_label: "Neu",
+      fi_stack_handle_tip: "Ziehen, um den ganzen Stapel zu verschieben",
+      fi_lightbox_btn_tip: "Alle schwebenden Bilder in einer Lightbox durchsuchen",
+      fi_hover_btn_tip: "Bild schweben lassen",
+      fi_lb_exit: "Lightbox verlassen",
+      fi_style_badge_tip: "Stapelstil anpassen (Drehwinkel, Versatz, Stapellimit)",
+      fi_style_rotate_label: "Drehwinkel",
+      fi_style_offset_label: "Versatzabstand",
+      fi_style_cap_label: "Max. pro Stapel",
+      fi_style_reset_label: "Auf Standard zurücksetzen",
+      fi_style_reset_toast: "✨ Stapelstil auf Standard zurückgesetzt",
+      fi_style_throw_label: "Mit Trägheit werfen",
+      fi_menu_info_tip: "Ziehe das Fenster, um es zu verschieben, oder in die Nähe eines anderen, um sie zu stapeln. Bei 2 oder mehr gestapelten Bildern verschiebt der kleine Griff an der Ecke den ganzen Stapel. Mausrad zum Zoomen, Doppelklick zum Schließen.",
       no_content: "⚠️ Kein Inhalt",
       copy_first_link: "🔗 Ersten Link kopieren (bereinigt)",
       copy_markdown: "🧾 Als Markdown kopieren",
@@ -7383,6 +7671,7 @@
       mp_copy_link:             "Nachrichtenlink kopieren",
       mp_idb_blocked:           "⚠️ Bitte andere Discord-Tabs schließen und erneut versuchen",
       mod_tip_mosaic:           "Alle Medien des aktuellen Servers oder Kanals durchsuchen. Erfordert den Wormhole-API-Modus.",
+      mod_tip_floatimage: "Zeigt ein beliebiges Bild aus einer Nachricht in einem verschiebbaren, schwebenden Fenster an. Doppelklicke ein Fenster, um es zu schließen.",
       ms_token_warn:            "⚠️ Mosaic verwendet dein API-Token, um Medien zu scannen. Nur in vertrauenswürdiger Umgebung verwenden.",
       ms_scope_server:          "Server",
       ms_scope_channel:         "Kanal",
@@ -32980,6 +33269,33 @@ if (type === "warn" && scanLimit !== null) {
     const _FI_STACK_OVERLAP_RATIO = 0.35;
     const _FI_STACK_DRAG_THRESHOLD = 6;
     const _FI_BASE_W = 200;
+    const _FI_ZOOM_LEVELS = [0.5, 1, 1.5, 2];
+    const _FI_ZOOM_CUSTOM_STEP = 0.5;
+    const _FI_ZOOM_MAX = 6;
+    const _FI_ZOOM_SMALL_STEP = 0.1;
+    const _FI_ZOOM_MIN = 0.2;
+    const _FI_WHEEL_COOLDOWN_MS = 100;
+    const _FI_ZOOM_ANIM_MS = 200;
+    const _FI_ZOOM_EASING = "cubic-bezier(0.22, 1, 0.36, 1)";
+    const _FI_CTRL_MIN_W = 88;
+    const _fiPrefersReducedMotion = () =>
+      !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    function _fiNextZoom(cur, dir) {
+      const EPS = 1e-6;
+      const bottom = _FI_ZOOM_LEVELS[0];
+      const top = _FI_ZOOM_LEVELS[_FI_ZOOM_LEVELS.length - 1];
+      if (dir > 0) {
+        if (cur < bottom - EPS) return bottom;
+        const nextLevel = _FI_ZOOM_LEVELS.find((z) => z > cur + EPS);
+        if (nextLevel !== undefined) return nextLevel;
+        return Math.min(_FI_ZOOM_MAX, cur + _FI_ZOOM_CUSTOM_STEP);
+      }
+      if (cur > top + EPS) return top;
+      for (let i = _FI_ZOOM_LEVELS.length - 1; i >= 0; i--) {
+        if (_FI_ZOOM_LEVELS[i] < cur - EPS) return _FI_ZOOM_LEVELS[i];
+      }
+      return Math.max(_FI_ZOOM_MIN, Math.round((cur - _FI_ZOOM_SMALL_STEP) * 100) / 100);
+    }
     const _fiStackHandles = new Map();
     const _fiLightboxBtns = new Map();
     let _fiGroupDraggingStackId = null, _fiGroupDragOffsetX = 0, _fiGroupDragOffsetY = 0;
@@ -32995,30 +33311,37 @@ if (type === "warn" && scanLimit !== null) {
         const u = new URL(url);
         const h = u.hostname;
         let s = url;
-        if (h.includes("twimg.com")) {
+        const hostIs = (...domains) => domains.some((d) => h === d || h.endsWith("." + d));
+        if (hostIs("twimg.com")) {
           u.searchParams.set("name", "orig");
           return u.toString();
         }
-        if (h.includes("pximg.net") || h.includes("pixiv.net"))
+        if (hostIs("pximg.net", "pixiv.net"))
           return s.replace(/\/c\/\d+x\d+(_\d+)?\//, "/").replace(/_master1200/, "").replace(/_square1200/, "");
         if (h.includes("blogspot") || h.includes("googleusercontent"))
           return s.replace(/\/(s\d+|w\d+-h\d+)(-[a-z]+)?\//, "/s0/");
         if (h.includes("staticflickr")) return s.replace(/_[mnwz]\.jpg$/, "_b.jpg");
         if (/fbcdn|instagram/.test(h)) return s.replace(/\/[ps]\d+x\d+\//, "/").replace(/_n\./, "_o.");
-        if (h.includes("redd.it") || h.includes("reddit.com"))
-          return s.replace(/\?.*$/, "").replace("preview.redd.it", "i.redd.it");
-        if (h.includes("discordapp") || h.includes("discord.com")) {
+        if (hostIs("redd.it", "reddit.com")) {
+          if (h === "preview.redd.it") {
+            u.hostname = "i.redd.it";
+            u.search = "";
+            return u.toString();
+          }
+          return url;
+        }
+        if (hostIs("discordapp.com", "discordapp.net", "discord.com")) {
           u.searchParams.delete("width");
           u.searchParams.delete("height");
           u.searchParams.delete("format");
           u.searchParams.delete("quality");
           return u.toString();
         }
-        if (h.includes("wikipedia") || h.includes("wikimedia"))
+        if (hostIs("wikipedia.org", "wikimedia.org"))
           return s.replace("/thumb/", "/").replace(/\/\d+px-.+$/, "");
-        if (h.includes("imgur.com"))
+        if (hostIs("imgur.com"))
           return s.replace(/([a-zA-Z0-9]{5,7})[sbml]\.(jpg|png|gif|webp)/, "$1.$2");
-        if (h.includes("unsplash.com")) {
+        if (hostIs("unsplash.com")) {
           u.searchParams.delete("w");
           u.searchParams.delete("h");
           u.searchParams.delete("q");
@@ -33453,8 +33776,11 @@ if (type === "warn" && scanLimit !== null) {
     function _fiCreate(url, x, y, restoreId, restoreLeft, restoreTop, restoreStackId, restoreStackIndex) {
       const upgradedUrl = _fiBestQualityUrl(url);
       const id = restoreId || `fi_${Date.now()}_${++_fiCounter}`;
-      const _FI_MIN_ZOOM = 0.5, _FI_MAX_ZOOM = 3, _FI_ZOOM_STEP = 0.1;
       let zoomFactor = 1;
+      let wheelLastT = 0;
+      let wheelLastDir = 0;
+      let zoomAnim = null;
+      const _fiCtrlFits = () => _FI_BASE_W * zoomFactor >= _FI_CTRL_MIN_W;
       const rawLeft = restoreLeft != null ? restoreLeft : Math.round(x - 100);
       const rawTop = restoreTop != null ? restoreTop : Math.round(y - 100);
       const [left, top] = _fiClampPos(rawLeft, rawTop);
@@ -33617,8 +33943,10 @@ if (type === "warn" && scanLimit !== null) {
       win.addEventListener(
         "mouseenter",
         () => {
-          controls.style.display = "flex";
-          newTabBtn.style.display = "flex";
+          if (_fiCtrlFits()) {
+            controls.style.display = "flex";
+            newTabBtn.style.display = "flex";
+          }
           const curInst = _fiInstances.get(id);
           if (curInst && curInst.stackId != null) {
             const handle = _fiStackHandles.get(curInst.stackId);
@@ -33656,6 +33984,7 @@ if (type === "warn" && scanLimit !== null) {
           if (e.button !== 0) return;
           if (_fiGroupDraggingStackId != null) return;
           if (_fiThrowState.has(id)) _fiStopThrow(id);
+          if (zoomAnim) zoomAnim.finish();
           _fiDraggingId = id;
           win.style.cursor = "grabbing";
           const r = win.getBoundingClientRect();
@@ -33677,10 +34006,26 @@ if (type === "warn" && scanLimit !== null) {
         { signal: ac.signal },
       );
       win.addEventListener("dblclick", () => _fiClose(id), { signal: ac.signal });
+      ac.signal.addEventListener(
+        "abort",
+        () => {
+          if (zoomAnim) zoomAnim.cancel();
+          zoomAnim = null;
+        },
+        { once: true },
+      );
       win.addEventListener(
         "wheel",
         (e) => {
           e.preventDefault();
+          if (e.deltaY === 0) return;
+          const dir = e.deltaY < 0 ? 1 : -1;
+          const now = performance.now();
+          if (dir === wheelLastDir && now - wheelLastT < _FI_WHEEL_COOLDOWN_MS) return;
+          const nextZoom = _fiNextZoom(zoomFactor, dir);
+          if (nextZoom === zoomFactor) return;
+          wheelLastDir = dir;
+          wheelLastT = now;
           const wheelInst = _fiInstances.get(id);
           if (wheelInst && wheelInst.stackId != null) {
             const oldStackId = wheelInst.stackId;
@@ -33689,13 +34034,34 @@ if (type === "warn" && scanLimit !== null) {
             wheelInst.stackId = null;
             wheelInst.stackIndex = 0;
           }
-          const dir = e.deltaY < 0 ? 1 : -1;
-          zoomFactor = Math.min(_FI_MAX_ZOOM, Math.max(_FI_MIN_ZOOM, zoomFactor + dir * _FI_ZOOM_STEP));
+          const cs = getComputedStyle(win);
+          const fromW = cs.width, fromL = cs.left, fromT = cs.top;
+          if (zoomAnim) {
+            zoomAnim.cancel();
+            zoomAnim = null;
+          }
+          zoomFactor = nextZoom;
           win.style.width = Math.round(_FI_BASE_W * zoomFactor) + "px";
+          const ctrlDisplay = _fiCtrlFits() ? "flex" : "none";
+          controls.style.display = ctrlDisplay;
+          newTabBtn.style.display = ctrlDisplay;
           const r = win.getBoundingClientRect();
           const [nx, ny] = _fiClampPos(r.left, r.top, r.width, r.height);
           if (nx !== r.left) win.style.left = nx + "px";
           if (ny !== r.top) win.style.top = ny + "px";
+          if (!_fiPrefersReducedMotion() && typeof win.animate === "function") {
+            const anim = win.animate(
+              [
+                { width: fromW, left: fromL, top: fromT },
+                { width: win.style.width, left: win.style.left, top: win.style.top },
+              ],
+              { duration: _FI_ZOOM_ANIM_MS, easing: _FI_ZOOM_EASING },
+            );
+            zoomAnim = anim;
+            anim.onfinish = anim.oncancel = () => {
+              if (zoomAnim === anim) zoomAnim = null;
+            };
+          }
           if (_fiDraggingId === id) {
             _fiDragCachedW = r.width;
             _fiDragCachedH = r.height;
@@ -33863,7 +34229,7 @@ if (type === "warn" && scanLimit !== null) {
 
     const _fiHoverBtn = document.createElement("div");
     _fiHoverBtn.className = "dmt-fi-hoverbtn";
-    _fiHoverBtn.title = "Float this image";
+    _fiHoverBtn.title = t("fi_hover_btn_tip");
     _fiHoverBtn.style.cssText = [
       "position:fixed",
       "display:none",
@@ -34379,7 +34745,8 @@ if (type === "warn" && scanLimit !== null) {
       _fiInstances.clear();
       _fiStackHandles.forEach((handle) => handle.remove());
       _fiStackHandles.clear();
-      _fiPersistAll();
+      _fiLightboxBtns.forEach((btn) => btn.remove());
+      _fiLightboxBtns.clear();
     }
 
     _floatImageInstance = {
