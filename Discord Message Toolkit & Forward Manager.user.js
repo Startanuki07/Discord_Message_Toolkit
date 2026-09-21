@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.3.0
+// @version      2.9.4.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -63,7 +63,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.3.0";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.4.0";
 
   const GMStore = {
     
@@ -1260,6 +1260,9 @@
       fi_new_badge_label: "New",
       fi_stack_handle_tip: "Drag to move the whole stack",
       fi_lightbox_btn_tip: "Browse all floating images in a lightbox",
+      fi_downloadall_btn_tip: "Download all images in this stack",
+      fi_downloadall_toast: "⬇️ Downloading {n} images",
+      fi_closeall_btn_tip: "Close and remove this entire stack",
       fi_hover_btn_tip: "Float this image",
       fi_lb_exit: "Exit lightbox",
       fi_style_badge_tip: "Adjust the stacking style (rotation, offset, stack limit)",
@@ -1269,6 +1272,7 @@
       fi_style_reset_label: "Reset to Default",
       fi_style_reset_toast: "✨ Stacking style reset to default",
       fi_style_throw_label: "Throw with inertia",
+      fi_style_anim_label: "Play animated images",
       fi_menu_info_tip:
         "Drag the window to move it, or drag it near another to stack them. When 2+ images are stacked, drag the small handle at the corner to move the whole stack. Scroll to zoom, double-click to close.",
       no_content: "⚠️ No Content",
@@ -1954,6 +1958,9 @@
       fi_new_badge_label: "新",
       fi_stack_handle_tip: "拖曳以移動整疊圖片",
       fi_lightbox_btn_tip: "以燈箱瀏覽所有浮動圖片",
+      fi_downloadall_btn_tip: "下載這一疊所有圖片",
+      fi_downloadall_toast: "⬇️ 正在下載 {n} 張圖片",
+      fi_closeall_btn_tip: "關閉並移除整疊圖片",
       fi_hover_btn_tip: "浮動此圖片",
       fi_lb_exit: "離開燈箱",
       fi_style_badge_tip: "調整疊放樣式（旋轉角度、位移量、每疊上限）",
@@ -1963,6 +1970,7 @@
       fi_style_reset_label: "還原預設",
       fi_style_reset_toast: "✨ 已將疊放樣式還原為預設",
       fi_style_throw_label: "拋擲慣性",
+      fi_style_anim_label: "播放動圖",
       fi_menu_info_tip: "拖曳視窗可移動位置，拖到另一張附近可疊放在一起。當 2 張以上圖片疊放時，拖曳角落的小把手即可移動整疊。滾輪可縮放，雙擊可關閉。",
       no_content: "⚠️ 無可複製內容",
       copy_first_link: "🔗 複製第一個連結 (已淨化)",
@@ -2610,6 +2618,9 @@
       fi_new_badge_label: "新",
       fi_stack_handle_tip: "拖动以移动整叠图片",
       fi_lightbox_btn_tip: "以灯箱浏览所有浮动图片",
+      fi_downloadall_btn_tip: "下载这一叠所有图片",
+      fi_downloadall_toast: "⬇️ 正在下载 {n} 张图片",
+      fi_closeall_btn_tip: "关闭并移除整叠图片",
       fi_hover_btn_tip: "浮动此图片",
       fi_lb_exit: "退出灯箱",
       fi_style_badge_tip: "调整叠放样式（旋转角度、位移量、每叠上限）",
@@ -2619,6 +2630,7 @@
       fi_style_reset_label: "恢复默认",
       fi_style_reset_toast: "✨ 已将叠放样式恢复为默认",
       fi_style_throw_label: "抛掷惯性",
+      fi_style_anim_label: "播放动图",
       fi_menu_info_tip: "拖动窗口可移动位置，拖到另一张附近可叠放在一起。当 2 张以上图片叠放时，拖动角落的小把手即可移动整叠。滚轮可缩放，双击可关闭。",
       no_content: "⚠️ 无可复制内容",
       copy_first_link: "🔗 复制第一个链接 (已净化)",
@@ -3266,6 +3278,9 @@
       fi_new_badge_label: "新",
       fi_stack_handle_tip: "ドラッグしてスタック全体を移動",
       fi_lightbox_btn_tip: "すべてのフロート画像をライトボックスで閲覧",
+      fi_downloadall_btn_tip: "このスタックの画像をすべてダウンロード",
+      fi_downloadall_toast: "⬇️ {n} 枚の画像をダウンロード中",
+      fi_closeall_btn_tip: "このスタックを閉じてすべて削除",
       fi_hover_btn_tip: "この画像をフロート表示",
       fi_lb_exit: "ライトボックスを終了",
       fi_style_badge_tip: "スタックのスタイルを調整（回転角度・オフセット・スタック上限）",
@@ -3275,6 +3290,7 @@
       fi_style_reset_label: "デフォルトに戻す",
       fi_style_reset_toast: "✨ スタックのスタイルをデフォルトに戻しました",
       fi_style_throw_label: "慣性で投げる",
+      fi_style_anim_label: "アニメ画像を再生",
       fi_menu_info_tip: "ウィンドウをドラッグして移動、別のウィンドウの近くにドラッグすると重ねられます。2枚以上重なっているときは、角の小さなハンドルをドラッグするとスタック全体を移動できます。スクロールでズーム、ダブルクリックで閉じます。",
       no_content: "⚠️ コンテンツなし",
       copy_first_link: "🔗 最初のリンクをコピー (浄化済)",
@@ -3922,6 +3938,9 @@
       fi_new_badge_label: "신규",
       fi_stack_handle_tip: "드래그하여 스택 전체 이동",
       fi_lightbox_btn_tip: "떠 있는 모든 이미지를 라이트박스로 보기",
+      fi_downloadall_btn_tip: "이 스택의 모든 이미지 다운로드",
+      fi_downloadall_toast: "⬇️ 이미지 {n}장 다운로드 중",
+      fi_closeall_btn_tip: "이 스택을 닫고 모두 제거",
       fi_hover_btn_tip: "이 이미지 띄우기",
       fi_lb_exit: "라이트박스 종료",
       fi_style_badge_tip: "스택 스타일 조정 (회전 각도, 오프셋, 스택 상한)",
@@ -3931,6 +3950,7 @@
       fi_style_reset_label: "기본값으로 재설정",
       fi_style_reset_toast: "✨ 스택 스타일을 기본값으로 재설정했습니다",
       fi_style_throw_label: "관성으로 던지기",
+      fi_style_anim_label: "움직이는 이미지 재생",
       fi_menu_info_tip: "창을 드래그하여 이동하거나, 다른 창 근처로 드래그하면 겹쳐 쌓을 수 있습니다. 2개 이상 쌓여 있을 때는 모서리의 작은 핸들을 드래그하면 스택 전체를 이동할 수 있습니다. 스크롤로 확대/축소, 더블클릭으로 닫습니다.",
       no_content: "⚠️ 콘텐츠 없음",
       copy_first_link: "🔗 첫 번째 링크 복사 (Clean)",
@@ -4569,6 +4589,9 @@
       fi_new_badge_label: "Nuevo",
       fi_stack_handle_tip: "Arrastra para mover toda la pila",
       fi_lightbox_btn_tip: "Ver todas las imágenes flotantes en un visor",
+      fi_downloadall_btn_tip: "Descargar todas las imágenes de esta pila",
+      fi_downloadall_toast: "⬇️ Descargando {n} imágenes",
+      fi_closeall_btn_tip: "Cerrar y eliminar toda esta pila",
       fi_hover_btn_tip: "Flotar esta imagen",
       fi_lb_exit: "Salir del visor",
       fi_style_badge_tip: "Ajustar el estilo de apilado (rotación, desplazamiento, límite por pila)",
@@ -4578,6 +4601,7 @@
       fi_style_reset_label: "Restablecer valores",
       fi_style_reset_toast: "✨ Estilo de apilado restablecido",
       fi_style_throw_label: "Lanzar con inercia",
+      fi_style_anim_label: "Reproducir imágenes animadas",
       fi_menu_info_tip: "Arrastra la ventana para moverla, o llévala junto a otra para apilarlas. Con 2 o más imágenes apiladas, arrastra el pequeño tirador de la esquina para mover toda la pila. Desplaza la rueda para hacer zoom y haz doble clic para cerrar.",
       no_content: "⚠️ Sin contenido",
       copy_first_link: "🔗 Copiar primer enlace (limpio)",
@@ -5225,6 +5249,9 @@
       fi_new_badge_label: "Novo",
       fi_stack_handle_tip: "Arraste para mover toda a pilha",
       fi_lightbox_btn_tip: "Ver todas as imagens flutuantes em um visualizador",
+      fi_downloadall_btn_tip: "Baixar todas as imagens desta pilha",
+      fi_downloadall_toast: "⬇️ Baixando {n} imagens",
+      fi_closeall_btn_tip: "Fechar e remover toda esta pilha",
       fi_hover_btn_tip: "Flutuar esta imagem",
       fi_lb_exit: "Sair do visualizador",
       fi_style_badge_tip: "Ajustar o estilo de empilhamento (rotação, deslocamento, limite por pilha)",
@@ -5234,6 +5261,7 @@
       fi_style_reset_label: "Restaurar padrão",
       fi_style_reset_toast: "✨ Estilo de empilhamento restaurado ao padrão",
       fi_style_throw_label: "Arremessar com inércia",
+      fi_style_anim_label: "Reproduzir imagens animadas",
       fi_menu_info_tip: "Arraste a janela para movê-la, ou leve-a perto de outra para empilhá-las. Com 2 ou mais imagens empilhadas, arraste a pequena alça no canto para mover a pilha inteira. Role para dar zoom e clique duas vezes para fechar.",
       no_content: "⚠️ Sem conteúdo",
       copy_first_link: "🔗 Copiar primeiro link (limpo)",
@@ -5881,6 +5909,9 @@
       fi_new_badge_label: "Nouveau",
       fi_stack_handle_tip: "Faites glisser pour déplacer toute la pile",
       fi_lightbox_btn_tip: "Parcourir toutes les images flottantes dans une visionneuse",
+      fi_downloadall_btn_tip: "Télécharger toutes les images de cette pile",
+      fi_downloadall_toast: "⬇️ Téléchargement de {n} images",
+      fi_closeall_btn_tip: "Fermer et supprimer toute cette pile",
       fi_hover_btn_tip: "Détacher cette image",
       fi_lb_exit: "Quitter la visionneuse",
       fi_style_badge_tip: "Ajuster le style d'empilement (rotation, décalage, limite par pile)",
@@ -5890,6 +5921,7 @@
       fi_style_reset_label: "Rétablir par défaut",
       fi_style_reset_toast: "✨ Style d'empilement rétabli par défaut",
       fi_style_throw_label: "Lancer avec inertie",
+      fi_style_anim_label: "Lire les images animées",
       fi_menu_info_tip: "Faites glisser la fenêtre pour la déplacer, ou approchez-la d'une autre pour les empiler. Quand 2 images ou plus sont empilées, faites glisser la petite poignée du coin pour déplacer toute la pile. Molette pour zoomer, double-clic pour fermer.",
       no_content: "⚠️ Aucun contenu",
       copy_first_link: "🔗 Copier le premier lien (propre)",
@@ -6539,6 +6571,9 @@
       fi_new_badge_label: "Новое",
       fi_stack_handle_tip: "Перетащите, чтобы переместить всю стопку",
       fi_lightbox_btn_tip: "Просмотреть все плавающие изображения в лайтбоксе",
+      fi_downloadall_btn_tip: "Скачать все изображения из этой стопки",
+      fi_downloadall_toast: "⬇️ Скачивание {n} изображений",
+      fi_closeall_btn_tip: "Закрыть и удалить всю стопку",
       fi_hover_btn_tip: "Вынести изображение",
       fi_lb_exit: "Выйти из лайтбокса",
       fi_style_badge_tip: "Настроить стиль стопки (угол поворота, смещение, лимит стопки)",
@@ -6548,6 +6583,7 @@
       fi_style_reset_label: "Сбросить по умолчанию",
       fi_style_reset_toast: "✨ Стиль стопки сброшен по умолчанию",
       fi_style_throw_label: "Бросок с инерцией",
+      fi_style_anim_label: "Воспроизводить анимацию",
       fi_menu_info_tip: "Перетащите окно, чтобы переместить его, или поднесите к другому, чтобы сложить их в стопку. Когда сложено 2 и более изображений, потяните за маленькую ручку в углу, чтобы переместить всю стопку. Колесо мыши — масштаб, двойной щелчок — закрыть.",
       no_content: "⚠️ Нет содержимого",
       copy_first_link: "🔗 Копировать первую ссылку (чистую)",
@@ -7193,6 +7229,9 @@
       fi_new_badge_label: "Neu",
       fi_stack_handle_tip: "Ziehen, um den ganzen Stapel zu verschieben",
       fi_lightbox_btn_tip: "Alle schwebenden Bilder in einer Lightbox durchsuchen",
+      fi_downloadall_btn_tip: "Alle Bilder dieses Stapels herunterladen",
+      fi_downloadall_toast: "⬇️ {n} Bilder werden heruntergeladen",
+      fi_closeall_btn_tip: "Diesen Stapel schließen und vollständig entfernen",
       fi_hover_btn_tip: "Bild schweben lassen",
       fi_lb_exit: "Lightbox verlassen",
       fi_style_badge_tip: "Stapelstil anpassen (Drehwinkel, Versatz, Stapellimit)",
@@ -7202,6 +7241,7 @@
       fi_style_reset_label: "Auf Standard zurücksetzen",
       fi_style_reset_toast: "✨ Stapelstil auf Standard zurückgesetzt",
       fi_style_throw_label: "Mit Trägheit werfen",
+      fi_style_anim_label: "Animierte Bilder abspielen",
       fi_menu_info_tip: "Ziehe das Fenster, um es zu verschieben, oder in die Nähe eines anderen, um sie zu stapeln. Bei 2 oder mehr gestapelten Bildern verschiebt der kleine Griff an der Ecke den ganzen Stapel. Mausrad zum Zoomen, Doppelklick zum Schließen.",
       no_content: "⚠️ Kein Inhalt",
       copy_first_link: "🔗 Ersten Link kopieren (bereinigt)",
@@ -12446,7 +12486,7 @@
 
             const btnRect = styleBtn.getBoundingClientRect();
             const POP_W_ESTIMATE = 246;
-            const POP_H_ESTIMATE = 230;
+            const POP_H_ESTIMATE = 256;
             const openUpward = btnRect.bottom + POP_H_ESTIMATE > window.innerHeight;
             pop.style.left =
               Math.round(Math.max(8, Math.min(btnRect.left, window.innerWidth - POP_W_ESTIMATE - 8))) + "px";
@@ -12512,6 +12552,13 @@
               (v) => _floatImageInstance.setThrowEnabled(v),
             );
             pop.appendChild(throwRow.row);
+
+            const animRow = _fiToggleRow(
+              "fi_style_anim_label",
+              _floatImageInstance.getAnimEnabled(),
+              (v) => _floatImageInstance.setAnimEnabled(v),
+            );
+            pop.appendChild(animRow.row);
 
             const rotateRow = _fiSliderRow(
               "fi_style_rotate_label", style.rotate, 0, 20, 1,
@@ -33259,6 +33306,9 @@ if (type === "warn" && scanLimit !== null) {
     let _FI_STACK_ROTATE = GMStore.get("fi_stack_rotate", _FI_STACK_ROTATE_DEFAULT);
 
     let _fiThrowEnabled = GMStore.get("fi_throw_enabled", false);
+    let _fiAnimEnabled = GMStore.get("fi_anim_enabled", true);
+    const _FI_FREEZE_MAX_EDGE = 1600;
+    const _FI_FREEZE_MAX_BYTES = 30 * 1024 * 1024;
     let _fiMoveHistory = [];
     let _fiThrowState = new Map();
     const _FI_THROW_FRICTION = 0.92;
@@ -33298,6 +33348,52 @@ if (type === "warn" && scanLimit !== null) {
     }
     const _fiStackHandles = new Map();
     const _fiLightboxBtns = new Map();
+    const _fiDownloadAllBtns = new Map();
+    const _fiCloseAllBtns = new Map();
+
+    const _fiSatelliteHideTimers = new Map();
+    const _FI_SATELLITE_HIDE_DELAY = 150;
+
+    const _FI_SATELLITE_TRANSITION = "opacity 0.18s ease, transform 0.18s cubic-bezier(0.34,1.56,0.64,1)";
+
+    function _fiSetSatelliteVisible(el, visible) {
+      el.style.opacity = visible ? "1" : "0";
+      el.style.transform = visible ? "scale(1)" : "scale(0.6)";
+      el.style.pointerEvents = visible ? "auto" : "none";
+    }
+
+    function _fiShowSatelliteGroup(stackId) {
+      const pending = _fiSatelliteHideTimers.get(stackId);
+      if (pending != null) {
+        clearTimeout(pending);
+        _fiSatelliteHideTimers.delete(stackId);
+      }
+      const handle = _fiStackHandles.get(stackId);
+      const lbBtn = _fiLightboxBtns.get(stackId);
+      const dlAllBtn = _fiDownloadAllBtns.get(stackId);
+      const closeBtn = _fiCloseAllBtns.get(stackId);
+      if (handle) _fiSetSatelliteVisible(handle, true);
+      if (lbBtn) _fiSetSatelliteVisible(lbBtn, true);
+      if (dlAllBtn) _fiSetSatelliteVisible(dlAllBtn, true);
+      if (closeBtn) _fiSetSatelliteVisible(closeBtn, true);
+    }
+
+    function _fiScheduleHideSatelliteGroup(stackId) {
+      const pending = _fiSatelliteHideTimers.get(stackId);
+      if (pending != null) clearTimeout(pending);
+      const timerId = setTimeout(() => {
+        _fiSatelliteHideTimers.delete(stackId);
+        const handle = _fiStackHandles.get(stackId);
+        const lbBtn = _fiLightboxBtns.get(stackId);
+        const dlAllBtn = _fiDownloadAllBtns.get(stackId);
+        const closeBtn = _fiCloseAllBtns.get(stackId);
+        if (handle) _fiSetSatelliteVisible(handle, false);
+        if (lbBtn) _fiSetSatelliteVisible(lbBtn, false);
+        if (dlAllBtn) _fiSetSatelliteVisible(dlAllBtn, false);
+        if (closeBtn) _fiSetSatelliteVisible(closeBtn, false);
+      }, _FI_SATELLITE_HIDE_DELAY);
+      _fiSatelliteHideTimers.set(stackId, timerId);
+    }
     let _fiGroupDraggingStackId = null, _fiGroupDragOffsetX = 0, _fiGroupDragOffsetY = 0;
     const _FI_IMG_STYLE_NATURAL =
       "display:block;width:100%;height:auto;max-height:70vh;object-fit:contain;pointer-events:none;";
@@ -33398,7 +33494,8 @@ if (type === "warn" && scanLimit !== null) {
       return members.length ? _fiAnchorRect(_fiInstances.get(members[0])) : null;
     }
 
-    function _fiApplyStackTransform(win, stackIndex) {
+    function _fiApplyStackTransform(win, stackIndex, withTransition) {
+      win.style.transition = withTransition ? "transform 0.28s cubic-bezier(0.34,1.1,0.64,1)" : "";
       win.style.transform = stackIndex
         ? `translate(${stackIndex * _FI_STACK_OFFSET}px, ${stackIndex * _FI_STACK_OFFSET}px) rotate(${stackIndex * _FI_STACK_ROTATE}deg)`
         : "";
@@ -33406,7 +33503,7 @@ if (type === "warn" && scanLimit !== null) {
 
     function _fiApplyAllStackTransforms() {
       _fiInstances.forEach((inst) => {
-        _fiApplyStackTransform(inst.el, inst.stackIndex);
+        _fiApplyStackTransform(inst.el, inst.stackIndex, true);
       });
     }
 
@@ -33428,30 +33525,25 @@ if (type === "warn" && scanLimit !== null) {
         handle.title = t("fi_stack_handle_tip");
         handle.style.cssText = [
           "position:fixed",
-          "display:none",
+          "display:flex",
           "align-items:center",
           "justify-content:center",
           `width:${_FI_HANDLE_SIZE}px`,
           `height:${_FI_HANDLE_SIZE}px`,
           "border-radius:50%",
-          "background:rgba(255,255,255,0.28)",
-          "border:1px solid rgba(255,255,255,0.4)",
+          "background:rgba(255,255,255,0.16)",
+          "border:1px solid rgba(255,255,255,0.35)",
           "cursor:grab",
-          "pointer-events:auto",
-          "backdrop-filter:blur(1px)",
+          "opacity:0",
+          "transform:scale(0.6)",
+          "pointer-events:none",
+          `transition:${_FI_SATELLITE_TRANSITION}`,
+          "backdrop-filter:blur(8px)",
         ].join(";");
         handle.innerHTML =
           '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="rgba(255,255,255,0.85)" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="7" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="7" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="17" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="17" r="1.2" fill="currentColor" stroke="none"/></svg>';
-        handle.addEventListener("mouseenter", () => { handle.style.display = "flex"; }, { signal: _fiDragAC.signal });
-        handle.addEventListener(
-          "mouseleave",
-          (e) => {
-            const lbBtn = _fiLightboxBtns.get(stackId);
-            if (lbBtn && e.relatedTarget && (e.relatedTarget === lbBtn || lbBtn.contains(e.relatedTarget))) return;
-            handle.style.display = "none";
-          },
-          { signal: _fiDragAC.signal },
-        );
+        handle.addEventListener("mouseenter", () => _fiShowSatelliteGroup(stackId), { signal: _fiDragAC.signal });
+        handle.addEventListener("mouseleave", () => _fiScheduleHideSatelliteGroup(stackId), { signal: _fiDragAC.signal });
         handle.addEventListener(
           "mousedown",
           (e) => {
@@ -33491,7 +33583,17 @@ if (type === "warn" && scanLimit !== null) {
     }
 
     const _FI_LB_BTN_SIZE = 18;
-    const _FI_LB_BTN_DIST = 26;
+    const _FI_LB_BTN_DIST = 42;
+
+    function _fiSatelliteAngle(index, total) {
+      if (total <= 1) return 0;
+      return (index / (total - 1)) * 90;
+    }
+
+    function _fiSatelliteOffset(angleDeg, dist) {
+      const rad = (angleDeg * Math.PI) / 180;
+      return { dx: -Math.sin(rad) * dist, dy: -Math.cos(rad) * dist };
+    }
 
     function _fiEnsureLightboxBtn(stackId, anchorRect) {
       let btn = _fiLightboxBtns.get(stackId);
@@ -33501,30 +33603,25 @@ if (type === "warn" && scanLimit !== null) {
         btn.title = t("fi_lightbox_btn_tip");
         btn.style.cssText = [
           "position:fixed",
-          "display:none",
+          "display:flex",
           "align-items:center",
           "justify-content:center",
           `width:${_FI_LB_BTN_SIZE}px`,
           `height:${_FI_LB_BTN_SIZE}px`,
           "border-radius:50%",
-          "background:rgba(88,101,242,0.55)",
-          "border:1px solid rgba(255,255,255,0.45)",
+          "background:rgba(255,255,255,0.16)",
+          "border:1px solid rgba(255,255,255,0.35)",
           "cursor:pointer",
-          "pointer-events:auto",
-          "backdrop-filter:blur(1px)",
+          "opacity:0",
+          "transform:scale(0.6)",
+          "pointer-events:none",
+          `transition:${_FI_SATELLITE_TRANSITION}`,
+          "backdrop-filter:blur(8px)",
         ].join(";");
         btn.innerHTML =
           '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>';
-        btn.addEventListener("mouseenter", () => { btn.style.display = "flex"; }, { signal: _fiDragAC.signal });
-        btn.addEventListener(
-          "mouseleave",
-          (e) => {
-            const handle = _fiStackHandles.get(stackId);
-            if (handle && e.relatedTarget && (e.relatedTarget === handle || handle.contains(e.relatedTarget))) return;
-            btn.style.display = "none";
-          },
-          { signal: _fiDragAC.signal },
-        );
+        btn.addEventListener("mouseenter", () => _fiShowSatelliteGroup(stackId), { signal: _fiDragAC.signal });
+        btn.addEventListener("mouseleave", () => _fiScheduleHideSatelliteGroup(stackId), { signal: _fiDragAC.signal });
         btn.addEventListener(
           "click",
           (e) => {
@@ -33539,9 +33636,10 @@ if (type === "warn" && scanLimit !== null) {
       if (anchorRect) {
         const handleCenterX = anchorRect.left - _FI_HANDLE_OFFSET + _FI_HANDLE_SIZE / 2;
         const handleCenterY = anchorRect.top + anchorRect.height - _FI_HANDLE_OFFSET + _FI_HANDLE_SIZE / 2;
-        const offset = _FI_LB_BTN_DIST * Math.SQRT1_2;
-        btn.style.left = Math.round(handleCenterX - offset - _FI_LB_BTN_SIZE / 2) + "px";
-        btn.style.top = Math.round(handleCenterY - offset - _FI_LB_BTN_SIZE / 2) + "px";
+        const angle = _fiSatelliteAngle(1, 3);
+        const { dx, dy } = _fiSatelliteOffset(angle, _FI_LB_BTN_DIST);
+        btn.style.left = Math.round(handleCenterX + dx - _FI_LB_BTN_SIZE / 2) + "px";
+        btn.style.top = Math.round(handleCenterY + dy - _FI_LB_BTN_SIZE / 2) + "px";
       }
       dmtGetPersistentLayer().appendChild(btn);
       return btn;
@@ -33555,15 +33653,148 @@ if (type === "warn" && scanLimit !== null) {
       }
     }
 
+    function _fiEnsureDownloadAllBtn(stackId, anchorRect) {
+      let btn = _fiDownloadAllBtns.get(stackId);
+      if (!btn) {
+        btn = document.createElement("div");
+        btn.className = "dmt-fi-downloadall-btn";
+        btn.title = t("fi_downloadall_btn_tip");
+        btn.style.cssText = [
+          "position:fixed",
+          "display:flex",
+          "align-items:center",
+          "justify-content:center",
+          `width:${_FI_LB_BTN_SIZE}px`,
+          `height:${_FI_LB_BTN_SIZE}px`,
+          "border-radius:50%",
+          "background:rgba(255,255,255,0.16)",
+          "border:1px solid rgba(255,255,255,0.35)",
+          "cursor:pointer",
+          "opacity:0",
+          "transform:scale(0.6)",
+          "pointer-events:none",
+          `transition:${_FI_SATELLITE_TRANSITION}`,
+          "backdrop-filter:blur(8px)",
+        ].join(";");
+        btn.innerHTML =
+          '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>';
+        btn.addEventListener("mouseenter", () => _fiShowSatelliteGroup(stackId), { signal: _fiDragAC.signal });
+        btn.addEventListener("mouseleave", () => _fiScheduleHideSatelliteGroup(stackId), { signal: _fiDragAC.signal });
+        btn.addEventListener(
+          "click",
+          (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const members = _fiStackMembers(stackId);
+            if (!members.length) return;
+            members.forEach((mid) => {
+              const inst = _fiInstances.get(mid);
+              if (inst && inst.url) _fiDownload(inst.url);
+            });
+            dmtShowToast(t("fi_downloadall_toast", { n: members.length }));
+          },
+          { signal: _fiDragAC.signal },
+        );
+        _fiDownloadAllBtns.set(stackId, btn);
+      }
+      if (anchorRect) {
+        const handleCenterX = anchorRect.left - _FI_HANDLE_OFFSET + _FI_HANDLE_SIZE / 2;
+        const handleCenterY = anchorRect.top + anchorRect.height - _FI_HANDLE_OFFSET + _FI_HANDLE_SIZE / 2;
+        const angle = _fiSatelliteAngle(2, 3);
+        const { dx, dy } = _fiSatelliteOffset(angle, _FI_LB_BTN_DIST);
+        btn.style.left = Math.round(handleCenterX + dx - _FI_LB_BTN_SIZE / 2) + "px";
+        btn.style.top = Math.round(handleCenterY + dy - _FI_LB_BTN_SIZE / 2) + "px";
+      }
+      dmtGetPersistentLayer().appendChild(btn);
+      return btn;
+    }
+
+    function _fiRemoveDownloadAllBtn(stackId) {
+      const btn = _fiDownloadAllBtns.get(stackId);
+      if (btn) {
+        btn.remove();
+        _fiDownloadAllBtns.delete(stackId);
+      }
+    }
+
+    function _fiEnsureCloseAllBtn(stackId, anchorRect) {
+      let btn = _fiCloseAllBtns.get(stackId);
+      if (!btn) {
+        btn = document.createElement("div");
+        btn.className = "dmt-fi-closeall-btn";
+        btn.title = t("fi_closeall_btn_tip");
+        btn.style.cssText = [
+          "position:fixed",
+          "display:flex",
+          "align-items:center",
+          "justify-content:center",
+          `width:${_FI_LB_BTN_SIZE}px`,
+          `height:${_FI_LB_BTN_SIZE}px`,
+          "border-radius:50%",
+          "background:rgba(255,255,255,0.16)",
+          "border:1px solid rgba(255,255,255,0.35)",
+          "cursor:pointer",
+          "opacity:0",
+          "transform:scale(0.6)",
+          "pointer-events:none",
+          `transition:${_FI_SATELLITE_TRANSITION}`,
+          "backdrop-filter:blur(8px)",
+        ].join(";");
+        btn.innerHTML =
+          '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>';
+        btn.addEventListener("mouseenter", () => _fiShowSatelliteGroup(stackId), { signal: _fiDragAC.signal });
+        btn.addEventListener("mouseleave", () => _fiScheduleHideSatelliteGroup(stackId), { signal: _fiDragAC.signal });
+        btn.addEventListener(
+          "click",
+          (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            _fiCloseStack(stackId);
+          },
+          { signal: _fiDragAC.signal },
+        );
+        _fiCloseAllBtns.set(stackId, btn);
+      }
+      if (anchorRect) {
+        const handleCenterX = anchorRect.left - _FI_HANDLE_OFFSET + _FI_HANDLE_SIZE / 2;
+        const handleCenterY = anchorRect.top + anchorRect.height - _FI_HANDLE_OFFSET + _FI_HANDLE_SIZE / 2;
+        const angle = _fiSatelliteAngle(0, 3);
+        const { dx, dy } = _fiSatelliteOffset(angle, _FI_LB_BTN_DIST);
+        btn.style.left = Math.round(handleCenterX + dx - _FI_LB_BTN_SIZE / 2) + "px";
+        btn.style.top = Math.round(handleCenterY + dy - _FI_LB_BTN_SIZE / 2) + "px";
+      }
+      dmtGetPersistentLayer().appendChild(btn);
+      return btn;
+    }
+
+    function _fiRemoveCloseAllBtn(stackId) {
+      const btn = _fiCloseAllBtns.get(stackId);
+      if (btn) {
+        btn.remove();
+        _fiCloseAllBtns.delete(stackId);
+      }
+      const pending = _fiSatelliteHideTimers.get(stackId);
+      if (pending != null) {
+        clearTimeout(pending);
+        _fiSatelliteHideTimers.delete(stackId);
+      }
+    }
+
+    function _fiInlineWidth(el) {
+      const w = parseFloat(el.style.width);
+      return Number.isFinite(w) && w > 0 ? w : _FI_BASE_W;
+    }
+
     function _fiReflowStack(stackId, orderedIds, anchorLeft, anchorTop) {
       const portal = dmtGetPersistentLayer();
       const grouped = orderedIds.length > 1;
       const anchorInst = grouped ? _fiInstances.get(orderedIds[0]) : null;
       const anchorImg = anchorInst && anchorInst.el.querySelector("img");
+      const anchorW = anchorInst ? _fiInlineWidth(anchorInst.el) : _FI_BASE_W;
       const ratioH =
         anchorImg && anchorImg.complete && anchorImg.naturalWidth
           ? Math.min(
-              Math.round(_FI_BASE_W * (anchorImg.naturalHeight / anchorImg.naturalWidth)),
+              Math.round(anchorW * (anchorImg.naturalHeight / anchorImg.naturalWidth)),
               Math.round(window.innerHeight * 0.7),
             )
           : null;
@@ -33574,23 +33805,32 @@ if (type === "warn" && scanLimit !== null) {
         inst.stackIndex = grouped ? idx : 0;
         if (anchorLeft != null) inst.el.style.left = Math.round(anchorLeft) + "px";
         if (anchorTop != null) inst.el.style.top = Math.round(anchorTop) + "px";
-        _fiApplyStackTransform(inst.el, inst.stackIndex);
+        _fiApplyStackTransform(inst.el, inst.stackIndex, true);
         if (idx === 0 || !ratioH) {
           _fiRevertToNatural(inst.el);
         } else {
+          if (typeof inst.el.getAnimations === "function") {
+            inst.el.getAnimations().forEach((a) => a.finish());
+          }
+          inst.el.style.width = anchorW + "px";
           inst.el.style.height = ratioH + "px";
           const img = inst.el.querySelector("img");
           if (img) img.style.cssText = _FI_IMG_STYLE_STACKED;
         }
         portal.appendChild(inst.el);
       });
+      orderedIds.forEach((id) => _fiSyncAnim(id));
       if (grouped) {
         const freshAnchorRect = _fiAnchorRect(_fiInstances.get(orderedIds[0]));
         _fiEnsureStackHandle(stackId, freshAnchorRect);
         _fiEnsureLightboxBtn(stackId, freshAnchorRect);
+        _fiEnsureDownloadAllBtn(stackId, freshAnchorRect);
+        _fiEnsureCloseAllBtn(stackId, freshAnchorRect);
       } else {
         _fiRemoveStackHandle(stackId);
         _fiRemoveLightboxBtn(stackId);
+        _fiRemoveDownloadAllBtn(stackId);
+        _fiRemoveCloseAllBtn(stackId);
       }
     }
 
@@ -33677,6 +33917,154 @@ if (type === "warn" && scanLimit !== null) {
       });
     }
 
+    function _fiIsAnimatedBytes(buf) {
+      const b = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+      if (b.length < 12) return false;
+      if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x38 && (b[4] === 0x37 || b[4] === 0x39) && b[5] === 0x61) {
+        let p = 13;
+        if (b[10] & 0x80) p += 3 * (1 << ((b[10] & 7) + 1));
+        let frames = 0;
+        while (p < b.length) {
+          const s = b[p++];
+          if (s === 0x3b) break;
+          if (s === 0x21) {
+            p++;
+            while (p < b.length) { const n = b[p++]; if (n === 0) break; p += n; }
+            continue;
+          }
+          if (s === 0x2c) {
+            if (++frames > 1) return true;
+            const lf = b[p + 8];
+            p += 9;
+            if (lf & 0x80) p += 3 * (1 << ((lf & 7) + 1));
+            p++;
+            while (p < b.length) { const n = b[p++]; if (n === 0) break; p += n; }
+            continue;
+          }
+          break;
+        }
+        return false;
+      }
+      if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47 && b[4] === 0x0d && b[5] === 0x0a && b[6] === 0x1a && b[7] === 0x0a) {
+        let p = 8;
+        while (p + 8 <= b.length) {
+          const len = ((b[p] << 24) | (b[p + 1] << 16) | (b[p + 2] << 8) | b[p + 3]) >>> 0;
+          const type = String.fromCharCode(b[p + 4], b[p + 5], b[p + 6], b[p + 7]);
+          if (type === "acTL") return true;
+          if (type === "IDAT" || type === "IEND") return false;
+          p += 12 + len;
+        }
+        return false;
+      }
+      if (b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 && b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) {
+        return String.fromCharCode(b[12], b[13], b[14], b[15]) === "VP8X" && (b[20] & 0x02) !== 0;
+      }
+      return false;
+    }
+
+    function _fiFetchFrozenFrame(url) {
+      return new Promise((resolve) => {
+        const fail = () => resolve({ animated: false, frozenUrl: null });
+        try {
+          GM_xmlhttpRequest({
+            method: "GET",
+            url,
+            responseType: "arraybuffer",
+            onload: async (res) => {
+              try {
+                if (res.status < 200 || res.status >= 300 || !res.response) return fail();
+                const ab = res.response;
+                if (ab.byteLength > _FI_FREEZE_MAX_BYTES) return fail();
+                if (!_fiIsAnimatedBytes(ab)) return resolve({ animated: false, frozenUrl: null });
+                const bmp = await createImageBitmap(new Blob([ab]));
+                let w = bmp.width, h = bmp.height;
+                if (!(w > 0 && h > 0)) { bmp.close(); return fail(); }
+                const m = Math.max(w, h);
+                if (m > _FI_FREEZE_MAX_EDGE) {
+                  const k = _FI_FREEZE_MAX_EDGE / m;
+                  w = Math.max(1, Math.round(w * k));
+                  h = Math.max(1, Math.round(h * k));
+                }
+                const cv = document.createElement("canvas");
+                cv.width = w;
+                cv.height = h;
+                cv.getContext("2d").drawImage(bmp, 0, 0, w, h);
+                bmp.close();
+                cv.toBlob((blob) => {
+                  if (!blob) return fail();
+                  resolve({ animated: true, frozenUrl: URL.createObjectURL(blob) });
+                }, "image/png");
+              } catch (e) {
+                fail();
+              }
+            },
+            onerror: fail,
+            ontimeout: fail,
+          });
+        } catch (e) {
+          fail();
+        }
+      });
+    }
+
+    function _fiShouldPlayAnim(inStack, idx, stackId) {
+      if (!_fiAnimEnabled) return false;
+      if (!inStack) return true;
+      const members = _fiStackMembers(stackId);
+      return idx === members.length - 1;
+    }
+
+    function _fiSwapImgSrc(inst, img, src) {
+      inst.swap = { phase: "switching" };
+      img.src = src;
+    }
+
+    function _fiSyncAnim(id) {
+      const inst = _fiInstances.get(id);
+      if (!inst) return;
+      const img = inst.el.querySelector("img");
+      if (!img) return;
+      if (_fiShouldPlayAnim(inst.stackId != null, inst.stackIndex, inst.stackId)) {
+        if (inst.frozenShown) {
+          inst.frozenShown = false;
+          _fiSwapImgSrc(inst, img, inst.origSrc);
+        }
+        return;
+      }
+      if (inst.animKind === "static") return;
+      if (inst.animKind === "animated") {
+        if (inst.frozenUrl && !inst.frozenShown) {
+          inst.frozenShown = true;
+          _fiSwapImgSrc(inst, img, inst.frozenUrl);
+        }
+        return;
+      }
+      if (inst.animPending) return;
+      inst.animPending = true;
+      _fiFetchFrozenFrame(inst.origSrc).then((r) => {
+        inst.animPending = false;
+        if (_fiInstances.get(id) !== inst) {
+          if (r.frozenUrl) URL.revokeObjectURL(r.frozenUrl);
+          return;
+        }
+        inst.animKind = r.animated ? "animated" : "static";
+        inst.frozenUrl = r.frozenUrl;
+        _fiSyncAnim(id);
+      });
+    }
+
+    function _fiSyncAllAnim() {
+      _fiInstances.forEach((_inst, id) => _fiSyncAnim(id));
+    }
+
+    function _fiRevokeFrozen(inst) {
+      if (inst.frozenUrl) {
+        URL.revokeObjectURL(inst.frozenUrl);
+        inst.frozenUrl = null;
+      }
+      inst.frozenShown = false;
+    }
+
     function _fiPersistAll() {
       const list = Array.from(_fiInstances.entries()).map(([id, inst]) => ({
         id,
@@ -33696,8 +34084,27 @@ if (type === "warn" && scanLimit !== null) {
       if (_fiThrowState.has(id)) _fiStopThrow(id);
       inst.cleanup();
       inst.el.remove();
+      _fiRevokeFrozen(inst);
       _fiInstances.delete(id);
       if (stackId != null) _fiReflowStack(stackId, _fiStackMembers(stackId));
+      _fiPersistAll();
+    }
+
+    function _fiCloseStack(stackId) {
+      const members = _fiStackMembers(stackId);
+      members.forEach((id) => {
+        const inst = _fiInstances.get(id);
+        if (!inst) return;
+        if (_fiThrowState.has(id)) _fiStopThrow(id);
+        inst.cleanup();
+        inst.el.remove();
+        _fiRevokeFrozen(inst);
+        _fiInstances.delete(id);
+      });
+      _fiRemoveStackHandle(stackId);
+      _fiRemoveLightboxBtn(stackId);
+      _fiRemoveDownloadAllBtn(stackId);
+      _fiRemoveCloseAllBtn(stackId);
       _fiPersistAll();
     }
 
@@ -33780,7 +34187,7 @@ if (type === "warn" && scanLimit !== null) {
       let wheelLastT = 0;
       let wheelLastDir = 0;
       let zoomAnim = null;
-      const _fiCtrlFits = () => _FI_BASE_W * zoomFactor >= _FI_CTRL_MIN_W;
+      const _fiCtrlFits = () => _fiInlineWidth(win) >= _FI_CTRL_MIN_W;
       const rawLeft = restoreLeft != null ? restoreLeft : Math.round(x - 100);
       const rawTop = restoreTop != null ? restoreTop : Math.round(y - 100);
       const [left, top] = _fiClampPos(rawLeft, rawTop);
@@ -33824,6 +34231,17 @@ if (type === "warn" && scanLimit !== null) {
       img.style.cssText = _FI_IMG_STYLE_NATURAL;
       let triedFallback = upgradedUrl === url;
       img.onerror = () => {
+        const swapInst = _fiInstances.get(id);
+        if (swapInst && swapInst.swap) {
+          if (swapInst.swap.phase === "switching") {
+            swapInst.swap.phase = "reverting";
+            swapInst.frozenShown = !!swapInst.frozenUrl && swapInst.lastGood === swapInst.frozenUrl;
+            img.src = swapInst.lastGood;
+            return;
+          }
+          swapInst.swap = null;
+          swapInst.frozenShown = false;
+        }
         if (!triedFallback) {
           triedFallback = true;
           img.src = url;
@@ -33846,6 +34264,11 @@ if (type === "warn" && scanLimit !== null) {
         win.appendChild(fallback);
       };
       img.onload = () => {
+        const loadInst = _fiInstances.get(id);
+        if (loadInst) {
+          loadInst.lastGood = img.src;
+          loadInst.swap = null;
+        }
         const curInst = _fiInstances.get(id);
         if (!curInst || curInst.stackId == null) return;
         const members = _fiStackMembers(curInst.stackId);
@@ -33854,6 +34277,8 @@ if (type === "warn" && scanLimit !== null) {
         const freshRect = _fiAnchorRect(curInst);
         _fiEnsureStackHandle(curInst.stackId, freshRect);
         _fiEnsureLightboxBtn(curInst.stackId, freshRect);
+        _fiEnsureDownloadAllBtn(curInst.stackId, freshRect);
+        _fiEnsureCloseAllBtn(curInst.stackId, freshRect);
       };
       win.appendChild(img);
 
@@ -33948,30 +34373,17 @@ if (type === "warn" && scanLimit !== null) {
             newTabBtn.style.display = "flex";
           }
           const curInst = _fiInstances.get(id);
-          if (curInst && curInst.stackId != null) {
-            const handle = _fiStackHandles.get(curInst.stackId);
-            if (handle) handle.style.display = "flex";
-            const lbBtn = _fiLightboxBtns.get(curInst.stackId);
-            if (lbBtn) lbBtn.style.display = "flex";
-          }
+          if (curInst && curInst.stackId != null) _fiShowSatelliteGroup(curInst.stackId);
         },
         { signal: ac.signal },
       );
       win.addEventListener(
         "mouseleave",
-        (e) => {
+        () => {
           controls.style.display = "none";
           newTabBtn.style.display = "none";
           const curInst = _fiInstances.get(id);
-          if (curInst && curInst.stackId != null) {
-            const handle = _fiStackHandles.get(curInst.stackId);
-            const lbBtn = _fiLightboxBtns.get(curInst.stackId);
-            const target = e.relatedTarget;
-            const enteringHandle = target && handle && (target === handle || handle.contains(target));
-            const enteringLbBtn = target && lbBtn && (target === lbBtn || lbBtn.contains(target));
-            if (handle && !enteringHandle && !enteringLbBtn) handle.style.display = "none";
-            if (lbBtn && !enteringHandle && !enteringLbBtn) lbBtn.style.display = "none";
-          }
+          if (curInst && curInst.stackId != null) _fiScheduleHideSatelliteGroup(curInst.stackId);
         },
         { signal: ac.signal },
       );
@@ -34022,6 +34434,7 @@ if (type === "warn" && scanLimit !== null) {
           const dir = e.deltaY < 0 ? 1 : -1;
           const now = performance.now();
           if (dir === wheelLastDir && now - wheelLastT < _FI_WHEEL_COOLDOWN_MS) return;
+          zoomFactor = _fiInlineWidth(win) / _FI_BASE_W;
           const nextZoom = _fiNextZoom(zoomFactor, dir);
           if (nextZoom === zoomFactor) return;
           wheelLastDir = dir;
@@ -34033,6 +34446,7 @@ if (type === "warn" && scanLimit !== null) {
             _fiReflowStack(oldStackId, _fiStackMembers(oldStackId).filter((m) => m !== id));
             wheelInst.stackId = null;
             wheelInst.stackIndex = 0;
+            _fiSyncAnim(id);
           }
           const cs = getComputedStyle(win);
           const fromW = cs.width, fromL = cs.left, fromT = cs.top;
@@ -34071,14 +34485,30 @@ if (type === "warn" && scanLimit !== null) {
       );
       win.addEventListener("dragstart", (e) => e.preventDefault(), { signal: ac.signal });
 
-      _fiInstances.set(id, { el: win, url: upgradedUrl, cleanup: () => ac.abort(), stackId: null, stackIndex: 0 });
+      _fiInstances.set(id, {
+        el: win,
+        url: upgradedUrl,
+        cleanup: () => ac.abort(),
+        stackId: null,
+        stackIndex: 0,
+        origSrc: upgradedUrl,
+        lastGood: upgradedUrl,
+        animKind: null,
+        frozenUrl: null,
+        frozenShown: false,
+        animPending: false,
+        swap: null,
+      });
       if (restoreStackId) {
         const inst = _fiInstances.get(id);
         inst.stackId = stackId;
         inst.stackIndex = restoreStackIndex || 0;
         _fiApplyStackTransform(win, inst.stackIndex);
+        _fiSyncAnim(id);
       } else if (joinMembers) {
         _fiReflowStack(stackId, joinMembers.concat([id]), finalLeft, finalTop);
+      } else {
+        _fiSyncAnim(id);
       }
       return id;
     }
@@ -34105,13 +34535,25 @@ if (type === "warn" && scanLimit !== null) {
             handle.style.left = Math.round(nx - _FI_HANDLE_OFFSET) + "px";
             handle.style.top = Math.round(ny + _fiGroupDragCachedH - _FI_HANDLE_OFFSET) + "px";
           }
+          const handleCenterX = nx - _FI_HANDLE_OFFSET + _FI_HANDLE_SIZE / 2;
+          const handleCenterY = ny + _fiGroupDragCachedH - _FI_HANDLE_OFFSET + _FI_HANDLE_SIZE / 2;
           const lbBtn = _fiLightboxBtns.get(_fiGroupDraggingStackId);
           if (lbBtn && handle) {
-            const handleCenterX = nx - _FI_HANDLE_OFFSET + _FI_HANDLE_SIZE / 2;
-            const handleCenterY = ny + _fiGroupDragCachedH - _FI_HANDLE_OFFSET + _FI_HANDLE_SIZE / 2;
-            const offset = _FI_LB_BTN_DIST * Math.SQRT1_2;
-            lbBtn.style.left = Math.round(handleCenterX - offset - _FI_LB_BTN_SIZE / 2) + "px";
-            lbBtn.style.top = Math.round(handleCenterY - offset - _FI_LB_BTN_SIZE / 2) + "px";
+            const { dx, dy } = _fiSatelliteOffset(_fiSatelliteAngle(1, 3), _FI_LB_BTN_DIST);
+            lbBtn.style.left = Math.round(handleCenterX + dx - _FI_LB_BTN_SIZE / 2) + "px";
+            lbBtn.style.top = Math.round(handleCenterY + dy - _FI_LB_BTN_SIZE / 2) + "px";
+          }
+          const dlAllBtn = _fiDownloadAllBtns.get(_fiGroupDraggingStackId);
+          if (dlAllBtn && handle) {
+            const { dx, dy } = _fiSatelliteOffset(_fiSatelliteAngle(2, 3), _FI_LB_BTN_DIST);
+            dlAllBtn.style.left = Math.round(handleCenterX + dx - _FI_LB_BTN_SIZE / 2) + "px";
+            dlAllBtn.style.top = Math.round(handleCenterY + dy - _FI_LB_BTN_SIZE / 2) + "px";
+          }
+          const closeBtn = _fiCloseAllBtns.get(_fiGroupDraggingStackId);
+          if (closeBtn && handle) {
+            const { dx, dy } = _fiSatelliteOffset(_fiSatelliteAngle(0, 3), _FI_LB_BTN_DIST);
+            closeBtn.style.left = Math.round(handleCenterX + dx - _FI_LB_BTN_SIZE / 2) + "px";
+            closeBtn.style.top = Math.round(handleCenterY + dy - _FI_LB_BTN_SIZE / 2) + "px";
           }
           return;
         }
@@ -34128,6 +34570,7 @@ if (type === "warn" && scanLimit !== null) {
               _fiReflowStack(oldStackId, _fiStackMembers(oldStackId).filter((m) => m !== _fiDraggingId));
               inst.stackId = null;
               inst.stackIndex = 0;
+              _fiSyncAnim(_fiDraggingId);
               _fiDragDetached = true;
             }
           }
@@ -34208,6 +34651,7 @@ if (type === "warn" && scanLimit !== null) {
         if (!item || !item.url) return;
         _fiCreate(item.url, 0, 0, item.id, item.left, item.top, item.stackId, item.stackIndex);
       });
+      _fiInstances.forEach((_inst, id) => _fiSyncAnim(id));
       const seenStackIds = new Set();
       _fiInstances.forEach((inst) => {
         if (inst.stackId != null && !seenStackIds.has(inst.stackId)) {
@@ -34217,6 +34661,8 @@ if (type === "warn" && scanLimit !== null) {
             const anchorRect = _fiAnchorRect(_fiInstances.get(members[0]));
             _fiEnsureStackHandle(inst.stackId, anchorRect);
             _fiEnsureLightboxBtn(inst.stackId, anchorRect);
+            _fiEnsureDownloadAllBtn(inst.stackId, anchorRect);
+            _fiEnsureCloseAllBtn(inst.stackId, anchorRect);
           }
         }
       });
@@ -34741,12 +35187,19 @@ if (type === "warn" && scanLimit !== null) {
       _fiInstances.forEach((inst) => {
         inst.cleanup();
         inst.el.remove();
+        _fiRevokeFrozen(inst);
       });
       _fiInstances.clear();
       _fiStackHandles.forEach((handle) => handle.remove());
       _fiStackHandles.clear();
       _fiLightboxBtns.forEach((btn) => btn.remove());
       _fiLightboxBtns.clear();
+      _fiDownloadAllBtns.forEach((btn) => btn.remove());
+      _fiDownloadAllBtns.clear();
+      _fiCloseAllBtns.forEach((btn) => btn.remove());
+      _fiCloseAllBtns.clear();
+      _fiSatelliteHideTimers.forEach((timerId) => clearTimeout(timerId));
+      _fiSatelliteHideTimers.clear();
     }
 
     _floatImageInstance = {
@@ -34800,6 +35253,12 @@ if (type === "warn" && scanLimit !== null) {
       setThrowEnabled: (v) => {
         _fiThrowEnabled = !!v;
         GMStore.set("fi_throw_enabled", _fiThrowEnabled);
+      },
+      getAnimEnabled: () => _fiAnimEnabled,
+      setAnimEnabled: (v) => {
+        _fiAnimEnabled = !!v;
+        GMStore.set("fi_anim_enabled", _fiAnimEnabled);
+        _fiSyncAllAnim();
       },
     };
     if (DEBUG) {
