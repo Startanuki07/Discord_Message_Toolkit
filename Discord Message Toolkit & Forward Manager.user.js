@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.4.0
+// @version      2.9.4.2
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -8834,6 +8834,7 @@
     const BUTTON_RIGHT = 230;
     let globalCloseTimer = null;
     let globalActiveDropdown = null;
+    let globalActiveBtn = null;
 
     let config = getConfig();
 
@@ -9779,6 +9780,7 @@
       if (globalActiveDropdown) {
         const dd = globalActiveDropdown;
         globalActiveDropdown = null;
+        globalActiveBtn = null;
 
         document.querySelectorAll(".msg-copy-btn.dmt-active")
           .forEach((b) => b.classList.remove("dmt-active"));
@@ -10466,6 +10468,8 @@
       "fixvx.com",
     ];
 
+    const CLEAN_URL_X_ONLY_PARAMS = ["t", "ref_url"];
+
     function cleanUrl(urlStr) {
       try {
         const url = new URL(urlStr);
@@ -10519,7 +10523,9 @@
         const isXDomain = CLEAN_URL_X_DOMAINS.some(
           (d) => hostname === d || hostname.endsWith("." + d),
         );
-        if (isXDomain) url.searchParams.delete("t");
+        if (isXDomain) {
+          CLEAN_URL_X_ONLY_PARAMS.forEach((p) => url.searchParams.delete(p));
+        }
         if (/\/video-$/.test(url.pathname)) {
           url.pathname = url.pathname.replace(/\/video-$/, "");
         }
@@ -13747,6 +13753,7 @@
         dmtGetPortal().appendChild(dropdown);
         dropdown.style.pointerEvents = "auto";
         globalActiveDropdown = dropdown;
+        globalActiveBtn = btn;
         dropdown.style.display = "flex";
         _calcDropdownPos(btn, dropdown);
       };
@@ -13774,6 +13781,7 @@
         dmtGetPortal().appendChild(dropdown);
         dropdown.style.pointerEvents = "auto";
         globalActiveDropdown = dropdown;
+        globalActiveBtn = btn;
         dropdown.style.display = "flex";
         _calcDropdownPos(btn, dropdown);
 
@@ -13846,6 +13854,7 @@
         config = getConfig();
         if (config.triggerMode === "hover") {
           cancelCloseGlobalMenu();
+          if (globalActiveDropdown && globalActiveBtn === btn) return;
           showMenu();
         }
       });
