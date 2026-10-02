@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.4.2
+// @version      2.9.4.4
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -11481,6 +11481,9 @@
       const existing = document.getElementById("mod-settings-panel");
       if (existing) {
         existing.remove();
+        if (existing._pendingReload) {
+          dmtConfirm(t("rescue_reload_msg")).then((ok) => { if (ok) location.reload(); });
+        }
         return;
       }
 
@@ -11624,6 +11627,7 @@
               dlg.remove();
               setModEnabled(mod.storageKey, false);
               updateToggle(false);
+              panel._pendingReload = true;
               const hint = document.createElement("div");
               hint.style.cssText =
                 "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#23272a;color:#dcddde;padding:8px 16px;border-radius:6px;font-size:12px;z-index:999999;box-shadow:0 4px 12px rgba(0,0,0,0.4);pointer-events:none;";
@@ -11690,12 +11694,7 @@
               const existingBadge = label.querySelector(".dmt-new-badge");
               if (existingBadge) existingBadge.remove();
               if (mod.enableWarn) {
-                setTimeout(() => {
-                  dmtConfirm(
-                    tOr("reload_confirm", "Reload page now to apply changes?"),
-                    { confirmText: tOr("reload_now", "Reload now"), cancelText: tOr("later", "Later") }
-                  ).then(ok => { if (ok) location.reload(); });
-                }, 200);
+                panel._pendingReload = true;
               }
             };
             warnBtns.appendChild(warnCancel);
@@ -11741,11 +11740,7 @@
           document.body.appendChild(hint);
           setTimeout(() => hint.remove(), 2000);
 
-          setTimeout(() => {
-            dmtConfirm(t("rescue_reload_msg")).then((ok) => {
-              if (ok) location.reload();
-            });
-          }, 250);
+          panel._pendingReload = true;
         };
 
         row.appendChild(label);
@@ -11767,6 +11762,9 @@
       manualBtn.onmouseleave = () => (manualBtn.style.background = "");
       manualBtn.onclick = () => {
         panel.remove();
+        if (panel._pendingReload) {
+          dmtConfirm(t("rescue_reload_msg")).then((ok) => { if (ok) location.reload(); });
+        }
         showManualModal();
       };
       panel.appendChild(manualBtn);
@@ -11793,6 +11791,9 @@
         if (!panel.contains(ev.target) && ev.target !== anchorEl) {
           panel.remove();
           document.removeEventListener("mousedown", closeHandler, true);
+          if (panel._pendingReload) {
+            dmtConfirm(t("rescue_reload_msg")).then((ok) => { if (ok) location.reload(); });
+          }
         }
       };
       setTimeout(
@@ -17370,14 +17371,28 @@
       };
 
       const DMT_BTN_SEL = 'div[class*="buttons__"], div[class*="buttonsInner_"]';
+      const CTA_SEL = '[class*="channelTextArea"], [class*="channelTextarea"]';
       let _inputBtnDebounce = null;
+      let _ctaObsTarget = null;
 
       const observer = new MutationObserver(() => {
         if (document.hidden) return;
 
         clearTimeout(_inputBtnDebounce);
         _inputBtnDebounce = setTimeout(() => {
-          document.querySelectorAll(DMT_BTN_SEL).forEach(injectButton);
+          const scope = _ctaObsTarget || document;
+          scope.querySelectorAll(DMT_BTN_SEL).forEach(injectButton);
+          const cta = document.querySelector(CTA_SEL);
+          if (cta && cta !== _ctaObsTarget) {
+            _ctaObsTarget = cta;
+            observer.disconnect();
+            observer.observe(cta, { childList: true, subtree: true });
+            observer.observe(document.body, { childList: true });
+          } else if (!cta && _ctaObsTarget) {
+            _ctaObsTarget = null;
+            observer.disconnect();
+            observer.observe(document.body, { childList: true, subtree: true });
+          }
         }, 100);
       });
 
@@ -18272,6 +18287,7 @@
     }
 
     let _headerModDebounce = null;
+    let _headerObsTarget = null;
     const observer = new MutationObserver(() => {
       if (document.hidden) return;
       clearTimeout(_headerModDebounce);
@@ -18281,6 +18297,19 @@
           !document.getElementById("discord-filename-btn")
         ) {
           injectButtons();
+        }
+        const container = document.querySelector(
+          'div:has(> [aria-label="收件匣"]), div:has(> [aria-label="Inbox"]), div:has(> [aria-label="收件箱"])',
+        );
+        if (container && container !== _headerObsTarget) {
+          _headerObsTarget = container;
+          observer.disconnect();
+          observer.observe(container, { childList: true });
+          observer.observe(document.body, { childList: true });
+        } else if (!container && _headerObsTarget) {
+          _headerObsTarget = null;
+          observer.disconnect();
+          observer.observe(document.body, { childList: true, subtree: true });
         }
       }, 150);
     });
@@ -32397,18 +32426,20 @@ if (type === "warn" && scanLimit !== null) {
         if (!det.scope) return;
         if (_msScopeSelEl.value.startsWith("c:") && det.channelId) {
           const newVal = `c:${det.channelId}`;
-          if ((_msScanState.phase === "scanning" || _msScanState.phase === "paused") && _msScanState.scope !== newVal) {
-            _msStop();
+          if (_msScopeSelEl.value !== newVal) {
+            if ((_msScanState.phase === "scanning" || _msScanState.phase === "paused") && _msScanState.scope !== newVal) {
+              _msStop();
+            }
+            _msScopeSelEl.value = newVal;
+            _msGridScope = _msScopeSelEl.value;
+            clearTimeout(_msNavDebounce);
+            _msNavDebounce = setTimeout(() => {
+              _msGridItems = []; _msGridRendered.clear();
+              if (_msGridContEl) _msGridContEl.innerHTML = "";
+              _msReloadGrid().catch(() => {});
+              _msUpdateStatusBar();
+            }, 500);
           }
-          _msScopeSelEl.value = newVal;
-          _msGridScope = _msScopeSelEl.value;
-          clearTimeout(_msNavDebounce);
-          _msNavDebounce = setTimeout(() => {
-            _msGridItems = []; _msGridRendered.clear();
-            if (_msGridContEl) _msGridContEl.innerHTML = "";
-            _msReloadGrid().catch(() => {});
-            _msUpdateStatusBar();
-          }, 500);
         } else if (_msScopeSelEl.value.startsWith("gc:") && det.guildId && det.channelId) {
           const newVal = `gc:${det.guildId}:${det.channelId}`;
           if (_msScopeSelEl.value !== newVal) {
@@ -35348,6 +35379,9 @@ if (type === "warn" && scanLimit !== null) {
       const existing = document.getElementById("mod-settings-panel-rescue");
       if (existing) {
         existing.remove();
+        if (existing._pendingReload) {
+          dmtConfirm(t("rescue_reload_msg")).then((ok) => { if (ok) location.reload(); });
+        }
         return;
       }
       const lang = getConfig().lang || navigator.language || "en-US";
@@ -35433,9 +35467,7 @@ if (type === "warn" && scanLimit !== null) {
             : "var(--dmt-bg-muted, #4f545c)";
           thumb.style.left = next ? "18px" : "2px";
 
-          dmtConfirm(t("rescue_reload_msg")).then((ok) => {
-            if (ok) setTimeout(() => location.reload(), 300);
-          });
+          overlay._pendingReload = true;
         };
         row.appendChild(nameSpan);
         row.appendChild(toggleEl);
@@ -35454,11 +35486,21 @@ if (type === "warn" && scanLimit !== null) {
         cursor: "pointer",
         fontSize: "13px",
       });
-      closeBtn.onclick = () => overlay.remove();
+      closeBtn.onclick = () => {
+        overlay.remove();
+        if (overlay._pendingReload) {
+          dmtConfirm(t("rescue_reload_msg")).then((ok) => { if (ok) location.reload(); });
+        }
+      };
       box.appendChild(closeBtn);
       overlay.appendChild(box);
       overlay.addEventListener("click", (e) => {
-        if (e.target === overlay) overlay.remove();
+        if (e.target === overlay) {
+          overlay.remove();
+          if (overlay._pendingReload) {
+            dmtConfirm(t("rescue_reload_msg")).then((ok) => { if (ok) location.reload(); });
+          }
+        }
       });
       dmtGetPortal().appendChild(overlay);
       overlay.style.pointerEvents = "auto";
