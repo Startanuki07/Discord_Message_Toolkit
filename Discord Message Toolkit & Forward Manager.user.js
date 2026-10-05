@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.4.4
+// @version      2.9.4.5
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -17388,10 +17388,12 @@
             observer.disconnect();
             observer.observe(cta, { childList: true, subtree: true });
             observer.observe(document.body, { childList: true });
+            DEBUG && console.log("[ChatInputBtn] 收斂：找到 channelTextArea 容器，切換至局部監聽", cta);
           } else if (!cta && _ctaObsTarget) {
             _ctaObsTarget = null;
             observer.disconnect();
             observer.observe(document.body, { childList: true, subtree: true });
+            DEBUG && console.log("[ChatInputBtn] 容器消失，退回全域監聽");
           }
         }, 100);
       });
@@ -18306,10 +18308,12 @@
           observer.disconnect();
           observer.observe(container, { childList: true });
           observer.observe(document.body, { childList: true });
+          DEBUG && console.log("[HeaderMods] 收斂：找到 header 容器，切換至局部監聽", container);
         } else if (!container && _headerObsTarget) {
           _headerObsTarget = null;
           observer.disconnect();
           observer.observe(document.body, { childList: true, subtree: true });
+          DEBUG && console.log("[HeaderMods] 容器消失，退回全域監聽");
         }
       }, 150);
     });
