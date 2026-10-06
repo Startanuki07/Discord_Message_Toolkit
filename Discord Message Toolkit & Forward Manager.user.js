@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.4.5
+// @version      2.9.4.10
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -63,7 +63,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.4.0";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.4.10";
 
   const GMStore = {
     
@@ -26233,7 +26233,7 @@ unsafeWindow.fetch = function(...args) {
       const jumpBtn2 = document.createElement("button");
       jumpBtn2.className = "mp-action-btn";
       jumpBtn2.title = mp("jump_to");
-      jumpBtn2.innerHTML = '<svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>';
+      jumpBtn2.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>';
       jumpBtn2.onclick = e => {
         e.stopPropagation();
         const g = _getCtx()?.guildId || "@me";
@@ -28135,7 +28135,7 @@ unsafeWindow.fetch = function(...args) {
       const jumpBtn = document.createElement("button");
       jumpBtn.className = "mp-action-btn";
       jumpBtn.title = mp("jump_to");
-      jumpBtn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>';
+      jumpBtn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>';
       jumpBtn.onclick = e => { e.stopPropagation(); _mpJumpToMessage(msg.channel_id, msg.id); };
 
       const delBtn = document.createElement("button");
@@ -31900,16 +31900,23 @@ if (type === "warn" && scanLimit !== null) {
       if (!_msIsDiscordCdn(checkUrl)) {
         item._msDead = true;
         item._msExternalFail = true;
+        item._msRefreshFail = "external";
         return Promise.resolve(false);
       }
       item._msRetryCount = (item._msRetryCount || 0) + 1;
-      if (item._msRetryCount > 2) { item._msDead = true; return Promise.resolve(false); }
+      if (item._msRetryCount > 2) {
+        item._msDead = true;
+        item._msRefreshFail = "capped";
+        DEBUG && console.log("[Mosaic][Refresh] 失敗", { reason: "capped", msg_id: item.msg_id, retry: item._msRetryCount });
+        return Promise.resolve(false);
+      }
       item._msRefreshPromise = (async () => {
         await _msAcquireRefreshSlot();
         try {
           const token    = await _msEnsureToken();
           const endpoint = `${MS_API_BASE}/channels/${item.channel_id}/messages?around=${item.msg_id}&limit=5`;
           let msg = null;
+          let gotOk = false;
           for (let attempt = 0; attempt < 3 && !msg; attempt++) {
             const res = await new Promise((resolve, reject) => {
               GM_xmlhttpRequest({
@@ -31931,20 +31938,38 @@ if (type === "warn" && scanLimit !== null) {
                 onerror: () => reject(new Error("network error")),
               });
             });
-            if (res.ok) { msg = res.data; break; }
+            if (res.ok) { gotOk = true; msg = res.data; break; }
             await _msSleep(Math.ceil(res.retry_after * 1000) + 100);
           }
-          if (!msg) { item._msDead = true; return false; }
+          if (!msg) {
+            item._msRefreshFail = gotOk ? "no-msg" : "rate-limited";
+            item._msDead = true;
+            DEBUG && console.log("[Mosaic][Refresh] 失敗", { reason: item._msRefreshFail, msg_id: item.msg_id, channel_id: item.channel_id });
+            return false;
+          }
           const target = _msStripQuery(item.proxy_url || item.url);
           const fresh  = _msExtractMedia(msg).find(m => _msStripQuery(m.proxy_url || m.url) === target);
-          if (!fresh) { item._msDead = true; return false; }
+          if (!fresh) {
+            item._msRefreshFail = "no-match";
+            item._msDead = true;
+            DEBUG && console.log("[Mosaic][Refresh] 失敗", {
+              reason: "no-match", msg_id: item.msg_id,
+              target: target.slice(-80),
+              candidates: _msExtractMedia(msg).map(m => _msStripQuery(m.proxy_url || m.url).slice(-80)).slice(0, 5),
+            });
+            return false;
+          }
           const oldUrl   = item.url;
           item.url       = fresh.url;
           item.proxy_url = fresh.proxy_url;
+          item._msRetryCount = 0;
+          item._msRefreshFail = null;
+          DEBUG && console.log("[Mosaic][Refresh] 成功", { msg_id: item.msg_id });
           _msPersistRefresh(oldUrl, item);
           return true;
         } catch (err) {
           DEBUG && console.warn("[Mosaic] _msRefreshMediaUrl:", err);
+          item._msRefreshFail = "exception";
           item._msDead = true;
           return false;
         } finally {
@@ -31955,25 +31980,35 @@ if (type === "warn" && scanLimit !== null) {
       return item._msRefreshPromise;
     }
 
-    function _msBuildDeadPlaceholder(size, item = null) {
-      const isExternal = !!item?._msExternalFail;
+    function _msBuildDeadPlaceholder(size, item = null, onJump = null) {
+      const isExternal    = !!item?._msExternalFail;
+      const isUnsupported = !isExternal && item?._msLbErrKind === "unsupported";
       const ph = document.createElement("div");
       ph.className = "ms-dead";
       const icon = document.createElement("div");
       icon.className = "ms-dead-icon";
-      icon.textContent = isExternal ? "🔗" : "🚫";
+      icon.textContent = isExternal ? "🔗" : (isUnsupported ? "⚠️" : "🚫");
       const label = document.createElement("div");
       label.className = "ms-dead-label";
       label.textContent = isExternal
         ? (tOr("ms_external_cant_embed", "Can't embed — file may still exist"))
-        : (tOr("ms_expired", "Link expired"));
+        : isUnsupported
+          ? (tOr("ms_cant_play", "Can't play in this browser"))
+          : (tOr("ms_expired", "Link expired"));
       ph.appendChild(icon);
       ph.appendChild(label);
       if (size === "full") {
         ph.style.cssText    = "position:static;inset:auto;z-index:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:transparent;color:#72767d;";
         icon.style.cssText  = "font-size:48px;opacity:0.6;";
         label.style.cssText = "font-size:13px;";
-        if (isExternal && item?.url) {
+        if (!isExternal && !isUnsupported && typeof onJump === "function") {
+          const jumpLink = document.createElement("button");
+          jumpLink.type = "button";
+          jumpLink.textContent = (tOr("ms_btn_jump", "Jump to message")) + " ↗";
+          jumpLink.style.cssText = "color:#5865f2;font-size:12px;text-decoration:underline;cursor:pointer;background:none;border:none;padding:0;";
+          jumpLink.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); onJump(); });
+          ph.appendChild(jumpLink);
+        } else if ((isExternal || isUnsupported) && item?.url) {
           const link = document.createElement("a");
           link.href = item.url;
           link.target = "_blank";
@@ -32187,8 +32222,53 @@ if (type === "warn" && scanLimit !== null) {
       window.location.href = fullUrl;
     }
 
+    const _MS_LB_BLOB_MAX = 100 * 1024 * 1024;
+
+    const _MS_LB_DET_FAILS = new Set(["no-msg", "no-match", "capped", "external"]);
+
+    function _msLbRelease(item) {
+      if (item._msLbBlob) { URL.revokeObjectURL(item._msLbBlob); item._msLbBlob = null; }
+      item._msLbStage = undefined;
+      item._msLbRefreshed = false;
+      item._msLbErrKind = undefined;
+    }
+
+    function _msLbGiveUp(item) {
+      if (item._msLbBlob) { URL.revokeObjectURL(item._msLbBlob); item._msLbBlob = null; }
+      item._msLbStage = 2;
+      if (!_msIsDiscordCdn(item.proxy_url || item.url)) item._msExternalFail = true;
+      item._msDead = true;
+    }
+
+    function _msFetchExternalBlob(item) {
+      if (item._msLbPending) return item._msLbPending;
+      const shortUrl = (item.url || "").slice(0, 80);
+      item._msLbPending = new Promise(resolve => {
+        GM_xmlhttpRequest({
+          method: "GET",
+          url: item.url,
+          responseType: "blob",
+          headers: { Accept: "image/*,video/*,*/*;q=0.8" },
+          timeout: 60000,
+          onload: res => {
+            const hdr = res.responseHeaders || "";
+            const ct  = (hdr.match(/content-type:\s*([^;\r\n]+)/i)?.[1] || res.response?.type || "").trim().toLowerCase();
+            const b   = res.response;
+            const ok  = res.status === 200 && !!b && b.size > 0 && b.size <= _MS_LB_BLOB_MAX && /^(image|video)\//.test(ct);
+            DEBUG && console.log("[Mosaic][LB] 外連備援", { url: shortUrl, status: res.status, ct, size: b?.size ?? null, ok });
+            if (ok) item._msLbBlob = URL.createObjectURL(b);
+            resolve(ok);
+          },
+          onerror:   () => { DEBUG && console.log("[Mosaic][LB] 外連備援 onerror", shortUrl); resolve(false); },
+          ontimeout: () => { DEBUG && console.log("[Mosaic][LB] 外連備援 timeout", shortUrl); resolve(false); },
+        });
+      }).finally(() => { item._msLbPending = null; });
+      return item._msLbPending;
+    }
+
     function _msLightbox(items, startIdx) {
       let cur = Math.max(0, Math.min(startIdx, items.length - 1));
+      let closed = false;
 
       const ov = document.createElement("div");
       ov.style.cssText = "position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;background:rgba(0,0,0,0.93);pointer-events:auto;cursor:default;";
@@ -32196,12 +32276,14 @@ if (type === "warn" && scanLimit !== null) {
       const hdr = document.createElement("div");
       hdr.style.cssText = "display:flex;align-items:center;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.08);gap:8px;flex-shrink:0;";
       const prevBtn = document.createElement("button");
-      prevBtn.textContent = "◀";
-      prevBtn.style.cssText = "background:rgba(255,255,255,0.1);border:none;color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:16px;flex-shrink:0;";
+      prevBtn.textContent = "‹";
+      prevBtn.title = "Previous (←)";
+      prevBtn.style.cssText = "background:rgba(255,255,255,0.1);border:none;color:#fff;padding:2px 12px;border-radius:6px;cursor:pointer;font-size:22px;line-height:1;flex-shrink:0;";
       const fnEl = document.createElement("div");
       fnEl.style.cssText = "flex:1;text-align:center;color:#dbdee1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;";
       const nextBtn = document.createElement("button");
-      nextBtn.textContent = "▶";
+      nextBtn.textContent = "›";
+      nextBtn.title = "Next (→)";
       nextBtn.style.cssText = prevBtn.style.cssText;
       const lbCloseBtn = document.createElement("button");
       lbCloseBtn.textContent = "✕";
@@ -32236,28 +32318,74 @@ if (type === "warn" && scanLimit !== null) {
         cur = Math.max(0, Math.min(idx, items.length - 1));
         const item = items[cur];
         fnEl.textContent = `🖼 ${item.filename || item.url.split("/").pop().split("?")[0]}  (${cur+1}/${items.length})`;
-        mediaArea.innerHTML = "";
-        if (item._msDead) {
-          const ph = _msBuildDeadPlaceholder("full", item);
+        mediaArea.replaceChildren();
+        const _lbIsExt    = !_msIsDiscordCdn(item.proxy_url || item.url);
+        const _lbStage    = item._msLbStage || 0;
+        const _lbShowDead = !item._msLbBlob && _lbStage >= 2;
+        let _lbIsGifFile = false;
+        try { _lbIsGifFile = /\.gif$/i.test(new URL(item.url).pathname); } catch (_) {}
+        const _lbUseVideo = item.media_type === "video" || (item.media_type === "gif" && !_lbIsGifFile);
+        const onMediaError = () => {
+          if (closed) return;
+          const _lbRerender = () => { if (!closed && items[cur] === item) render(cur); };
+          const _lbToBlob = () => {
+            item._msLbStage = 1;
+            _msFetchExternalBlob(item).then(ok => {
+              if (closed) { _msLbRelease(item); return; }
+              if (!ok) _msLbGiveUp(item);
+              _lbRerender();
+            });
+          };
+          if (_lbStage !== 0) { _msLbGiveUp(item); _lbRerender(); return; }
+          if (_lbIsExt) { _lbToBlob(); return; }
+          if (item._msLbRefreshed) { item._msLbErrKind = "unsupported"; _lbToBlob(); return; }
+          if (_MS_LB_DET_FAILS.has(item._msRefreshFail)) { _msLbGiveUp(item); _lbRerender(); return; }
+          item._msDead = false;
+          _msRefreshMediaUrl(item).then(ok => {
+            if (closed) return;
+            if (ok) { item._msLbRefreshed = true; _lbRerender(); return; }
+            if (_MS_LB_DET_FAILS.has(item._msRefreshFail)) { _msLbGiveUp(item); _lbRerender(); return; }
+            _lbToBlob();
+          });
+        };
+        if (item._msLbPending && !item._msLbBlob) {
+          const wait = document.createElement("div");
+          wait.style.cssText = "font-size:36px;opacity:0.6;color:#72767d;";
+          wait.textContent = "⏳";
+          mediaArea.appendChild(wait);
+        } else if (_lbShowDead) {
+          const ph = _msBuildDeadPlaceholder("full", item, () => jumpBtn.click());
           ph.addEventListener("click", e => e.stopPropagation());
           mediaArea.appendChild(ph);
-        } else if (item.media_type === "video" || item.media_type === "gif") {
+        } else if (_lbUseVideo) {
           const v = document.createElement("video");
-          v.src       = item.url;
+          v.src       = item._msLbBlob || item.url;
           v.controls  = true;
           v.autoplay  = true;
           v.loop      = item.media_type === "gif";
           v.style.cssText = "max-width:90vw;max-height:70vh;object-fit:contain;border-radius:4px;";
           v.addEventListener("click", e => e.stopPropagation());
-          v.addEventListener("error", () => { _msRefreshMediaUrl(item).then(() => render(cur)); });
+          v.addEventListener("error", onMediaError);
           mediaArea.appendChild(v);
+          const _lbPlayP = v.play();
+          if (_lbPlayP && _lbPlayP.catch) {
+            _lbPlayP.catch(err => {
+              DEBUG && console.log("[Mosaic][LB] autoplay 被擋:", err && err.name);
+              if (err && err.name === "NotAllowedError" && !v.muted) {
+                v.muted = true;
+                const _retry = v.play();
+                if (_retry && _retry.catch) _retry.catch(() => {});
+              }
+            });
+          }
         } else {
           const img = document.createElement("img");
-          img.src = item.url;
+          img.src = item._msLbBlob || item.url;
+          if (_lbIsExt && !item._msLbBlob) img.referrerPolicy = "no-referrer";
           img.alt = item.filename || "";
           img.style.cssText = "max-width:90vw;max-height:70vh;object-fit:contain;border-radius:4px;cursor:default;";
           img.addEventListener("click", e => e.stopPropagation());
-          img.addEventListener("error", () => { _msRefreshMediaUrl(item).then(() => render(cur)); });
+          img.addEventListener("error", onMediaError);
           mediaArea.appendChild(img);
         }
         metaEl.textContent = [item.author_name, _msGetChannelName(item.channel_id) || item.channel_id, _msFmtDate(item.timestamp)].filter(Boolean).join("  ·  ");
@@ -32280,7 +32408,11 @@ if (type === "warn" && scanLimit !== null) {
         nextBtn.style.opacity = cur === items.length - 1 ? "0.3" : "1";
       };
 
-      const close = () => { ov.remove(); document.removeEventListener("keydown", onKey, true); };
+      const close = () => {
+        closed = true;
+        items.forEach(it => _msLbRelease(it));
+        ov.remove(); document.removeEventListener("keydown", onKey, true);
+      };
       const onKey = e => {
         if (e.key === "Escape") {
           e.stopImmediatePropagation();
