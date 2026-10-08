@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.4.10
+// @version      2.9.4.12
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -63,7 +63,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.4.10";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.4.12";
 
   const GMStore = {
     
@@ -31947,15 +31947,16 @@ if (type === "warn" && scanLimit !== null) {
             DEBUG && console.log("[Mosaic][Refresh] 失敗", { reason: item._msRefreshFail, msg_id: item.msg_id, channel_id: item.channel_id });
             return false;
           }
-          const target = _msStripQuery(item.proxy_url || item.url);
-          const fresh  = _msExtractMedia(msg).find(m => _msStripQuery(m.proxy_url || m.url) === target);
+          const target    = _msStripQuery(item.proxy_url || item.url);
+          const candidates = _msExtractMedia(msg);
+          const fresh       = candidates.find(m => _msStripQuery(m.proxy_url || m.url) === target);
           if (!fresh) {
             item._msRefreshFail = "no-match";
             item._msDead = true;
             DEBUG && console.log("[Mosaic][Refresh] 失敗", {
               reason: "no-match", msg_id: item.msg_id,
               target: target.slice(-80),
-              candidates: _msExtractMedia(msg).map(m => _msStripQuery(m.proxy_url || m.url).slice(-80)).slice(0, 5),
+              candidates: candidates.map(m => _msStripQuery(m.proxy_url || m.url).slice(-80)).slice(0, 5),
             });
             return false;
           }
@@ -31964,7 +31965,10 @@ if (type === "warn" && scanLimit !== null) {
           item.proxy_url = fresh.proxy_url;
           item._msRetryCount = 0;
           item._msRefreshFail = null;
-          DEBUG && console.log("[Mosaic][Refresh] 成功", { msg_id: item.msg_id });
+          DEBUG && console.log("[Mosaic][Refresh] 成功", {
+            msg_id: item.msg_id,
+            sig: { url: _msHasSig(fresh.url), proxy_url: _msHasSig(fresh.proxy_url) },
+          });
           _msPersistRefresh(oldUrl, item);
           return true;
         } catch (err) {
@@ -31978,6 +31982,18 @@ if (type === "warn" && scanLimit !== null) {
         }
       })();
       return item._msRefreshPromise;
+    }
+
+    function _msHasSig(u) { return !!u && /[?&]ex=[0-9a-f]+/i.test(u); }
+    function _msPreferredMediaUrl(item) {
+      const raw = item.url || "";
+      if (!_msIsDiscordCdn(item.proxy_url || raw)) return raw;
+      if (_msHasSig(raw)) return raw;
+      const px = (item.proxy_url || "")
+        .replace(/([?&])(width|height)=\d+/g, "$1")
+        .replace(/&{2,}/g, "&")
+        .replace(/\?&/, "?");
+      return _msHasSig(px) ? px : raw;
     }
 
     function _msBuildDeadPlaceholder(size, item = null, onJump = null) {
@@ -32010,7 +32026,7 @@ if (type === "warn" && scanLimit !== null) {
           ph.appendChild(jumpLink);
         } else if ((isExternal || isUnsupported) && item?.url) {
           const link = document.createElement("a");
-          link.href = item.url;
+          link.href = _msPreferredMediaUrl(item);
           link.target = "_blank";
           link.rel = "noopener noreferrer";
           link.textContent = tOr("ms_open_original", "Open original link ↗");
@@ -32242,11 +32258,12 @@ if (type === "warn" && scanLimit !== null) {
 
     function _msFetchExternalBlob(item) {
       if (item._msLbPending) return item._msLbPending;
-      const shortUrl = (item.url || "").slice(0, 80);
+      const reqUrl   = _msPreferredMediaUrl(item);
+      const shortUrl = reqUrl.slice(0, 80);
       item._msLbPending = new Promise(resolve => {
         GM_xmlhttpRequest({
           method: "GET",
-          url: item.url,
+          url: reqUrl,
           responseType: "blob",
           headers: { Accept: "image/*,video/*,*/*;q=0.8" },
           timeout: 60000,
@@ -32338,7 +32355,10 @@ if (type === "warn" && scanLimit !== null) {
           };
           if (_lbStage !== 0) { _msLbGiveUp(item); _lbRerender(); return; }
           if (_lbIsExt) { _lbToBlob(); return; }
-          if (item._msLbRefreshed) { item._msLbErrKind = "unsupported"; _lbToBlob(); return; }
+          if (item._msLbRefreshed) {
+            if (!_msHasSig(_msPreferredMediaUrl(item))) { _msLbGiveUp(item); _lbRerender(); return; }
+            item._msLbErrKind = "unsupported"; _lbToBlob(); return;
+          }
           if (_MS_LB_DET_FAILS.has(item._msRefreshFail)) { _msLbGiveUp(item); _lbRerender(); return; }
           item._msDead = false;
           _msRefreshMediaUrl(item).then(ok => {
@@ -32359,7 +32379,7 @@ if (type === "warn" && scanLimit !== null) {
           mediaArea.appendChild(ph);
         } else if (_lbUseVideo) {
           const v = document.createElement("video");
-          v.src       = item._msLbBlob || item.url;
+          v.src       = item._msLbBlob || _msPreferredMediaUrl(item);
           v.controls  = true;
           v.autoplay  = true;
           v.loop      = item.media_type === "gif";
@@ -32380,7 +32400,7 @@ if (type === "warn" && scanLimit !== null) {
           }
         } else {
           const img = document.createElement("img");
-          img.src = item._msLbBlob || item.url;
+          img.src = item._msLbBlob || _msPreferredMediaUrl(item);
           if (_lbIsExt && !item._msLbBlob) img.referrerPolicy = "no-referrer";
           img.alt = item.filename || "";
           img.style.cssText = "max-width:90vw;max-height:70vh;object-fit:contain;border-radius:4px;cursor:default;";
@@ -32400,7 +32420,7 @@ if (type === "warn" && scanLimit !== null) {
           close();
           _msJumpToMsg(gid, item.channel_id, item.msg_id);
         };
-        dlBtn.href   = item.url;
+        dlBtn.href   = _msPreferredMediaUrl(item);
         dlBtn.download = item.filename || item.url.split("/").pop().split("?")[0];
         prevBtn.disabled = cur === 0;
         nextBtn.disabled = cur === items.length - 1;
