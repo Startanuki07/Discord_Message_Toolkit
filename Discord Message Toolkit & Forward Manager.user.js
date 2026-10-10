@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.4.12
+// @version      2.9.4.16
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -63,7 +63,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.4.12";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.4.16";
 
   const GMStore = {
     
@@ -1715,6 +1715,8 @@
       mp_group_select_all:      "Select all",
       mp_group_deselect_all:    "Deselect all",
       mp_jump_to:               "Jump to message",
+      mp_scope_outdated:        "Scope outdated",
+      mp_scope_outdated_hint:   "Browse tab's scope changed — click to refresh with the current scope",
       mp_delete_single:         "Delete this message",
       mp_cache_title:           "📦 Cache Management",
       mp_cache_empty:           "No cached messages yet. Browse your posts to build the cache.",
@@ -1804,6 +1806,7 @@
       mp_create_task_schedule:  "Queue for later",
       mp_create_task_now:       "Run now",
       mp_img_expired:           "Image URL may have expired.",
+      mp_media_unavailable:     "Can't load this media. The file may still exist.",
       mp_fav_add:               "Favorite (protected from Task deletion)",
       mp_fav_remove:            "Unfavorite",
       mp_fav_all_excluded:      "All selected messages are favorited — Task not created.",
@@ -2366,6 +2369,8 @@
       mp_group_select_all:      "全選",
       mp_group_deselect_all:    "取消全選",
       mp_jump_to:               "跳轉至訊息",
+      mp_scope_outdated:        "範圍可能過舊",
+      mp_scope_outdated_hint:   "Browse 分頁的範圍已變更，點擊以目前範圍重新整理",
       mp_delete_single:         "刪除此訊息",
       mp_cache_title:           "📦 快取管理",
       mp_cache_empty:           "尚無快取訊息，請瀏覽您的貼文以建立快取。",
@@ -2455,6 +2460,7 @@
       mp_create_task_schedule:  "進入排程",
       mp_create_task_now:       "立刻執行",
       mp_img_expired:           "圖片連結可能已過期。",
+      mp_media_unavailable:     "無法載入此媒體，檔案可能仍存在。",
       mp_fav_add:               "收藏（保護此訊息不被 Task 刪除）",
       mp_fav_remove:            "取消收藏",
       mp_fav_all_excluded:      "所有已選訊息均已收藏，Task 未建立。",
@@ -3069,6 +3075,8 @@
       mp_group_select_all:      "全选",
       mp_group_deselect_all:    "取消全选",
       mp_jump_to:               "跳转至消息",
+      mp_scope_outdated:        "范围可能过旧",
+      mp_scope_outdated_hint:   "Browse 分页的范围已变更，点击以当前范围重新整理",
       mp_delete_single:         "删除此消息",
       mp_cache_title:           "📦 缓存管理",
       mp_cache_empty:           "暂无缓存消息，请浏览您的帖子以建立缓存。",
@@ -3157,6 +3165,7 @@
       mp_create_task_schedule:  "加入排程",
       mp_create_task_now:       "立即执行",
       mp_img_expired:           "图片链接可能已过期。",
+      mp_media_unavailable:     "无法加载此媒体，文件可能仍存在。",
       mp_fav_add:               "收藏（受保护，任务不会删除）",
       mp_fav_remove:            "取消收藏",
       mp_fav_all_excluded:      "所选消息均已收藏 — 任务未创建。",
@@ -3729,6 +3738,8 @@
       mp_group_select_all:      "すべて選択",
       mp_group_deselect_all:    "選択解除",
       mp_jump_to:               "メッセージへジャンプ",
+      mp_scope_outdated:        "範囲が古い可能性",
+      mp_scope_outdated_hint:   "閲覧タブの範囲が変更されました。クリックして現在の範囲で更新",
       mp_delete_single:         "このメッセージを削除",
       mp_cache_title:           "📦 キャッシュ管理",
       mp_cache_empty:           "キャッシュなし。投稿を閲覧してキャッシュを構築してください。",
@@ -3817,6 +3828,7 @@
       mp_create_task_schedule:  "スケジュールに追加",
       mp_create_task_now:       "今すぐ実行",
       mp_img_expired:           "画像URLが期限切れの可能性があります。",
+      mp_media_unavailable:     "このメディアを読み込めません。ファイルはまだ存在する可能性があります。",
       mp_fav_add:               "お気に入り（Taskによる削除から保護）",
       mp_fav_remove:            "お気に入りを解除",
       mp_fav_all_excluded:      "選択したメッセージはすべてお気に入りです — Taskを作成できません。",
@@ -4386,6 +4398,8 @@
       mp_group_select_all:      "모두 선택",
       mp_group_deselect_all:    "선택 해제",
       mp_jump_to:               "메시지로 이동",
+      mp_scope_outdated:        "범위가 오래되었을 수 있음",
+      mp_scope_outdated_hint:   "둘러보기 탭의 범위가 변경되었습니다. 클릭하여 현재 범위로 새로고침",
       mp_delete_single:         "이 메시지 삭제",
       mp_cache_title:           "📦 캐시 관리",
       mp_cache_empty:           "캐시된 메시지가 없습니다. 게시물을 탐색하여 캐시를 구축하세요.",
@@ -4474,6 +4488,7 @@
       mp_create_task_schedule:  "예약에 추가",
       mp_create_task_now:       "지금 실행",
       mp_img_expired:           "이미지 URL이 만료되었을 수 있습니다.",
+      mp_media_unavailable:     "이 미디어를 불러올 수 없습니다. 파일이 여전히 존재할 수 있습니다.",
       mp_fav_add:               "즐겨찾기 (Task 삭제로부터 보호)",
       mp_fav_remove:            "즐겨찾기 해제",
       mp_fav_all_excluded:      "선택한 모든 메시지가 즐겨찾기 상태입니다 — Task가 생성되지 않았습니다.",
@@ -4991,6 +5006,8 @@
       mp_group_select_all:      "Seleccionar todo",
       mp_group_deselect_all:    "Deseleccionar todo",
       mp_jump_to:               "Ir al mensaje",
+      mp_scope_outdated:        "El alcance puede estar desactualizado",
+      mp_scope_outdated_hint:   "El alcance de la pestaña Explorar cambió; haz clic para actualizar con el alcance actual",
       mp_delete_single:         "Eliminar este mensaje",
       mp_cache_title:           "📦 Gestión de caché",
       mp_cache_empty:           "Sin mensajes en caché. Navega tus publicaciones para construir el caché.",
@@ -5078,6 +5095,7 @@
       mp_create_task_schedule:  "Programar para después",
       mp_create_task_now:       "Ejecutar ahora",
       mp_img_expired:           "La URL de la imagen puede haber caducado.",
+      mp_media_unavailable:     "No se puede cargar este contenido. El archivo puede seguir existiendo.",
       mp_fav_add:               "Favorito (protegido de eliminación por Tarea)",
       mp_fav_remove:            "Quitar de favoritos",
       mp_fav_all_excluded:      "Todos los mensajes seleccionados son favoritos — Tarea no creada.",
@@ -5649,6 +5667,8 @@
       mp_group_select_all:      "Selecionar tudo",
       mp_group_deselect_all:    "Desmarcar tudo",
       mp_jump_to:               "Ir à mensagem",
+      mp_scope_outdated:        "O escopo pode estar desatualizado",
+      mp_scope_outdated_hint:   "O escopo da aba Navegar mudou; clique para atualizar com o escopo atual",
       mp_delete_single:         "Excluir esta mensagem",
       mp_cache_title:           "📦 Gerenciamento de cache",
       mp_cache_empty:           "Sem mensagens em cache. Navegue pelas suas postagens para criar o cache.",
@@ -5736,6 +5756,7 @@
       mp_create_task_schedule:  "Agendar para depois",
       mp_create_task_now:       "Executar agora",
       mp_img_expired:           "A URL da imagem pode ter expirado.",
+      mp_media_unavailable:     "Não é possível carregar esta mídia. O arquivo pode ainda existir.",
       mp_fav_add:               "Favorito (protegido de exclusão por Tarefa)",
       mp_fav_remove:            "Remover dos favoritos",
       mp_fav_all_excluded:      "Todas as mensagens selecionadas são favoritas — Tarefa não criada.",
@@ -6312,6 +6333,8 @@
       mp_group_select_all:      "Tout sélectionner",
       mp_group_deselect_all:    "Tout désélectionner",
       mp_jump_to:               "Aller au message",
+      mp_scope_outdated:        "La portée est peut-être obsolète",
+      mp_scope_outdated_hint:   "La portée de l'onglet Parcourir a changé ; cliquez pour actualiser avec la portée actuelle",
       mp_delete_single:         "Supprimer ce message",
       mp_cache_title:           "📦 Gestion du cache",
       mp_cache_empty:           "Aucun message en cache. Parcourez vos publications pour créer le cache.",
@@ -6399,6 +6422,7 @@
       mp_create_task_schedule:  "Planifier plus tard",
       mp_create_task_now:       "Exécuter maintenant",
       mp_img_expired:           "L'URL de l'image a peut-être expiré.",
+      mp_media_unavailable:     "Impossible de charger ce média. Le fichier existe peut-être encore.",
       mp_fav_add:               "Favori (protégé contre la suppression par Tâche)",
       mp_fav_remove:            "Retirer des favoris",
       mp_fav_all_excluded:      "Tous les messages sélectionnés sont en favoris — Tâche non créée.",
@@ -6970,6 +6994,8 @@
       mp_group_select_all:      "Выбрать все",
       mp_group_deselect_all:    "Снять выбор",
       mp_jump_to:               "Перейти к сообщению",
+      mp_scope_outdated:        "Область может быть устаревшей",
+      mp_scope_outdated_hint:   "Область вкладки «Обзор» изменилась; нажмите, чтобы обновить с текущей областью",
       mp_delete_single:         "Удалить это сообщение",
       mp_cache_title:           "📦 Управление кэшем",
       mp_cache_empty:           "Нет кэшированных сообщений. Просмотрите свои посты для создания кэша.",
@@ -7057,6 +7083,7 @@
       mp_create_task_schedule:  "Запланировать",
       mp_create_task_now:       "Выполнить сейчас",
       mp_img_expired:           "URL изображения мог устареть.",
+      mp_media_unavailable:     "Не удалось загрузить медиафайл. Возможно, файл всё ещё существует.",
       mp_fav_add:               "В избранное (защита от удаления Задачей)",
       mp_fav_remove:            "Удалить из избранного",
       mp_fav_all_excluded:      "Все выбранные сообщения в избранном — Задача не создана.",
@@ -7617,6 +7644,8 @@
       mp_group_select_all:      "Alle auswählen",
       mp_group_deselect_all:    "Auswahl aufheben",
       mp_jump_to:               "Zur Nachricht springen",
+      mp_scope_outdated:        "Bereich möglicherweise veraltet",
+      mp_scope_outdated_hint:   "Der Bereich im Tab „Durchsuchen“ hat sich geändert; klicken, um mit dem aktuellen Bereich zu aktualisieren",
       mp_delete_single:         "Diese Nachricht löschen",
       mp_cache_title:           "📦 Cache-Verwaltung",
       mp_cache_empty:           "Kein Cache vorhanden. Durchsuche deine Beiträge, um den Cache aufzubauen.",
@@ -7704,6 +7733,7 @@
       mp_create_task_schedule:  "Für später einplanen",
       mp_create_task_now:       "Jetzt ausführen",
       mp_img_expired:           "Bild-URL ist möglicherweise abgelaufen.",
+      mp_media_unavailable:     "Dieses Medium kann nicht geladen werden. Die Datei existiert möglicherweise noch.",
       mp_fav_add:               "Favorit (vor Aufgaben-Löschen geschützt)",
       mp_fav_remove:            "Aus Favoriten entfernen",
       mp_fav_all_excluded:      "Alle ausgewählten Nachrichten sind Favoriten — Aufgabe nicht erstellt.",
@@ -25746,12 +25776,13 @@ unsafeWindow.fetch = function(...args) {
     }
 
     async function _deltaSync(scope) {
-      if (!_token || !_userId) return;
+      const EMPTY = { count: 0, items: [] };
+      if (!_token || !_userId) return EMPTY;
       const meta = await _readSyncMeta(scope);
-      if (!meta?.newestId) return;
+      if (!meta?.newestId) return EMPTY;
 
       const ctx = _getCtx();
-      if (!ctx) return;
+      if (!ctx) return EMPTY;
       const DELTA_PAGE = 25;
       const params = {
         author_id: _userId, sort_by: "timestamp",
@@ -25786,6 +25817,7 @@ unsafeWindow.fetch = function(...args) {
         if (offset > 200) break;
       }
 
+      const slimmedNew = newMsgs.map(_slimMsg);
       if (newMsgs.length > 0) {
         await _idbPut(newMsgs);
         const latestMsg = newMsgs[0];
@@ -25796,7 +25828,7 @@ unsafeWindow.fetch = function(...args) {
         });
         DEBUG && console.log("[SYNC] delta:", newMsgs.length, "new msgs written to IDB");
       }
-      return newMsgs.length;
+      return { count: newMsgs.length, items: slimmedNew };
     }
 
     const API_BASE       = "https://discord.com/api/v10";
@@ -26182,6 +26214,27 @@ unsafeWindow.fetch = function(...args) {
       return m ? Date.now() > parseInt(m[1], 16) * 1000 : false;
     }
 
+    function _mpBuildDeadPlaceholder(msg) {
+      const ph = document.createElement("div");
+      ph.style.cssText = "display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:rgba(255,255,255,.7);padding:24px;";
+      const icon = document.createElement("div");
+      icon.style.cssText = "font-size:40px;opacity:.6;";
+      icon.textContent = "🚫";
+      const label = document.createElement("div");
+      label.style.cssText = "font-size:13px;";
+      label.textContent = mp("media_unavailable");
+      ph.append(icon, label);
+      if (msg?.channel_id && msg?.id) {
+        const jump = document.createElement("button");
+        jump.type = "button";
+        jump.textContent = mp("jump_to") + " ↗";
+        jump.style.cssText = "color:#5865f2;font-size:12px;text-decoration:underline;cursor:pointer;background:none;border:none;padding:0;";
+        jump.addEventListener("click", e => { e.preventDefault(); e.stopPropagation(); _mpJumpToMessage(msg.channel_id, msg.id); });
+        ph.appendChild(jump);
+      }
+      return ph;
+    }
+
     function _getThumbUrl(msg) {
       const att = (msg.attachments || []).find(a => a.content_type?.startsWith("image/"));
       if (att) return att.proxy_url || att.url;
@@ -26209,7 +26262,7 @@ unsafeWindow.fetch = function(...args) {
         img.src = thumbUrl; img.alt = "";
         img.loading = "lazy";
         if (_isExpired(thumbUrl)) img.style.opacity = "0.6";
-        img.onclick = e => { e.stopPropagation(); _lightbox(thumbUrl); };
+        img.onclick = e => { e.stopPropagation(); _lightbox(thumbUrl, msg); };
         item.appendChild(img);
       } else if (videoUrl) {
         const vid = document.createElement("video");
@@ -26398,7 +26451,7 @@ unsafeWindow.fetch = function(...args) {
         "#dmt-mp-hover-zoom img{width:100%;height:100%;object-fit:contain;display:block;background:#111;}",
         
         "#dmt-mp-panel .mp-fav-btn{color:var(--dmt-text-muted,#949ba4);}",
-        "#dmt-mp-panel .mp-fav-btn:hover,#dmt-mp-panel .mp-fav-btn.mp-fav-active{color:#ff1744;filter:drop-shadow(0 0 4px rgba(255,23,68,.55));}",
+        "#dmt-mp-panel .mp-fav-btn:hover,#dmt-mp-panel .mp-fav-btn.mp-fav-active{color:#f23f70;filter:drop-shadow(0 0 3px rgba(242,63,112,.45));}",
         "#dmt-mp-panel .mp-fav-btn svg{width:14px;height:14px;}",
         "width:22px;height:22px;border-radius:5px;border:none;",
         "background:rgba(0,0,0,.55);color:rgba(255,255,255,.85);cursor:pointer;padding:0;",
@@ -26615,11 +26668,16 @@ unsafeWindow.fetch = function(...args) {
       }
     }
 
-    function _lightbox(url) {
+    function _lightbox(url, msg = null) {
       const lb = document.createElement("div");
       lb.id = "dmt-mp-lightbox";
       const img = document.createElement("img");
-      img.src = url; lb.appendChild(img);
+      img.src = url;
+      img.addEventListener("error", () => {
+        img.remove();
+        lb.insertBefore(_mpBuildDeadPlaceholder(msg), lb.firstChild);
+      });
+      lb.appendChild(img);
       lb.onclick = () => lb.remove();
       dmtGetPortal().appendChild(lb);
       lb.style.pointerEvents = "auto";
@@ -26897,6 +26955,8 @@ unsafeWindow.fetch = function(...args) {
       }
       if (_browseObs) { _browseObs.disconnect(); _browseObs = null; }
       if (_mediaObs) { _mediaObs.disconnect(); _mediaObs = null; }
+      _mediaTabBuilt = false;
+      _mediaScopeHintEl = null;
       _panelEl.querySelectorAll("[data-has-vid-obs]").forEach(el => {
         el._vidObs?.disconnect(); el._vidObs = null;
       });
@@ -26968,7 +27028,7 @@ unsafeWindow.fetch = function(...args) {
         mediaArea.style.display   = key === "media"   ? "flex" : "none";
         tasksArea.style.display   = key === "tasks"   ? ""    : "none";
         if (key === "tasks") _renderTasksTab(tasksArea);
-        if (key === "media") _renderMediaTab(mediaArea);
+        if (key === "media") { if (_mediaTabBuilt) _syncMediaScopeHint(); else _renderMediaTab(mediaArea); }
         if (key === "favs")  _renderFavsTab(favsArea);
         if (key === "browse" && _browseData.length === 0) {
           _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput);
@@ -27411,15 +27471,15 @@ unsafeWindow.fetch = function(...args) {
             _browseTotal  = cached.length;
             _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
             if (_token) {
-              _deltaSync(scope).then(newCount => {
-                if (newCount > 0 && capturedGen === _browseGen) {
-                  _idbGetByScope(scope).then(refreshed => {
-                    if (capturedGen !== _browseGen) return;
-                    const refreshedFiltered = filterForScope(refreshed);
-                    _browseData   = refreshedFiltered;
-                    _browseOffset = refreshedFiltered.length;
+              _deltaSync(scope).then(({ count, items }) => {
+                if (count > 0 && capturedGen === _browseGen) {
+                  const existingIds = new Set(_browseData.map(m => m.id));
+                  const newFiltered = filterForScope(items).filter(m => !existingIds.has(m.id));
+                  if (newFiltered.length > 0) {
+                    _browseData   = newFiltered.concat(_browseData);
+                    _browseOffset = _browseData.length;
                     _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput);
-                  });
+                  }
                 }
               }).catch(() => {});
             }
@@ -27966,7 +28026,7 @@ unsafeWindow.fetch = function(...args) {
       GMStore.set(SK_FAVS, [..._favIds], true);
     }
     const _SVG_HEART_EMPTY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
-    const _SVG_HEART_FULL  = '<svg viewBox="0 0 24 24" fill="#ff1744" stroke="#ff1744" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
+    const _SVG_HEART_FULL  = '<svg viewBox="0 0 24 24" fill="#f23f70" stroke="#f23f70" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
 
     function _mpShowZoom(url, e) {
       let z = document.getElementById("dmt-mp-hover-zoom");
@@ -28071,7 +28131,7 @@ unsafeWindow.fetch = function(...args) {
         const img = document.createElement("img");
         img.className = "mp-msg-thumb"; img.src = thumb; img.alt = "";
         if (_isExpired(thumb)) { img.style.opacity = "0.5"; img.title = mp("img_expired"); }
-        img.onclick = e => { e.stopPropagation(); _lightbox(thumb); };
+        img.onclick = e => { e.stopPropagation(); _lightbox(thumb, msg); };
         row.appendChild(img);
       }
 
@@ -28205,6 +28265,8 @@ unsafeWindow.fetch = function(...args) {
     let _mediaLoading = false;
     let _mediaGen     = 0;
     let _mediaScope   = "channel";
+    let _mediaTabBuilt = false;
+    let _mediaScopeHintEl = null;
     let _mediaQuery   = "";
     let _mediaObs     = null;
     let _lbItems      = [];
@@ -28221,6 +28283,11 @@ unsafeWindow.fetch = function(...args) {
     function _mediaCellMode() {
       const mode = GMStore.get(SK_MEDIA_CELL_MODE, "medium");
       return Object.prototype.hasOwnProperty.call(MEDIA_CELL_COLS_TIERS, mode) ? mode : "medium";
+    }
+
+    function _syncMediaScopeHint() {
+      if (!_mediaScopeHintEl) return;
+      _mediaScopeHintEl.style.display = (_mediaScope !== _browseScope) ? "" : "none";
     }
 
     function _renderMediaTab(container) {
@@ -28243,10 +28310,12 @@ unsafeWindow.fetch = function(...args) {
       ].forEach(s => {
         const b = document.createElement("button");
         b.className = "mp-media-filter-btn" + (s.key === _mediaScope ? " active" : "");
+        b.dataset.scopeKey = s.key;
         b.textContent = s.label; b.disabled = !s.ok;
         b.style.opacity = s.ok ? "1" : "0.4";
         b.onclick = () => {
           _mediaScope = s.key;
+          _syncMediaScopeHint();
           scopeWrap.querySelectorAll(".mp-media-filter-btn").forEach(x => x.classList.remove("active"));
           b.classList.add("active");
           _mediaGen++;
@@ -28355,7 +28424,19 @@ unsafeWindow.fetch = function(...args) {
         _updateMediaCellSizeBtn();
       };
 
-      toolbar.append(scopeWrap, typeWrap, searchEl, rBtn, mediaCellSizeBtn, mediaTimeFmtBtn);
+      const scopeHint = document.createElement("button");
+      scopeHint.className = "mp-media-filter-btn";
+      scopeHint.textContent = "⚠ " + mp("scope_outdated");
+      scopeHint.title = mp("scope_outdated_hint");
+      scopeHint.style.cssText = "display:none;color:#faa61a;border-color:#faa61a;flex-shrink:0;";
+      scopeHint.onclick = () => {
+        const targetBtn = scopeWrap.querySelector('[data-scope-key="' + _browseScope + '"]');
+        if (targetBtn && !targetBtn.disabled) targetBtn.click();
+        _syncMediaScopeHint();
+      };
+      _mediaScopeHintEl = scopeHint;
+
+      toolbar.append(scopeWrap, typeWrap, searchEl, rBtn, mediaCellSizeBtn, mediaTimeFmtBtn, scopeHint);
 
       const scrollWrap = document.createElement("div");
       scrollWrap.className = "mp-media-body";
@@ -28417,6 +28498,8 @@ unsafeWindow.fetch = function(...args) {
         grid.appendChild(skFrag);
         _loadMediaPage(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
       }
+
+      _mediaTabBuilt = true;
     }
 
     function _mpDisconnectVidObs(container) {
@@ -28529,10 +28612,12 @@ unsafeWindow.fetch = function(...args) {
       const q = _mediaQuery;
 
       if (q) {
+        const _mediaMap = new Map();
+        for (const m of _mediaData) if (!_mediaMap.has(m.id)) _mediaMap.set(m.id, m);
         grid.querySelectorAll(".mp-masonry-item, .mp-media-date-sep").forEach(el => {
           const msgId = el.dataset.msgId;
           if (!msgId) { el.style.display = ""; return; }
-          const msg = _mediaData.find(m => m.id === msgId);
+          const msg = _mediaMap.get(msgId);
           if (!msg) return;
           const match = (msg.content || "").toLowerCase().includes(q) ||
             (msg.attachments || []).some(a => a.filename?.toLowerCase().includes(q));
@@ -28563,6 +28648,11 @@ unsafeWindow.fetch = function(...args) {
 
       const groups = _groupByDate(newMsgs);
 
+      const _mediaIdxMap = new Map();
+      for (let i = 0; i < _mediaData.length; i++) {
+        if (!_mediaIdxMap.has(_mediaData[i].id)) _mediaIdxMap.set(_mediaData[i].id, i);
+      }
+
       const BATCH = 6;
       const allNewItems = [];
 
@@ -28577,7 +28667,7 @@ unsafeWindow.fetch = function(...args) {
           section = sep;
         }
         msgs.forEach(msg => {
-          const item = _buildMasonryItem(msg, _mediaData.indexOf(msg), selCount2, createBtn2, cancelBtn2);
+          const item = _buildMasonryItem(msg, _mediaIdxMap.get(msg.id), selCount2, createBtn2, cancelBtn2);
           item.classList.add("mp-new");
           const ph = document.createElement("div");
           ph.className = "mp-skeleton-card";
@@ -28639,7 +28729,7 @@ unsafeWindow.fetch = function(...args) {
           requestAnimationFrame(() =>
             _loadMediaPage(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText)
           );
-        }, { threshold: 0.1, rootMargin: "0px" });
+        }, { threshold: 0.1, rootMargin: "100px" });
         _mediaObs.observe(sentinel);
       }
     }
@@ -28921,17 +29011,25 @@ unsafeWindow.fetch = function(...args) {
         const msg = items[curIdx];
         const thumb = _getThumbUrl(msg);
         const video = _getVideoUrl(msg);
-        mediaWrap.innerHTML = "";
+        mediaWrap.replaceChildren();
         const origin = _calcOrigin(fromEl);
         if (thumb) {
           const img = document.createElement("img");
           img.className = "lb-media"; img.src = thumb; img.alt = "";
+          img.addEventListener("error", () => {
+            img.remove();
+            mediaWrap.appendChild(_mpBuildDeadPlaceholder(msg));
+          });
           mediaWrap.appendChild(img);
           _animIn(img, origin);
         } else if (video) {
           const vid = document.createElement("video");
           vid.className = "lb-media"; vid.src = video;
           vid.controls = true; vid.autoplay = true; vid.style.maxHeight = "80vh";
+          vid.addEventListener("error", () => {
+            vid.remove();
+            mediaWrap.appendChild(_mpBuildDeadPlaceholder(msg));
+          });
           mediaWrap.appendChild(vid);
           _animIn(vid, origin);
         }
