@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.4.16
+// @version      2.9.4.18
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -1681,6 +1681,7 @@
       ms_cap_warn:        "⚠️ Stopped at {cap} items — click Scan again to continue further back, or narrow the time range",
       ms_stats_title:     "Cache Statistics",
       ms_stats_clear:     "Clear cached media for this scope",
+      ms_cache_owner_mismatch: "The cached media for this scope was scanned by a different Discord account (you may have switched accounts).\nTo continue, this scope's cached media and scan progress must be cleared (reset to 0), and the scope must be scanned again (this can take a while and uses many API requests).\nClear now?",
       ms_expired:         "Link expired",
       ms_fetching:        "Fetching…",
       ms_indexing:        "Indexing",
@@ -1726,6 +1727,7 @@
       mp_cache_deleting:        "…",
       mp_cache_deleted:         "Deleted ",
       mp_cache_clear_scope:     "Clear this scope",
+      mp_cache_owner_mismatch:  "The cached messages for this scope were saved by a different Discord account (you may have switched accounts).\nTo continue, this scope's cached messages and sync progress must be cleared (reset to 0). They will be fetched again from Discord.\nClear now?",
       mp_cache_clearing:        "Clearing…",
       mp_cache_cleared:         "Cleared ✓",
       mp_cache_clear_all:       "🗑 Clear all cache",
@@ -1769,6 +1771,9 @@
       mp_task_done_toast:       "Task complete! Deleted {n} messages.",
       mp_task_created:          "Delete task created.",
       mp_task_running:          "Another task is already running.",
+      mp_task_owner_mismatch:   "This task was created by a different Discord account. Switch to that account to run it.",
+      mp_task_owner_unknown:    "This task was created before owner tracking existed. Run it with the account you're currently signed in to?\nIf it was created by a different account, cancel.",
+      mp_task_403_paused:       "Task paused after repeated permission errors (403); the affected messages were skipped. Make sure you're on the right account, then resume to process the rest.",
       mp_refresh:               "Refresh",
       mp_page_size_label:       "Messages per page:",
       mp_page_size_n:           "{n} messages",
@@ -2338,6 +2343,7 @@
       ms_cap_warn:        "⚠️ 已掃描 {cap} 筆上限 — 再按一次 Scan 可繼續往更早掃描，或縮小時間範圍",
       ms_stats_title:     "快取統計",
       ms_stats_clear:     "清除此範圍的快取媒體",
+      ms_cache_owner_mismatch: "此範圍的快取媒體是由另一個 Discord 帳號掃描的（可能是你切換了帳號）。\n要繼續使用，必須先清除此範圍的快取媒體與掃描進度（歸 0），並重新掃描（可能需要較長時間，且會使用大量 API 請求）。\n要現在清除嗎？",
       ms_expired:         "連結已過期",
       ms_fetching:        "取得中…",
       ms_indexing:        "索引建立中",
@@ -2380,6 +2386,7 @@
       mp_cache_deleting:        "…",
       mp_cache_deleted:         "已刪除 ",
       mp_cache_clear_scope:     "清除此範圍",
+      mp_cache_owner_mismatch:  "此範圍的快取訊息是由另一個 Discord 帳號儲存的（可能是你切換了帳號）。\n要繼續使用，必須先清除此範圍的快取訊息與同步進度（歸 0），之後會重新從 Discord 取得。\n要現在清除嗎？",
       mp_cache_clearing:        "清除中…",
       mp_cache_cleared:         "已清除 ✓",
       mp_cache_clear_all:       "🗑 清除全部快取",
@@ -2423,6 +2430,9 @@
       mp_task_done_toast:       "任務完成！共刪除 {n} 則訊息。",
       mp_task_created:          "刪除任務已建立。",
       mp_task_running:          "已有任務進行中，請先完成或暫停現有任務。",
+      mp_task_owner_mismatch:   "此任務由另一個 Discord 帳號建立，請切換到該帳號後再執行。",
+      mp_task_owner_unknown:    "此任務建立於尚未記錄擁有者的舊版本。要以目前登入的帳號執行嗎？\n若它是由其他帳號建立的，請取消。",
+      mp_task_403_paused:       "任務已暫停：連續多則訊息因權限不足（403）無法刪除，這些訊息已略過。請確認目前登入的帳號是否正確，再按繼續處理剩餘項目。",
       mp_refresh:               "重新掃載",
       mp_page_size_label:       "每頁訊息數：",
       mp_page_size_n:           "{n} 則",
@@ -2999,6 +3009,7 @@
       ms_cap_warn:        "⚠️ 已达到 {cap} 条上限 — 再次点击 Scan 可继续向更早扫描，或缩小时间范围",
       ms_stats_title:     "缓存统计",
       ms_stats_clear:     "清除此范围的缓存媒体",
+      ms_cache_owner_mismatch: "此范围的缓存媒体是由另一个 Discord 账号扫描的（可能是你切换了账号）。\n要继续使用，必须先清除此范围的缓存媒体与扫描进度（归 0），并重新扫描（可能需要较长时间，且会使用大量 API 请求）。\n现在清除吗？",
       ms_expired:         "链接已过期",
       ms_fetching:        "获取中…",
       ms_indexing:        "索引构建中",
@@ -3086,6 +3097,7 @@
       mp_cache_deleting:        "…",
       mp_cache_deleted:         "已删除 ",
       mp_cache_clear_scope:     "清除此范围",
+      mp_cache_owner_mismatch:  "此范围的缓存消息是由另一个 Discord 账号保存的（可能是你切换了账号）。\n要继续使用，必须先清除此范围的缓存消息与同步进度（归 0），之后会重新从 Discord 获取。\n现在清除吗？",
       mp_cache_clearing:        "清除中…",
       mp_cache_cleared:         "已清除 ✓",
       mp_cache_clear_all:       "🗑 清除全部缓存",
@@ -3129,6 +3141,9 @@
       mp_task_done_toast:       "任务完成！已删除 {n} 条消息。",
       mp_task_created:          "删除任务已创建。",
       mp_task_running:          "已有任务进行中，请先完成或暂停。",
+      mp_task_owner_mismatch:   "此任务由另一个 Discord 账号创建，请切换到该账号后再运行。",
+      mp_task_owner_unknown:    "此任务创建于尚未记录所有者的旧版本。要使用当前登录的账号运行吗？\n如果它是由其他账号创建的，请取消。",
+      mp_task_403_paused:       "任务已暂停：连续多条消息因权限不足（403）无法删除，这些消息已跳过。请确认当前登录的账号是否正确，再继续处理剩余项目。",
       mp_refresh:               "刷新",
       mp_page_size_label:       "每页消息数：",
       mp_page_size_n:           "{n} 条",
@@ -3662,6 +3677,7 @@
       ms_cap_warn:        "⚠️ {cap}件の上限に達しました — もう一度 Scan を押すとさらに過去まで続けられます。時間範囲を絞ることもできます",
       ms_stats_title:     "キャッシュ統計",
       ms_stats_clear:     "このスコープのキャッシュをクリア",
+      ms_cache_owner_mismatch: "このスコープのキャッシュされたメディアは、別の Discord アカウントでスキャンされたものです（アカウントを切り替えた可能性があります）。\n続行するには、このスコープのキャッシュ済みメディアとスキャンの進行状況をクリア（0 に戻す）し、再スキャンする必要があります（時間がかかり、多くの API リクエストを使用します）。\n今すぐクリアしますか？",
       ms_expired:         "リンク期限切れ",
       ms_fetching:        "取得中…",
       ms_indexing:        "インデックス中",
@@ -3749,6 +3765,7 @@
       mp_cache_deleting:        "…",
       mp_cache_deleted:         "削除済み ",
       mp_cache_clear_scope:     "このスコープをクリア",
+      mp_cache_owner_mismatch:  "このスコープのキャッシュされたメッセージは、別の Discord アカウントで保存されたものです（アカウントを切り替えた可能性があります）。\n続行するには、このスコープのキャッシュ済みメッセージと同期の進行状況をクリア（0 に戻す）する必要があります。クリア後は Discord から再取得されます。\n今すぐクリアしますか？",
       mp_cache_clearing:        "クリア中…",
       mp_cache_cleared:         "クリア済み ✓",
       mp_cache_clear_all:       "🗑 全キャッシュをクリア",
@@ -3792,6 +3809,9 @@
       mp_task_done_toast:       "タスク完了！{n} 件削除しました。",
       mp_task_created:          "削除タスクを作成しました。",
       mp_task_running:          "タスクが実行中です。完了または一時停止してから新しいタスクを作成してください。",
+      mp_task_owner_mismatch:   "このタスクは別の Discord アカウントで作成されました。そのアカウントに切り替えてから実行してください。",
+      mp_task_owner_unknown:    "このタスクは所有者を記録する前の旧バージョンで作成されました。現在ログイン中のアカウントで実行しますか？\n別のアカウントで作成したものであれば、キャンセルしてください。",
+      mp_task_403_paused:       "タスクを一時停止しました：権限不足（403）が連続したため、該当メッセージはスキップされました。ログイン中のアカウントが正しいか確認してから、再開して残りを処理してください。",
       mp_refresh:               "再読み込み",
       mp_page_size_label:       "1ページの件数：",
       mp_page_size_n:           "{n} 件",
@@ -4366,6 +4386,7 @@
       ms_cap_warn:        "⚠️ {cap}개 제한에 도달했습니다 — Scan을 다시 누르면 더 과거까지 계속 스캔할 수 있습니다. 시간 범위를 좁힐 수도 있습니다",
       ms_stats_title:     "캐시 통계",
       ms_stats_clear:     "이 범위의 캐시 지우기",
+      ms_cache_owner_mismatch: "이 범위의 캐시된 미디어는 다른 Discord 계정으로 스캔된 것입니다(계정을 전환했을 수 있습니다).\n계속하려면 이 범위의 캐시된 미디어와 스캔 진행 상태를 지우고(0으로 초기화) 다시 스캔해야 합니다(시간이 오래 걸리고 API 요청을 많이 사용합니다).\n지금 지울까요?",
       ms_expired:         "링크 만료됨",
       ms_fetching:        "가져오는 중…",
       ms_indexing:        "인덱싱 중",
@@ -4409,6 +4430,7 @@
       mp_cache_deleting:        "…",
       mp_cache_deleted:         "삭제됨 ",
       mp_cache_clear_scope:     "이 범위 지우기",
+      mp_cache_owner_mismatch:  "이 범위의 캐시된 메시지는 다른 Discord 계정으로 저장된 것입니다(계정을 전환했을 수 있습니다).\n계속하려면 이 범위의 캐시된 메시지와 동기화 진행 상태를 지워야(0으로 초기화) 하며, 이후 Discord에서 다시 가져옵니다.\n지금 지울까요?",
       mp_cache_clearing:        "지우는 중…",
       mp_cache_cleared:         "지워짐 ✓",
       mp_cache_clear_all:       "🗑 전체 캐시 지우기",
@@ -4452,6 +4474,9 @@
       mp_task_done_toast:       "작업 완료! {n}개의 메시지가 삭제되었습니다.",
       mp_task_created:          "삭제 작업이 만들어졌습니다.",
       mp_task_running:          "이미 실행 중인 작업이 있습니다. 완료하거나 일시 중지하세요.",
+      mp_task_owner_mismatch:   "이 작업은 다른 Discord 계정으로 생성되었습니다. 해당 계정으로 전환한 후 실행하세요.",
+      mp_task_owner_unknown:    "이 작업은 소유자를 기록하기 전의 이전 버전에서 생성되었습니다. 현재 로그인한 계정으로 실행할까요?\n다른 계정에서 만든 작업이라면 취소하세요.",
+      mp_task_403_paused:       "작업이 일시 중지되었습니다: 권한 부족(403)이 연속되어 해당 메시지는 건너뛰었습니다. 올바른 계정인지 확인한 후 다시 시작하여 나머지를 처리하세요.",
       mp_refresh:               "새로 고침",
       mp_page_size_label:       "페이지당 메시지 수:",
       mp_page_size_n:           "{n}개",
@@ -5017,6 +5042,7 @@
       mp_cache_deleting:        "…",
       mp_cache_deleted:         "Eliminados ",
       mp_cache_clear_scope:     "Limpiar este ámbito",
+      mp_cache_owner_mismatch:  "Los mensajes en caché de este ámbito fueron guardados por otra cuenta de Discord (puede que hayas cambiado de cuenta).\nPara continuar, hay que limpiar los mensajes en caché de este ámbito y su progreso de sincronización (volver a 0). Se obtendrán de nuevo desde Discord.\n¿Limpiar ahora?",
       mp_cache_clearing:        "Limpiando…",
       mp_cache_cleared:         "Limpiado ✓",
       mp_cache_clear_all:       "🗑 Limpiar todo el caché",
@@ -5059,6 +5085,9 @@
       mp_task_done_toast:       "¡Tarea completada! {n} mensaje(s) eliminado(s).",
       mp_task_created:          "Tarea de eliminación creada.",
       mp_task_running:          "Ya hay una tarea en curso. Complétala o ponla en pausa.",
+      mp_task_owner_mismatch:   "Esta tarea fue creada por otra cuenta de Discord. Cambia a esa cuenta para ejecutarla.",
+      mp_task_owner_unknown:    "Esta tarea se creó antes de que se registrara su propietario. ¿Ejecutarla con la cuenta con la que has iniciado sesión ahora?\nSi la creó otra cuenta, cancela.",
+      mp_task_403_paused:       "Tarea en pausa: hubo varios errores de permisos (403) seguidos y esos mensajes se omitieron. Comprueba que estás en la cuenta correcta y reanuda para procesar el resto.",
       mp_refresh:               "Actualizar",
       mp_page_size_label:       "Mensajes por página:",
       mp_page_size_n:           "{n} mensajes",
@@ -5152,6 +5181,7 @@
       ms_cap_warn:              "⚠️ Detenido en {cap} elementos — pulsa Scan de nuevo para continuar más atrás, o acota el rango de tiempo",
       ms_stats_title:           "Estadísticas de caché",
       ms_stats_clear:           "Borrar archivos en caché de este ámbito",
+      ms_cache_owner_mismatch:  "Los archivos multimedia en caché de este ámbito fueron escaneados por otra cuenta de Discord (puede que hayas cambiado de cuenta).\nPara continuar, hay que borrar los archivos en caché de este ámbito y su progreso de escaneo (volver a 0) y volver a escanearlo (puede tardar y usa muchas solicitudes a la API).\n¿Borrar ahora?",
       ms_expired:               "Enlace caducado",
       ms_fetching:              "Obteniendo…",
       ms_indexing:              "Indexando",
@@ -5678,6 +5708,7 @@
       mp_cache_deleting:        "…",
       mp_cache_deleted:         "Excluídos ",
       mp_cache_clear_scope:     "Limpar este escopo",
+      mp_cache_owner_mismatch:  "As mensagens em cache deste escopo foram salvas por outra conta do Discord (talvez você tenha trocado de conta).\nPara continuar, é preciso limpar as mensagens em cache deste escopo e o progresso de sincronização (zerar). Elas serão obtidas novamente do Discord.\nLimpar agora?",
       mp_cache_clearing:        "Limpando…",
       mp_cache_cleared:         "Limpo ✓",
       mp_cache_clear_all:       "🗑 Limpar todo o cache",
@@ -5720,6 +5751,9 @@
       mp_task_done_toast:       "Tarefa concluída! {n} mensagem(ns) excluída(s).",
       mp_task_created:          "Tarefa de exclusão criada.",
       mp_task_running:          "Já há uma tarefa em andamento. Conclua-a ou pause-a.",
+      mp_task_owner_mismatch:   "Esta tarefa foi criada por outra conta do Discord. Troque para essa conta para executá-la.",
+      mp_task_owner_unknown:    "Esta tarefa foi criada antes de o proprietário ser registrado. Executá-la com a conta conectada agora?\nSe foi criada por outra conta, cancele.",
+      mp_task_403_paused:       "Tarefa pausada: houve vários erros de permissão (403) seguidos e essas mensagens foram ignoradas. Verifique se está na conta correta e retome para processar o restante.",
       mp_refresh:               "Atualizar",
       mp_page_size_label:       "Mensagens por página:",
       mp_page_size_n:           "{n} mensagens",
@@ -5813,6 +5847,7 @@
       ms_cap_warn:              "⚠️ Interrompido em {cap} itens — clique em Scan novamente para continuar mais para trás, ou reduza o intervalo de tempo",
       ms_stats_title:           "Estatísticas de cache",
       ms_stats_clear:           "Limpar mídia em cache deste escopo",
+      ms_cache_owner_mismatch:  "A mídia em cache deste escopo foi escaneada por outra conta do Discord (talvez você tenha trocado de conta).\nPara continuar, é preciso limpar a mídia em cache deste escopo e o progresso da varredura (zerar) e escanear o escopo novamente (pode demorar e usa muitas requisições à API).\nLimpar agora?",
       ms_expired:               "Link expirado",
       ms_fetching:              "Buscando…",
       ms_indexing:              "Indexando",
@@ -6344,6 +6379,7 @@
       mp_cache_deleting:        "…",
       mp_cache_deleted:         "Supprimés ",
       mp_cache_clear_scope:     "Effacer cette portée",
+      mp_cache_owner_mismatch:  "Les messages en cache de cette portée ont été enregistrés par un autre compte Discord (vous avez peut-être changé de compte).\nPour continuer, il faut effacer les messages en cache de cette portée et leur progression de synchronisation (remise à 0). Ils seront récupérés à nouveau depuis Discord.\nEffacer maintenant ?",
       mp_cache_clearing:        "Effacement…",
       mp_cache_cleared:         "Effacé ✓",
       mp_cache_clear_all:       "🗑 Effacer tout le cache",
@@ -6386,6 +6422,9 @@
       mp_task_done_toast:       "Tâche terminée ! {n} message(s) supprimé(s).",
       mp_task_created:          "Tâche de suppression créée.",
       mp_task_running:          "Une tâche est déjà en cours. Terminez-la ou mettez-la en pause.",
+      mp_task_owner_mismatch:   "Cette tâche a été créée par un autre compte Discord. Passez à ce compte pour l'exécuter.",
+      mp_task_owner_unknown:    "Cette tâche a été créée avant l'enregistrement du propriétaire. L'exécuter avec le compte actuellement connecté ?\nSi elle a été créée par un autre compte, annulez.",
+      mp_task_403_paused:       "Tâche en pause : plusieurs erreurs de permissions (403) consécutives ; ces messages ont été ignorés. Vérifiez que vous utilisez le bon compte, puis reprenez pour traiter le reste.",
       mp_refresh:               "Actualiser",
       mp_page_size_label:       "Messages par page :",
       mp_page_size_n:           "{n} messages",
@@ -6479,6 +6518,7 @@
       ms_cap_warn:              "⚠️ Arrêté à {cap} éléments — cliquez à nouveau sur Scan pour continuer plus loin dans le passé, ou réduisez la plage temporelle",
       ms_stats_title:           "Statistiques du cache",
       ms_stats_clear:           "Effacer les médias en cache de cette portée",
+      ms_cache_owner_mismatch:  "Les médias en cache de cette portée ont été analysés par un autre compte Discord (vous avez peut-être changé de compte).\nPour continuer, il faut effacer les médias en cache de cette portée et la progression de l'analyse (remise à 0), puis relancer l'analyse (cela peut être long et utilise beaucoup de requêtes API).\nEffacer maintenant ?",
       ms_expired:               "Lien expiré",
       ms_fetching:              "Récupération…",
       ms_indexing:              "Indexation",
@@ -7005,6 +7045,7 @@
       mp_cache_deleting:        "…",
       mp_cache_deleted:         "Удалено ",
       mp_cache_clear_scope:     "Очистить эту область",
+      mp_cache_owner_mismatch:  "Сообщения в кэше этой области сохранены другим аккаунтом Discord (возможно, вы сменили аккаунт).\nЧтобы продолжить, нужно очистить кэш сообщений этой области и прогресс синхронизации (обнулить). Они будут загружены из Discord заново.\nОчистить сейчас?",
       mp_cache_clearing:        "Очистка…",
       mp_cache_cleared:         "Очищено ✓",
       mp_cache_clear_all:       "🗑 Очистить весь кэш",
@@ -7047,6 +7088,9 @@
       mp_task_done_toast:       "Задача выполнена! Удалено {n} сообщений.",
       mp_task_created:          "Задача удаления создана.",
       mp_task_running:          "Задача уже выполняется. Завершите или поставьте на паузу.",
+      mp_task_owner_mismatch:   "Эта задача создана другим аккаунтом Discord. Переключитесь на него, чтобы запустить её.",
+      mp_task_owner_unknown:    "Эта задача создана до появления учёта владельца. Запустить её от текущего аккаунта?\nЕсли её создал другой аккаунт, отмените.",
+      mp_task_403_paused:       "Задача приостановлена: несколько ошибок доступа (403) подряд, эти сообщения пропущены. Убедитесь, что вы в нужном аккаунте, и возобновите, чтобы обработать остальное.",
       mp_refresh:               "Обновить",
       mp_page_size_label:       "Сообщений на страницу:",
       mp_page_size_n:           "{n} сообщений",
@@ -7140,6 +7184,7 @@
       ms_cap_warn:              "⚠️ Остановлено на {cap} элементах — нажмите Scan ещё раз, чтобы продолжить сканирование глубже, или сузьте диапазон времени",
       ms_stats_title:           "Статистика кэша",
       ms_stats_clear:           "Очистить кэш медиафайлов этой области",
+      ms_cache_owner_mismatch:  "Медиа в кэше этой области были просканированы другим аккаунтом Discord (возможно, вы сменили аккаунт).\nЧтобы продолжить, нужно очистить кэш медиа этой области и прогресс сканирования (обнулить) и просканировать область заново (это может занять много времени и использует много запросов к API).\nОчистить сейчас?",
       ms_expired:               "Ссылка устарела",
       ms_fetching:              "Получение…",
       ms_indexing:              "Индексация",
@@ -7655,6 +7700,7 @@
       mp_cache_deleting:        "…",
       mp_cache_deleted:         "Gelöscht ",
       mp_cache_clear_scope:     "Diesen Bereich leeren",
+      mp_cache_owner_mismatch:  "Die zwischengespeicherten Nachrichten dieses Bereichs wurden von einem anderen Discord-Konto gespeichert (möglicherweise hast du das Konto gewechselt).\nUm fortzufahren, müssen die zwischengespeicherten Nachrichten dieses Bereichs und der Synchronisierungsfortschritt geleert (auf 0 zurückgesetzt) werden. Sie werden erneut von Discord abgerufen.\nJetzt leeren?",
       mp_cache_clearing:        "Leeren…",
       mp_cache_cleared:         "Geleert ✓",
       mp_cache_clear_all:       "🗑 Gesamten Cache leeren",
@@ -7697,6 +7743,9 @@
       mp_task_done_toast:       "Aufgabe abgeschlossen! {n} Nachricht(en) gelöscht.",
       mp_task_created:          "Löschaufgabe erstellt.",
       mp_task_running:          "Eine Aufgabe läuft bereits. Beenden oder pausieren.",
+      mp_task_owner_mismatch:   "Diese Aufgabe wurde von einem anderen Discord-Konto erstellt. Wechsle zu diesem Konto, um sie auszuführen.",
+      mp_task_owner_unknown:    "Diese Aufgabe wurde erstellt, bevor der Besitzer gespeichert wurde. Mit dem aktuell angemeldeten Konto ausführen?\nWurde sie von einem anderen Konto erstellt, abbrechen.",
+      mp_task_403_paused:       "Aufgabe pausiert: Mehrere Berechtigungsfehler (403) in Folge; diese Nachrichten wurden übersprungen. Prüfe, ob du das richtige Konto verwendest, und setze fort, um den Rest zu verarbeiten.",
       mp_refresh:               "Aktualisieren",
       mp_page_size_label:       "Nachrichten pro Seite:",
       mp_page_size_n:           "{n} Nachrichten",
@@ -7790,6 +7839,7 @@
       ms_cap_warn:              "⚠️ Bei {cap} Elementen gestoppt — klicken Sie erneut auf Scan, um weiter in die Vergangenheit fortzufahren, oder grenzen Sie den Zeitraum ein",
       ms_stats_title:           "Cache-Statistik",
       ms_stats_clear:           "Zwischengespeicherte Medien dieses Bereichs löschen",
+      ms_cache_owner_mismatch:  "Die zwischengespeicherten Medien dieses Bereichs wurden von einem anderen Discord-Konto gescannt (möglicherweise hast du das Konto gewechselt).\nUm fortzufahren, müssen die zwischengespeicherten Medien dieses Bereichs und der Scan-Fortschritt gelöscht (auf 0 zurückgesetzt) und der Bereich erneut gescannt werden (das kann dauern und verbraucht viele API-Anfragen).\nJetzt löschen?",
       ms_expired:               "Link abgelaufen",
       ms_fetching:              "Wird abgerufen…",
       ms_indexing:              "Indizierung läuft",
@@ -25384,7 +25434,6 @@ unsafeWindow.fetch = function(...args) {
     const SK_PANEL_POS   = "mp_panel_pos";
     const SK_COLLAPSED   = "mp_collapsed_dates";
     const SK_TYPE_FILTER = "mp_type_filter";
-    const SK_USERID      = "mp_userid";
     const SK_PAGE_SIZE   = "mp_page_size";
     const SK_FAVS        = "mp_favs";
     const SK_LAST_SCOPE  = "mp_last_scope";
@@ -25679,6 +25728,25 @@ unsafeWindow.fetch = function(...args) {
       }
     }
 
+    const _cacheGuardInflight = new Map();
+    function _idbGetByScopeGuarded(scope) {
+      if (_cacheGuardInflight.has(scope)) return _cacheGuardInflight.get(scope);
+      const p = (async () => {
+        const data = await _idbGetByScope(scope);
+        if (data.length === 0) return { data, aborted: false };
+        let ok = false;
+        try { ok = await _ensureCredentials(); } catch (_) {}
+        if (!ok || !_userId) return { data, aborted: false };
+        if (!data.some(m => m.author?.id && m.author.id !== _userId)) return { data, aborted: false };
+        const clear = await dmtConfirm(mp("cache_owner_mismatch"), { danger: true, confirmText: mp("cache_clear_scope") });
+        if (!clear) return { data: [], aborted: true };
+        await _idbClearScope(scope);
+        return { data: [], aborted: false };
+      })().finally(() => _cacheGuardInflight.delete(scope));
+      _cacheGuardInflight.set(scope, p);
+      return p;
+    }
+
     function _csvEscape(val) {
       const s = String(val ?? "");
       if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
@@ -25903,6 +25971,7 @@ unsafeWindow.fetch = function(...args) {
 
     let _token        = null;
     let _userId       = null;
+    let _userIdToken  = null;
     let _panelEl      = null;
     let _browseData   = [];
     let _browseOffset = 0;
@@ -25937,6 +26006,8 @@ unsafeWindow.fetch = function(...args) {
     let _err403LastShown = 0;
     let _errNetLastShown  = 0;
     const _ERR_NOTIFY_COOLDOWN_MS = 60000;
+    let _lastDeleteStatus = 0;
+    const TASK_403_BREAK = 5;
 
     const mp = (key, params = {}) => t("mp_" + key, params);
 
@@ -26008,8 +26079,6 @@ unsafeWindow.fetch = function(...args) {
       if (_token && _userId && (now - _tokenFetchedAt) < TOKEN_TTL_MS) return true;
       const { token, userId } = await _fetchFromStorage();
       if (token)  { _token = token; _tokenFetchedAt = now; }
-      if (userId) { _userId = userId; GMStore.set(SK_USERID, userId); }
-      if (!_userId) _userId = GMStore.get(SK_USERID, null);
       if (!_token) {
         try {
           let wpToken = null;
@@ -26025,7 +26094,22 @@ unsafeWindow.fetch = function(...args) {
           if (wpToken) { _token = wpToken; _tokenFetchedAt = now; }
         } catch (_) {}
       }
+      if (userId) { _userId = userId; _userIdToken = _token; }
+      if (_userId && _userIdToken !== _token) _userId = null;
+      if (!_userId && _token) {
+        const apiId = await _fetchUserIdFromApi();
+        if (apiId) { _userId = apiId; _userIdToken = _token; }
+      }
       return !!(_token && _userId);
+    }
+
+    async function _fetchUserIdFromApi() {
+      try {
+        const res = await _gmFetch("GET", API_BASE + "/users/@me");
+        if (res.status !== 200) return null;
+        const id = JSON.parse(res.responseText)?.id;
+        return (typeof id === "string" && /^\d+$/.test(id)) ? id : null;
+      } catch (_) { return null; }
     }
 
     function _credErrMsg() {
@@ -26111,11 +26195,13 @@ unsafeWindow.fetch = function(...args) {
     }
 
     async function _apiDelete(channelId, msgId, retries = 3) {
+      _lastDeleteStatus = 0;
       for (let i = 0; i < retries; i++) {
         await _sleep(_deleteDelay);
         if (_stopRequested) return false;
         try {
           const res = await _gmFetch("DELETE", API_BASE + "/channels/" + channelId + "/messages/" + msgId);
+          _lastDeleteStatus = res.status;
           if (res.status === 429) {
             let w = 3000;
             try { w = (JSON.parse(res.responseText).retry_after || 3) * 1000; } catch (_) {}
@@ -27464,7 +27550,12 @@ unsafeWindow.fetch = function(...args) {
           const filterForScope = arr => (_browseScope === "channel" && ctx?.channelId)
             ? arr.filter(m => m.channel_id === ctx.channelId)
             : arr;
-          const cached = filterForScope(await _idbGetByScope(scope));
+          const guarded = await _idbGetByScopeGuarded(scope);
+          if (guarded.aborted) {
+            if (capturedGen === _browseGen) msgList.appendChild(_makeMsgPlaceholder("mp-token-warn", mp("cache_owner_mismatch")));
+            return;
+          }
+          const cached = filterForScope(guarded.data);
           if (cached.length > 0 && capturedGen === _browseGen) {
             _browseData   = cached;
             _browseOffset = cached.length;
@@ -29088,7 +29179,11 @@ unsafeWindow.fetch = function(...args) {
         if (_browseData.length === 0) {
           const scope = _scopeKey();
           if (scope) {
-            _idbGetByScope(scope).then(cached => {
+            _idbGetByScopeGuarded(scope).then(({ data: cached, aborted }) => {
+              if (aborted) {
+                list.appendChild(_makeMsgPlaceholder("mp-token-warn", mp("cache_owner_mismatch")));
+                return;
+              }
               if (cached.length > 0) {
                 _browseData = cached;
                 _drawFavs();
@@ -29427,6 +29522,7 @@ unsafeWindow.fetch = function(...args) {
         }
         const task = {
           id: crypto.randomUUID(), createdAt: Date.now(), label: "",
+          ownerId: _userId || null,
           scope: _browseScope, guildId: ctx?.guildId || null,
           channelId: ctx?.channelId || null, channelName: ctx ? "#" + ctx.channelId : "",
           filters: { ..._loadTypeFilter() }, status: "active",
@@ -29460,6 +29556,18 @@ unsafeWindow.fetch = function(...args) {
       const ok = await _ensureCredentials();
       if (!ok) { dmtShowToast(_credErrMsg(), { duration: 4000 }); return; }
 
+      if (task.ownerId && task.ownerId !== _userId) {
+        dmtShowToast("⚠️ " + mp("task_owner_mismatch"), { duration: 5000 });
+        return;
+      }
+      if (!task.ownerId) {
+        _runningTask = taskId;
+        const adopt = await dmtConfirm(mp("task_owner_unknown"), { danger: true });
+        _runningTask = null;
+        if (!adopt) return;
+        task.ownerId = _userId;
+      }
+
       _runningTask   = taskId;
       _stopRequested = false;
       task.status    = "active"; _saveTasks(tasks);
@@ -29468,6 +29576,7 @@ unsafeWindow.fetch = function(...args) {
       const quota   = _getTaskQuota(task);
       let   pending = task.pendingIds || [];
       let   pIdx    = task.offset;
+      let   consec403 = 0;
 
       _updateInlineProgress(task, pIdx, pending.length, false);
 
@@ -29499,8 +29608,18 @@ unsafeWindow.fetch = function(...args) {
         const success = await _apiDelete(chId, msgId);
         if (success) {
           task.deletedCount++; _bumpQuota();
+          consec403 = 0;
+        } else if (_lastDeleteStatus === 403) {
+          consec403++;
+        } else {
+          consec403 = 0;
         }
         task.offset = ++pIdx;
+
+        if (consec403 >= TASK_403_BREAK) {
+          dmtShowToast("⚠️ " + mp("task_403_paused"), { duration: 6000 });
+          break;
+        }
 
         if (pIdx % 5 === 0) {
           const ts2 = _getTasks(); const i2 = ts2.findIndex(t => t.id === taskId);
@@ -29514,7 +29633,9 @@ unsafeWindow.fetch = function(...args) {
       const ft = _getTasks(); const fi = ft.findIndex(t => t.id === taskId);
       if (fi >= 0) {
         ft[fi].status = (pIdx >= pending.length && !_stopRequested) ? "done" : "paused";
-        ft[fi].offset = pIdx; _saveTasks(ft);
+        ft[fi].offset = pIdx;
+        ft[fi].deletedCount = task.deletedCount;
+        _saveTasks(ft);
         if (ft[fi].status === "done")
           dmtShowToast(mp("task_done_toast", { n: task.deletedCount }), { duration: 4000 });
       }
@@ -31165,6 +31286,9 @@ if (type === "warn" && scanLimit !== null) {
       statusDetail: null,
     };
     let _msToken        = null;
+    let _msUserId       = null;
+    let _msUserIdToken  = null;
+    let _msOwnerPhEl    = null;
     let _msScanAbort    = false;
     let _msPanelEl      = null;
     let _msPanelResizeObs = null;
@@ -31396,6 +31520,65 @@ if (type === "warn" && scanLimit !== null) {
       }
     }
 
+    const _msOwnerInflight = new Map();
+    const _msOwnerVerified = new Set();
+
+    async function _msReadSyncRec(scopeKey) {
+      try {
+        const db = await _msIdbOpen();
+        return await new Promise((resolve, reject) => {
+          const r = db.transaction("media_sync", "readonly").objectStore("media_sync").get(scopeKey);
+          r.onsuccess = () => resolve(r.result || null);
+          r.onerror   = e => reject(e.target.error);
+        });
+      } catch (_) { return null; }
+    }
+
+    async function _msClearScopeData(scope) {
+      const db = await _msIdbOpen();
+      await new Promise((res, rej) => {
+        const tx = db.transaction(["media_items","media_stats","media_sync"], "readwrite");
+        const idx = tx.objectStore("media_items").index("scope");
+        const r   = idx.openCursor(IDBKeyRange.only(scope));
+        r.onsuccess = e => { const c = e.target.result; if (c) { c.delete(); c.continue(); } };
+        tx.objectStore("media_stats").delete(scope);
+        tx.objectStore("media_sync").delete(scope);
+        tx.oncomplete = res; tx.onerror = e => rej(e.target.error);
+      });
+    }
+
+    function _msCheckCacheOwner(scope) {
+      if (_msOwnerInflight.has(scope)) return _msOwnerInflight.get(scope);
+      const p = (async () => {
+        let uid = null;
+        try { uid = await _msEnsureUserId(); } catch (_) {}
+        if (!uid) return true;
+        const vKey = uid + "|" + scope;
+        if (_msOwnerVerified.has(vKey)) return true;
+        const rec = await _msReadSyncRec(scope);
+        if (rec && rec.scanned_by && rec.scanned_by !== uid) {
+          const clear = await dmtConfirm(
+            tOr("ms_cache_owner_mismatch", "The cached media for this scope was scanned by a different Discord account (you may have switched accounts).\nTo continue, this scope's cached media and scan progress must be cleared (reset to 0), and the scope must be scanned again (this can take a while and uses many API requests).\nClear now?"),
+            { danger: true, confirmText: tOr("ms_stats_clear", "Clear cached media for this scope") }
+          );
+          if (!clear) return false;
+          await _msClearScopeData(scope);
+        } else if (rec && !rec.scanned_by) {
+          await _msWriteSyncMeta(scope, { scanned_by: uid });
+        }
+        _msOwnerVerified.add(vKey);
+        return true;
+      })().finally(() => _msOwnerInflight.delete(scope));
+      _msOwnerInflight.set(scope, p);
+      return p;
+    }
+
+    async function _msStampScope(scope) {
+      let uid = null;
+      try { uid = await _msEnsureUserId(); } catch (_) {}
+      if (uid) await _msWriteSyncMeta(scope, { scanned_by: uid });
+    }
+
     async function _msWriteIncompleteSyncMeta(scope, oldestIdSnapshot, newestTsSnapshot, prevSync) {
       const oldestMs    = _msSnowflakeToTimestamp(oldestIdSnapshot);
       const prevOldestMs = prevSync?.oldest_scanned_ts ? new Date(prevSync.oldest_scanned_ts).getTime() : null;
@@ -31540,6 +31723,34 @@ if (type === "warn" && scanLimit !== null) {
       throw new Error(tOr("ms_no_token_warn", "Token not found — enable API Mode in Wormhole settings"));
     }
 
+    function _msFetchUserIdFromApi(token) {
+      return new Promise(resolve => {
+        GM_xmlhttpRequest({
+          method:  "GET",
+          url:     MS_API_BASE + "/users/@me",
+          headers: { Authorization: token, "Content-Type": "application/json" },
+          timeout: 15000,
+          onload: r => {
+            try {
+              const id = r.status === 200 ? JSON.parse(r.responseText)?.id : null;
+              resolve((typeof id === "string" && /^\d+$/.test(id)) ? id : null);
+            } catch (_) { resolve(null); }
+          },
+          onerror:   () => resolve(null),
+          ontimeout: () => resolve(null),
+        });
+      });
+    }
+
+    async function _msEnsureUserId() {
+      const token = await _msEnsureToken();
+      if (_msUserId && _msUserIdToken === token) return _msUserId;
+      _msUserId = null;
+      const id = await _msFetchUserIdFromApi(token);
+      if (id) { _msUserId = id; _msUserIdToken = token; }
+      return id;
+    }
+
     async function _msFetchPage(endpoint, offset, minId, maxId, channelId) {
       const token = await _msEnsureToken();
       let url = `${MS_API_BASE}/${endpoint}/messages/search?has=image&has=video&has=file&has=sound&limit=25&offset=${offset}&include_nsfw=true`;
@@ -31577,6 +31788,8 @@ if (type === "warn" && scanLimit !== null) {
     const _msSleep = ms => new Promise(r => setTimeout(r, ms));
 
     async function _msFullScan(scope, scopeType) {
+      if (!(await _msCheckCacheOwner(scope))) return;
+      await _msStampScope(scope);
       const isGuild    = scopeType === "guild" || scopeType === "guild-channel";
       const parsedGc   = scopeType === "guild-channel" ? _msParseScope(scope) : null;
       const id         = parsedGc ? parsedGc.guildId : scope.slice(2);
@@ -32271,7 +32484,27 @@ if (type === "warn" && scanLimit !== null) {
     async function _msReloadGrid() {
       if (_msGridLoading || !_msGridScope || !_msGridContEl) return;
       _msGridLoading = true;
+      const scopeAtStart = _msGridScope;
+      let rerun = false;
       try {
+        if (_msOwnerPhEl) { _msOwnerPhEl.remove(); _msOwnerPhEl = null; }
+        const ownerOk = await _msCheckCacheOwner(scopeAtStart);
+        if (!_msGridContEl) return;
+        if (_msGridScope !== scopeAtStart) { rerun = true; return; }
+        if (!ownerOk) {
+          _msGridItems = []; _msGridCursor = null; _msGridAll = true;
+          _msGridRendered.clear();
+          _msGridContEl.textContent = "";
+          _msRenderGrid();
+          const host = _msGridContEl.parentElement;
+          if (host) {
+            _msOwnerPhEl = document.createElement("div");
+            _msOwnerPhEl.style.cssText = "padding:24px 16px;text-align:center;color:#b5bac1;font-size:13px;line-height:1.6;white-space:pre-line;";
+            _msOwnerPhEl.textContent = tOr("ms_cache_owner_mismatch", "The cached media for this scope was scanned by a different Discord account. Clear this scope's cached media and scan progress (reset to 0) and scan again to continue.");
+            host.appendChild(_msOwnerPhEl);
+          }
+          return;
+        }
         const items = await _msReadPage(_msGridScope, _msGridFilter, null, MS_PAGE_SIZE, _msChannelFilter, _msAuthorTypeFilter, _msPinnedOnly, _msContentFilter, _msMentionsFilter, _msMentionsUserQuery);
         _msGridItems   = items;
         _msGridCursor  = items.length ? [_msGridScope, items[items.length-1].timestamp, items[items.length-1].url] : null;
@@ -32281,6 +32514,7 @@ if (type === "warn" && scanLimit !== null) {
         _msRenderGrid();
       } finally {
         _msGridLoading = false;
+        if (rerun) _msReloadGrid().catch(() => {});
       }
     }
 
@@ -33171,16 +33405,7 @@ if (type === "warn" && scanLimit !== null) {
       clearCacheBtn.addEventListener("click", async () => {
         if (!_msGridScope) return;
         try {
-          const db = await _msIdbOpen();
-          await new Promise((res, rej) => {
-            const tx = db.transaction(["media_items","media_stats","media_sync"], "readwrite");
-            const idx = tx.objectStore("media_items").index("scope");
-            const r   = idx.openCursor(IDBKeyRange.only(_msGridScope));
-            r.onsuccess = e => { const c = e.target.result; if (c) { c.delete(); c.continue(); } };
-            tx.objectStore("media_stats").delete(_msGridScope);
-            tx.objectStore("media_sync").delete(_msGridScope);
-            tx.oncomplete = res; tx.onerror = e => rej(e.target.error);
-          });
+          await _msClearScopeData(_msGridScope);
           _msGridItems = []; _msGridRendered.clear();
           if (_msGridContEl) _msGridContEl.innerHTML = "";
           _msReloadGrid().catch(() => {});
