@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.4.18
+// @version      2.9.4.19
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -63,7 +63,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.4.16";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.4.19";
 
   const GMStore = {
     
@@ -13397,13 +13397,24 @@
             if (id) collectedLinks.pixiv.push({ id, host: currentHost });
           }
           if (/\.(jpg|png|gif)$/.test(url)) {
-            const match = url.match(/(\d+)_p\d+\.(jpg|png|gif)$/);
-            if (match)
+            const isPixivHost =
+              currentHost === "pixiv.cat" ||
+              (currentHost && currentHost.endsWith(".pximg.net"));
+            const match = isPixivHost
+              ? url.match(/(\d+)(?:_p\d+)?\.(jpg|png|gif)$/)
+              : url.match(/(\d+)_p\d+\.(jpg|png|gif)$/);
+            if (match) {
+              addItem(
+                "convert",
+                t("to_pixiv"),
+                `https://www.pixiv.net/artworks/${match[1]}`,
+              );
               addItem(
                 "convert",
                 t("restore_pixiv_img"),
                 `https://www.phixiv.net/artworks/${match[1]}`,
               );
+            }
           }
         });
         const processGroup = (type, processor) => {
