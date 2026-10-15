@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.4.19
+// @version      2.9.4.21
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -27129,13 +27129,16 @@ unsafeWindow.fetch = function(...args) {
         if (key === "favs")  _renderFavsTab(favsArea);
         if (key === "browse" && _browseData.length === 0) {
           _loadAndRender(msgList, selCount, createBtn, cancelBtn, searchInput);
+        } else if (key === "browse") {
+          const nowCtx = _getCtx();
+          if (nowCtx) { _browseCtxSnapshot = nowCtx; _ctxChangedNotified = false; }
         }
       };
 
       const tabDefs = [
         { key: "browse", labelKey: "tab_browse" },
-        { key: "favs",   label: "💗 Favs"          },
         { key: "media",  labelKey: "tab_media"  },
+        { key: "favs",   label: "💗 Favs"          },
         { key: "tasks",  labelKey: "tab_tasks"  },
       ];
       tabDefs.forEach(({ key, labelKey, label }) => {
@@ -27391,7 +27394,12 @@ unsafeWindow.fetch = function(...args) {
             _sentinelLoading = true;
             _updatePrefetchProgress(statusBar);
             const prevLen = _browseData.length;
-            _fetchPage(true).then(() => {
+            _fetchPage(true).then((result) => {
+              if (result && result.ctxChanged) {
+                _sentinelLoading = false;
+                _updatePrefetchProgress(statusBar);
+                return;
+              }
               const q = (searchInput?.value || "").toLowerCase();
               const allFiltered = _browseData.filter(m =>
                 _passesTypeFilter(m) && _passesChanFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
@@ -27822,7 +27830,7 @@ unsafeWindow.fetch = function(...args) {
           _ctxChangedNotified = true;
           dmtShowToast("⚠️ " + mp("browse_ctx_changed"), { duration: 3000 });
         }
-        return;
+        return { ctxChanged: true };
       }
       const capturedGen = _browseGen;
       const data = await _searchMyPosts({ scope: _browseScope, offset: _browseOffset, skipDelay });
@@ -28638,6 +28646,7 @@ unsafeWindow.fetch = function(...args) {
           grid.appendChild(_makeMsgPlaceholder("mp-token-warn", _credErrMsg()));
           _mediaLoading = false;
           if (statusBar) statusBar.style.display = "none";
+          _setupSentinelObs(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
           return;
         }
       }
@@ -28673,6 +28682,7 @@ unsafeWindow.fetch = function(...args) {
       _mediaLoading = false;
       if (!data) {
         if (statusBar) statusBar.style.display = "none";
+        _setupSentinelObs(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
         return;
       }
 
@@ -28725,6 +28735,7 @@ unsafeWindow.fetch = function(...args) {
             (msg.attachments || []).some(a => a.filename?.toLowerCase().includes(q));
           el.style.display = match ? "" : "none";
         });
+        _setupSentinelObs(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
         return;
       }
 
@@ -28826,12 +28837,13 @@ unsafeWindow.fetch = function(...args) {
     function _setupSentinelObs(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText) {
       if (_mediaObs) _mediaObs.disconnect();
       if (_mediaTotal !== null && _mediaOffset < _mediaTotal) {
+        const mediaRoot = sentinel.closest(".mp-media-body") || null;
         _mediaObs = new IntersectionObserver(entries => {
           if (!entries[0].isIntersecting) return;
           requestAnimationFrame(() =>
             _loadMediaPage(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText)
           );
-        }, { threshold: 0.1, rootMargin: "100px" });
+        }, { root: mediaRoot, threshold: 0.1, rootMargin: "100px" });
         _mediaObs.observe(sentinel);
       }
     }
