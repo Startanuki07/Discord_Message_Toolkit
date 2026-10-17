@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.4.21
+// @version      2.9.4.24
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -7868,6 +7868,335 @@
 
   TRANSLATIONS["custom"] = { name: "Custom" };
 
+  function showModuleSettingsPanel(anchorEl) {
+    const gearWrap = anchorEl?.closest(".dmt-gear-wrap") || anchorEl?.parentElement;
+    const dot = gearWrap?.querySelector(".dmt-gear-dot");
+    if (dot) dot.remove();
+
+    const existing = document.getElementById("mod-settings-panel");
+    if (existing) {
+      existing.remove();
+      if (existing._pendingReload) {
+        dmtConfirm(t("rescue_reload_msg")).then((ok) => { if (ok) location.reload(); });
+      }
+      return;
+    }
+
+    const lang = getConfig().lang || navigator.language || "en-US";
+    const getLang = (labels) => {
+      if (labels[lang]) return labels[lang];
+      const prefix = lang.split("-")[0];
+      const prefixKey = Object.keys(labels).find(k => k.split("-")[0] === prefix);
+      if (prefixKey) return labels[prefixKey];
+      return labels["en-US"] || labels["zh-TW"];
+    };
+
+    const panel = document.createElement("div");
+    panel.id = "mod-settings-panel";
+    panel.style.cssText = `
+      position: fixed;
+      background: #2b2d31;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 12px 0 8px;
+      z-index: 2147483647;
+      min-width: 240px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+      font-size: 13px;
+      color: #dcddde;
+    `;
+
+    const title = document.createElement("div");
+    title.style.cssText =
+      "padding: 0 14px 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #72767d;";
+    title.textContent =
+      {
+        "zh-TW": "功能模組開關",
+        "zh-CN": "功能模块开关",
+        ja: "モジュール設定",
+        ko: "모듈 설정",
+      }[lang] || "Module Settings";
+    panel.appendChild(title);
+
+    const sep = document.createElement("div");
+    sep.style.cssText =
+      "height: 1px; background: rgba(255,255,255,0.07); margin: 0 0 6px;";
+    panel.appendChild(sep);
+
+    MODULE_DEFS.forEach((mod) => {
+      const row = document.createElement("div");
+      row.style.cssText =
+        "display:flex; align-items:center; justify-content:space-between; padding: 6px 14px; cursor:pointer; border-radius:4px; margin: 0 4px;";
+      row.onmouseenter = () =>
+        (row.style.background = "rgba(255,255,255,0.06)");
+      row.onmouseleave = () => (row.style.background = "");
+
+      const label = document.createElement("span");
+      label.style.cssText = "display:flex; align-items:center; gap:7px;";
+      label.innerHTML = `<span style="font-size:15px;">${mod.icon}</span><span>${getLang(mod.label)}</span>`;
+
+      const newBadge = renderNewBadge(mod.storageKey);
+      if (newBadge) label.appendChild(newBadge);
+
+      if (mod.tip) {
+        const tipBtn = document.createElement("span");
+        tipBtn.style.cssText = `
+          display:inline-flex; align-items:center; justify-content:center;
+          width:14px; height:14px; border-radius:50%;
+          color:rgba(185,187,190,0.45); cursor:help; flex-shrink:0;
+          font-size:11px; font-weight:700; line-height:1;
+          transition: color 0.15s;
+        `;
+        tipBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
+          <path d="M12 17v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          <circle cx="12" cy="8" r="0.5" fill="currentColor" stroke="currentColor" stroke-width="1.5"/>
+        </svg>`;
+        tipBtn.title = t(mod.tip);
+        tipBtn.onmouseenter = () => tipBtn.style.color = "rgba(185,187,190,0.9)";
+        tipBtn.onmouseleave = () => tipBtn.style.color = "rgba(185,187,190,0.45)";
+        tipBtn.addEventListener("click", (e) => e.stopPropagation());
+        label.appendChild(tipBtn);
+      }
+
+      const enabled = isModEnabled(mod.storageKey);
+      const toggle = document.createElement("div");
+      toggle.style.cssText = `
+        width: 34px; height: 18px; border-radius: 9px;
+        background: ${enabled ? "#5865f2" : "#4f545c"};
+        position: relative; transition: background 0.2s; flex-shrink: 0;
+        cursor: pointer;
+      `;
+      const thumb = document.createElement("div");
+      thumb.style.cssText = `
+        width: 14px; height: 14px; border-radius: 50%; background: #fff;
+        position: absolute; top: 2px;
+        left: ${enabled ? "18px" : "2px"};
+        transition: left 0.2s;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      `;
+      toggle.appendChild(thumb);
+
+      const updateToggle = (on) => {
+        toggle.style.background = on ? "#5865f2" : "#4f545c";
+        thumb.style.left = on ? "18px" : "2px";
+      };
+
+      row.onclick = () => {
+        const nowEnabled = isModEnabled(mod.storageKey);
+        const next = !nowEnabled;
+
+        if (mod.warn && !next) {
+          const dlg = document.createElement("div");
+          dlg.style.cssText = `
+            position:fixed; inset:0; background:rgba(0,0,0,0.7);
+            z-index:2147483647; display:flex; align-items:center; justify-content:center;
+          `;
+          const box = document.createElement("div");
+          box.style.cssText = `
+            background:#2f3136; border-radius:10px; padding:22px 24px; max-width:380px;
+            color:#dcddde; font-size:13px; line-height:1.6;
+            box-shadow:0 12px 40px rgba(0,0,0,0.6);
+          `;
+          const warnTitle = document.createElement("div");
+          warnTitle.style.cssText =
+            "font-size:15px; font-weight:700; margin-bottom:12px; color:#fff;";
+          warnTitle.textContent = t("mod_msg_warn_title");
+          const warnBody = document.createElement("div");
+          warnBody.style.cssText =
+            "white-space:pre-line; color:#b9bbbe; margin-bottom:18px;";
+          warnBody.textContent = t("mod_msg_warn_body");
+          const btnRow = document.createElement("div");
+          btnRow.style.cssText =
+            "display:flex; gap:10px; justify-content:flex-end;";
+          const cancelBtn = document.createElement("button");
+          cancelBtn.textContent = t("mod_msg_warn_cancel");
+          cancelBtn.style.cssText =
+            "padding:7px 16px; border-radius:5px; background:#4f545c; color:#fff; border:none; cursor:pointer; font-size:13px;";
+          cancelBtn.onclick = () => dlg.remove();
+          const confirmBtn = document.createElement("button");
+          confirmBtn.textContent = t("mod_msg_warn_confirm");
+          confirmBtn.style.cssText =
+            "padding:7px 16px; border-radius:5px; background:#ed4245; color:#fff; border:none; cursor:pointer; font-size:13px;";
+          confirmBtn.onclick = () => {
+            dlg.remove();
+            setModEnabled(mod.storageKey, false);
+            updateToggle(false);
+            panel._pendingReload = true;
+            const hint = document.createElement("div");
+            hint.style.cssText =
+              "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#23272a;color:#dcddde;padding:8px 16px;border-radius:6px;font-size:12px;z-index:999999;box-shadow:0 4px 12px rgba(0,0,0,0.4);pointer-events:none;";
+            hint.textContent =
+              mod.icon +
+              " " +
+              getLang(mod.label) +
+              " — " +
+              t("mod_msg_warn_confirm") +
+              " (重新整頁生效)";
+            document.body.appendChild(hint);
+            setTimeout(() => hint.remove(), 3000);
+          };
+          btnRow.appendChild(cancelBtn);
+          btnRow.appendChild(confirmBtn);
+          box.appendChild(warnTitle);
+          box.appendChild(warnBody);
+          box.appendChild(btnRow);
+          dlg.appendChild(box);
+          dmtGetPortal().appendChild(dlg);
+          dlg.style.pointerEvents = "auto";
+          dlg.addEventListener("click", (e) => {
+            if (e.target === dlg) dlg.remove();
+          });
+          return;
+        }
+
+        if (next && mod.enableWarn) {
+          const warnDlg = document.createElement("div");
+          warnDlg.style.cssText =
+            "position:fixed;inset:0;background:rgba(0,0,0,0.7);" +
+            "z-index:2147483647;display:flex;align-items:center;justify-content:center;";
+          const warnBox = document.createElement("div");
+          warnBox.style.cssText =
+            "background:#2f3136;border-radius:10px;padding:22px 24px;max-width:400px;" +
+            "color:#dcddde;font-size:13px;line-height:1.6;" +
+            "box-shadow:0 12px 40px rgba(0,0,0,0.6);";
+          const warnHead = document.createElement("div");
+          warnHead.style.cssText = "font-size:15px;font-weight:700;margin-bottom:10px;color:#fff;";
+          warnHead.textContent = mod.icon + "  " + getLang(mod.label);
+          const warnBody = document.createElement("div");
+          warnBody.style.cssText = "white-space:pre-line;color:#b9bbbe;margin-bottom:18px;";
+          warnBody.textContent = t(mod.enableWarn);
+          const warnBtns = document.createElement("div");
+          warnBtns.style.cssText = "display:flex;gap:10px;justify-content:flex-end;";
+          const warnCancel = document.createElement("button");
+          warnCancel.textContent = t("mod_msg_warn_cancel");
+          warnCancel.style.cssText =
+            "padding:7px 16px;border-radius:5px;background:#4f545c;color:#fff;" +
+            "border:none;cursor:pointer;font-size:13px;";
+          warnCancel.onclick = () => {
+            warnDlg.remove();
+          };
+          const warnConfirm = document.createElement("button");
+          warnConfirm.textContent = t("mod_enable_confirm");
+          warnConfirm.style.cssText =
+            "padding:7px 16px;border-radius:5px;background:#5865f2;color:#fff;" +
+            "border:none;cursor:pointer;font-size:13px;";
+          warnConfirm.onclick = () => {
+            warnDlg.remove();
+            setModEnabled(mod.storageKey, true);
+            updateToggle(true);
+            markFeatureSeen(mod.storageKey);
+            const existingBadge = label.querySelector(".dmt-new-badge");
+            if (existingBadge) existingBadge.remove();
+            if (mod.enableWarn) {
+              panel._pendingReload = true;
+            }
+          };
+          warnBtns.appendChild(warnCancel);
+          warnBtns.appendChild(warnConfirm);
+          warnBox.appendChild(warnHead);
+          warnBox.appendChild(warnBody);
+          warnBox.appendChild(warnBtns);
+          warnDlg.appendChild(warnBox);
+          dmtGetPortal().appendChild(warnDlg);
+          warnDlg.style.pointerEvents = "auto";
+          warnDlg.addEventListener("click", e => { if (e.target === warnDlg) warnDlg.remove(); });
+          return;
+        }
+
+        setModEnabled(mod.storageKey, next);
+        updateToggle(next);
+
+        markFeatureSeen(mod.storageKey);
+        const existingBadge = label.querySelector(".dmt-new-badge");
+        if (existingBadge) existingBadge.remove();
+        const hint = document.createElement("div");
+        hint.style.cssText = `
+          position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+          background: #23272a; color: #dcddde;
+          padding: 8px 16px; border-radius: 6px; font-size: 12px;
+          z-index: 999999; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+          pointer-events: none;
+        `;
+        const actionLabel = next
+          ? {
+              "zh-TW": "已啟用",
+              "zh-CN": "已启用",
+              ja: "有効",
+              ko: "활성화됨",
+            }[lang] || "Enabled"
+          : {
+              "zh-TW": "已停用",
+              "zh-CN": "已停用",
+              ja: "無効",
+              ko: "비활성화됨",
+            }[lang] || "Disabled";
+        hint.textContent = `${mod.icon} ${getLang(mod.label)} — ${actionLabel}`;
+        document.body.appendChild(hint);
+        setTimeout(() => hint.remove(), 2000);
+
+        panel._pendingReload = true;
+      };
+
+      row.appendChild(label);
+      row.appendChild(toggle);
+      panel.appendChild(row);
+    });
+
+    const sep2 = document.createElement("div");
+    sep2.style.cssText =
+      "height: 1px; background: rgba(255,255,255,0.07); margin: 8px 0 4px;";
+    panel.appendChild(sep2);
+
+    const manualBtn = document.createElement("div");
+    manualBtn.style.cssText =
+      "padding: 6px 14px; cursor:pointer; color:#72767d; font-size:12px; display:flex; align-items:center; gap:6px; border-radius:4px; margin: 0 4px;";
+    manualBtn.innerHTML = `<span>📖</span><span>${{ "zh-TW": "查看使用說明", "zh-CN": "查看使用说明", ja: "マニュアルを見る", ko: "사용 설명서 보기" }[lang] || "View Manual"}</span>`;
+    manualBtn.onmouseenter = () =>
+      (manualBtn.style.background = "rgba(255,255,255,0.06)");
+    manualBtn.onmouseleave = () => (manualBtn.style.background = "");
+    manualBtn.onclick = () => {
+      panel.remove();
+      if (panel._pendingReload) {
+        dmtConfirm(t("rescue_reload_msg")).then((ok) => { if (ok) location.reload(); });
+      }
+      showManualModal();
+    };
+    panel.appendChild(manualBtn);
+
+    dmtGetPortal().appendChild(panel);
+    panel.style.pointerEvents = "auto";
+    const rect = anchorEl.getBoundingClientRect();
+    const pw = panel.offsetWidth;
+    const ph = panel.offsetHeight;
+
+    let left = rect.right - pw - 4;
+    if (left < 6) left = rect.right + 8;
+    if (left + pw > window.innerWidth - 6) left = window.innerWidth - pw - 6;
+
+    let top = rect.top;
+    if (top + ph > window.innerHeight - 10)
+      top = window.innerHeight - ph - 10;
+    if (top < 6) top = 6;
+
+    panel.style.top = top + "px";
+    panel.style.left = left + "px";
+
+    const closeHandler = (ev) => {
+      if (!panel.contains(ev.target) && ev.target !== anchorEl) {
+        panel.remove();
+        document.removeEventListener("mousedown", closeHandler, true);
+        if (panel._pendingReload) {
+          dmtConfirm(t("rescue_reload_msg")).then((ok) => { if (ok) location.reload(); });
+        }
+      }
+    };
+    setTimeout(
+      () => document.addEventListener("mousedown", closeHandler, true),
+      50,
+    );
+  }
+
   function initForwardingManager() {
     DEBUG &&
       console.log(
@@ -8170,15 +8499,19 @@
         DEBUG &&
           DEBUG && console.log("[ForwardingManager] Local Observer attached to modal.");
 
+        let _fmRemoveObsDebounce = null;
         const removeObserver = new MutationObserver((mutations, obs) => {
-          if (!document.body.contains(modal)) {
-            listObserver.disconnect();
-            activeObservers.delete(modal);
-            obs.disconnect();
-            DEBUG && console.log(
-              "[ForwardingManager] Modal closed. Local Observer disconnected.",
-            );
-          }
+          clearTimeout(_fmRemoveObsDebounce);
+          _fmRemoveObsDebounce = setTimeout(() => {
+            if (!document.body.contains(modal)) {
+              listObserver.disconnect();
+              activeObservers.delete(modal);
+              obs.disconnect();
+              DEBUG && console.log(
+                "[ForwardingManager] Modal closed. Local Observer disconnected.",
+              );
+            }
+          }, 300);
         });
         removeObserver.observe(document.body, {
           childList: true,
@@ -11551,335 +11884,6 @@
         scheduleCloseGlobalMenu();
       });
       return submenu;
-    }
-
-    function showModuleSettingsPanel(anchorEl) {
-      const gearWrap = anchorEl?.closest(".dmt-gear-wrap") || anchorEl?.parentElement;
-      const dot = gearWrap?.querySelector(".dmt-gear-dot");
-      if (dot) dot.remove();
-
-      const existing = document.getElementById("mod-settings-panel");
-      if (existing) {
-        existing.remove();
-        if (existing._pendingReload) {
-          dmtConfirm(t("rescue_reload_msg")).then((ok) => { if (ok) location.reload(); });
-        }
-        return;
-      }
-
-      const lang = getConfig().lang || navigator.language || "en-US";
-      const getLang = (labels) => {
-        if (labels[lang]) return labels[lang];
-        const prefix = lang.split("-")[0];
-        const prefixKey = Object.keys(labels).find(k => k.split("-")[0] === prefix);
-        if (prefixKey) return labels[prefixKey];
-        return labels["en-US"] || labels["zh-TW"];
-      };
-
-      const panel = document.createElement("div");
-      panel.id = "mod-settings-panel";
-      panel.style.cssText = `
-        position: fixed;
-        background: #2b2d31;
-        border: 1px solid rgba(255,255,255,0.12);
-        border-radius: 8px;
-        padding: 12px 0 8px;
-        z-index: 2147483647;
-        min-width: 240px;
-        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-        font-size: 13px;
-        color: #dcddde;
-      `;
-
-      const title = document.createElement("div");
-      title.style.cssText =
-        "padding: 0 14px 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #72767d;";
-      title.textContent =
-        {
-          "zh-TW": "功能模組開關",
-          "zh-CN": "功能模块开关",
-          ja: "モジュール設定",
-          ko: "모듈 설정",
-        }[lang] || "Module Settings";
-      panel.appendChild(title);
-
-      const sep = document.createElement("div");
-      sep.style.cssText =
-        "height: 1px; background: rgba(255,255,255,0.07); margin: 0 0 6px;";
-      panel.appendChild(sep);
-
-      MODULE_DEFS.forEach((mod) => {
-        const row = document.createElement("div");
-        row.style.cssText =
-          "display:flex; align-items:center; justify-content:space-between; padding: 6px 14px; cursor:pointer; border-radius:4px; margin: 0 4px;";
-        row.onmouseenter = () =>
-          (row.style.background = "rgba(255,255,255,0.06)");
-        row.onmouseleave = () => (row.style.background = "");
-
-        const label = document.createElement("span");
-        label.style.cssText = "display:flex; align-items:center; gap:7px;";
-        label.innerHTML = `<span style="font-size:15px;">${mod.icon}</span><span>${getLang(mod.label)}</span>`;
-
-        const newBadge = renderNewBadge(mod.storageKey);
-        if (newBadge) label.appendChild(newBadge);
-
-        if (mod.tip) {
-          const tipBtn = document.createElement("span");
-          tipBtn.style.cssText = `
-            display:inline-flex; align-items:center; justify-content:center;
-            width:14px; height:14px; border-radius:50%;
-            color:rgba(185,187,190,0.45); cursor:help; flex-shrink:0;
-            font-size:11px; font-weight:700; line-height:1;
-            transition: color 0.15s;
-          `;
-          tipBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/>
-            <path d="M12 17v-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            <circle cx="12" cy="8" r="0.5" fill="currentColor" stroke="currentColor" stroke-width="1.5"/>
-          </svg>`;
-          tipBtn.title = t(mod.tip);
-          tipBtn.onmouseenter = () => tipBtn.style.color = "rgba(185,187,190,0.9)";
-          tipBtn.onmouseleave = () => tipBtn.style.color = "rgba(185,187,190,0.45)";
-          tipBtn.addEventListener("click", (e) => e.stopPropagation());
-          label.appendChild(tipBtn);
-        }
-
-        const enabled = isModEnabled(mod.storageKey);
-        const toggle = document.createElement("div");
-        toggle.style.cssText = `
-          width: 34px; height: 18px; border-radius: 9px;
-          background: ${enabled ? "#5865f2" : "#4f545c"};
-          position: relative; transition: background 0.2s; flex-shrink: 0;
-          cursor: pointer;
-        `;
-        const thumb = document.createElement("div");
-        thumb.style.cssText = `
-          width: 14px; height: 14px; border-radius: 50%; background: #fff;
-          position: absolute; top: 2px;
-          left: ${enabled ? "18px" : "2px"};
-          transition: left 0.2s;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.4);
-        `;
-        toggle.appendChild(thumb);
-
-        const updateToggle = (on) => {
-          toggle.style.background = on ? "#5865f2" : "#4f545c";
-          thumb.style.left = on ? "18px" : "2px";
-        };
-
-        row.onclick = () => {
-          const nowEnabled = isModEnabled(mod.storageKey);
-          const next = !nowEnabled;
-
-          if (mod.warn && !next) {
-            const dlg = document.createElement("div");
-            dlg.style.cssText = `
-              position:fixed; inset:0; background:rgba(0,0,0,0.7);
-              z-index:2147483647; display:flex; align-items:center; justify-content:center;
-            `;
-            const box = document.createElement("div");
-            box.style.cssText = `
-              background:#2f3136; border-radius:10px; padding:22px 24px; max-width:380px;
-              color:#dcddde; font-size:13px; line-height:1.6;
-              box-shadow:0 12px 40px rgba(0,0,0,0.6);
-            `;
-            const warnTitle = document.createElement("div");
-            warnTitle.style.cssText =
-              "font-size:15px; font-weight:700; margin-bottom:12px; color:#fff;";
-            warnTitle.textContent = t("mod_msg_warn_title");
-            const warnBody = document.createElement("div");
-            warnBody.style.cssText =
-              "white-space:pre-line; color:#b9bbbe; margin-bottom:18px;";
-            warnBody.textContent = t("mod_msg_warn_body");
-            const btnRow = document.createElement("div");
-            btnRow.style.cssText =
-              "display:flex; gap:10px; justify-content:flex-end;";
-            const cancelBtn = document.createElement("button");
-            cancelBtn.textContent = t("mod_msg_warn_cancel");
-            cancelBtn.style.cssText =
-              "padding:7px 16px; border-radius:5px; background:#4f545c; color:#fff; border:none; cursor:pointer; font-size:13px;";
-            cancelBtn.onclick = () => dlg.remove();
-            const confirmBtn = document.createElement("button");
-            confirmBtn.textContent = t("mod_msg_warn_confirm");
-            confirmBtn.style.cssText =
-              "padding:7px 16px; border-radius:5px; background:#ed4245; color:#fff; border:none; cursor:pointer; font-size:13px;";
-            confirmBtn.onclick = () => {
-              dlg.remove();
-              setModEnabled(mod.storageKey, false);
-              updateToggle(false);
-              panel._pendingReload = true;
-              const hint = document.createElement("div");
-              hint.style.cssText =
-                "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#23272a;color:#dcddde;padding:8px 16px;border-radius:6px;font-size:12px;z-index:999999;box-shadow:0 4px 12px rgba(0,0,0,0.4);pointer-events:none;";
-              hint.textContent =
-                mod.icon +
-                " " +
-                getLang(mod.label) +
-                " — " +
-                t("mod_msg_warn_confirm") +
-                " (重新整頁生效)";
-              document.body.appendChild(hint);
-              setTimeout(() => hint.remove(), 3000);
-            };
-            btnRow.appendChild(cancelBtn);
-            btnRow.appendChild(confirmBtn);
-            box.appendChild(warnTitle);
-            box.appendChild(warnBody);
-            box.appendChild(btnRow);
-            dlg.appendChild(box);
-            dmtGetPortal().appendChild(dlg);
-            dlg.style.pointerEvents = "auto";
-            dlg.addEventListener("click", (e) => {
-              if (e.target === dlg) dlg.remove();
-            });
-            return;
-          }
-
-          if (next && mod.enableWarn) {
-            const warnDlg = document.createElement("div");
-            warnDlg.style.cssText =
-              "position:fixed;inset:0;background:rgba(0,0,0,0.7);" +
-              "z-index:2147483647;display:flex;align-items:center;justify-content:center;";
-            const warnBox = document.createElement("div");
-            warnBox.style.cssText =
-              "background:#2f3136;border-radius:10px;padding:22px 24px;max-width:400px;" +
-              "color:#dcddde;font-size:13px;line-height:1.6;" +
-              "box-shadow:0 12px 40px rgba(0,0,0,0.6);";
-            const warnHead = document.createElement("div");
-            warnHead.style.cssText = "font-size:15px;font-weight:700;margin-bottom:10px;color:#fff;";
-            warnHead.textContent = mod.icon + "  " + getLang(mod.label);
-            const warnBody = document.createElement("div");
-            warnBody.style.cssText = "white-space:pre-line;color:#b9bbbe;margin-bottom:18px;";
-            warnBody.textContent = t(mod.enableWarn);
-            const warnBtns = document.createElement("div");
-            warnBtns.style.cssText = "display:flex;gap:10px;justify-content:flex-end;";
-            const warnCancel = document.createElement("button");
-            warnCancel.textContent = t("mod_msg_warn_cancel");
-            warnCancel.style.cssText =
-              "padding:7px 16px;border-radius:5px;background:#4f545c;color:#fff;" +
-              "border:none;cursor:pointer;font-size:13px;";
-            warnCancel.onclick = () => {
-              warnDlg.remove();
-            };
-            const warnConfirm = document.createElement("button");
-            warnConfirm.textContent = t("mod_enable_confirm");
-            warnConfirm.style.cssText =
-              "padding:7px 16px;border-radius:5px;background:#5865f2;color:#fff;" +
-              "border:none;cursor:pointer;font-size:13px;";
-            warnConfirm.onclick = () => {
-              warnDlg.remove();
-              setModEnabled(mod.storageKey, true);
-              updateToggle(true);
-              markFeatureSeen(mod.storageKey);
-              const existingBadge = label.querySelector(".dmt-new-badge");
-              if (existingBadge) existingBadge.remove();
-              if (mod.enableWarn) {
-                panel._pendingReload = true;
-              }
-            };
-            warnBtns.appendChild(warnCancel);
-            warnBtns.appendChild(warnConfirm);
-            warnBox.appendChild(warnHead);
-            warnBox.appendChild(warnBody);
-            warnBox.appendChild(warnBtns);
-            warnDlg.appendChild(warnBox);
-            dmtGetPortal().appendChild(warnDlg);
-            warnDlg.style.pointerEvents = "auto";
-            warnDlg.addEventListener("click", e => { if (e.target === warnDlg) warnDlg.remove(); });
-            return;
-          }
-
-          setModEnabled(mod.storageKey, next);
-          updateToggle(next);
-
-          markFeatureSeen(mod.storageKey);
-          const existingBadge = label.querySelector(".dmt-new-badge");
-          if (existingBadge) existingBadge.remove();
-          const hint = document.createElement("div");
-          hint.style.cssText = `
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: #23272a; color: #dcddde;
-            padding: 8px 16px; border-radius: 6px; font-size: 12px;
-            z-index: 999999; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            pointer-events: none;
-          `;
-          const actionLabel = next
-            ? {
-                "zh-TW": "已啟用",
-                "zh-CN": "已启用",
-                ja: "有効",
-                ko: "활성화됨",
-              }[lang] || "Enabled"
-            : {
-                "zh-TW": "已停用",
-                "zh-CN": "已停用",
-                ja: "無効",
-                ko: "비활성화됨",
-              }[lang] || "Disabled";
-          hint.textContent = `${mod.icon} ${getLang(mod.label)} — ${actionLabel}`;
-          document.body.appendChild(hint);
-          setTimeout(() => hint.remove(), 2000);
-
-          panel._pendingReload = true;
-        };
-
-        row.appendChild(label);
-        row.appendChild(toggle);
-        panel.appendChild(row);
-      });
-
-      const sep2 = document.createElement("div");
-      sep2.style.cssText =
-        "height: 1px; background: rgba(255,255,255,0.07); margin: 8px 0 4px;";
-      panel.appendChild(sep2);
-
-      const manualBtn = document.createElement("div");
-      manualBtn.style.cssText =
-        "padding: 6px 14px; cursor:pointer; color:#72767d; font-size:12px; display:flex; align-items:center; gap:6px; border-radius:4px; margin: 0 4px;";
-      manualBtn.innerHTML = `<span>📖</span><span>${{ "zh-TW": "查看使用說明", "zh-CN": "查看使用说明", ja: "マニュアルを見る", ko: "사용 설명서 보기" }[lang] || "View Manual"}</span>`;
-      manualBtn.onmouseenter = () =>
-        (manualBtn.style.background = "rgba(255,255,255,0.06)");
-      manualBtn.onmouseleave = () => (manualBtn.style.background = "");
-      manualBtn.onclick = () => {
-        panel.remove();
-        if (panel._pendingReload) {
-          dmtConfirm(t("rescue_reload_msg")).then((ok) => { if (ok) location.reload(); });
-        }
-        showManualModal();
-      };
-      panel.appendChild(manualBtn);
-
-      dmtGetPortal().appendChild(panel);
-      panel.style.pointerEvents = "auto";
-      const rect = anchorEl.getBoundingClientRect();
-      const pw = panel.offsetWidth;
-      const ph = panel.offsetHeight;
-
-      let left = rect.right - pw - 4;
-      if (left < 6) left = rect.right + 8;
-      if (left + pw > window.innerWidth - 6) left = window.innerWidth - pw - 6;
-
-      let top = rect.top;
-      if (top + ph > window.innerHeight - 10)
-        top = window.innerHeight - ph - 10;
-      if (top < 6) top = 6;
-
-      panel.style.top = top + "px";
-      panel.style.left = left + "px";
-
-      const closeHandler = (ev) => {
-        if (!panel.contains(ev.target) && ev.target !== anchorEl) {
-          panel.remove();
-          document.removeEventListener("mousedown", closeHandler, true);
-          if (panel._pendingReload) {
-            dmtConfirm(t("rescue_reload_msg")).then((ok) => { if (ok) location.reload(); });
-          }
-        }
-      };
-      setTimeout(
-        () => document.addEventListener("mousedown", closeHandler, true),
-        50,
-      );
     }
 
     function showManualModal() {
@@ -17021,27 +17025,32 @@
         });
         activeLocalObservers.set(pickerContainer, localObserver);
 
+        let _removeObserverDebounce = null;
         const removeObserver = new MutationObserver((mutations, obs) => {
-          const isGone = !document.body.contains(pickerContainer);
-          const isHidden = !isGone && (
-            pickerContainer.style.display === "none" ||
-            pickerContainer.offsetParent === null
-          );
-          if (isGone || isHidden) {
-            localObserver.disconnect();
-            activeLocalObservers.delete(pickerContainer);
-            obs.disconnect();
-            clearTimeout(_removeObserverFallbackTimer);
-            DEBUG && console.log(
-              `[EmojiSearchHelper] Local observer disconnected (${isGone ? "removed" : "hidden"}).`,
+          clearTimeout(_removeObserverDebounce);
+          _removeObserverDebounce = setTimeout(() => {
+            const isGone = !document.body.contains(pickerContainer);
+            const isHidden = !isGone && (
+              pickerContainer.style.display === "none" ||
+              pickerContainer.offsetParent === null
             );
-          }
+            if (isGone || isHidden) {
+              localObserver.disconnect();
+              activeLocalObservers.delete(pickerContainer);
+              obs.disconnect();
+              clearTimeout(_removeObserverFallbackTimer);
+              DEBUG && console.log(
+                `[EmojiSearchHelper] Local observer disconnected (${isGone ? "removed" : "hidden"}).`,
+              );
+            }
+          }, 300);
         });
         removeObserver.observe(document.body, {
           childList: true,
           subtree: true,
         });
         const _removeObserverFallbackTimer = setTimeout(() => {
+          clearTimeout(_removeObserverDebounce);
           localObserver.disconnect();
           activeLocalObservers.delete(pickerContainer);
           removeObserver.disconnect();
@@ -31321,6 +31330,7 @@ if (type === "warn" && scanLimit !== null) {
     let _msGridItems    = [];
     let _msGridCursor   = null;
     let _msGridAll      = false;
+    let _msLoadMoreLoading = false;
     let _msGridFilter   = "all";
     let _msChannelFilter = "all";
     let _msAuthorTypeFilter = "all";
@@ -32542,13 +32552,21 @@ if (type === "warn" && scanLimit !== null) {
     }
 
     async function _msLoadMoreItems() {
-      if (_msGridAll || !_msGridScope || !_msGridCursor) return;
-      const more = await _msReadPage(_msGridScope, _msGridFilter, _msGridCursor, MS_PAGE_SIZE, _msChannelFilter, _msAuthorTypeFilter, _msPinnedOnly, _msContentFilter, _msMentionsFilter, _msMentionsUserQuery);
-      if (!more.length) { _msGridAll = true; return; }
-      _msGridItems  = _msGridItems.concat(more);
-      _msGridCursor = [_msGridScope, more[more.length-1].timestamp, more[more.length-1].url];
-      _msGridAll    = more.length < MS_PAGE_SIZE;
-      _msRenderGrid();
+      if (_msLoadMoreLoading || _msGridAll || !_msGridScope || !_msGridCursor) return;
+      _msLoadMoreLoading = true;
+      const scopeAtStart  = _msGridScope;
+      const cursorAtStart = _msGridCursor;
+      try {
+        const more = await _msReadPage(scopeAtStart, _msGridFilter, cursorAtStart, MS_PAGE_SIZE, _msChannelFilter, _msAuthorTypeFilter, _msPinnedOnly, _msContentFilter, _msMentionsFilter, _msMentionsUserQuery);
+        if (_msGridScope !== scopeAtStart || _msGridCursor !== cursorAtStart) return;
+        if (!more.length) { _msGridAll = true; return; }
+        _msGridItems  = _msGridItems.concat(more);
+        _msGridCursor = [scopeAtStart, more[more.length-1].timestamp, more[more.length-1].url];
+        _msGridAll    = more.length < MS_PAGE_SIZE;
+        _msRenderGrid();
+      } finally {
+        _msLoadMoreLoading = false;
+      }
     }
 
     function _msJumpToMsg(guildId, channelId, msgId) {
