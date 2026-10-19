@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.4.24
+// @version      2.9.4.28
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -519,6 +519,20 @@
     } catch (e) {
       DEBUG && console.warn("[safeParseJSON] 解析失敗，回退預設值", e);
       return fallback;
+    }
+  }
+
+  function boundedMapSet(map, key, value, maxSize) {
+    map.set(key, value);
+    if (map.size > maxSize) {
+      const keepFrom = Math.floor(maxSize * 0.8);
+      const dropCount = map.size - keepFrom;
+      const it = map.keys();
+      for (let i = 0; i < dropCount; i++) {
+        const k = it.next().value;
+        if (k === undefined) break;
+        map.delete(k);
+      }
     }
   }
 
@@ -16733,10 +16747,10 @@
               items.forEach((item) => {
                 if (item.src && item.url) {
                   const cdnKey = item.src.replace(/^https?:/, "");
-                  _klipyUrlCache.set(cdnKey, item.url);
-                  _klipyUrlCache.set(item.src, item.url);
+                  boundedMapSet(_klipyUrlCache, cdnKey, item.url, 2000);
+                  boundedMapSet(_klipyUrlCache, item.src, item.url, 2000);
                   if (item.gif_src) {
-                    _klipyThumbCache.set(item.url, item.gif_src);
+                    boundedMapSet(_klipyThumbCache, item.url, item.gif_src, 1000);
                   }
                 }
               });
@@ -17480,14 +17494,13 @@
 
         clearTimeout(_inputBtnDebounce);
         _inputBtnDebounce = setTimeout(() => {
-          const scope = _ctaObsTarget || document;
-          scope.querySelectorAll(DMT_BTN_SEL).forEach(injectButton);
+          document.querySelectorAll(DMT_BTN_SEL).forEach(injectButton);
           const cta = document.querySelector(CTA_SEL);
           if (cta && cta !== _ctaObsTarget) {
             _ctaObsTarget = cta;
             observer.disconnect();
             observer.observe(cta, { childList: true, subtree: true });
-            observer.observe(document.body, { childList: true });
+            observer.observe(document.body, { childList: true, subtree: true });
             DEBUG && console.log("[ChatInputBtn] 收斂：找到 channelTextArea 容器，切換至局部監聽", cta);
           } else if (!cta && _ctaObsTarget) {
             _ctaObsTarget = null;
@@ -25956,9 +25969,9 @@ unsafeWindow.fetch = function(...args) {
       if (_chanNameCache.has(channelId)) return _chanNameCache.get(channelId);
       try {
         const res = await _gmFetch("GET", `${API_BASE}/channels/${channelId}`);
-        if (res.status !== 200) { _chanNameCache.set(channelId, null); return null; }
+        if (res.status !== 200) { boundedMapSet(_chanNameCache, channelId, null, 500); return null; }
         const name = JSON.parse(res.responseText)?.name || null;
-        _chanNameCache.set(channelId, name);
+        boundedMapSet(_chanNameCache, channelId, name, 500);
         return name;
       } catch (_) {
         return null;
@@ -32067,9 +32080,9 @@ if (type === "warn" && scanLimit !== null) {
             onerror: () => reject(new Error("network error")),
           });
         });
-        if (res.status !== 200) { _msChanNameCache.set(channelId, null); return null; }
+        if (res.status !== 200) { boundedMapSet(_msChanNameCache, channelId, null, 500); return null; }
         const name = JSON.parse(res.responseText)?.name || null;
-        _msChanNameCache.set(channelId, name);
+        boundedMapSet(_msChanNameCache, channelId, name, 500);
         return name;
       } catch (_) {
         return null;
