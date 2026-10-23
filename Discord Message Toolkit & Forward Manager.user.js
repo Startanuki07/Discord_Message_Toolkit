@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.4.28
+// @version      2.9.5.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -63,7 +63,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.4.19";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.5.0";
 
   const GMStore = {
     
@@ -10300,6 +10300,7 @@
             wh_send_autoclose: GMStore.get("wh_send_autoclose", "true"),
             wh_send_goto: GMStore.get("wh_send_goto", "false"),
             wh_send_show_toast: GMStore.get("wh_send_show_toast", "true"),
+            wh_send_options_collapsed: GMStore.get("wh_send_options_collapsed", "false"),
             wormhole_focus_mode: localStorage.getItem("wormhole_focus_mode"),
             wormhole_focus_size: localStorage.getItem("wormhole_focus_size"),
           },
@@ -10691,6 +10692,8 @@
             GMStore.set("wh_send_goto", wp.wh_send_goto);
           if (wp.wh_send_show_toast != null)
             GMStore.set("wh_send_show_toast", wp.wh_send_show_toast);
+          if (wp.wh_send_options_collapsed != null)
+            GMStore.set("wh_send_options_collapsed", wp.wh_send_options_collapsed);
           if (wp.wormhole_focus_mode != null)
             localStorage.setItem("wormhole_focus_mode", wp.wormhole_focus_mode);
           if (wp.wormhole_focus_size != null)
@@ -18468,6 +18471,9 @@
       this._monitorVisHandler = null;
       this._monitorIdleCounts = new Map();
       this._monitorLastPolledAt = new Map();
+      this._sendPanels = new Map();
+      this._sendQueueTail = Promise.resolve();
+      this._sendQueueLength = 0;
     }
 
     initialize() {
@@ -20479,11 +20485,63 @@ unsafeWindow.fetch = function(...args) {
       }
     }
 
-    openSendMessageOverlay(wormhole) {
-      if (document.getElementById("wh-send-overlay")) return;
+    _getSendPanelLayout(wormholeId) {
+      const all = GMStore.get("wh_send_panel_layouts", {}, true) || {};
+      const raw = all[wormholeId] || {};
+      return {
+        left:   typeof raw.left === "string"   ? raw.left   : null,
+        top:    typeof raw.top === "string"    ? raw.top    : null,
+        width:  typeof raw.width === "string"  ? raw.width  : null,
+        height: typeof raw.height === "string" ? raw.height : null,
+      };
+    }
+    _saveSendPanelLayout(wormholeId, patch) {
+      const all = GMStore.get("wh_send_panel_layouts", {}, true) || {};
+      all[wormholeId] = { ...this._getSendPanelLayout(wormholeId), ...patch };
+      GMStore.set("wh_send_panel_layouts", all, true);
+      if (patch.width && patch.height) {
+        GMStore.set("wh_send_panel_last_size", { width: patch.width, height: patch.height }, true);
+      }
+    }
+    _getSendPanelLastSize() {
+      const raw = GMStore.get("wh_send_panel_last_size", null, true);
+      return (raw && typeof raw.width === "string" && typeof raw.height === "string") ? raw : null;
+    }
 
-      const overlay = document.createElement("div");
-      overlay.id = "wh-send-overlay";
+    _enqueueSend(taskFn, onQueued) {
+      const wasQueued = this._sendQueueLength > 0;
+      this._sendQueueLength++;
+      if (wasQueued && typeof onQueued === "function") {
+        try { onQueued(); } catch (_) {}
+      }
+      const result = this._sendQueueTail.then(taskFn, taskFn);
+      this._sendQueueTail = result.then(() => {}, () => {});
+      const cleanup = () => { this._sendQueueLength = Math.max(0, this._sendQueueLength - 1); };
+      result.then(cleanup, cleanup);
+      return result;
+    }
+
+    openSendMessageOverlay(wormhole) {
+      const _existingPanel = this._sendPanels.get(wormhole.id);
+      if (_existingPanel && _existingPanel.isConnected) {
+        dmtGetPortal().appendChild(_existingPanel);
+        _existingPanel.classList.remove("wh-send-flash");
+        void _existingPanel.offsetWidth;
+        _existingPanel.classList.add("wh-send-flash");
+        return;
+      }
+
+      const panel = document.createElement("div");
+      panel.id = "wh-send-panel";
+      this._sendPanels.set(wormhole.id, panel);
+      const WH_SEND_PANEL_SOFT_LIMIT = 15;
+      if (this._sendPanels.size === WH_SEND_PANEL_SOFT_LIMIT) {
+        this.showToast(
+          tOr("wm_send_panel_soft_limit", "{n} send panels are open — things may get crowded.")
+            .replace("{n}", String(WH_SEND_PANEL_SOFT_LIMIT)),
+          "ℹ️"
+        );
+      }
       const ph = this.t("wm_send_placeholder").replace(
         "#{name}",
         wormhole.name,
@@ -20499,7 +20557,7 @@ unsafeWindow.fetch = function(...args) {
         this._startTokenInterceptor((token) => {
           tokenDetected = true;
           this._cachedToken = token;
-          const warn = document.getElementById("wh-send-token-warn");
+          const warn = panel.querySelector("#wh-send-token-warn");
           if (warn) {
             warn.style.transition = "opacity 0.4s";
             warn.style.opacity = "0";
@@ -20508,7 +20566,7 @@ unsafeWindow.fetch = function(...args) {
         });
         setTimeout(() => {
           if (tokenDetected) return;
-          const warn = document.getElementById("wh-send-token-warn");
+          const warn = panel.querySelector("#wh-send-token-warn");
           if (warn) {
             warn.style.transition = "opacity 0.4s";
             warn.style.opacity = "1";
@@ -20516,9 +20574,9 @@ unsafeWindow.fetch = function(...args) {
         }, 5000);
       }
 
-      overlay.innerHTML = `
-        <div id="wh-send-backdrop"></div>
-        <div id="wh-send-modal" class="${isApiMode ? "mode-api" : "mode-nav"}">
+      panel.className = isApiMode ? "mode-api" : "mode-nav";
+      const _whOptCollapsed = GMStore.get("wh_send_options_collapsed", "false") === "true";
+      panel.innerHTML = `
           <div id="wh-send-header">
             <span id="wh-send-title">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5865f2" stroke-width="2.5" style="margin-right:6px;vertical-align:middle;flex-shrink:0"><path d="M14.12 3.88a8 8 0 0 1-3.68 15.69"/><path d="M18.84 6a10 10 0 0 0-14.72 13.84"/><path d="M9.88 20.12a8 8 0 0 1 3.68-15.69"/><path d="M5.16 18a10 10 0 0 0 14.72-13.84"/></svg>
@@ -20537,6 +20595,9 @@ unsafeWindow.fetch = function(...args) {
           <hr id="wh-send-divider">
           <div id="wh-send-footer">
             <div id="wh-send-footer-left">
+              <button id="wh-send-options-toggle" type="button" aria-expanded="${_whOptCollapsed ? "false" : "true"}" title="${tOr("wm_send_options_toggle", "Toggle send options")}">
+                <span class="wh-opt-chevron">${this.ICONS.chevronDown}</span>
+              </button>
               ${
                 apiUnlocked
                   ? `
@@ -20558,7 +20619,7 @@ unsafeWindow.fetch = function(...args) {
             </div>
           </div>
           <div id="wh-send-bottom-row">
-            <div id="wh-send-checkboxes">
+            <div id="wh-send-checkboxes" class="${_whOptCollapsed ? "wh-collapsed" : ""}">
               <label id="wh-send-autoclose-label">
                 <input type="checkbox" id="wh-send-autoclose" ${GMStore.get("wh_send_autoclose", "true") !== "false" ? "checked" : ""}>
                 <span>${this.t("wm_send_autoclose")}</span>
@@ -20573,23 +20634,22 @@ unsafeWindow.fetch = function(...args) {
               </label>
             </div>
             <span id="wh-send-status"></span>
-          </div>
-        </div>`;
+          </div>`;
 
       if (!document.getElementById("wh-send-styles")) {
         const s = document.createElement("style");
         s.id = "wh-send-styles";
         s.textContent = `
-          #wh-send-overlay{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center}
-          #wh-send-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.72)}
-          #wh-send-modal{position:relative;background:var(--dmt-bg-primary);border:1px solid rgba(88,101,242,.35);border-radius:10px;box-shadow:0 16px 48px rgba(0,0,0,.7);padding:20px 22px 16px;width:min(660px,94vw);max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:14px;animation:wh-in .18s cubic-bezier(.19,1,.22,1)}
+          
+          #wh-send-panel{position:fixed;z-index:2147483647;pointer-events:auto;background:var(--dmt-bg-primary);border:1px solid rgba(88,101,242,.35);border-radius:10px;box-shadow:0 16px 48px rgba(0,0,0,.55);padding:16px 18px 14px;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;min-width:380px;min-height:300px;max-width:96vw;max-height:94vh;resize:both;overflow:hidden;animation:wh-in .18s cubic-bezier(.19,1,.22,1)}
           @keyframes wh-in{from{opacity:0;transform:translateY(10px) scale(.97)}to{opacity:1;transform:none}}
-          #wh-send-header{display:flex;align-items:center;justify-content:space-between}
+          #wh-send-header{display:flex;align-items:center;justify-content:space-between;cursor:move;user-select:none;flex-shrink:0}
           #wh-send-title{color:var(--dmt-text-bright);font-size:14px;font-weight:600;display:flex;align-items:center;flex:1}
           #wh-send-close{background:transparent;border:none;color:var(--dmt-text-muted);font-size:18px;cursor:pointer;padding:2px 6px;border-radius:4px;line-height:1}
           #wh-send-close:hover{color:#fff;background:rgba(255,255,255,.08)}
-          #wh-send-token-warn{font-size:12px;color:#f0b232;padding:6px 10px;background:rgba(240,178,50,.08);border-radius:6px;border:1px solid rgba(240,178,50,.2)}
-          #wh-send-dropzone{position:relative;display:flex;flex-direction:column;gap:6px}
+          #wh-send-token-warn{font-size:12px;color:#f0b232;padding:6px 10px;background:rgba(240,178,50,.08);border-radius:6px;border:1px solid rgba(240,178,50,.2);flex-shrink:0}
+          
+          #wh-send-dropzone{position:relative;display:flex;flex-direction:column;gap:6px;flex:1;min-height:0;overflow-y:auto;padding-right:6px}
           #wh-send-input{width:100%;box-sizing:border-box;background:var(--dmt-bg-deep);color:var(--dmt-text-bright);border:1.5px solid rgba(88,101,242,.25);border-radius:6px;padding:10px 12px;font-size:14px;line-height:1.5;resize:vertical;min-height:72px;max-height:220px;outline:none;font-family:inherit;transition:border-color .15s}
           #wh-send-input:focus{border-color:rgba(88,101,242,.7)}
           #wh-send-input:disabled{opacity:.5;cursor:not-allowed}
@@ -20598,8 +20658,8 @@ unsafeWindow.fetch = function(...args) {
           .wh-paste-thumb{position:relative;width:64px;height:64px;border-radius:6px;overflow:hidden;border:1px solid rgba(255,255,255,.1)}
           .wh-paste-thumb img{width:100%;height:100%;object-fit:cover}
           .wh-paste-thumb-rm{position:absolute;top:1px;right:1px;background:rgba(0,0,0,.7);color:#fff;border:none;border-radius:3px;font-size:10px;cursor:pointer;padding:0 3px;line-height:16px}
-          #wh-send-divider{border:none;border-top:1px solid rgba(255,255,255,.06);margin:0}
-          #wh-send-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:2px}
+          #wh-send-divider{border:none;border-top:1px solid rgba(255,255,255,.06);margin:0;flex-shrink:0}
+          #wh-send-footer{display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:2px;flex-shrink:0}
           #wh-send-footer-left{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
           #wh-send-actions{display:flex;gap:8px;flex-shrink:0}
           
@@ -20619,13 +20679,20 @@ unsafeWindow.fetch = function(...args) {
           #wh-send-mode-toggle.is-api svg{stroke:#2dc770;opacity:1}
           #wh-send-mode-toggle.is-api:hover{background:rgba(35,165,90,.15);border-color:rgba(35,165,90,.7)}
           #wh-send-mode-desc{font-size:11px;color:#4e5058;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-          #wh-send-bottom-row{display:flex;align-items:center;justify-content:space-between;min-height:18px;padding:0 2px}
+          
+          #wh-send-bottom-row{display:flex;align-items:center;justify-content:space-between;padding:0 2px;flex-shrink:0}
           #wh-send-checkboxes{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+          #wh-send-checkboxes.wh-collapsed{display:none}
+          #wh-send-options-toggle{display:flex;align-items:center;justify-content:center;width:18px;height:18px;padding:0;background:transparent;border:none;color:var(--dmt-text-muted);cursor:pointer;border-radius:4px;flex-shrink:0;transition:color .15s,background .15s}
+          #wh-send-options-toggle:hover{color:var(--dmt-text-subtle);background:rgba(255,255,255,.08)}
+          #wh-send-options-toggle .wh-opt-chevron{display:flex;transition:transform .18s ease}
+          #wh-send-options-toggle[aria-expanded="false"] .wh-opt-chevron{transform:rotate(-90deg)}
           #wh-send-autoclose-label,#wh-send-goto-label,#wh-send-show-toast-label{display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none;font-size:12px;color:var(--dmt-text-muted);transition:color .15s,opacity .15s}
           #wh-send-autoclose-label:hover,#wh-send-goto-label:hover,#wh-send-show-toast-label:hover{color:var(--dmt-text-subtle)}
           #wh-send-autoclose-label input,#wh-send-goto-label input,#wh-send-show-toast-label input{accent-color:var(--dmt-accent);cursor:pointer;width:13px;height:13px}
           #wh-send-goto-label.cb-disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
           #wh-send-status{font-size:12px;color:var(--dmt-text-muted);text-align:right}
+          #wh-send-status:empty{display:none}
           #wh-send-status.err{color:var(--dmt-danger)}
           #wh-send-status.ok{color:#23a55a}
           #wh-send-cancel-btn{padding:7px 16px;border-radius:3px;background:transparent;border:none;color:var(--dmt-text-bright);font-size:14px;cursor:pointer;transition:background .1s}
@@ -20635,8 +20702,10 @@ unsafeWindow.fetch = function(...args) {
           #wh-send-submit-btn:disabled{background:#3c4270;color:var(--dmt-text-muted);cursor:not-allowed}
 
           @keyframes wh-out{from{opacity:1;transform:none}to{opacity:0;transform:translateY(6px) scale(.97)}}
-          #wh-send-overlay.wh-leaving #wh-send-modal{animation:wh-out .15s ease-in forwards}
-          #wh-send-overlay.wh-leaving #wh-send-backdrop{animation:wh-out .15s ease-in forwards}
+          #wh-send-panel.wh-leaving{animation:wh-out .15s ease-in forwards}
+          
+          @keyframes wh-flash{0%,100%{box-shadow:0 16px 48px rgba(0,0,0,.55)}50%{box-shadow:0 0 0 3px rgba(88,101,242,.9),0 16px 48px rgba(0,0,0,.55)}}
+          #wh-send-panel.wh-send-flash{animation:wh-flash .55s ease-in-out}
 
           #wh-send-fields{display:flex;flex-direction:column;gap:8px}
           .wh-field-row{display:flex;gap:6px;align-items:flex-start}
@@ -20644,6 +20713,12 @@ unsafeWindow.fetch = function(...args) {
           .wh-field-textarea{flex:1;box-sizing:border-box;background:var(--dmt-bg-deep);color:var(--dmt-text-bright);border:1.5px solid rgba(88,101,242,.25);border-radius:6px;padding:8px 10px;font-size:14px;line-height:1.5;resize:none;min-height:80px;max-height:200px;outline:none;font-family:inherit;transition:border-color .15s}
           .wh-field-textarea:focus{border-color:rgba(88,101,242,.7)}
           .wh-field-textarea:disabled{opacity:.5;cursor:not-allowed}
+          
+          .wh-field-textarea,#wh-send-dropzone{scrollbar-width:thin;scrollbar-color:rgba(88,101,242,.35) transparent}
+          .wh-field-textarea::-webkit-scrollbar,#wh-send-dropzone::-webkit-scrollbar{width:6px}
+          .wh-field-textarea::-webkit-scrollbar-track,#wh-send-dropzone::-webkit-scrollbar-track{background:transparent}
+          .wh-field-textarea::-webkit-scrollbar-thumb,#wh-send-dropzone::-webkit-scrollbar-thumb{background:rgba(88,101,242,.35);border-radius:3px;border:1px solid transparent;background-clip:padding-box}
+          .wh-field-textarea::-webkit-scrollbar-thumb:hover,#wh-send-dropzone::-webkit-scrollbar-thumb:hover{background:rgba(88,101,242,.6)}
           .wh-field-del{background:transparent;border:none;color:rgba(237,66,69,.5);cursor:pointer;font-size:14px;padding:8px 2px;flex-shrink:0;transition:color .12s;line-height:1}
           .wh-field-del:hover{color:rgba(237,66,69,.9)}
           #wh-send-field-add{align-self:flex-start;font-size:11px;font-weight:600;padding:3px 10px;border-radius:5px;background:rgba(88,101,242,.1);border:1px solid rgba(88,101,242,.25);color:rgba(88,101,242,.8);cursor:pointer;transition:background .12s,color .12s;margin-top:2px}
@@ -20668,14 +20743,102 @@ unsafeWindow.fetch = function(...args) {
         document.head.appendChild(s);
       }
 
-      dmtGetPortal().appendChild(overlay);
-      overlay.style.pointerEvents = "auto";
+      dmtGetPortal().appendChild(panel);
+      panel.style.pointerEvents = "auto";
 
-      const fieldsEl   = overlay.querySelector("#wh-send-fields");
-      const addFieldBtn = overlay.querySelector("#wh-send-field-add");
-      const coolNote   = overlay.querySelector("#wh-send-cool-note");
-      const status     = overlay.querySelector("#wh-send-status");
-      const submitBtn  = overlay.querySelector("#wh-send-submit-btn");
+      const _whClampIntoView = () => {
+        const maxLeft = Math.max(0, window.innerWidth  - 80);
+        const maxTop  = Math.max(0, window.innerHeight - 60);
+        const l = parseFloat(panel.style.left) || 0;
+        const t = parseFloat(panel.style.top)  || 0;
+        panel.style.left = Math.min(Math.max(0, l), maxLeft) + "px";
+        panel.style.top  = Math.min(Math.max(0, t), maxTop)  + "px";
+      };
+      const _whSavedLayout = this._getSendPanelLayout(wormhole.id);
+      if (_whSavedLayout.left && _whSavedLayout.top && _whSavedLayout.width && _whSavedLayout.height) {
+        panel.style.left   = _whSavedLayout.left;
+        panel.style.top    = _whSavedLayout.top;
+        panel.style.width  = _whSavedLayout.width;
+        panel.style.height = _whSavedLayout.height;
+        _whClampIntoView();
+      } else {
+        const _whLastSize = this._getSendPanelLastSize();
+        const _whW = Math.min(_whLastSize ? (parseFloat(_whLastSize.width)  || 640) : 640, window.innerWidth  * 0.94);
+        const _whH = Math.min(_whLastSize ? (parseFloat(_whLastSize.height) || 460) : 460, window.innerHeight * 0.85);
+        panel.style.width  = _whW + "px";
+        panel.style.height = _whH + "px";
+        const _whCascadeIdx = Math.max(0, this._sendPanels.size - 1);
+        const _whStep     = 32;
+        const _whBaseLeft = Math.max(20, Math.round((window.innerWidth  - _whW) / 2) - 160);
+        const _whBaseTop  = Math.max(20, Math.round((window.innerHeight - _whH) / 2) - 160);
+        const _whMaxSteps = Math.max(1, Math.min(
+          Math.floor((window.innerWidth  - _whW - _whBaseLeft) / _whStep),
+          Math.floor((window.innerHeight - _whH - _whBaseTop)  / _whStep),
+        ));
+        const _whLap       = Math.floor(_whCascadeIdx / _whMaxSteps);
+        const _whWrapped   = _whCascadeIdx % _whMaxSteps;
+        const _whLapOffset = 18;
+        const _whLapMax    = Math.max(1, Math.floor((_whStep * _whMaxSteps) / (_whLapOffset * 2)) || 1);
+        const _whLapN      = _whLap % _whLapMax;
+        panel.style.left = (_whBaseLeft + _whWrapped * _whStep + _whLapN * _whLapOffset) + "px";
+        panel.style.top  = (_whBaseTop  + _whWrapped * _whStep - _whLapN * _whLapOffset) + "px";
+        _whClampIntoView();
+      }
+
+      const dragAC = new AbortController();
+      const dragSig = { signal: dragAC.signal };
+      let whDragging = false, whDox = 0, whDoy = 0, whDragStartLeft = 0, whDragStartTop = 0;
+      const headerEl = panel.querySelector("#wh-send-header");
+      headerEl.addEventListener("mousedown", (e) => {
+        if (e.button !== 0 || e.target.closest("#wh-send-close")) return;
+        whDragging = true;
+        whDox = e.clientX - panel.getBoundingClientRect().left;
+        whDoy = e.clientY - panel.getBoundingClientRect().top;
+        whDragStartLeft = parseFloat(panel.style.left) || 0;
+        whDragStartTop  = parseFloat(panel.style.top)  || 0;
+        e.preventDefault();
+      }, dragSig);
+      document.addEventListener("mousemove", (e) => {
+        if (!whDragging) return;
+        const nx = Math.max(0, Math.min(window.innerWidth  - 80, e.clientX - whDox));
+        const ny = Math.max(0, Math.min(window.innerHeight - 60, e.clientY - whDoy));
+        panel.style.left = nx + "px";
+        panel.style.top  = ny + "px";
+      }, dragSig);
+      document.addEventListener("mouseup", () => {
+        if (!whDragging) return;
+        whDragging = false;
+        const _whMovedLeft = parseFloat(panel.style.left) || 0;
+        const _whMovedTop  = parseFloat(panel.style.top)  || 0;
+        if (_whMovedLeft === whDragStartLeft && _whMovedTop === whDragStartTop) return;
+        this._saveSendPanelLayout(wormhole.id, {
+          left: panel.style.left, top: panel.style.top,
+          width: panel.offsetWidth + "px", height: panel.offsetHeight + "px",
+        });
+      }, dragSig);
+
+      let whResizeObserver = null, whResizeTimer = null;
+      let whResizeSkipFirst = true;
+      if (typeof ResizeObserver !== "undefined") {
+        whResizeObserver = new ResizeObserver(() => {
+          if (whResizeSkipFirst) { whResizeSkipFirst = false; return; }
+          clearTimeout(whResizeTimer);
+          whResizeTimer = setTimeout(() => {
+            if (!panel.isConnected) return;
+            this._saveSendPanelLayout(wormhole.id, {
+              left: panel.style.left, top: panel.style.top,
+              width: panel.offsetWidth + "px", height: panel.offsetHeight + "px",
+            });
+          }, 300);
+        });
+        whResizeObserver.observe(panel);
+      }
+
+      const fieldsEl   = panel.querySelector("#wh-send-fields");
+      const addFieldBtn = panel.querySelector("#wh-send-field-add");
+      const coolNote   = panel.querySelector("#wh-send-cool-note");
+      const status     = panel.querySelector("#wh-send-status");
+      const submitBtn  = panel.querySelector("#wh-send-submit-btn");
 
       const MAX_FIELDS = 5;
       const POST_COOL_MAP = { 1: 0, 2: 0, 3: 5000, 4: 5000, 5: 8000 };
@@ -20745,7 +20908,7 @@ unsafeWindow.fetch = function(...args) {
           ],
           [
             '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8" opacity=".5"/><line x1="7" y1="12" x2="17" y2="12"/></svg>',
-            "Spoiler  ||text||", "||", "||", "spoiler text", false, false,
+            "Spoiler  ||text ||", "||", " ||", "spoiler text", false, false,
           ],
           ["separator", "", "", "", "", false, false],
           [
@@ -20859,29 +21022,29 @@ unsafeWindow.fetch = function(...args) {
         status.textContent = msg;
         status.className = cls;
       };
+      let whManuallyClosed = false;
       const closeOverlay = (instant = false) => {
-        if (instant) { overlay.remove(); document.removeEventListener("keydown", escHandler); return; }
-        overlay.classList.add("wh-leaving");
-        overlay.addEventListener("animationend", () => {
-          overlay.remove();
-          document.removeEventListener("keydown", escHandler);
-        }, { once: true });
-        setTimeout(() => { if (overlay.isConnected) { overlay.remove(); document.removeEventListener("keydown", escHandler); } }, 160);
+        whManuallyClosed = true;
+        dragAC.abort();
+        whResizeObserver?.disconnect();
+        clearTimeout(whResizeTimer);
+        if (this._sendPanels.get(wormhole.id) === panel) this._sendPanels.delete(wormhole.id);
+        if (instant) { panel.remove(); return; }
+        panel.classList.add("wh-leaving");
+        panel.addEventListener("animationend", () => { panel.remove(); }, { once: true });
+        setTimeout(() => { if (panel.isConnected) panel.remove(); }, 160);
       };
       const lock = (on) => {
-        overlay.querySelectorAll(".wh-field-textarea, #wh-send-submit-btn, #wh-send-cancel-btn, #wh-send-close, #wh-send-field-add")
+        panel.querySelectorAll(".wh-field-textarea, #wh-send-submit-btn, #wh-send-cancel-btn, #wh-send-close, #wh-send-field-add")
           .forEach(el => { el.disabled = on; });
       };
-      const escHandler = (e) => { if (e.key === "Escape") closeOverlay(); };
 
-      overlay.querySelector("#wh-send-backdrop").onclick = () => closeOverlay();
-      overlay.querySelector("#wh-send-close").onclick    = () => closeOverlay();
-      overlay.querySelector("#wh-send-cancel-btn").onclick = () => closeOverlay();
-      document.addEventListener("keydown", escHandler);
+      panel.querySelector("#wh-send-close").onclick    = () => closeOverlay();
+      panel.querySelector("#wh-send-cancel-btn").onclick = () => closeOverlay();
 
-      const toggleBtn = overlay.querySelector("#wh-send-mode-toggle");
+      const toggleBtn = panel.querySelector("#wh-send-mode-toggle");
       if (toggleBtn) {
-        const descEl = overlay.querySelector("#wh-send-mode-desc");
+        const descEl = panel.querySelector("#wh-send-mode-desc");
         toggleBtn.onclick = () => {
           isApiMode = !isApiMode;
           this.setApiMode(isApiMode);
@@ -20896,8 +21059,9 @@ unsafeWindow.fetch = function(...args) {
         };
       }
 
-      const preview = overlay.querySelector("#wh-send-paste-preview");
+      const preview = panel.querySelector("#wh-send-paste-preview");
       let pendingFiles = [];
+      let myPill = null;
       const addThumb = (file) => {
         const idx = pendingFiles.length;
         pendingFiles.push(file);
@@ -20913,7 +21077,7 @@ unsafeWindow.fetch = function(...args) {
         wrap.appendChild(rm);
         preview.appendChild(wrap);
       };
-      overlay.addEventListener("paste", (e) => {
+      panel.addEventListener("paste", (e) => {
         if (!e.target.classList.contains("wh-field-textarea")) return;
         const items = e.clipboardData?.items;
         if (!items) return;
@@ -20924,10 +21088,10 @@ unsafeWindow.fetch = function(...args) {
         if (hasImage) e.preventDefault();
       });
 
-      const autocloseEl  = overlay.querySelector("#wh-send-autoclose");
-      const gotoEl       = overlay.querySelector("#wh-send-goto");
-      const gotoLabel    = overlay.querySelector("#wh-send-goto-label");
-      const showToastEl  = overlay.querySelector("#wh-send-show-toast");
+      const autocloseEl  = panel.querySelector("#wh-send-autoclose");
+      const gotoEl       = panel.querySelector("#wh-send-goto");
+      const gotoLabel    = panel.querySelector("#wh-send-goto-label");
+      const showToastEl  = panel.querySelector("#wh-send-show-toast");
       const syncMutex = () => {
         const ac = autocloseEl.checked;
         gotoLabel.classList.toggle("cb-disabled", ac);
@@ -20937,6 +21101,23 @@ unsafeWindow.fetch = function(...args) {
       autocloseEl.addEventListener("change", () => { GMStore.set("wh_send_autoclose", String(autocloseEl.checked)); syncMutex(); });
       gotoEl.addEventListener("change",      () => { GMStore.set("wh_send_goto",       String(gotoEl.checked)); });
       showToastEl.addEventListener("change", () => { GMStore.set("wh_send_show_toast", String(showToastEl.checked)); });
+
+      const optToggle = panel.querySelector("#wh-send-options-toggle");
+      const optGroup  = panel.querySelector("#wh-send-checkboxes");
+      optToggle.addEventListener("click", () => {
+        const collapsed = optGroup.classList.toggle("wh-collapsed");
+        optToggle.setAttribute("aria-expanded", collapsed ? "false" : "true");
+        GMStore.set("wh_send_options_collapsed", String(collapsed));
+      });
+
+      const resetFieldsForNextMessage = () => {
+        preview.querySelectorAll(".wh-paste-thumb img").forEach(img => URL.revokeObjectURL(img.src));
+        preview.innerHTML = "";
+        fieldsEl.innerHTML = "";
+        addField.call(this, ph, true);
+        addField.call(this, this.t("wm_send_placeholder")?.replace("#{name}", "") || "Field 2…");
+        setStatus("");
+      };
 
       submitBtn.onclick = async () => {
         const texts = [...fieldsEl.querySelectorAll(".wh-field-textarea")]
@@ -20951,6 +21132,7 @@ unsafeWindow.fetch = function(...args) {
         }
 
         lock(true);
+        const self = this;
         try {
           if (this.getApiMode() && !this._cachedToken && this._tokenWatcher) {
             setStatus(this.t("wm_send_waiting_token"));
@@ -20969,93 +21151,114 @@ unsafeWindow.fetch = function(...args) {
             setTimeout(r, SEND_JITTER_MIN + Math.random() * (SEND_JITTER_MAX - SEND_JITTER_MIN))
           );
 
-          closeOverlay(true);
+          const willAutoClose = autocloseEl.checked;
+          const willGoto      = gotoEl.checked;
+          const willToast     = showToastEl.checked;
 
-          const existing = document.getElementById("wh-send-result-toast");
-          if (existing) existing.remove();
-          const pill = document.createElement("div");
-          pill.id = "wh-send-result-toast";
-          pill.style.cssText = `
-            position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(8px);
-            background:#2b2d31; color:#f2f3f5; padding:10px 20px; border-radius:20px;
-            font-size:13px; font-weight:500; box-shadow:0 8px 24px rgba(0,0,0,0.45);
-            z-index:2147483649; border:1px solid rgba(88,101,242,0.4);
-            user-select:none; text-align:center; min-width:160px;
-            opacity:0; transition:opacity 0.18s, transform 0.18s, border-color 0.2s, background 0.2s;
-            pointer-events:auto; white-space:nowrap;
-          `;
-          dmtGetPortal().appendChild(pill);
-          pill.style.pointerEvents = "auto";
-          requestAnimationFrame(() => {
-            pill.style.opacity = "1";
-            pill.style.transform = "translateX(-50%) translateY(0)";
-          });
+          const _whAnchor = panel.getBoundingClientRect();
 
-          const self = this;
-          const hint = tOr("wm_send_toast_hint", "Click to go to channel");
+          if (willAutoClose) closeOverlay(true);
 
-          const setPill = (topText, state = "progress") => {
-            pill.innerHTML = `<div style="font-weight:500">${topText}</div><div style="font-size:11px;margin-top:3px;opacity:0.65">${hint}</div>`;
-            if (state === "ok") {
-              pill.style.borderColor = "rgba(35,165,90,.55)";
-              pill.style.color = "#23a55a";
-              pill.onmouseenter = () => { pill.style.boxShadow = "0 8px 28px rgba(35,165,90,.25)"; pill.style.borderColor = "rgba(35,165,90,.85)"; };
-              pill.onmouseleave = () => { pill.style.boxShadow = "0 8px 24px rgba(0,0,0,0.45)"; pill.style.borderColor = "rgba(35,165,90,.55)"; };
-            } else if (state === "err") {
-              pill.style.borderColor = "rgba(237,66,69,.55)";
-              pill.style.color = "#ed4245";
-            } else if (state === "cool") {
-              pill.style.borderColor = "rgba(240,178,50,.4)";
-              pill.style.color = "#f0b232";
-            } else {
-              pill.style.borderColor = "rgba(88,101,242,.4)";
-              pill.style.color = "#dbdee1";
-            }
-          };
+          let pill = null;
+          let setPill = () => {};
+          let dismissPill = () => {};
+          if (willToast) {
+            if (myPill) { myPill.remove(); myPill = null; }
+            pill = document.createElement("div");
+            const _pillLeft = Math.min(Math.max(_whAnchor.left + _whAnchor.width / 2, 90), window.innerWidth  - 90);
+            const _pillTop  = Math.min(_whAnchor.bottom + 10, window.innerHeight - 50);
+            pill.style.cssText = `
+              position:fixed; left:${_pillLeft}px; top:${_pillTop}px; transform:translateX(-50%) translateY(8px);
+              background:#2b2d31; color:#f2f3f5; padding:10px 20px; border-radius:20px;
+              font-size:13px; font-weight:500; box-shadow:0 8px 24px rgba(0,0,0,0.45);
+              z-index:2147483649; border:1px solid rgba(88,101,242,0.4);
+              user-select:none; text-align:center; min-width:160px;
+              opacity:0; transition:opacity 0.18s, transform 0.18s, border-color 0.2s, background 0.2s;
+              pointer-events:auto; white-space:nowrap;
+            `;
+            myPill = pill;
+            dmtGetPortal().appendChild(pill);
+            pill.style.pointerEvents = "auto";
+            requestAnimationFrame(() => {
+              pill.style.opacity = "1";
+              pill.style.transform = "translateX(-50%) translateY(0)";
+            });
 
-          pill.style.cursor = "pointer";
-          pill.onclick = () => self.navigateToChannel(wormhole.url);
-          pill.onmouseenter = () => { pill.style.boxShadow = "0 8px 28px rgba(88,101,242,.2)"; };
-          pill.onmouseleave = () => { pill.style.boxShadow = "0 8px 24px rgba(0,0,0,0.45)"; };
+            const hint = tOr("wm_send_toast_hint", "Click to go to channel");
 
-          const dismissPill = (delay = 3000) => {
-            setTimeout(() => {
-              pill.style.opacity = "0";
-              pill.style.transform = "translateX(-50%) translateY(8px)";
-              setTimeout(() => pill.remove(), 220);
-            }, delay);
-          };
+            setPill = (topText, state = "progress") => {
+              pill.innerHTML = `<div style="font-weight:500">${topText}</div><div style="font-size:11px;margin-top:3px;opacity:0.65">${hint}</div>`;
+              if (state === "ok") {
+                pill.style.borderColor = "rgba(35,165,90,.55)";
+                pill.style.color = "#23a55a";
+                pill.onmouseenter = () => { pill.style.boxShadow = "0 8px 28px rgba(35,165,90,.25)"; pill.style.borderColor = "rgba(35,165,90,.85)"; };
+                pill.onmouseleave = () => { pill.style.boxShadow = "0 8px 24px rgba(0,0,0,0.45)"; pill.style.borderColor = "rgba(35,165,90,.55)"; };
+              } else if (state === "err") {
+                pill.style.borderColor = "rgba(237,66,69,.55)";
+                pill.style.color = "#ed4245";
+              } else if (state === "cool") {
+                pill.style.borderColor = "rgba(240,178,50,.4)";
+                pill.style.color = "#f0b232";
+              } else {
+                pill.style.borderColor = "rgba(88,101,242,.4)";
+                pill.style.color = "#dbdee1";
+              }
+            };
 
-          let sendOk = true;
-          for (let i = 0; i < total; i++) {
-            const segText = texts[i] ?? "";
-            const isLast  = i === total - 1;
-            const files   = isLast && hasImg ? pendingFiles : [];
+            pill.style.cursor = "pointer";
+            pill.onclick = () => self.navigateToChannel(wormhole.url);
+            pill.onmouseenter = () => { pill.style.boxShadow = "0 8px 28px rgba(88,101,242,.2)"; };
+            pill.onmouseleave = () => { pill.style.boxShadow = "0 8px 24px rgba(0,0,0,0.45)"; };
 
-            setPill(
-              (tOr("wm_send_sending_n", "Sending {n}/{total}…"))
-                .replace("{n}", i + 1).replace("{total}", total)
-            );
-
-            const ok = useApi
-              ? await self._sendViaApi(wormhole, segText, () => {}, files)
-              : await self._sendViaWormhole(wormhole, segText, () => {}, files);
-
-            if (!ok) {
-              pill.style.cursor = "default";
-              pill.onclick = null;
-              setPill(useApi ? self.t("wm_api_send_fail") : self.t("wm_send_fail"), "err");
-              dismissPill(3500);
-              sendOk = false;
-              break;
-            }
-
-            if (!isLast) await jitter();
+            dismissPill = (delay = 3000) => {
+              setTimeout(() => {
+                pill.style.opacity = "0";
+                pill.style.transform = "translateX(-50%) translateY(8px)";
+                setTimeout(() => {
+                  pill.remove();
+                  if (myPill === pill) myPill = null;
+                }, 220);
+              }, delay);
+            };
           }
+
+          const sendOk = await self._enqueueSend(async () => {
+            for (let i = 0; i < total; i++) {
+              const segText = texts[i] ?? "";
+              const isLast  = i === total - 1;
+              const files   = isLast && hasImg ? pendingFiles : [];
+
+              setPill(
+                (tOr("wm_send_sending_n", "Sending {n}/{total}…"))
+                  .replace("{n}", i + 1).replace("{total}", total)
+              );
+
+              const ok = useApi
+                ? await self._sendViaApi(wormhole, segText, () => {}, files)
+                : await self._sendViaWormhole(wormhole, segText, () => {}, files);
+
+              if (!ok) {
+                if (pill) { pill.style.cursor = "default"; pill.onclick = null; }
+                setPill(useApi ? self.t("wm_api_send_fail") : self.t("wm_send_fail"), "err");
+                dismissPill(3500);
+                setStatus(self.t(useApi ? "wm_api_send_fail" : "wm_send_fail"), "err");
+                if (!willAutoClose) lock(false);
+                return false;
+              }
+
+              if (!isLast) await jitter();
+            }
+            return true;
+          }, () => setPill(tOr("wm_send_queued", "Queued…")));
 
           if (!sendOk) return;
 
           pendingFiles = [];
+
+          const finishUp = () => {
+            if (!willAutoClose && panel.isConnected) { resetFieldsForNextMessage(); lock(false); }
+            if (willGoto && !whManuallyClosed) self.navigateToChannel(wormhole.url);
+          };
 
           if (postCool > 0) {
             let remaining = Math.ceil(postCool / 1000);
@@ -21069,6 +21272,7 @@ unsafeWindow.fetch = function(...args) {
                 clearInterval(coolTick);
                 setPill(self.t("wm_send_toast_title").replace("#{name}", escHtml(wormhole.name)), "ok");
                 dismissPill(3000);
+                finishUp();
               } else {
                 setPill(coolLabel(remaining), "cool");
               }
@@ -21076,11 +21280,12 @@ unsafeWindow.fetch = function(...args) {
           } else {
             setPill(self.t("wm_send_toast_title").replace("#{name}", escHtml(wormhole.name)), "ok");
             dismissPill(3000);
+            finishUp();
           }
         } catch (err) {
           console.error("[WH Send]", err);
           setStatus(this.t("wm_send_fail"), "err");
-          lock(false);
+          if (!autocloseEl.checked) lock(false);
         }
       };
     }
@@ -30506,6 +30711,8 @@ if (type === "warn" && scanLimit !== null) {
 
     let _debounceTimer = null;
 
+    let _pasteChannelId = null;
+
     async function onPaste(e) {
       const text = (e.clipboardData || window.clipboardData)?.getData("text") || "";
       const pastedURLs = text.match(URL_RE);
@@ -30516,20 +30723,24 @@ if (type === "warn" && scanLimit !== null) {
 
       const normalizedPasted = filteredURLs.map(normalizeURL);
 
+      const channelId = getCurrentChannelId();
+      if (!channelId) return;
+      _pasteChannelId = channelId;
+
       clearTimeout(_debounceTimer);
       _debounceTimer = setTimeout(async () => {
 
         const wh = _wormholeInstance;
         const apiMode = localStorage.getItem("wh_api_mode") === "true";
         const token = (apiMode && isModEnabled("mod_wormhole")) ? (wh?._cachedToken || null) : null;
-        const channelId = getCurrentChannelId();
-        if (!channelId) return;
 
         if (token) {
           showBanner("info", t("uc_fetching"));
           try {
             const limit = getScanLimit();
             const messages = await fetchMessages(channelId, token, limit);
+
+            if (_pasteChannelId !== channelId) return;
 
             const urlMap = new Map();
             for (const msg of messages) {
@@ -30600,12 +30811,13 @@ if (type === "warn" && scanLimit !== null) {
 
     let _ucNavLastChannel = getCurrentChannelId();
     function _ucOnNavChange() {
-      if (!document.getElementById(BANNER_ID)) return;
       const channelId = getCurrentChannelId();
-      if (channelId !== _ucNavLastChannel) {
-        removeBanner();
-        _ucNavLastChannel = channelId;
-      }
+      if (channelId === _ucNavLastChannel) return;
+      _ucNavLastChannel = channelId;
+
+      clearTimeout(_debounceTimer);
+
+      if (document.getElementById(BANNER_ID)) removeBanner();
     }
     if (typeof navigation !== "undefined") {
       navigation.addEventListener("navigate", _ucOnNavChange, { passive: true });
@@ -31090,8 +31302,12 @@ if (type === "warn" && scanLimit !== null) {
           const kw   = input.value;
           const hits = _csSearch(kw);
           _csRenderResults(results, hits, kw);
-          if (kw.trim().length >= 2) _csHistPush(kw);
         }, 150);
+      });
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && input.value.trim().length >= 2) {
+          _csHistPush(input.value);
+        }
       });
 
       const footer = document.createElement("div");
