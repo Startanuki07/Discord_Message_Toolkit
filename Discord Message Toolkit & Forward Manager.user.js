@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.5.9
+// @version      2.9.5.14
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -63,7 +63,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.5.9";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.5.11";
 
   const GMStore = {
     
@@ -1673,6 +1673,12 @@
       ms_btn_resume:      "Resume",
       ms_btn_stop:        "Stop",
       ms_btn_jump:        "Jump to message",
+      ms_fav_add:         "Bookmark",
+      ms_fav_remove:      "Remove bookmark",
+      ms_btn_copy_media:  "Copy media URL",
+      ms_tab_media:       "Media",
+      ms_tab_favs:        "Bookmarks",
+      ms_favs_empty:      "No bookmarks yet — hover a thumbnail and tap ♡ to save it here.",
       ms_btn_download:    "Download",
       ms_err_forbidden:   "Permission denied for this scope",
       ms_err_forbidden_thread_hint: "— common causes: threads/forum posts (try the parent channel), or an NSFW channel blocked by your Discord account's age-restricted content setting or Discord's own search limits (Server scope may help)",
@@ -2337,6 +2343,12 @@
       ms_btn_resume:      "繼續",
       ms_btn_stop:        "停止",
       ms_btn_jump:        "跳至訊息",
+      ms_fav_add:         "加入書籤",
+      ms_fav_remove:      "移除書籤",
+      ms_btn_copy_media:  "複製媒體連結",
+      ms_tab_media:       "媒體",
+      ms_tab_favs:        "書籤",
+      ms_favs_empty:      "還沒有書籤——將滑鼠移到縮圖上並點擊 ♡ 即可收藏",
       ms_btn_download:    "下載",
       ms_err_forbidden:   "此範圍無存取權限",
       ms_err_forbidden_thread_hint: "—常見原因：討論串或 Forum 貼文（請切換到上層頻道），或 NSFW 頻道被你的 Discord 帳號「年齡限制內容」設定或 Discord 搜尋功能本身的已知限制擋下（可試試 Server 範圍）",
@@ -26294,6 +26306,57 @@ unsafeWindow.fetch = function(...args) {
       });
     }
 
+    const _guildNameCache = new Map();
+    async function _getGuildName(guildId) {
+      if (!guildId) return null;
+      if (_guildNameCache.has(guildId)) return _guildNameCache.get(guildId);
+      try {
+        const ok = await _ensureCredentials();
+        if (!ok) return null;
+        const res = await _gmFetch("GET", API_BASE + "/guilds/" + guildId);
+        if (res.status === 200) {
+          const name = JSON.parse(res.responseText)?.name || null;
+          _guildNameCache.set(guildId, name);
+          return name;
+        }
+        if (res.status === 403 || res.status === 404) _guildNameCache.set(guildId, null);
+        return null;
+      } catch (_) {
+        return null;
+      }
+    }
+
+    const _chanGuildCache = new Map();
+    async function _resolveChannelGuilds(channelIds) {
+      const ctx = _getCtx();
+      if (ctx?.guildId && ctx.channelId && !_chanGuildCache.has(ctx.channelId)) {
+        boundedMapSet(_chanGuildCache, ctx.channelId, ctx.guildId, 500);
+      }
+      const todo = [...new Set(channelIds)].filter(id => id && !_chanGuildCache.has(id));
+      if (todo.length === 0) return;
+      try {
+        const ok = await _ensureCredentials();
+        if (!ok) return;
+      } catch (_) { return; }
+      let next = 0, rateLimited = false;
+      const worker = async () => {
+        while (!rateLimited && next < todo.length) {
+          const cid = todo[next++];
+          try {
+            const res = await _gmFetch("GET", API_BASE + "/channels/" + cid);
+            if (res.status === 200) {
+              boundedMapSet(_chanGuildCache, cid, JSON.parse(res.responseText)?.guild_id || null, 500);
+            } else if (res.status === 403 || res.status === 404) {
+              boundedMapSet(_chanGuildCache, cid, null, 500);
+            } else if (res.status === 429) {
+              rateLimited = true;
+            }
+          } catch (_) {  }
+        }
+      };
+      await Promise.all(Array.from({ length: Math.min(4, todo.length) }, worker));
+    }
+
     let _searchDelay = 1200, _deleteDelay = 1000;
     const SEARCH_BASE = 1200, DELETE_BASE = 1000;
     let _browseFetchDelay = 300;
@@ -26771,6 +26834,13 @@ unsafeWindow.fetch = function(...args) {
         "display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;",
         "overflow:hidden;word-break:break-word;}",
         "#dmt-mp-panel .mp-msg-meta{font-size:11px;color:var(--dmt-text-muted,#949ba4);margin-top:2px;}",
+        "#dmt-mp-panel .mp-guild-badge{display:inline-block;max-width:100px;overflow:hidden;" +
+        "text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;padding:1px 6px;" +
+        "margin-right:6px;border-radius:4px;" +
+        "background:linear-gradient(135deg,#1c1c1c,#0b0b0b);" +
+        "border:1px solid rgba(212,175,55,.7);color:#f0cf65;" +
+        "box-shadow:0 0 5px rgba(212,175,55,.22);" +
+        "font-size:10px;font-weight:700;}",
         "#dmt-mp-panel .mp-expired-warn{font-size:10px;color:#faa61a;margin-top:1px;}",
         "#dmt-mp-panel .mp-msg-actions{display:flex;gap:4px;align-items:center;flex-shrink:0;}",
         "#dmt-mp-panel .mp-action-btn{width:26px;height:26px;border-radius:5px;border:none;",
@@ -28380,7 +28450,7 @@ unsafeWindow.fetch = function(...args) {
       }, 5000);
     }
 
-    function _buildMsgRow(msg, globalIdx, allFiltered, selCount, createBtn, cancelBtn, onGroupChange) {
+    function _buildMsgRow(msg, globalIdx, allFiltered, selCount, createBtn, cancelBtn, onGroupChange, guildName = null) {
       const row = document.createElement("div");
       row.className = "mp-msg-row" + (_selectedIds.has(msg.id) ? " selected" : "");
       row.dataset.msgId = msg.id;
@@ -28450,8 +28520,17 @@ unsafeWindow.fetch = function(...args) {
       meta.className = "mp-msg-meta";
       const ts  = new Date(msg.timestamp);
       const att = (msg.attachments || []).length;
-      meta.textContent = _fmtTs(ts)
-                       + (att > 0 ? "  📎" + att : "");
+      const metaText = _fmtTs(ts) + (att > 0 ? "  📎" + att : "");
+      if (guildName) {
+        const badge = document.createElement("span");
+        badge.className = "mp-guild-badge";
+        badge.textContent = guildName;
+        badge.title = guildName;
+        meta.appendChild(badge);
+        meta.appendChild(document.createTextNode(metaText));
+      } else {
+        meta.textContent = metaText;
+      }
       main.append(textEl, meta);
       if (thumb && _isExpired(thumb)) {
         const w = Object.assign(document.createElement("div"), {
@@ -28928,8 +29007,12 @@ unsafeWindow.fetch = function(...args) {
       const newMsgs = _mediaData.filter(m => !rendered.has(m.id));
 
       if (rendered.size === 0 && newMsgs.length === 0) {
-        grid.appendChild(_makeMsgPlaceholder("mp-empty", mp("no_media")));
         _lbItems = [];
+        if (_mediaTotal !== null && _mediaOffset < _mediaTotal) {
+          _setupSentinelObs(grid, sentinel, selCount2, createBtn2, cancelBtn2, statusBar, statusText);
+          return;
+        }
+        grid.appendChild(_makeMsgPlaceholder("mp-empty", mp("no_media")));
         return;
       }
 
@@ -29407,14 +29490,25 @@ unsafeWindow.fetch = function(...args) {
           if (ok && _userId) favMsgs = favMsgs.filter(m => !m.author?.id || m.author.id === _userId);
         } catch (_) {}
 
-        list.innerHTML = "";
-
         if (favMsgs.length === 0) {
+          list.innerHTML = "";
           titleEl.textContent = "💗 0 saved";
           list.appendChild(_makeEmptyCta(true));
           return;
         }
 
+        await _resolveChannelGuilds(favMsgs.filter(m => !m.guild_id).map(m => m.channel_id));
+        if (myGen !== _favsGen) return;
+        const _gidOf = m => m.guild_id || _chanGuildCache.get(m.channel_id) || null;
+        const guildIds = [...new Set(favMsgs.map(_gidOf).filter(Boolean))];
+        const guildNameMap = new Map();
+        if (guildIds.length > 0) {
+          const names = await Promise.all(guildIds.map(id => _getGuildName(id)));
+          if (myGen !== _favsGen) return;
+          guildIds.forEach((id, i) => guildNameMap.set(id, names[i]));
+        }
+
+        list.innerHTML = "";
         titleEl.textContent = "💗 " + favMsgs.length + " saved";
 
         const frag = document.createDocumentFragment();
@@ -29438,7 +29532,9 @@ unsafeWindow.fetch = function(...args) {
 
           const rowFrag = document.createDocumentFragment();
           msgs.forEach((msg, i) => {
-            rowFrag.appendChild(_buildMsgRow(msg, i, favMsgs, null, null, null, () => {}));
+            const gid = _gidOf(msg);
+            const guildName = gid ? guildNameMap.get(gid) : null;
+            rowFrag.appendChild(_buildMsgRow(msg, i, favMsgs, null, null, null, () => {}, guildName));
           });
           const rowsWrap = document.createElement("div");
           rowsWrap.className = "mp-rows-wrap";
@@ -31680,6 +31776,56 @@ if (type === "warn" && scanLimit !== null) {
       }
     }
 
+    const MS_FAVS_KEY = "ms_favs";
+    let   _msFavIds    = new Set();
+    let   _msFavsGen   = 0;
+    let   _msActiveTab = "media";
+    let   _msUpdateFavsTabLabel = null;
+    let   _msFavItems = [];
+
+    function _msLoadFavs() {
+      try {
+        const arr = GMStore.get(MS_FAVS_KEY, [], true);
+        _msFavIds = new Set(Array.isArray(arr) ? arr : []);
+      } catch (_) { _msFavIds = new Set(); }
+    }
+    function _msSaveFavs() {
+      try { GMStore.set(MS_FAVS_KEY, [..._msFavIds], true); } catch (_) {}
+    }
+
+    function _msToggleFav(item) {
+      const nowFav = !_msFavIds.has(item.url);
+      if (nowFav) _msFavIds.add(item.url); else _msFavIds.delete(item.url);
+      _msSaveFavs();
+      if (nowFav) _msWriteItems([item], item.scope).catch(() => {});
+      return nowFav;
+    }
+
+    async function _msIdbGetByUrls(urls) {
+      if (!urls || urls.length === 0) return [];
+      try {
+        const db = await _msIdbOpen();
+        return await new Promise((resolve, reject) => {
+          const tx    = db.transaction("media_items", "readonly");
+          const store = tx.objectStore("media_items");
+          const found = [];
+          let remaining = urls.length;
+          urls.forEach(url => {
+            const req = store.get(url);
+            req.onsuccess = () => {
+              if (req.result) found.push(req.result);
+              if (--remaining === 0) resolve(found);
+            };
+            req.onerror = () => { if (--remaining === 0) resolve(found); };
+          });
+          tx.onerror = e => reject(e.target.error);
+        });
+      } catch (err) {
+        DEBUG && console.warn("[Mosaic] _msIdbGetByUrls failed:", err);
+        return [];
+      }
+    }
+
     const _msOwnerInflight = new Map();
     const _msOwnerVerified = new Set();
 
@@ -32509,6 +32655,10 @@ if (type === "warn" && scanLimit !== null) {
       return ph;
     }
 
+    const _MS_SVG_HEART_EMPTY = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13.5S1.5 9.5 1.5 5.5A3.5 3.5 0 0 1 8 3.207 3.5 3.5 0 0 1 14.5 5.5C14.5 9.5 8 13.5 8 13.5z"/></svg>';
+    const _MS_SVG_HEART_FULL  = '<svg viewBox="0 0 16 16" fill="currentColor" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 13.5S1.5 9.5 1.5 5.5A3.5 3.5 0 0 1 8 3.207 3.5 3.5 0 0 1 14.5 5.5C14.5 9.5 8 13.5 8 13.5z"/></svg>';
+    const _MS_SVG_COPY = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
+
     function _msBuildCell(item, idx) {
       const col  = idx % MS_COLS;
       const row  = Math.floor(idx / MS_COLS);
@@ -32574,6 +32724,38 @@ if (type === "warn" && scanLimit !== null) {
       hover.appendChild(date);
       cell.appendChild(hover);
 
+      const favBtn = document.createElement("button");
+      const isFav  = _msFavIds.has(item.url);
+      favBtn.className = "ms-cell-fav-btn" + (isFav ? " ms-fav-active" : "");
+      favBtn.innerHTML  = isFav ? _MS_SVG_HEART_FULL : _MS_SVG_HEART_EMPTY;
+      favBtn.title = isFav ? tOr("ms_fav_remove", "Remove bookmark") : tOr("ms_fav_add", "Bookmark");
+      favBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        const nowFav = _msToggleFav(item);
+        favBtn.classList.toggle("ms-fav-active", nowFav);
+        favBtn.innerHTML = nowFav ? _MS_SVG_HEART_FULL : _MS_SVG_HEART_EMPTY;
+        favBtn.title = nowFav ? tOr("ms_fav_remove", "Remove bookmark") : tOr("ms_fav_add", "Bookmark");
+        _msUpdateFavsTabLabel?.();
+        if (_msActiveTab === "favs" && !nowFav) _msRenderFavsGrid().catch(() => {});
+      });
+      cell.appendChild(favBtn);
+
+      const copyBtn = document.createElement("button");
+      copyBtn.className = "ms-cell-copy-btn";
+      copyBtn.innerHTML  = _MS_SVG_COPY;
+      copyBtn.title = tOr("ms_btn_copy_media", "Copy media URL");
+      copyBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        const url = item.proxy_url || item.url;
+        try {
+          typeof GM_setClipboard === "function" ? GM_setClipboard(url) : navigator.clipboard.writeText(url);
+          dmtShowToast?.("✅ " + tOr("copy_success", "Copied"), { duration: 1200 });
+        } catch (_) {
+          dmtShowToast?.("⚠️ " + tOr("copy_fail", "Copy failed"), { duration: 1200 });
+        }
+      });
+      cell.appendChild(copyBtn);
+
       const jumpCorner = document.createElement("a");
       jumpCorner.className = "ms-cell-jump";
       const gid = item.guild_id
@@ -32588,30 +32770,30 @@ if (type === "warn" && scanLimit !== null) {
         _msJumpToMsg(gid, item.channel_id, item.msg_id);
       });
       jumpCorner.style.cssText = [
-        "position:absolute","top:0","right:0",
+        "position:absolute","bottom:0","right:0",
         "width:0","height:0",
-        "border-top:26px solid rgba(88,101,242,0.72)",
+        "border-bottom:26px solid rgba(88,101,242,0.72)",
         "border-left:26px solid transparent",
-        "z-index:3","cursor:pointer",
-        "transition:border-top-color 0.15s",
+        "cursor:pointer",
       ].join(";");
       const jumpIcon = document.createElement("span");
       jumpIcon.textContent = "↗";
-      jumpIcon.style.cssText = "position:absolute;top:-24px;right:2px;font-size:10px;color:#fff;line-height:1;pointer-events:none;";
+      jumpIcon.style.cssText = "position:absolute;bottom:-24px;right:2px;font-size:10px;color:#fff;line-height:1;pointer-events:none;";
       jumpCorner.appendChild(jumpIcon);
-      jumpCorner.addEventListener("mouseenter", () => { jumpCorner.style.borderTopColor = "rgba(88,101,242,1)"; });
-      jumpCorner.addEventListener("mouseleave", () => { jumpCorner.style.borderTopColor = "rgba(88,101,242,0.72)"; });
+      jumpCorner.addEventListener("mouseenter", () => { jumpCorner.style.borderBottomColor = "rgba(88,101,242,1)"; });
+      jumpCorner.addEventListener("mouseleave", () => { jumpCorner.style.borderBottomColor = "rgba(88,101,242,0.72)"; });
       cell.appendChild(jumpCorner);
 
       cell.addEventListener("click", () => {
-        const realIdx = _msGridItems.indexOf(item);
-        _msLightbox(_msGridItems, realIdx >= 0 ? realIdx : idx);
+        const srcList = _msActiveTab === "favs" ? _msFavItems : _msGridItems;
+        const realIdx = srcList.indexOf(item);
+        _msLightbox(srcList, realIdx >= 0 ? realIdx : idx);
       });
       return cell;
     }
 
     function _msRenderGrid() {
-      if (!_msGridContEl) return;
+      if (!_msGridContEl || _msActiveTab !== "media") return;
       const items     = _msGridItems;
       const totalRows = Math.ceil(items.length / MS_COLS);
       _msGridContEl.style.height = (totalRows * MS_CELL_H) + "px";
@@ -32639,6 +32821,40 @@ if (type === "warn" && scanLimit !== null) {
       for (const [i, el] of _msGridRendered) {
         if (!visSet.has(i)) { el.remove(); _msGridRendered.delete(i); }
       }
+    }
+
+    async function _msRenderFavsGrid() {
+      if (!_msGridContEl || _msActiveTab !== "favs") return;
+      _msGridRendered.clear();
+      _msGridContEl.innerHTML = "";
+      const urls = [..._msFavIds];
+
+      if (urls.length === 0) {
+        _msFavItems = [];
+        _msGridContEl.style.height = "";
+        const empty = document.createElement("div");
+        empty.style.cssText = "padding:40px 16px;text-align:center;color:#b5bac1;font-size:13px;line-height:1.6;";
+        empty.textContent = tOr("ms_favs_empty", "No bookmarks yet — hover a thumbnail and tap ♡ to save it here.");
+        _msGridContEl.appendChild(empty);
+        return;
+      }
+
+      const myGen = ++_msFavsGen;
+      const cached = await _msIdbGetByUrls(urls);
+      if (myGen !== _msFavsGen || _msActiveTab !== "favs") return;
+
+      const byUrl = new Map(cached.map(it => [it.url, it]));
+      for (const it of _msGridItems) {
+        if (_msFavIds.has(it.url) && !byUrl.has(it.url)) byUrl.set(it.url, it);
+      }
+      const favItems = [...byUrl.values()].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      _msFavItems = favItems;
+
+      const totalRows = Math.ceil(favItems.length / MS_COLS);
+      _msGridContEl.style.height = (totalRows * MS_CELL_H) + "px";
+      const frag = document.createDocumentFragment();
+      favItems.forEach((item, i) => frag.appendChild(_msBuildCell(item, i)));
+      _msGridContEl.appendChild(frag);
     }
 
     async function _msReloadGrid() {
@@ -32977,6 +33193,7 @@ if (type === "warn" && scanLimit !== null) {
         _msPanelResizeObs?.disconnect();
         _msPanelResizeObs = null;
         document.removeEventListener("keydown", panelEsc, false);
+        _msFavsGen++;
         return;
       }
       const { scope, guildId, channelId } = _msDetectScope();
@@ -32986,6 +33203,9 @@ if (type === "warn" && scanLimit !== null) {
       _msPinnedOnly = false;
       _msGridItems  = [];
       _msGridRendered.clear();
+      _msActiveTab  = "media";
+      _msFavItems   = [];
+      _msLoadFavs();
 
       const _msLayoutSettings = getMosaicLayoutSettings();
       _msCellSizeMode = _msLayoutSettings.cellSizeMode;
@@ -33309,6 +33529,45 @@ if (type === "warn" && scanLimit !== null) {
       panel.appendChild(toolbar);
       panel.appendChild(closeBtn);
 
+      const tabBar = document.createElement("div");
+      tabBar.style.cssText = "display:flex;gap:4px;padding:6px 12px;border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0;background:#2b2d31;";
+      const _msTabBtnCss = "border:none;background:transparent;color:#949ba4;font-size:12px;font-weight:600;padding:5px 10px;border-radius:6px;cursor:pointer;transition:background .12s,color .12s;";
+      const mediaTabBtn = document.createElement("button");
+      const favsTabBtn  = document.createElement("button");
+      mediaTabBtn.style.cssText = _msTabBtnCss;
+      favsTabBtn.style.cssText  = _msTabBtnCss;
+      mediaTabBtn.textContent = "🖼 " + tOr("ms_tab_media", "Media");
+
+      const _msUpdateTabBtnStyle = () => {
+        mediaTabBtn.style.background = _msActiveTab === "media" ? "rgba(88,101,242,0.18)" : "transparent";
+        mediaTabBtn.style.color      = _msActiveTab === "media" ? "#fff" : "#949ba4";
+        favsTabBtn.style.background  = _msActiveTab === "favs"  ? "rgba(88,101,242,0.18)" : "transparent";
+        favsTabBtn.style.color       = _msActiveTab === "favs"  ? "#fff" : "#949ba4";
+      };
+      _msUpdateFavsTabLabel = () => {
+        favsTabBtn.textContent = "💗 " + tOr("ms_tab_favs", "Bookmarks") + (_msFavIds.size ? " (" + _msFavIds.size + ")" : "");
+      };
+      _msUpdateFavsTabLabel();
+      _msUpdateTabBtnStyle();
+
+      mediaTabBtn.addEventListener("click", () => {
+        if (_msActiveTab === "media") return;
+        _msActiveTab = "media";
+        _msUpdateTabBtnStyle();
+        _msGridRendered.clear();
+        if (_msGridContEl) _msGridContEl.innerHTML = "";
+        _msRenderGrid();
+      });
+      favsTabBtn.addEventListener("click", () => {
+        if (_msActiveTab === "favs") return;
+        _msActiveTab = "favs";
+        _msUpdateTabBtnStyle();
+        _msRenderFavsGrid().catch(() => {});
+      });
+      tabBar.appendChild(mediaTabBtn);
+      tabBar.appendChild(favsTabBtn);
+      panel.appendChild(tabBar);
+
       let _dragOffX = 0, _dragOffY = 0;
 
       const _msStartDrag = (e, onEndCb) => {
@@ -33629,7 +33888,7 @@ if (type === "warn" && scanLimit !== null) {
           ".ms-pulse-dot{display:inline-block;width:6px;height:6px;border-radius:50%;",
           "background:#5865f2;margin-right:6px;vertical-align:middle;animation:ms-pulse 1.1s ease-in-out infinite;}",
           "@keyframes ms-pulse{0%,100%{opacity:0.35;transform:scale(0.85);}50%{opacity:1;transform:scale(1.15);}}",
-          ".ms-badge{position:absolute;top:5px;left:5px;z-index:3;background:rgba(0,0,0,0.65);",
+          ".ms-badge{position:absolute;bottom:5px;left:5px;z-index:4;background:rgba(0,0,0,0.65);",
           "color:#fff;font-size:9px;font-weight:700;padding:2px 5px;border-radius:3px;",
           "letter-spacing:.04em;pointer-events:none;}",
           ".ms-hover-info{position:absolute;bottom:0;left:0;right:0;z-index:3;",
@@ -33643,6 +33902,24 @@ if (type === "warn" && scanLimit !== null) {
           ".ms-channel{font-size:9px;color:rgba(88,101,242,0.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}",
           ".ms-cell{transition:outline 0.12s;}",
           ".ms-cell:hover{outline:2px solid rgba(88,101,242,0.65);outline-offset:-2px;z-index:1;}",
+          ".ms-cell-fav-btn{position:absolute;top:4px;left:4px;z-index:4;width:22px;height:22px;",
+          "border-radius:50%;border:none;cursor:pointer;background:rgba(0,0,0,0.45);",
+          "display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;",
+          "transition:opacity 0.15s,background 0.15s;color:rgba(255,255,255,0.85);}",
+          ".ms-cell-fav-btn svg{width:12px;height:12px;pointer-events:none;}",
+          ".ms-cell:hover .ms-cell-fav-btn{opacity:1;pointer-events:auto;}",
+          ".ms-cell-fav-btn.ms-fav-active{opacity:1;pointer-events:auto;background:rgba(224,36,94,0.75);color:#fff;}",
+          ".ms-cell-fav-btn.ms-fav-active:hover{background:rgba(224,36,94,0.95);}",
+          ".ms-cell-fav-btn:not(.ms-fav-active):hover{background:rgba(0,0,0,0.65);}",
+          ".ms-cell-copy-btn{position:absolute;top:5px;right:5px;z-index:3;width:24px;height:24px;",
+          "border-radius:6px;border:none;background:rgba(0,0,0,0.38);backdrop-filter:blur(4px);",
+          "color:rgba(255,255,255,0.75);cursor:pointer;display:flex;align-items:center;",
+          "justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.15s,background 0.1s;}",
+          ".ms-cell-copy-btn svg{width:12px;height:12px;pointer-events:none;}",
+          ".ms-cell:hover .ms-cell-copy-btn{opacity:1;pointer-events:auto;}",
+          ".ms-cell-copy-btn:hover{background:rgba(29,155,240,0.75);}",
+          ".ms-cell-jump{opacity:0;pointer-events:none;transition:opacity 0.15s,border-bottom-color 0.15s;}",
+          ".ms-cell:hover .ms-cell-jump{opacity:1;pointer-events:auto;}",
         ].join("");
         document.head.appendChild(ss);
       }
@@ -33657,7 +33934,7 @@ if (type === "warn" && scanLimit !== null) {
         _msScrollTimer = setTimeout(() => {
           _msRenderGrid();
           const { scrollTop, scrollHeight, clientHeight } = gridScroll;
-          if (scrollTop + clientHeight >= scrollHeight - MS_CELL_H * 6) {
+          if (_msActiveTab === "media" && scrollTop + clientHeight >= scrollHeight - MS_CELL_H * 6) {
             _msLoadMoreItems().catch(() => {});
           }
         }, 50);
@@ -33675,7 +33952,8 @@ if (type === "warn" && scanLimit !== null) {
           _msGridContEl.style.width = (MS_COLS * MS_CELL_W) + "px";
           _msGridRendered.clear();
           if (_msGridContEl) _msGridContEl.innerHTML = "";
-          _msRenderGrid();
+          if (_msActiveTab === "favs") _msRenderFavsGrid().catch(() => {});
+          else _msRenderGrid();
         }
         clearTimeout(_msLayoutSaveTimer);
         _msLayoutSaveTimer = setTimeout(() => {
