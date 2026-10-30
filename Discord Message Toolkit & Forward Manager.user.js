@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.5.14
+// @version      2.9.6.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -1829,6 +1829,8 @@
       mp_create_task_schedule:  "Queue for later",
       mp_create_task_now:       "Run now",
       mp_img_expired:           "Image URL may have expired.",
+      mp_favs_view_grid:        "Switch to Grid view",
+      mp_favs_cell_unavailable: "Unavailable",
       mp_media_unavailable:     "Can't load this media. The file may still exist.",
       mp_fav_add:               "Favorite (protected from Task deletion)",
       mp_fav_remove:            "Unfavorite",
@@ -2496,6 +2498,8 @@
       mp_create_task_schedule:  "進入排程",
       mp_create_task_now:       "立刻執行",
       mp_img_expired:           "圖片連結可能已過期。",
+      mp_favs_view_grid:        "切換方格視圖",
+      mp_favs_cell_unavailable: "無法載入",
       mp_media_unavailable:     "無法載入此媒體，檔案可能仍存在。",
       mp_fav_add:               "收藏（保護此訊息不被 Task 刪除）",
       mp_fav_remove:            "取消收藏",
@@ -3208,6 +3212,8 @@
       mp_create_task_schedule:  "加入排程",
       mp_create_task_now:       "立即执行",
       mp_img_expired:           "图片链接可能已过期。",
+      mp_favs_view_grid:        "切换为网格视图",
+      mp_favs_cell_unavailable: "无法加载",
       mp_media_unavailable:     "无法加载此媒体，文件可能仍存在。",
       mp_fav_add:               "收藏（受保护，任务不会删除）",
       mp_fav_remove:            "取消收藏",
@@ -3876,6 +3882,8 @@
       mp_create_task_schedule:  "スケジュールに追加",
       mp_create_task_now:       "今すぐ実行",
       mp_img_expired:           "画像URLが期限切れの可能性があります。",
+      mp_favs_view_grid:        "グリッド表示に切り替え",
+      mp_favs_cell_unavailable: "読み込めません",
       mp_media_unavailable:     "このメディアを読み込めません。ファイルはまだ存在する可能性があります。",
       mp_fav_add:               "お気に入り（Taskによる削除から保護）",
       mp_fav_remove:            "お気に入りを解除",
@@ -4541,6 +4549,8 @@
       mp_create_task_schedule:  "예약에 추가",
       mp_create_task_now:       "지금 실행",
       mp_img_expired:           "이미지 URL이 만료되었을 수 있습니다.",
+      mp_favs_view_grid:        "그리드 보기로 전환",
+      mp_favs_cell_unavailable: "불러올 수 없음",
       mp_media_unavailable:     "이 미디어를 불러올 수 없습니다. 파일이 여전히 존재할 수 있습니다.",
       mp_fav_add:               "즐겨찾기 (Task 삭제로부터 보호)",
       mp_fav_remove:            "즐겨찾기 해제",
@@ -5152,6 +5162,8 @@
       mp_create_task_schedule:  "Programar para después",
       mp_create_task_now:       "Ejecutar ahora",
       mp_img_expired:           "La URL de la imagen puede haber caducado.",
+      mp_favs_view_grid:        "Cambiar a vista de cuadrícula",
+      mp_favs_cell_unavailable: "No disponible",
       mp_media_unavailable:     "No se puede cargar este contenido. El archivo puede seguir existiendo.",
       mp_fav_add:               "Favorito (protegido de eliminación por Tarea)",
       mp_fav_remove:            "Quitar de favoritos",
@@ -5818,6 +5830,8 @@
       mp_create_task_schedule:  "Agendar para depois",
       mp_create_task_now:       "Executar agora",
       mp_img_expired:           "A URL da imagem pode ter expirado.",
+      mp_favs_view_grid:        "Alternar para vista de grade",
+      mp_favs_cell_unavailable: "Indisponível",
       mp_media_unavailable:     "Não é possível carregar esta mídia. O arquivo pode ainda existir.",
       mp_fav_add:               "Favorito (protegido de exclusão por Tarefa)",
       mp_fav_remove:            "Remover dos favoritos",
@@ -6489,6 +6503,8 @@
       mp_create_task_schedule:  "Planifier plus tard",
       mp_create_task_now:       "Exécuter maintenant",
       mp_img_expired:           "L'URL de l'image a peut-être expiré.",
+      mp_favs_view_grid:        "Passer en vue grille",
+      mp_favs_cell_unavailable: "Indisponible",
       mp_media_unavailable:     "Impossible de charger ce média. Le fichier existe peut-être encore.",
       mp_fav_add:               "Favori (protégé contre la suppression par Tâche)",
       mp_fav_remove:            "Retirer des favoris",
@@ -7155,6 +7171,8 @@
       mp_create_task_schedule:  "Запланировать",
       mp_create_task_now:       "Выполнить сейчас",
       mp_img_expired:           "URL изображения мог устареть.",
+      mp_favs_view_grid:        "Переключить на сетку",
+      mp_favs_cell_unavailable: "Недоступно",
       mp_media_unavailable:     "Не удалось загрузить медиафайл. Возможно, файл всё ещё существует.",
       mp_fav_add:               "В избранное (защита от удаления Задачей)",
       mp_fav_remove:            "Удалить из избранного",
@@ -7810,6 +7828,8 @@
       mp_create_task_schedule:  "Für später einplanen",
       mp_create_task_now:       "Jetzt ausführen",
       mp_img_expired:           "Bild-URL ist möglicherweise abgelaufen.",
+      mp_favs_view_grid:        "Zur Rasteransicht wechseln",
+      mp_favs_cell_unavailable: "Nicht verfügbar",
       mp_media_unavailable:     "Dieses Medium kann nicht geladen werden. Die Datei existiert möglicherweise noch.",
       mp_fav_add:               "Favorit (vor Aufgaben-Löschen geschützt)",
       mp_fav_remove:            "Aus Favoriten entfernen",
@@ -10907,7 +10927,7 @@
       "fixvx.com",
     ];
 
-    const CLEAN_URL_X_ONLY_PARAMS = ["t", "ref_url"];
+    const CLEAN_URL_X_ONLY_PARAMS = ["t", "ref_url", "a"];
 
     function cleanUrl(urlStr) {
       try {
@@ -25591,6 +25611,7 @@ unsafeWindow.fetch = function(...args) {
     const SK_PREFETCH_LIMIT = "mp_prefetch_limit";
     const SK_TIME_FORMAT = "mp_time_fmt";
     const SK_MEDIA_CELL_MODE = "mp_media_cell_mode";
+    const SK_FAVS_VIEW   = "mp_favs_view";
 
     const IDB_NAME = "dmt_cache";
     const IDB_VER  = 2;
@@ -26841,6 +26862,18 @@ unsafeWindow.fetch = function(...args) {
         "border:1px solid rgba(212,175,55,.7);color:#f0cf65;" +
         "box-shadow:0 0 5px rgba(212,175,55,.22);" +
         "font-size:10px;font-weight:700;}",
+        "#dmt-mp-panel .mp-masonry.mp-fav-grid{padding:0 4px 4px;}",
+        "#dmt-mp-panel .mp-fav-cell-guild{position:absolute;top:5px;left:6px;z-index:1;max-width:calc(100% - 40px);}",
+        "#dmt-mp-panel .mp-fav-cell-guild .mp-guild-badge{display:block;max-width:100%;margin-right:0;}",
+        "#dmt-mp-panel .mp-fav-cell-video .mp-fav-cell-guild{top:24px;}",
+        "#dmt-mp-panel .mp-fav-text{position:absolute;inset:0;padding:8px 8px 6px;font-size:11px;line-height:1.4;" +
+        "color:var(--dmt-text-muted,#949ba4);overflow:hidden;word-break:break-word;" +
+        "display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;}",
+        "#dmt-mp-panel .mp-fav-text.has-guild{padding-top:28px;}",
+        "#dmt-mp-panel .mp-fav-text.is-empty{font-style:italic;opacity:.6;}",
+        "#dmt-mp-panel .mp-fav-dead{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;" +
+        "justify-content:center;gap:4px;padding:6px;text-align:center;font-size:10px;color:rgba(255,255,255,.55);}",
+        "#dmt-mp-panel .mp-fav-dead span:first-child{font-size:22px;opacity:.7;}",
         "#dmt-mp-panel .mp-expired-warn{font-size:10px;color:#faa61a;margin-top:1px;}",
         "#dmt-mp-panel .mp-msg-actions{display:flex;gap:4px;align-items:center;flex-shrink:0;}",
         "#dmt-mp-panel .mp-action-btn{width:26px;height:26px;border-radius:5px;border:none;",
@@ -28306,7 +28339,7 @@ unsafeWindow.fetch = function(...args) {
     }
 
     function _mpJumpToMessage(channelId, msgId) {
-      const guildId = _getCtx()?.guildId || "@me";
+      const guildId = _chanGuildCache.get(channelId) || _getCtx()?.guildId || "@me";
       const path = "/channels/" + guildId + "/" + channelId + "/" + msgId;
       const fullUrl = "https://discord.com" + path;
 
@@ -29438,6 +29471,7 @@ unsafeWindow.fetch = function(...args) {
     }
 
     function _renderFavsTab(container) {
+      _mpDisconnectVidObs(container);
       container.innerHTML = "";
       container.style.cssText = "display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;padding:8px 0 0;";
 
@@ -29451,7 +29485,25 @@ unsafeWindow.fetch = function(...args) {
       favRefreshBtn.title = mp("refresh");
       favRefreshBtn.innerHTML = '<svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>';
       favRefreshBtn.onclick = () => _renderFavsTab(container);
-      toolbar.append(titleEl, favRefreshBtn);
+
+      let _favSnapshot = null;
+      const _favsIsGrid = () => GMStore.get(SK_FAVS_VIEW, "list") === "grid";
+      const FAVS_ICON_GRID = "M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z";
+      const FAVS_ICON_LIST = "M3 14h4v-4H3v4zm0 5h4v-4H3v4zM3 9h4V5H3v4zm5 5h13v-4H8v4zm0 5h13v-4H8v4zM8 5v4h13V5H8z";
+      const favViewBtn = document.createElement("button");
+      favViewBtn.className = "mp-refresh-btn";
+      const _updateFavViewBtn = () => {
+        const isGrid = _favsIsGrid();
+        favViewBtn.replaceChildren(_mkFavSvgIcon(isGrid ? FAVS_ICON_LIST : FAVS_ICON_GRID));
+        favViewBtn.title = isGrid ? mp("view_list") : mp("favs_view_grid");
+      };
+      _updateFavViewBtn();
+      favViewBtn.onclick = () => {
+        GMStore.set(SK_FAVS_VIEW, _favsIsGrid() ? "list" : "grid");
+        _updateFavViewBtn();
+        if (_favSnapshot) _paintFavs(); else _drawFavs();
+      };
+      toolbar.append(titleEl, favViewBtn, favRefreshBtn);
       container.appendChild(toolbar);
 
       const list = document.createElement("div");
@@ -29460,7 +29512,9 @@ unsafeWindow.fetch = function(...args) {
       container.appendChild(list);
 
       async function _drawFavs() {
+        _mpDisconnectVidObs(list);
         list.innerHTML = "";
+        _favSnapshot = null;
         const favIdList = [..._favIds];
 
         if (favIdList.length === 0) {
@@ -29469,9 +29523,17 @@ unsafeWindow.fetch = function(...args) {
           return;
         }
 
-        const skelFrag = document.createDocumentFragment();
-        for (let i = 0; i < 3; i++) skelFrag.appendChild(_makeSkeletonRow());
-        list.appendChild(skelFrag);
+        if (_favsIsGrid()) {
+          const skelGrid = document.createElement("div");
+          skelGrid.className = "mp-masonry mp-fav-grid";
+          skelGrid.style.setProperty("--mp-media-cols", String(_mediaCellCols()));
+          for (let i = 0; i < 6; i++) skelGrid.appendChild(_makeSkeletonCard());
+          list.appendChild(skelGrid);
+        } else {
+          const skelFrag = document.createDocumentFragment();
+          for (let i = 0; i < 3; i++) skelFrag.appendChild(_makeSkeletonRow());
+          list.appendChild(skelFrag);
+        }
         titleEl.textContent = "💗 Loading…";
 
         const myGen = ++_favsGen;
@@ -29508,8 +29570,20 @@ unsafeWindow.fetch = function(...args) {
           guildIds.forEach((id, i) => guildNameMap.set(id, names[i]));
         }
 
+        _favSnapshot = { favMsgs, guildNameMap, gidOf: _gidOf };
+        _paintFavs();
+      }
+
+      function _paintFavs() {
+        const { favMsgs, guildNameMap, gidOf: _gidOf } = _favSnapshot;
+        _mpDisconnectVidObs(list);
         list.innerHTML = "";
         titleEl.textContent = "💗 " + favMsgs.length + " saved";
+
+        if (_favsIsGrid()) {
+          list.appendChild(_buildFavsGrid(favMsgs, guildNameMap, _gidOf));
+          return;
+        }
 
         const frag = document.createDocumentFragment();
         const groups = _groupByDate(favMsgs);
@@ -29546,6 +29620,144 @@ unsafeWindow.fetch = function(...args) {
       }
 
       _drawFavs();
+    }
+
+    function _mkFavSvgIcon(pathD) {
+      const NS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("viewBox", "0 0 24 24");
+      svg.setAttribute("aria-hidden", "true");
+      const path = document.createElementNS(NS, "path");
+      path.setAttribute("d", pathD);
+      svg.appendChild(path);
+      return svg;
+    }
+
+    function _buildFavsGrid(favMsgs, guildNameMap, gidOf) {
+      const grid = document.createElement("div");
+      grid.className = "mp-masonry mp-fav-grid";
+      grid.style.setProperty("--mp-media-cols", String(_mediaCellCols()));
+
+      const groups = _groupByDate(favMsgs);
+      const mediaMsgs = [];
+      groups.forEach(msgs => msgs.forEach(m => {
+        if (_getThumbUrl(m) || _getVideoUrl(m)) mediaMsgs.push(m);
+      }));
+
+      groups.forEach((msgs, dateKey) => {
+        const sep = document.createElement("div");
+        sep.className = "mp-media-date-sep";
+        sep.textContent = _fmtDateKey(dateKey);
+        grid.appendChild(sep);
+        msgs.forEach(msg => {
+          const gid = gidOf(msg);
+          grid.appendChild(_buildFavGridCell(msg, mediaMsgs, gid ? guildNameMap.get(gid) : null));
+        });
+      });
+      return grid;
+    }
+
+    function _buildFavGridCell(msg, mediaMsgs, guildName) {
+      const item = document.createElement("div");
+      item.className = "mp-masonry-item";
+      item.dataset.msgId = msg.id;
+
+      const thumbUrl = _getThumbUrl(msg);
+      const videoUrl = _getVideoUrl(msg);
+
+      const markDead = el => {
+        el.remove();
+        if (item.querySelector(".mp-fav-dead")) return;
+        const dead = document.createElement("div");
+        dead.className = "mp-fav-dead";
+        const ic = document.createElement("span");
+        ic.textContent = "🚫";
+        const lb = document.createElement("span");
+        lb.textContent = mp("favs_cell_unavailable");
+        item.title = mp("media_unavailable");
+        dead.append(ic, lb);
+        item.insertBefore(dead, item.firstChild);
+      };
+
+      if (thumbUrl) {
+        const img = document.createElement("img");
+        img.src = thumbUrl; img.alt = ""; img.loading = "lazy";
+        if (_isExpired(thumbUrl)) img.style.opacity = "0.6";
+        img.addEventListener("error", () => markDead(img));
+        item.appendChild(img);
+      } else if (videoUrl) {
+        const vid = document.createElement("video");
+        vid.dataset.src = videoUrl;
+        vid.muted = true;
+        vid.preload = "metadata";
+        vid.addEventListener("error", () => { if (vid.getAttribute("src")) markDead(vid); });
+        item.appendChild(vid);
+        item.appendChild(Object.assign(document.createElement("div"), {
+          className: "mp-video-badge", textContent: "▶",
+        }));
+        item.classList.add("mp-fav-cell-video");
+        const vidObs = new IntersectionObserver(entries => {
+          if (entries[0].isIntersecting) {
+            if (!vid.getAttribute("src") && vid.dataset.src) vid.src = vid.dataset.src;
+          } else if (vid.getAttribute("src")) {
+            vid.pause();
+            vid.removeAttribute("src");
+            vid.load();
+          }
+        }, { threshold: 0.1 });
+        vidObs.observe(vid);
+        item.dataset.hasVidObs = "1";
+        item._vidObs = vidObs;
+      } else {
+        const raw = (msg.content || "").trim();
+        const tx = document.createElement("div");
+        tx.className = "mp-fav-text" + (guildName ? " has-guild" : "") + (raw ? "" : " is-empty");
+        tx.textContent = raw || mp("no_content");
+        item.appendChild(tx);
+      }
+
+      if (guildName) {
+        const gw = document.createElement("div");
+        gw.className = "mp-fav-cell-guild";
+        const gb = document.createElement("span");
+        gb.className = "mp-guild-badge";
+        gb.textContent = guildName;
+        gb.title = guildName;
+        gw.appendChild(gb);
+        item.appendChild(gw);
+      }
+
+      const jumpCorner = document.createElement("button");
+      jumpCorner.className = "mp-jump-corner";
+      jumpCorner.title = mp("jump_to");
+      jumpCorner.appendChild(_mkFavSvgIcon("M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"));
+      jumpCorner.onclick = e => { e.stopPropagation(); _mpJumpToMessage(msg.channel_id, msg.id); };
+      item.appendChild(jumpCorner);
+
+      const overlay = document.createElement("div");
+      overlay.className = "mp-grid-overlay";
+      const metaEl = Object.assign(document.createElement("div"), {
+        className: "mp-grid-meta", textContent: _fmtTs(new Date(msg.timestamp)),
+      });
+      const actsEl = document.createElement("div");
+      actsEl.className = "mp-grid-acts";
+      const favBtn = document.createElement("button");
+      favBtn.className = "mp-action-btn mp-fav-btn" + (_favIds.has(msg.id) ? " mp-fav-active" : "");
+      favBtn.title = _favIds.has(msg.id) ? mp("fav_remove") : mp("fav_add");
+      favBtn.innerHTML = _favIds.has(msg.id) ? _SVG_HEART_FULL : _SVG_HEART_EMPTY;
+      favBtn.onclick = e => { e.stopPropagation(); _mpToggleFav(msg.id, favBtn); };
+      actsEl.appendChild(favBtn);
+      overlay.append(metaEl, actsEl);
+      item.appendChild(overlay);
+
+      item.addEventListener("click", e => {
+        if (e.target.closest(".mp-action-btn") || e.target.closest(".mp-jump-corner")) return;
+        const idx = mediaMsgs.indexOf(msg);
+        if (idx >= 0) _openMediaLightbox(mediaMsgs, idx, item);
+        else _mpJumpToMessage(msg.channel_id, msg.id);
+      });
+
+      return item;
     }
 
     function _renderTasksTab(container) {
