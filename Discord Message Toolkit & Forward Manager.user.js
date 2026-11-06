@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.6.0
+// @version      2.9.7.0
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -63,7 +63,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.5.11";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.7.0";
 
   const GMStore = {
     
@@ -106,6 +106,7 @@
     "bl_hide_notices": "2.6.5.8",
     "mod_floatimage": "2.8.2.17",
     "fi_poker_stack": "2.9.0.0",
+    "ms_bulk_download": "2.9.7.0",
   };
 
   function isFeatureNew(featureKey) {
@@ -166,6 +167,25 @@
       "pointer-events:none",
     ].join(";");
     return badge;
+  }
+
+  function renderNewBadgeDot(featureKey) {
+    if (!isFeatureNew(featureKey)) return null;
+    const dot = document.createElement("span");
+    dot.className = "dmt-new-badge-dot";
+    dot.style.cssText = [
+      "position:absolute",
+      "top:-3px",
+      "right:-3px",
+      "width:8px",
+      "height:8px",
+      "border-radius:50%",
+      "background:#23a55a",
+      "box-shadow:0 0 0 1.5px rgba(0,0,0,0.3)",
+      "pointer-events:none",
+      "animation:dmt-badge-pulse 2s ease-in-out infinite",
+    ].join(";");
+    return dot;
   }
 
   const ConfigManager = {
@@ -1669,6 +1689,33 @@
       ms_last_scan:       "Last scan",
       ms_scanning:        "Scanning",
       ms_btn_scan:        "Scan",
+      ms_btn_scan_tip:    "Click: scan for new media · Shift+Click: rescan the whole selected range",
+      ms_notice_new:      "✓ {n} new media added",
+      ms_notice_uptodate: "✓ Up to date — no new media found (Shift+Click ⟳ to rescan the whole range)",
+      ms_bulk_btn_title:  "Download all media matching the current filters (ZIP)",
+      ms_bulk_title:      "Bulk download",
+      ms_bulk_collecting: "Collecting items… {n} found",
+      ms_bulk_confirm:    "{n} items match the current filters. Download them as ZIP files (about 500 MB each)? Expired links are refreshed automatically.",
+      ms_bulk_none:       "No media matches the current filters.",
+      ms_bulk_media_only: "Bulk download works on the Media tab — switch tabs and try again.",
+      ms_bulk_refreshing: "Refreshing expired links… {done}/{total}",
+      ms_bulk_downloading: "Downloading… {done}/{total}",
+      ms_bulk_detail:     "{size} · {parts} ZIP saved · {failed} failed",
+      ms_bulk_done:       "✓ Done — {n} files in {parts} ZIP file(s)",
+      ms_bulk_cancelled:  "Cancelled — {n} files saved in {parts} ZIP file(s)",
+      ms_bulk_failed:     "{n} failed — {reasons}",
+      ms_bulk_start:      "Start",
+      ms_bulk_cancel:     "Cancel",
+      ms_bulk_close:      "Close",
+      ms_bulk_retry:      "Retry failed ({n})",
+      ms_sel_btn_title:   "Select media to download (Ctrl+click also works)",
+      ms_sel_hint:        "Click media to select · Shift+click for a range",
+      ms_sel_count:       "{n} selected",
+      ms_sel_all_loaded:  "All loaded",
+      ms_sel_all_match:   "All matching filters",
+      ms_sel_clear:       "Clear",
+      ms_sel_download:    "Download ({n})",
+      ms_bulk_confirm_sel: "Download the {n} selected items as ZIP files (about 500 MB each)? Expired links are refreshed automatically.",
       ms_btn_pause:       "Pause",
       ms_btn_resume:      "Resume",
       ms_btn_stop:        "Stop",
@@ -2341,6 +2388,33 @@
       ms_last_scan:       "上次掃描",
       ms_scanning:        "掃描中",
       ms_btn_scan:        "掃描",
+      ms_btn_scan_tip:    "點擊：掃描新媒體 · Shift＋點擊：重新掃描整個所選範圍",
+      ms_notice_new:      "✓ 新增 {n} 個媒體",
+      ms_notice_uptodate: "✓ 已是最新，沒有新的媒體（Shift＋點擊 ⟳ 可重新掃描整個範圍）",
+      ms_bulk_btn_title:  "下載目前篩選條件下的全部媒體（ZIP）",
+      ms_bulk_title:      "批量下載",
+      ms_bulk_collecting: "正在收集項目… 已找到 {n} 筆",
+      ms_bulk_confirm:    "目前篩選條件下共有 {n} 個項目。要打包成 ZIP 下載嗎（每包約 500 MB）？過期的連結會自動刷新。",
+      ms_bulk_none:       "目前篩選條件下沒有任何媒體。",
+      ms_bulk_media_only: "批量下載僅支援「媒體」分頁，請切換分頁後再試。",
+      ms_bulk_refreshing: "正在刷新過期連結… {done}/{total}",
+      ms_bulk_downloading: "下載中… {done}/{total}",
+      ms_bulk_detail:     "{size} · 已存 {parts} 個 ZIP · 失敗 {failed} 個",
+      ms_bulk_done:       "✓ 完成 — {n} 個檔案，共 {parts} 個 ZIP",
+      ms_bulk_cancelled:  "已取消 — 已儲存 {n} 個檔案（{parts} 個 ZIP）",
+      ms_bulk_failed:     "{n} 個失敗 — {reasons}",
+      ms_bulk_start:      "開始下載",
+      ms_bulk_cancel:     "取消",
+      ms_bulk_close:      "關閉",
+      ms_bulk_retry:      "重試失敗項目（{n}）",
+      ms_sel_btn_title:   "選取要下載的媒體（也可按住 Ctrl 點擊）",
+      ms_sel_hint:        "點擊媒體即可選取 · Shift＋點擊選取範圍",
+      ms_sel_count:       "已選 {n} 個",
+      ms_sel_all_loaded:  "全選已載入",
+      ms_sel_all_match:   "全選符合條件的全部",
+      ms_sel_clear:       "清除",
+      ms_sel_download:    "下載（{n}）",
+      ms_bulk_confirm_sel: "要把已選的 {n} 個項目打包成 ZIP 下載嗎（每包約 500 MB）？過期的連結會自動刷新。",
       ms_btn_pause:       "暫停",
       ms_btn_resume:      "繼續",
       ms_btn_stop:        "停止",
@@ -3017,6 +3091,33 @@
       ms_last_scan:       "上次扫描",
       ms_scanning:        "扫描中",
       ms_btn_scan:        "扫描",
+      ms_btn_scan_tip:    "点击：扫描新媒体 · Shift＋点击：重新扫描整个所选范围",
+      ms_notice_new:      "✓ 新增 {n} 个媒体",
+      ms_notice_uptodate: "✓ 已是最新，没有新的媒体（Shift＋点击 ⟳ 可重新扫描整个范围）",
+      ms_bulk_btn_title:  "下载当前筛选条件下的全部媒体（ZIP）",
+      ms_bulk_title:      "批量下载",
+      ms_bulk_collecting: "正在收集项目… 已找到 {n} 个",
+      ms_bulk_confirm:    "当前筛选条件下共有 {n} 个项目。要打包成 ZIP 下载吗（每包约 500 MB）？过期的链接会自动刷新。",
+      ms_bulk_none:       "当前筛选条件下没有任何媒体。",
+      ms_bulk_media_only: "批量下载仅支持“媒体”标签页，请切换后再试。",
+      ms_bulk_refreshing: "正在刷新过期链接… {done}/{total}",
+      ms_bulk_downloading: "下载中… {done}/{total}",
+      ms_bulk_detail:     "{size} · 已保存 {parts} 个 ZIP · 失败 {failed} 个",
+      ms_bulk_done:       "✓ 完成 — {n} 个文件，共 {parts} 个 ZIP",
+      ms_bulk_cancelled:  "已取消 — 已保存 {n} 个文件（{parts} 个 ZIP）",
+      ms_bulk_failed:     "{n} 个失败 — {reasons}",
+      ms_bulk_start:      "开始下载",
+      ms_bulk_cancel:     "取消",
+      ms_bulk_close:      "关闭",
+      ms_bulk_retry:      "重试失败项（{n}）",
+      ms_sel_btn_title:   "选择要下载的媒体（也可按住 Ctrl 点击）",
+      ms_sel_hint:        "点击媒体即可选择 · Shift＋点击选择范围",
+      ms_sel_count:       "已选 {n} 个",
+      ms_sel_all_loaded:  "全选已加载",
+      ms_sel_all_match:   "全选符合条件的全部",
+      ms_sel_clear:       "清除",
+      ms_sel_download:    "下载（{n}）",
+      ms_bulk_confirm_sel: "要把已选的 {n} 个项目打包成 ZIP 下载吗（每包约 500 MB）？过期的链接会自动刷新。",
       ms_btn_pause:       "暂停",
       ms_btn_resume:      "继续",
       ms_btn_stop:        "停止",
@@ -3693,6 +3794,33 @@
       ms_last_scan:       "最終スキャン",
       ms_scanning:        "スキャン中",
       ms_btn_scan:        "スキャン",
+      ms_btn_scan_tip:    "クリック：新しいメディアをスキャン · Shift＋クリック：選択範囲全体を再スキャン",
+      ms_notice_new:      "✓ 新しいメディアを {n} 件追加しました",
+      ms_notice_uptodate: "✓ 最新の状態です — 新しいメディアはありません（Shift＋クリックで範囲全体を再スキャン）",
+      ms_bulk_btn_title:  "現在のフィルター条件のメディアをすべてダウンロード（ZIP）",
+      ms_bulk_title:      "一括ダウンロード",
+      ms_bulk_collecting: "項目を収集中… {n} 件見つかりました",
+      ms_bulk_confirm:    "現在のフィルター条件に一致する項目は {n} 件です。ZIP ファイルとしてダウンロードしますか（1 ファイルあたり約 500 MB）？期限切れのリンクは自動的に更新されます。",
+      ms_bulk_none:       "現在のフィルター条件に一致するメディアはありません。",
+      ms_bulk_media_only: "一括ダウンロードは「メディア」タブで利用できます。タブを切り替えてもう一度お試しください。",
+      ms_bulk_refreshing: "期限切れリンクを更新中… {done}/{total}",
+      ms_bulk_downloading: "ダウンロード中… {done}/{total}",
+      ms_bulk_detail:     "{size} · ZIP {parts} 個保存済み · 失敗 {failed} 件",
+      ms_bulk_done:       "✓ 完了 — {n} ファイル（ZIP {parts} 個）",
+      ms_bulk_cancelled:  "キャンセルしました — {n} ファイルを保存済み（ZIP {parts} 個）",
+      ms_bulk_failed:     "{n} 件失敗 — {reasons}",
+      ms_bulk_start:      "開始",
+      ms_bulk_cancel:     "キャンセル",
+      ms_bulk_close:      "閉じる",
+      ms_bulk_retry:      "失敗分を再試行（{n}）",
+      ms_sel_btn_title:   "ダウンロードするメディアを選択（Ctrl＋クリックでも可）",
+      ms_sel_hint:        "メディアをクリックして選択 · Shift＋クリックで範囲選択",
+      ms_sel_count:       "{n} 件選択中",
+      ms_sel_all_loaded:  "読み込み済みをすべて選択",
+      ms_sel_all_match:   "条件に一致するすべてを選択",
+      ms_sel_clear:       "クリア",
+      ms_sel_download:    "ダウンロード（{n}）",
+      ms_bulk_confirm_sel: "選択した {n} 件を ZIP ファイルとしてダウンロードしますか（1 ファイルあたり約 500 MB）？期限切れのリンクは自動的に更新されます。",
       ms_btn_pause:       "一時停止",
       ms_btn_resume:      "再開",
       ms_btn_stop:        "停止",
@@ -4404,6 +4532,33 @@
       ms_last_scan:       "마지막 스캔",
       ms_scanning:        "스캔 중",
       ms_btn_scan:        "스캔",
+      ms_btn_scan_tip:    "클릭: 새 미디어 스캔 · Shift+클릭: 선택한 전체 범위 다시 스캔",
+      ms_notice_new:      "✓ 새 미디어 {n}개 추가됨",
+      ms_notice_uptodate: "✓ 최신 상태입니다 — 새 미디어가 없습니다 (Shift+클릭으로 전체 범위 다시 스캔)",
+      ms_bulk_btn_title:  "현재 필터 조건의 모든 미디어 다운로드(ZIP)",
+      ms_bulk_title:      "일괄 다운로드",
+      ms_bulk_collecting: "항목 수집 중… {n}개 발견",
+      ms_bulk_confirm:    "현재 필터 조건에 맞는 항목이 {n}개입니다. ZIP 파일로 다운로드할까요(파일당 약 500MB)? 만료된 링크는 자동으로 갱신됩니다.",
+      ms_bulk_none:       "현재 필터 조건에 맞는 미디어가 없습니다.",
+      ms_bulk_media_only: "일괄 다운로드는 '미디어' 탭에서 사용할 수 있습니다. 탭을 전환한 뒤 다시 시도하세요.",
+      ms_bulk_refreshing: "만료된 링크 갱신 중… {done}/{total}",
+      ms_bulk_downloading: "다운로드 중… {done}/{total}",
+      ms_bulk_detail:     "{size} · ZIP {parts}개 저장됨 · 실패 {failed}개",
+      ms_bulk_done:       "✓ 완료 — 파일 {n}개 (ZIP {parts}개)",
+      ms_bulk_cancelled:  "취소됨 — 파일 {n}개 저장됨 (ZIP {parts}개)",
+      ms_bulk_failed:     "{n}개 실패 — {reasons}",
+      ms_bulk_start:      "시작",
+      ms_bulk_cancel:     "취소",
+      ms_bulk_close:      "닫기",
+      ms_bulk_retry:      "실패 항목 재시도({n})",
+      ms_sel_btn_title:   "다운로드할 미디어 선택(Ctrl+클릭도 가능)",
+      ms_sel_hint:        "미디어를 클릭해 선택 · Shift+클릭으로 범위 선택",
+      ms_sel_count:       "{n}개 선택됨",
+      ms_sel_all_loaded:  "불러온 항목 모두 선택",
+      ms_sel_all_match:   "조건에 맞는 항목 모두 선택",
+      ms_sel_clear:       "지우기",
+      ms_sel_download:    "다운로드({n})",
+      ms_bulk_confirm_sel: "선택한 {n}개 항목을 ZIP 파일로 다운로드할까요(파일당 약 500MB)? 만료된 링크는 자동으로 갱신됩니다.",
       ms_btn_pause:       "일시 정지",
       ms_btn_resume:      "재개",
       ms_btn_stop:        "중지",
@@ -5197,6 +5352,33 @@
       ms_last_scan:             "Último escaneo",
       ms_scanning:              "Escaneando",
       ms_btn_scan:              "Escanear",
+      ms_btn_scan_tip:          "Clic: buscar medios nuevos · Shift+clic: reescanear todo el rango seleccionado",
+      ms_notice_new:            "✓ {n} medios nuevos añadidos",
+      ms_notice_uptodate:       "✓ Todo al día: no hay medios nuevos (Shift+clic para reescanear todo el rango)",
+      ms_bulk_btn_title:        "Descargar todos los medios que coinciden con los filtros actuales (ZIP)",
+      ms_bulk_title:            "Descarga masiva",
+      ms_bulk_collecting:       "Recopilando elementos… {n} encontrados",
+      ms_bulk_confirm:          "{n} elementos coinciden con los filtros actuales. ¿Descargarlos como archivos ZIP (unos 500 MB cada uno)? Los enlaces caducados se actualizan automáticamente.",
+      ms_bulk_none:             "Ningún medio coincide con los filtros actuales.",
+      ms_bulk_media_only:       "La descarga masiva funciona en la pestaña Medios: cambia de pestaña e inténtalo de nuevo.",
+      ms_bulk_refreshing:       "Actualizando enlaces caducados… {done}/{total}",
+      ms_bulk_downloading:      "Descargando… {done}/{total}",
+      ms_bulk_detail:           "{size} · {parts} ZIP guardados · {failed} fallidos",
+      ms_bulk_done:             "✓ Listo — {n} archivos en {parts} ZIP",
+      ms_bulk_cancelled:        "Cancelado — {n} archivos guardados en {parts} ZIP",
+      ms_bulk_failed:           "{n} fallidos — {reasons}",
+      ms_bulk_start:            "Iniciar",
+      ms_bulk_cancel:           "Cancelar",
+      ms_bulk_close:            "Cerrar",
+      ms_bulk_retry:            "Reintentar fallidos ({n})",
+      ms_sel_btn_title:         "Seleccionar medios para descargar (también con Ctrl+clic)",
+      ms_sel_hint:              "Haz clic en los medios para seleccionarlos · Shift+clic para un rango",
+      ms_sel_count:             "{n} seleccionados",
+      ms_sel_all_loaded:        "Todos los cargados",
+      ms_sel_all_match:         "Todos los que coinciden con los filtros",
+      ms_sel_clear:             "Borrar",
+      ms_sel_download:          "Descargar ({n})",
+      ms_bulk_confirm_sel:      "¿Descargar los {n} elementos seleccionados como archivos ZIP (unos 500 MB cada uno)? Los enlaces caducados se actualizan automáticamente.",
       ms_btn_pause:             "Pausar",
       ms_btn_resume:            "Reanudar",
       ms_btn_stop:              "Detener",
@@ -5865,6 +6047,33 @@
       ms_last_scan:             "Última varredura",
       ms_scanning:              "Escaneando",
       ms_btn_scan:              "Escanear",
+      ms_btn_scan_tip:          "Clique: buscar mídias novas · Shift+clique: refazer a varredura de todo o intervalo selecionado",
+      ms_notice_new:            "✓ {n} novas mídias adicionadas",
+      ms_notice_uptodate:       "✓ Tudo atualizado — nenhuma mídia nova (Shift+clique para refazer a varredura de todo o intervalo)",
+      ms_bulk_btn_title:        "Baixar todas as mídias que correspondem aos filtros atuais (ZIP)",
+      ms_bulk_title:            "Download em massa",
+      ms_bulk_collecting:       "Coletando itens… {n} encontrados",
+      ms_bulk_confirm:          "{n} itens correspondem aos filtros atuais. Baixar como arquivos ZIP (cerca de 500 MB cada)? Links expirados são atualizados automaticamente.",
+      ms_bulk_none:             "Nenhuma mídia corresponde aos filtros atuais.",
+      ms_bulk_media_only:       "O download em massa funciona na aba Mídia — troque de aba e tente novamente.",
+      ms_bulk_refreshing:       "Atualizando links expirados… {done}/{total}",
+      ms_bulk_downloading:      "Baixando… {done}/{total}",
+      ms_bulk_detail:           "{size} · {parts} ZIP salvos · {failed} com falha",
+      ms_bulk_done:             "✓ Concluído — {n} arquivos em {parts} ZIP",
+      ms_bulk_cancelled:        "Cancelado — {n} arquivos salvos em {parts} ZIP",
+      ms_bulk_failed:           "{n} com falha — {reasons}",
+      ms_bulk_start:            "Iniciar",
+      ms_bulk_cancel:           "Cancelar",
+      ms_bulk_close:            "Fechar",
+      ms_bulk_retry:            "Tentar novamente ({n})",
+      ms_sel_btn_title:         "Selecionar mídias para baixar (Ctrl+clique também funciona)",
+      ms_sel_hint:              "Clique nas mídias para selecionar · Shift+clique para um intervalo",
+      ms_sel_count:             "{n} selecionados",
+      ms_sel_all_loaded:        "Todos os carregados",
+      ms_sel_all_match:         "Todos que correspondem aos filtros",
+      ms_sel_clear:             "Limpar",
+      ms_sel_download:          "Baixar ({n})",
+      ms_bulk_confirm_sel:      "Baixar os {n} itens selecionados como arquivos ZIP (cerca de 500 MB cada)? Links expirados são atualizados automaticamente.",
       ms_btn_pause:             "Pausar",
       ms_btn_resume:            "Retomar",
       ms_btn_stop:              "Parar",
@@ -6538,6 +6747,33 @@
       ms_last_scan:             "Dernier scan",
       ms_scanning:              "Analyse en cours",
       ms_btn_scan:              "Scanner",
+      ms_btn_scan_tip:          "Clic : chercher de nouveaux médias · Maj+clic : rescanner toute la plage sélectionnée",
+      ms_notice_new:            "✓ {n} nouveaux médias ajoutés",
+      ms_notice_uptodate:       "✓ À jour — aucun nouveau média (Maj+clic pour rescanner toute la plage)",
+      ms_bulk_btn_title:        "Télécharger tous les médias correspondant aux filtres actuels (ZIP)",
+      ms_bulk_title:            "Téléchargement groupé",
+      ms_bulk_collecting:       "Collecte des éléments… {n} trouvés",
+      ms_bulk_confirm:          "{n} éléments correspondent aux filtres actuels. Les télécharger en fichiers ZIP (environ 500 Mo chacun) ? Les liens expirés sont actualisés automatiquement.",
+      ms_bulk_none:             "Aucun média ne correspond aux filtres actuels.",
+      ms_bulk_media_only:       "Le téléchargement groupé fonctionne dans l'onglet Médias — changez d'onglet puis réessayez.",
+      ms_bulk_refreshing:       "Actualisation des liens expirés… {done}/{total}",
+      ms_bulk_downloading:      "Téléchargement… {done}/{total}",
+      ms_bulk_detail:           "{size} · {parts} ZIP enregistrés · {failed} échecs",
+      ms_bulk_done:             "✓ Terminé — {n} fichiers dans {parts} ZIP",
+      ms_bulk_cancelled:        "Annulé — {n} fichiers enregistrés dans {parts} ZIP",
+      ms_bulk_failed:           "{n} échecs — {reasons}",
+      ms_bulk_start:            "Démarrer",
+      ms_bulk_cancel:           "Annuler",
+      ms_bulk_close:            "Fermer",
+      ms_bulk_retry:            "Réessayer les échecs ({n})",
+      ms_sel_btn_title:         "Sélectionner des médias à télécharger (Ctrl+clic fonctionne aussi)",
+      ms_sel_hint:              "Cliquez sur les médias pour les sélectionner · Maj+clic pour une plage",
+      ms_sel_count:             "{n} sélectionnés",
+      ms_sel_all_loaded:        "Tous les chargés",
+      ms_sel_all_match:         "Tous ceux correspondant aux filtres",
+      ms_sel_clear:             "Effacer",
+      ms_sel_download:          "Télécharger ({n})",
+      ms_bulk_confirm_sel:      "Télécharger les {n} éléments sélectionnés en fichiers ZIP (environ 500 Mo chacun) ? Les liens expirés sont actualisés automatiquement.",
       ms_btn_pause:             "Pause",
       ms_btn_resume:            "Reprendre",
       ms_btn_stop:              "Arrêter",
@@ -7206,6 +7442,33 @@
       ms_last_scan:             "Последнее сканирование",
       ms_scanning:              "Сканирование",
       ms_btn_scan:              "Сканировать",
+      ms_btn_scan_tip:          "Клик: сканировать новые медиа · Shift+клик: пересканировать весь выбранный диапазон",
+      ms_notice_new:            "✓ Добавлено новых медиа: {n}",
+      ms_notice_uptodate:       "✓ Всё актуально — новых медиа нет (Shift+клик — пересканировать весь диапазон)",
+      ms_bulk_btn_title:        "Скачать все медиа, соответствующие текущим фильтрам (ZIP)",
+      ms_bulk_title:            "Массовая загрузка",
+      ms_bulk_collecting:       "Сбор элементов… найдено: {n}",
+      ms_bulk_confirm:          "Под текущие фильтры подходит элементов: {n}. Скачать их в виде ZIP-файлов (примерно по 500 МБ)? Просроченные ссылки обновляются автоматически.",
+      ms_bulk_none:             "Нет медиа, соответствующих текущим фильтрам.",
+      ms_bulk_media_only:       "Массовая загрузка работает на вкладке «Медиа» — переключите вкладку и повторите.",
+      ms_bulk_refreshing:       "Обновление просроченных ссылок… {done}/{total}",
+      ms_bulk_downloading:      "Загрузка… {done}/{total}",
+      ms_bulk_detail:           "{size} · сохранено ZIP: {parts} · ошибок: {failed}",
+      ms_bulk_done:             "✓ Готово — файлов: {n}, ZIP: {parts}",
+      ms_bulk_cancelled:        "Отменено — сохранено файлов: {n} (ZIP: {parts})",
+      ms_bulk_failed:           "Ошибок: {n} — {reasons}",
+      ms_bulk_start:            "Начать",
+      ms_bulk_cancel:           "Отмена",
+      ms_bulk_close:            "Закрыть",
+      ms_bulk_retry:            "Повторить неудачные ({n})",
+      ms_sel_btn_title:         "Выбрать медиа для загрузки (также Ctrl+клик)",
+      ms_sel_hint:              "Кликайте по медиа для выбора · Shift+клик — диапазон",
+      ms_sel_count:             "Выбрано: {n}",
+      ms_sel_all_loaded:        "Все загруженные",
+      ms_sel_all_match:         "Все по текущим фильтрам",
+      ms_sel_clear:             "Сбросить",
+      ms_sel_download:          "Скачать ({n})",
+      ms_bulk_confirm_sel:      "Скачать выбранные элементы ({n}) в виде ZIP-файлов (примерно по 500 МБ)? Просроченные ссылки обновляются автоматически.",
       ms_btn_pause:             "Пауза",
       ms_btn_resume:            "Продолжить",
       ms_btn_stop:              "Остановить",
@@ -7863,6 +8126,33 @@
       ms_last_scan:             "Letzter Scan",
       ms_scanning:              "Scannen läuft",
       ms_btn_scan:              "Scannen",
+      ms_btn_scan_tip:          "Klick: nach neuen Medien suchen · Umschalt+Klick: gesamten gewählten Bereich neu scannen",
+      ms_notice_new:            "✓ {n} neue Medien hinzugefügt",
+      ms_notice_uptodate:       "✓ Auf dem neuesten Stand — keine neuen Medien (Umschalt+Klick: gesamten Bereich neu scannen)",
+      ms_bulk_btn_title:        "Alle Medien zu den aktuellen Filtern herunterladen (ZIP)",
+      ms_bulk_title:            "Massendownload",
+      ms_bulk_collecting:       "Elemente werden gesammelt… {n} gefunden",
+      ms_bulk_confirm:          "{n} Elemente entsprechen den aktuellen Filtern. Als ZIP-Dateien herunterladen (je ca. 500 MB)? Abgelaufene Links werden automatisch erneuert.",
+      ms_bulk_none:             "Keine Medien entsprechen den aktuellen Filtern.",
+      ms_bulk_media_only:       "Der Massendownload funktioniert im Tab „Medien“ – Tab wechseln und erneut versuchen.",
+      ms_bulk_refreshing:       "Abgelaufene Links werden erneuert… {done}/{total}",
+      ms_bulk_downloading:      "Wird heruntergeladen… {done}/{total}",
+      ms_bulk_detail:           "{size} · {parts} ZIP gespeichert · {failed} fehlgeschlagen",
+      ms_bulk_done:             "✓ Fertig — {n} Dateien in {parts} ZIP",
+      ms_bulk_cancelled:        "Abgebrochen — {n} Dateien in {parts} ZIP gespeichert",
+      ms_bulk_failed:           "{n} fehlgeschlagen — {reasons}",
+      ms_bulk_start:            "Starten",
+      ms_bulk_cancel:           "Abbrechen",
+      ms_bulk_close:            "Schließen",
+      ms_bulk_retry:            "Fehlgeschlagene wiederholen ({n})",
+      ms_sel_btn_title:         "Medien zum Herunterladen auswählen (Strg+Klick geht auch)",
+      ms_sel_hint:              "Medien anklicken zum Auswählen · Umschalt+Klick für einen Bereich",
+      ms_sel_count:             "{n} ausgewählt",
+      ms_sel_all_loaded:        "Alle geladenen",
+      ms_sel_all_match:         "Alle passend zu den Filtern",
+      ms_sel_clear:             "Leeren",
+      ms_sel_download:          "Herunterladen ({n})",
+      ms_bulk_confirm_sel:      "Die {n} ausgewählten Elemente als ZIP-Dateien herunterladen (je ca. 500 MB)? Abgelaufene Links werden automatisch erneuert.",
       ms_btn_pause:             "Pausieren",
       ms_btn_resume:            "Fortsetzen",
       ms_btn_stop:              "Stopp",
@@ -17499,7 +17789,20 @@
         }, 150);
       };
 
-      const DMT_BTN_SEL = 'div[class*="buttons__"], div[class*="buttonsInner_"]';
+      const DMT_EMOJI_BTN_SEL =
+        '[class*="emojiButton"], [class*="emoji_button"],' +
+        'button[aria-label*="moji"], button[aria-label*="表情"],' +
+        'button[aria-label*="スタンプ"], button[aria-label*="스티커"]';
+      function _dmtFindToolbarContainers() {
+        const seen = new Set();
+        document.querySelectorAll(DMT_EMOJI_BTN_SEL).forEach(emojiBtn => {
+          let node = emojiBtn.parentElement;
+          for (let depth = 0; node && depth < 4; depth++, node = node.parentElement) {
+            if (node.children && node.children.length >= 2) { seen.add(node); break; }
+          }
+        });
+        return Array.from(seen);
+      }
       const CTA_SEL = '[class*="channelTextArea"], [class*="channelTextarea"]';
       let _inputBtnDebounce = null;
       let _ctaObsTarget = null;
@@ -17509,7 +17812,7 @@
 
         clearTimeout(_inputBtnDebounce);
         _inputBtnDebounce = setTimeout(() => {
-          document.querySelectorAll(DMT_BTN_SEL).forEach(injectButton);
+          _dmtFindToolbarContainers().forEach(injectButton);
           const cta = document.querySelector(CTA_SEL);
           if (cta && cta !== _ctaObsTarget) {
             _ctaObsTarget = cta;
@@ -17531,7 +17834,7 @@
       let _scanRetry = 0;
       const MAX_SCAN_RETRY = 5;
       const _initialScan = () => {
-        const found = document.querySelectorAll(DMT_BTN_SEL);
+        const found = _dmtFindToolbarContainers();
         if (found.length > 0) {
           found.forEach(injectButton);
         } else if (_scanRetry < MAX_SCAN_RETRY) {
@@ -31751,7 +32054,9 @@ if (type === "warn" && scanLimit !== null) {
       total:        null,
       error:        null,
       statusDetail: null,
+      notice:       null,
     };
+    let _msNoticeTimer  = null;
     let _msToken        = null;
     let _msUserId       = null;
     let _msUserIdToken  = null;
@@ -31775,8 +32080,33 @@ if (type === "warn" && scanLimit !== null) {
     let _msMentionsUserQuery = "";
     let _msGridScope    = null;
     let _msGridRendered = new Map();
-    let _msScrollTimer  = null;
+    let _msScrollRaf    = null;
+    const MS_SCAN_REFRESH_MIN_MS = 1500;
+    let _msScanRefreshTimer = null;
+    let _msScanRefreshLast  = 0;
+    let _msReloadQueuedFull = false;
+    let _msReloadQueuedPreserve = false;
+    let _msRefreshAfterMore = false;
     let _msMutObs       = null;
+
+    const MS_BULK_REFRESH_API   = "https://discord.com/api/v9/attachments/refresh-urls";
+    const MS_BULK_REFRESH_BATCH = 50;
+    const MS_BULK_CONCURRENCY   = 3;
+    const MS_BULK_RETRY         = 2;
+    const MS_BULK_ZIP_MAX_BYTES = 500 * 1024 * 1024;
+    const MS_BULK_ZIP_MAX_FILES = 2000;
+    const MS_BULK_FILE_MAX_BYTES = 2 * 1024 * 1024 * 1024;
+    let _msBulkRun = null;
+    let _msBulkCardEl = null;
+
+    let _msSelMode   = false;
+    const _msSelMap  = new Map();
+    let _msSelAnchor = null;
+    let _msSelScope  = null;
+    let _msSelBtnEl  = null;
+    let _msSelBarEl  = null;
+    let _msSelFrameEl = null;
+    let _msSelFrameRO = null;
 
     let _msScopeSelEl  = null;
     let _msTypeSelEl   = null;
@@ -32155,10 +32485,13 @@ if (type === "warn" && scanLimit !== null) {
             const cur = e.target.result;
             if (!cur || items.length >= pageSize) { resolve(items); return; }
             const v = cur.value;
-            if (!skipped && cursorPos && v.timestamp === cursorPos[1] && v.url === cursorPos[2]) {
+            if (!skipped && cursorPos) {
+              if (v.timestamp === cursorPos[1]) {
+                if (v.url === cursorPos[2]) skipped = true;
+                cur.continue();
+                return;
+              }
               skipped = true;
-              cur.continue();
-              return;
             }
             const typeOk   = filter === "all" || v.media_type === filter;
             const chanOk   = !chanFilter || chanFilter === "all" || v.channel_id === chanFilter;
@@ -32305,7 +32638,8 @@ if (type === "warn" && scanLimit !== null) {
 
     const _msSleep = ms => new Promise(r => setTimeout(r, ms));
 
-    async function _msFullScan(scope, scopeType) {
+    async function _msFullScan(scope, scopeType, opts) {
+      const force = !!(opts && opts.force);
       if (!(await _msCheckCacheOwner(scope))) return;
       await _msStampScope(scope);
       const isGuild    = scopeType === "guild" || scopeType === "guild-channel";
@@ -32316,7 +32650,8 @@ if (type === "warn" && scanLimit !== null) {
 
       let minId = null, maxId = null;
       let _msScanRangeStart = null;
-      const { sync: _msPrevSync } = await _msGetStats(scope);
+      const { sync: _msPrevSync, stats: _msPrevStats } = await _msGetStats(scope);
+      const _msRangeSync = force ? null : _msPrevSync;
       if (_msRangeKey === "custom") {
         if (_msCustomStart) { minId = _msTimestampToSnowflake(_msCustomStart.getTime()); _msScanRangeStart = _msCustomStart.getTime(); }
         if (_msCustomEnd)   maxId = _msTimestampToSnowflake(_msCustomEnd.getTime() + 86399999);
@@ -32324,8 +32659,8 @@ if (type === "warn" && scanLimit !== null) {
         const durMs = MS_TIME_RANGES[_msRangeKey];
         if (durMs != null) {
           const rangeStart  = Date.now() - durMs;
-          const prevOldest  = _msPrevSync?.oldest_scanned_ts ? new Date(_msPrevSync.oldest_scanned_ts).getTime() : null;
-          const prevNewest  = _msPrevSync?.newest_timestamp  ? new Date(_msPrevSync.newest_timestamp).getTime()  : null;
+          const prevOldest  = _msRangeSync?.oldest_scanned_ts ? new Date(_msRangeSync.oldest_scanned_ts).getTime() : null;
+          const prevNewest  = _msRangeSync?.newest_timestamp  ? new Date(_msRangeSync.newest_timestamp).getTime()  : null;
           const rangeCovered = prevOldest !== null && prevOldest <= rangeStart;
           const lastTs = rangeCovered && prevNewest !== null ? (prevNewest - 60000) : 0;
           minId = _msTimestampToSnowflake(Math.max(rangeStart, lastTs));
@@ -32342,9 +32677,10 @@ if (type === "warn" && scanLimit !== null) {
       let curMaxId = maxId;
       let oldestIdInWindow = null;
 
+      clearTimeout(_msNoticeTimer);
       Object.assign(_msScanState, {
         phase: "scanning", scope, scopeType,
-        offset: 0, scanned: 0, total: null, error: null, statusDetail: null,
+        offset: 0, scanned: 0, total: null, error: null, statusDetail: null, notice: null,
       });
       _msScanAbort = false;
       GMStore.set("ms_last_scan_scope", scope);
@@ -32360,7 +32696,7 @@ if (type === "warn" && scanLimit !== null) {
           _msScanState.error = tOr("ms_cap_warn", "⚠️ Stopped at {cap} items — click Scan again to continue further back, or narrow the time range", { cap: MS_SCAN_ITEM_CAP });
           await _msWriteIncompleteSyncMeta(scope, oldestIdInWindow, newestTs, _msPrevSync);
           _msUpdateStatusBar(); _msUpdateScanBtn();
-          if (_msPanelEl && _msGridScope === scope) _msReloadGrid().catch(() => {});
+          if (_msPanelEl && _msGridScope === scope) _msScheduleScanRefresh(true);
           return;
         }
 
@@ -32425,7 +32761,7 @@ if (type === "warn" && scanLimit !== null) {
             _msScanState.error = "HTTP 400" + detail + " — " + tail;
           }
           _msUpdateStatusBar(); _msUpdateProgressBar(); _msUpdateScanBtn();
-          if (_msPanelEl && _msGridScope === scope) _msReloadGrid().catch(() => {});
+          if (_msPanelEl && _msGridScope === scope) _msScheduleScanRefresh(true);
           return;
         }
         if (res.status === 403) {
@@ -32456,7 +32792,7 @@ if (type === "warn" && scanLimit !== null) {
 
         _msScanState.offset += 25;
         _msUpdateStatusBar(); _msUpdateProgressBar();
-        if (_msPanelEl && _msGridScope === scope) _msReloadGrid().catch(() => {});
+        if (_msPanelEl && _msGridScope === scope) _msScheduleScanRefresh(false);
 
         if (_msScanState.offset >= MS_OFFSET_WINDOW_LIMIT
             && _msScanState.offset < (_msScanState.total || 0)
@@ -32480,9 +32816,14 @@ if (type === "warn" && scanLimit !== null) {
             last_scan_at: new Date().toISOString(), newest_timestamp: newestTs, is_complete: true,
             oldest_scanned_ts: _msNewOldestMs != null ? new Date(_msNewOldestMs).toISOString() : null,
           });
+          const { stats: _msAfterStats } = await _msGetStats(scope);
+          const _msAdded = Math.max(0, (_msAfterStats?.total_count ?? 0) - (_msPrevStats?.total_count ?? 0));
+          _msSetScanNotice(_msAdded > 0
+            ? tOr("ms_notice_new", "✓ {n} new media added", { n: _msAdded.toLocaleString() })
+            : tOr("ms_notice_uptodate", "✓ Up to date — no new media found (Shift+Click ⟳ to rescan the whole range)"));
           _msUpdateStatusBar(); _msUpdateScanBtn();
           if (_msPanelEl && _msGridScope === scope) {
-            _msReloadGrid().catch(() => {});
+            _msScheduleScanRefresh(true);
             _msRefreshChanFilterOptions().catch(() => {});
           }
           return;
@@ -32645,8 +32986,16 @@ if (type === "warn" && scanLimit !== null) {
           ? `${total.toLocaleString()} ${tOr("ms_items", "items")}`
           : (tOr("ms_empty", "No media scanned yet"));
         if (lastScan) text += ` · ${tOr("ms_last_scan", "Last scan")}: ${lastScan}`;
+        if (_msScanState.notice) text = _msScanState.notice + "  ·  " + text;
         _msStatusBarEl.textContent = text;
       }).catch(() => {});
+    }
+
+    function _msSetScanNotice(text) {
+      clearTimeout(_msNoticeTimer);
+      _msScanState.notice = text || null;
+      _msUpdateStatusBar();
+      if (text) _msNoticeTimer = setTimeout(() => { _msScanState.notice = null; _msUpdateStatusBar(); }, 10000);
     }
 
     function _msUpdateProgressBar() {
@@ -32664,10 +33013,13 @@ if (type === "warn" && scanLimit !== null) {
     function _msUpdateScanBtn() {
       if (!_msScanBtnEl) return;
       const phase = _msScanState.phase;
-      if      (phase === "scanning") _msScanBtnEl.textContent = "⏸ " + (tOr("ms_btn_pause", "Pause"));
-      else if (phase === "paused")   _msScanBtnEl.textContent = "▶ " + (tOr("ms_btn_resume", "Resume"));
-      else                           _msScanBtnEl.textContent = "⟳ " + (tOr("ms_btn_scan", "Scan"));
-      if (_msStopBtnEl) _msStopBtnEl.style.display = (phase === "scanning" || phase === "paused") ? "" : "none";
+      let icon, label;
+      if      (phase === "scanning") { icon = "pause";   label = tOr("ms_btn_pause", "Pause"); }
+      else if (phase === "paused")   { icon = "play";    label = tOr("ms_btn_resume", "Resume"); }
+      else                           { icon = "refresh"; label = tOr("ms_btn_scan", "Scan"); }
+      const key = icon + "|" + label;
+      if (_msScanBtnEl._msKey !== key) { _msScanBtnEl._msKey = key; _msSetBtnContent(_msScanBtnEl, icon, label, 14); }
+      if (_msStopBtnEl) _msStopBtnEl.style.display = (phase === "scanning" || phase === "paused") ? "inline-flex" : "none";
     }
 
     function _msStripQuery(u) {
@@ -32996,16 +33348,26 @@ if (type === "warn" && scanLimit !== null) {
       jumpCorner.addEventListener("mouseleave", () => { jumpCorner.style.borderBottomColor = "rgba(88,101,242,0.72)"; });
       cell.appendChild(jumpCorner);
 
-      cell.addEventListener("click", () => {
+      cell.addEventListener("mousedown", (ev) => { if (ev.shiftKey && _msSelMode) ev.preventDefault(); });
+      cell.addEventListener("click", (ev) => {
+        if (_msActiveTab === "media" && (_msSelMode || ev.ctrlKey || ev.metaKey)) {
+          if (!_msSelMode) _msSelSetMode(true);
+          _msSelToggle(item, ev.shiftKey);
+          _msSelRefreshCells();
+          _msSelRenderBar();
+          return;
+        }
         const srcList = _msActiveTab === "favs" ? _msFavItems : _msGridItems;
         const realIdx = srcList.indexOf(item);
         _msLightbox(srcList, realIdx >= 0 ? realIdx : idx);
       });
+      if (_msActiveTab === "media" && _msSelMap.size) _msSelApplyCell(cell, item);
       return cell;
     }
 
     function _msRenderGrid() {
       if (!_msGridContEl || _msActiveTab !== "media") return;
+      if (_msSelMap.size && _msSelSyncScope()) { _msSelRefreshCells(); _msSelRenderBar(); }
       const items     = _msGridItems;
       const totalRows = Math.ceil(items.length / MS_COLS);
       _msGridContEl.style.height = (totalRows * MS_CELL_H) + "px";
@@ -33023,9 +33385,13 @@ if (type === "warn" && scanLimit !== null) {
       const visSet = new Set();
       for (let i = visStart; i < visEnd; i++) visSet.add(i);
 
+      for (const [i, el] of _msGridRendered) {
+        if (!items[i] || el._msUrl !== items[i].url) { el.remove(); _msGridRendered.delete(i); }
+      }
       for (const i of visSet) {
         if (!_msGridRendered.has(i) && items[i]) {
           const cell = _msBuildCell(items[i], i);
+          cell._msUrl = items[i].url;
           _msGridContEl.appendChild(cell);
           _msGridRendered.set(i, cell);
         }
@@ -33069,8 +33435,14 @@ if (type === "warn" && scanLimit !== null) {
       _msGridContEl.appendChild(frag);
     }
 
-    async function _msReloadGrid() {
-      if (_msGridLoading || !_msGridScope || !_msGridContEl) return;
+    async function _msReloadGrid(opts) {
+      const preserve = !!(opts && opts.preserve);
+      if (!_msGridScope || !_msGridContEl) return;
+      if (_msGridLoading) {
+        if (preserve) _msReloadQueuedPreserve = true; else _msReloadQueuedFull = true;
+        return;
+      }
+      if (preserve && _msLoadMoreLoading) { _msRefreshAfterMore = true; return; }
       _msGridLoading = true;
       const scopeAtStart = _msGridScope;
       let rerun = false;
@@ -33093,17 +33465,50 @@ if (type === "warn" && scanLimit !== null) {
           }
           return;
         }
-        const items = await _msReadPage(_msGridScope, _msGridFilter, null, MS_PAGE_SIZE, _msChannelFilter, _msAuthorTypeFilter, _msPinnedOnly, _msContentFilter, _msMentionsFilter, _msMentionsUserQuery);
+        const want  = preserve ? Math.max(MS_PAGE_SIZE, _msGridItems.length) : MS_PAGE_SIZE;
+        const items = await _msReadPage(scopeAtStart, _msGridFilter, null, want, _msChannelFilter, _msAuthorTypeFilter, _msPinnedOnly, _msContentFilter, _msMentionsFilter, _msMentionsUserQuery);
+        if (!_msGridContEl) return;
+        if (_msGridScope !== scopeAtStart) { rerun = true; return; }
         _msGridItems   = items;
-        _msGridCursor  = items.length ? [_msGridScope, items[items.length-1].timestamp, items[items.length-1].url] : null;
-        _msGridAll     = items.length < MS_PAGE_SIZE;
-        _msGridRendered.clear();
-        if (_msGridContEl) _msGridContEl.innerHTML = "";
+        _msGridCursor  = items.length ? [scopeAtStart, items[items.length-1].timestamp, items[items.length-1].url] : null;
+        _msGridAll     = items.length < want;
+        if (!preserve) {
+          _msGridRendered.clear();
+          _msGridContEl.innerHTML = "";
+        }
         _msRenderGrid();
       } finally {
         _msGridLoading = false;
-        if (rerun) _msReloadGrid().catch(() => {});
+        const queuedFull = _msReloadQueuedFull, queuedKeep = _msReloadQueuedPreserve;
+        _msReloadQueuedFull = false; _msReloadQueuedPreserve = false;
+        if (rerun || queuedFull) _msReloadGrid().catch(() => {});
+        else if (queuedKeep) _msReloadGrid({ preserve: true }).catch(() => {});
+        else _msCheckLoadMore();
       }
+    }
+
+    function _msCheckLoadMore() {
+      if (_msActiveTab !== "media" || _msGridAll || _msGridLoading || _msLoadMoreLoading) return;
+      const sc = _msGridContEl && _msGridContEl.parentElement;
+      if (!sc) return;
+      if (sc.scrollTop + sc.clientHeight >= sc.scrollHeight - MS_CELL_H * 6) {
+        _msLoadMoreItems().catch(() => {});
+      }
+    }
+
+    function _msScheduleScanRefresh(immediate) {
+      clearTimeout(_msScanRefreshTimer);
+      _msScanRefreshTimer = null;
+      if (!_msPanelEl || !_msGridContEl) return;
+      const run = () => {
+        _msScanRefreshTimer = null;
+        if (!_msPanelEl || !_msGridContEl) return;
+        _msScanRefreshLast = Date.now();
+        _msReloadGrid({ preserve: true }).catch(() => {});
+      };
+      const wait = immediate ? 0 : Math.max(0, MS_SCAN_REFRESH_MIN_MS - (Date.now() - _msScanRefreshLast));
+      if (wait === 0) run();
+      else _msScanRefreshTimer = setTimeout(run, wait);
     }
 
     async function _msLoadMoreItems() {
@@ -33121,7 +33526,734 @@ if (type === "warn" && scanLimit !== null) {
         _msRenderGrid();
       } finally {
         _msLoadMoreLoading = false;
+        if (_msRefreshAfterMore) { _msRefreshAfterMore = false; _msReloadGrid({ preserve: true }).catch(() => {}); }
+        else _msCheckLoadMore();
       }
+    }
+
+    const MS_ICON_PATHS = {
+      download: ["M12 4v11", "M7.5 11l4.5 4.5 4.5-4.5", "M5 19h14"],
+      select:   ["M7 4h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z", "M8.5 12.5l2.5 2.5 4.5-5"],
+      check:    ["M5 12.5l4.5 4.5L19 7.5"],
+      close:    ["M6 6l12 12", "M18 6L6 18"],
+      stats:    ["M5 20V11", "M12 20V5", "M19 20v-6"],
+      sliders:  ["M4 7h9", "M17 7h3", "M13 7a2 2 0 1 0 4 0a2 2 0 1 0-4 0", "M4 17h3", "M11 17h9", "M7 17a2 2 0 1 0 4 0a2 2 0 1 0-4 0"],
+      dock:     ["M5 5v14", "M19 12H9", "M13 8l-4 4 4 4"],
+      undock:   ["M19 5v14", "M5 12h10", "M11 8l4 4-4 4"],
+      refresh:  ["M19 12a7 7 0 1 1-2.05-4.95", "M19 4v4h-4"],
+      pause:    ["M9 5v14", "M15 5v14"],
+      play:     ["M8 5l11 7-11 7z"],
+      stop:     ["M8 6h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"],
+      image:    ["M7 4h10a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z", "M4 17l4.5-4.5 3.5 3.5 3-3L20 17", "M9 9.5h.01"],
+      heart:    ["M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"],
+      trash:    ["M5 7h14", "M10 7V5h4v2", "M7 7l1 12h8l1-12", "M10 11v5", "M14 11v5"],
+      warning:  ["M12 4l9 16H3z", "M12 10v4", "M12 17h.01"],
+      chevLeft: ["M15 5l-7 7 7 7"],
+      chevRight: ["M9 5l7 7-7 7"],
+      external: ["M14 4h6v6", "M20 4l-9 9", "M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"],
+      clock:    ["M12 5a7 7 0 1 0 0 14a7 7 0 1 0 0-14", "M12 8.5V12l2.5 1.5"],
+    };
+    function _msIcon(name, size) {
+      const NS  = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("viewBox", "0 0 24 24");
+      svg.setAttribute("width", String(size || 16));
+      svg.setAttribute("height", String(size || 16));
+      svg.setAttribute("fill", "none");
+      svg.setAttribute("stroke", "currentColor");
+      svg.setAttribute("stroke-width", "2");
+      svg.setAttribute("stroke-linecap", "round");
+      svg.setAttribute("stroke-linejoin", "round");
+      svg.setAttribute("aria-hidden", "true");
+      svg.style.cssText = "flex-shrink:0;display:block;pointer-events:none;";
+      for (const d of (MS_ICON_PATHS[name] || [])) {
+        const p = document.createElementNS(NS, "path");
+        p.setAttribute("d", d);
+        svg.appendChild(p);
+      }
+      return svg;
+    }
+    function _msSetBtnContent(btn, icon, label, size) {
+      btn.textContent = "";
+      btn.appendChild(_msIcon(icon, size));
+      if (label) {
+        const s = document.createElement("span");
+        s.textContent = label;
+        btn.appendChild(s);
+      }
+    }
+
+    function _msBulkSleep(run, ms) {
+      return new Promise(resolve => {
+        const t0 = Date.now();
+        const tick = () => (run.aborted || Date.now() - t0 >= ms) ? resolve() : setTimeout(tick, Math.min(250, ms));
+        tick();
+      });
+    }
+    function _msBulkNotify(run) { try { run.onUpdate && run.onUpdate(run); } catch (_) {} }
+
+    function _msBulkGm(run, opts) {
+      return new Promise(resolve => {
+        if (run.aborted) { resolve({ status: 0, err: "abort" }); return; }
+        let handle = null, settled = false;
+        const done = r => { if (settled) return; settled = true; if (handle) run.reqs.delete(handle); resolve(r); };
+        try {
+          handle = GM_xmlhttpRequest(Object.assign({}, opts, {
+            onload: r => {
+              let text = null;
+              try { if (typeof r.responseText === "string") text = r.responseText; } catch (_) {}
+              done({ status: r.status, text, response: r.response, headers: r.responseHeaders || "" });
+            },
+            onerror:   () => done({ status: 0, err: "network" }),
+            ontimeout: () => done({ status: 0, err: "timeout" }),
+            onabort:   () => done({ status: 0, err: "abort" }),
+          }));
+          if (handle && !settled) run.reqs.add(handle);
+        } catch (_) { done({ status: 0, err: "throw" }); }
+      });
+    }
+
+    function _msBulkIsAttachUrl(u) {
+      try {
+        const x = new URL(u);
+        return (x.hostname === "cdn.discordapp.com" || x.hostname === "media.discordapp.net") && x.pathname.startsWith("/attachments/");
+      } catch (_) { return false; }
+    }
+    function _msBulkNeedsRefresh(u) {
+      try {
+        const ex = new URL(u).searchParams.get("ex");
+        if (!ex) return true;
+        return parseInt(ex, 16) * 1000 < Date.now() + 60000;
+      } catch (_) { return true; }
+    }
+
+    let _msCrcTab = null;
+    function _msCrcTable() {
+      if (_msCrcTab) return _msCrcTab;
+      const t = new Uint32Array(256);
+      for (let n = 0; n < 256; n++) {
+        let c = n;
+        for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+        t[n] = c >>> 0;
+      }
+      return (_msCrcTab = t);
+    }
+    async function _msCrc32Blob(blob) {
+      const T = _msCrcTable();
+      let crc = 0xFFFFFFFF;
+      const eat = u8 => { for (let i = 0; i < u8.length; i++) crc = T[(crc ^ u8[i]) & 0xFF] ^ (crc >>> 8); };
+      if (typeof blob.stream === "function") {
+        const rd = blob.stream().getReader();
+        for (;;) { const { done, value } = await rd.read(); if (done) break; eat(value); }
+      } else {
+        eat(new Uint8Array(await blob.arrayBuffer()));
+      }
+      return (crc ^ 0xFFFFFFFF) >>> 0;
+    }
+    function _msDosDateTime(ts) {
+      let d = new Date(ts);
+      if (isNaN(d.getTime()) || d.getFullYear() < 1980 || d.getFullYear() > 2107) d = new Date();
+      return {
+        time: (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1),
+        date: ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate(),
+      };
+    }
+    function _msZipLocalHeader(nameBytes, crc, size, dt) {
+      const b = new Uint8Array(30 + nameBytes.length), v = new DataView(b.buffer);
+      v.setUint32(0, 0x04034b50, true); v.setUint16(4, 20, true); v.setUint16(6, 0x0800, true); v.setUint16(8, 0, true);
+      v.setUint16(10, dt.time, true);   v.setUint16(12, dt.date, true); v.setUint32(14, crc, true);
+      v.setUint32(18, size, true);      v.setUint32(22, size, true);
+      v.setUint16(26, nameBytes.length, true); v.setUint16(28, 0, true);
+      b.set(nameBytes, 30);
+      return b;
+    }
+    function _msZipCentralHeader(nameBytes, crc, size, dt, offset) {
+      const b = new Uint8Array(46 + nameBytes.length), v = new DataView(b.buffer);
+      v.setUint32(0, 0x02014b50, true); v.setUint16(4, 20, true); v.setUint16(6, 20, true);
+      v.setUint16(8, 0x0800, true);     v.setUint16(10, 0, true);
+      v.setUint16(12, dt.time, true);   v.setUint16(14, dt.date, true); v.setUint32(16, crc, true);
+      v.setUint32(20, size, true);      v.setUint32(24, size, true);
+      v.setUint16(28, nameBytes.length, true); v.setUint16(30, 0, true); v.setUint16(32, 0, true);
+      v.setUint16(34, 0, true);         v.setUint16(36, 0, true);        v.setUint32(38, 0, true);
+      v.setUint32(42, offset, true);
+      b.set(nameBytes, 46);
+      return b;
+    }
+    function _msZipEnd(count, cdSize, cdOffset) {
+      const b = new Uint8Array(22), v = new DataView(b.buffer);
+      v.setUint32(0, 0x06054b50, true); v.setUint16(4, 0, true); v.setUint16(6, 0, true);
+      v.setUint16(8, count, true);      v.setUint16(10, count, true);
+      v.setUint32(12, cdSize, true);    v.setUint32(16, cdOffset, true); v.setUint16(20, 0, true);
+      return b;
+    }
+    function _msZipBuild(entries) {
+      const enc = new TextEncoder();
+      const parts = [], central = [];
+      let offset = 0;
+      for (const e of entries) {
+        const nb = enc.encode(e.name);
+        const lh = _msZipLocalHeader(nb, e.crc, e.size, e.dt);
+        central.push(_msZipCentralHeader(nb, e.crc, e.size, e.dt, offset));
+        parts.push(lh, e.blob);
+        offset += lh.length + e.size;
+      }
+      const cdSize = central.reduce((n, c) => n + c.length, 0);
+      parts.push(...central, _msZipEnd(entries.length, cdSize, offset));
+      return new Blob(parts, { type: "application/zip" });
+    }
+
+    function _msBulkSanitize(s, max) {
+      let t = String(s || "").replace(/[\\/:*?"<>|\u0000-\u001f]/g, "_").replace(/\s+/g, " ").trim()
+                             .replace(/^\.+/, "").replace(/[. ]+$/, "");
+      if (/^(con|prn|aux|nul|com\d|lpt\d)(\.|$)/i.test(t)) t = "_" + t;
+      if (t.length > max) {
+        const m = /(\.[A-Za-z0-9]{1,5})$/.exec(t), ext = m ? m[1] : "";
+        t = t.slice(0, max - ext.length) + ext;
+      }
+      return t;
+    }
+    function _msBulkExtFromType(ct, mediaType) {
+      const c = String(ct || "").toLowerCase();
+      const map = { "image/jpeg": "jpg", "image/png": "png", "image/gif": "gif", "image/webp": "webp", "image/avif": "avif",
+                    "image/bmp": "bmp", "image/svg+xml": "svg", "video/mp4": "mp4", "video/webm": "webm",
+                    "video/quicktime": "mov", "video/x-matroska": "mkv" };
+      for (const k in map) if (c.startsWith(k)) return map[k];
+      return mediaType === "gif" ? "gif" : mediaType === "video" ? "mp4" : "png";
+    }
+    function _msBulkEntryName(run, item, ct) {
+      const seq = (run.nameSeq.get(item.msg_id) || 0) + 1;
+      run.nameSeq.set(item.msg_id, seq);
+      let fname = _msBulkSanitize(item.filename || "", 100);
+      if (!fname) {
+        try { fname = _msBulkSanitize(decodeURIComponent(new URL(item.url).pathname.split("/").pop() || ""), 100); } catch (_) {}
+      }
+      if (!/\.[A-Za-z0-9]{1,5}$/.test(fname)) fname = (fname || "media") + "." + _msBulkExtFromType(ct, item.media_type);
+      const date   = String(item.timestamp || "").slice(0, 10) || "0000-00-00";
+      const author = _msBulkSanitize(item.author_name || item.author_id || "unknown", 24) || "unknown";
+      const dir    = _msBulkSanitize(item.channel_id || "unknown", 32) || "unknown";
+      const base   = `${dir}/${date}_${author}_${item.msg_id || "0"}_${seq}_${fname}`;
+      let name = base, n = 1;
+      while (run.usedNames.has(name)) {
+        n++;
+        name = /(\.[A-Za-z0-9]{1,5})$/.test(base) ? base.replace(/(\.[A-Za-z0-9]{1,5})$/, ` (${n})$1`) : base + ` (${n})`;
+      }
+      run.usedNames.add(name);
+      return name;
+    }
+
+    function _msBulkCreate(scope, presetItems) {
+      const d = new Date(), p2 = n => String(n).padStart(2, "0");
+      return {
+        scope, phase: presetItems ? "confirm" : "collecting",
+        items: presetItems || [], found: presetItems ? presetItems.length : 0,
+        urlOf: new Map(), nameSeq: new Map(), usedNames: new Set(),
+        refreshTotal: 0, refreshDone: 0,
+        doneCount: 0, failCount: 0, failed: [], bytes: 0,
+        parts: 0, savedParts: [], part: { entries: [], bytes: 0 },
+        aborted: false, reqs: new Set(), error: null, startedAt: 0, finishedAt: 0,
+        stamp: `${d.getFullYear()}${p2(d.getMonth() + 1)}${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}`,
+        onUpdate: null, save: _msBulkSaveBlob,
+      };
+    }
+
+    async function _msBulkCollect(run) {
+      const PAGE = 500, out = [];
+      let cursor = null;
+      for (;;) {
+        if (run.aborted) return null;
+        const page = await _msReadPage(run.scope, _msGridFilter, cursor, PAGE, _msChannelFilter, _msAuthorTypeFilter,
+                                       _msPinnedOnly, _msContentFilter, _msMentionsFilter, _msMentionsUserQuery);
+        for (const it of page) out.push(it);
+        run.found = out.length;
+        _msBulkNotify(run);
+        if (page.length < PAGE) break;
+        const last = page[page.length - 1];
+        cursor = [run.scope, last.timestamp, last.url];
+      }
+      run.items = out;
+      run.phase = "confirm";
+      _msBulkNotify(run);
+      return out;
+    }
+
+    async function _msBulkRefreshBatch(run, urls, token) {
+      for (let attempt = 0; attempt < 4; attempt++) {
+        if (run.aborted) return null;
+        const r = await _msBulkGm(run, {
+          method: "POST", url: MS_BULK_REFRESH_API, timeout: 30000,
+          headers: { Authorization: token, "Content-Type": "application/json" },
+          data: JSON.stringify({ attachment_urls: urls }),
+        });
+        if (r.status === 200) {
+          try {
+            const arr = JSON.parse(r.text).refreshed_urls || [];
+            const map = new Map();
+            for (const x of arr) if (x && x.original && x.refreshed) map.set(x.original, x.refreshed);
+            if (map.size < urls.length && arr.length === urls.length) {
+              arr.forEach((x, i) => { if (x && x.refreshed && !map.has(urls[i])) map.set(urls[i], x.refreshed); });
+            }
+            return map;
+          } catch (_) { return null; }
+        }
+        if (r.status === 429) {
+          let wait = 2;
+          try { wait = Math.min(30, Math.max(1, Number(JSON.parse(r.text).retry_after) || 2)); } catch (_) {}
+          await _msBulkSleep(run, wait * 1000 + 250);
+          continue;
+        }
+        return null;
+      }
+      return null;
+    }
+
+    async function _msBulkRefreshPhase(run) {
+      const need = run.items.filter(it => _msBulkIsAttachUrl(it.url) && _msBulkNeedsRefresh(it.url));
+      run.refreshTotal = need.length; run.refreshDone = 0;
+      _msBulkNotify(run);
+      if (!need.length) return;
+      let token = null;
+      try { token = await _msEnsureToken(); } catch (_) {}
+      for (let i = 0; i < need.length; i += MS_BULK_REFRESH_BATCH) {
+        if (run.aborted) return;
+        const chunk = need.slice(i, i + MS_BULK_REFRESH_BATCH);
+        const urls  = [...new Set(chunk.map(it => it.url))];
+        const map   = token ? await _msBulkRefreshBatch(run, urls, token) : null;
+        for (const it of chunk) {
+          const fresh = map && map.get(it.url);
+          if (fresh) { run.urlOf.set(it, fresh); continue; }
+          if (map) continue;
+          try { if (await _msRefreshMediaUrl(it)) run.urlOf.set(it, _msPreferredMediaUrl(it)); } catch (_) {}
+        }
+        run.refreshDone = Math.min(need.length, i + chunk.length);
+        _msBulkNotify(run);
+        if (i + MS_BULK_REFRESH_BATCH < need.length) await _msBulkSleep(run, 1000);
+      }
+    }
+
+    async function _msBulkDownloadOne(run, item) {
+      const primary = run.urlOf.get(item) || _msPreferredMediaUrl(item);
+      const cands = [primary];
+      if (!run.urlOf.has(item) && item.proxy_url && item.proxy_url !== primary) cands.push(item.proxy_url);
+      let reason = "unknown";
+      for (const url of cands) {
+        for (let attempt = 0; attempt <= MS_BULK_RETRY; attempt++) {
+          if (run.aborted) return { ok: false, reason: "aborted" };
+          const r = await _msBulkGm(run, {
+            method: "GET", url, responseType: "blob", timeout: 120000,
+            headers: { Accept: "image/*,video/*,*/*;q=0.8" },
+          });
+          if (run.aborted) return { ok: false, reason: "aborted" };
+          if (r.status === 200 && r.response && r.response.size > 0) {
+            const ct = String((r.response.type || (/content-type:\s*([^;\r\n]+)/i.exec(r.headers) || [])[1] || "")).trim().toLowerCase();
+            if (/^(text\/|application\/(json|xml))/.test(ct)) { reason = "not media (" + ct + ")"; break; }
+            if (r.response.size > MS_BULK_FILE_MAX_BYTES) return { ok: false, reason: "too large" };
+            return { ok: true, blob: r.response, ct };
+          }
+          reason = r.status ? "HTTP " + r.status : (r.err || "error");
+          if ([400, 401, 403, 404, 410].includes(r.status)) break;
+          if (attempt < MS_BULK_RETRY) await _msBulkSleep(run, 1000 * (attempt + 1));
+        }
+      }
+      return { ok: false, reason };
+    }
+
+    function _msBulkFlushPart(run) {
+      const p = run.part;
+      if (!p.entries.length) return;
+      run.part = { entries: [], bytes: 0 };
+      run.parts++;
+      const blob = _msZipBuild(p.entries);
+      const name = `Mosaic_${_msBulkSanitize(run.scope, 30) || "scope"}_${run.stamp}_part${run.parts}.zip`;
+      run.savedParts.push({ name, files: p.entries.length, bytes: blob.size });
+      try { run.save(blob, name); } catch (e) { run.error = "save failed: " + (e && e.message); }
+    }
+
+    async function _msBulkAddToZip(run, item, blob, ct) {
+      const crc = await _msCrc32Blob(blob);
+      const name = _msBulkEntryName(run, item, ct);
+      const p = run.part;
+      if (p.entries.length && (p.bytes + blob.size > MS_BULK_ZIP_MAX_BYTES || p.entries.length >= MS_BULK_ZIP_MAX_FILES)) {
+        _msBulkFlushPart(run);
+      }
+      run.part.entries.push({ name, blob, crc, size: blob.size, dt: _msDosDateTime(item.timestamp) });
+      run.part.bytes += blob.size;
+    }
+
+    function _msBulkSaveBlob(blob, name) {
+      const u = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = u; a.download = name; a.style.display = "none";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(u), 120000);
+    }
+
+    async function _msBulkExecute(run) {
+      run.startedAt = Date.now();
+      try {
+        run.phase = "refreshing"; _msBulkNotify(run);
+        await _msBulkRefreshPhase(run);
+        if (!run.aborted) {
+          run.phase = "downloading"; _msBulkNotify(run);
+          let next = 0;
+          const worker = async () => {
+            while (!run.aborted) {
+              const idx = next++;
+              if (idx >= run.items.length) return;
+              const item = run.items[idx];
+              const r = await _msBulkDownloadOne(run, item);
+              if (r.ok) {
+                try { await _msBulkAddToZip(run, item, r.blob, r.ct); run.doneCount++; run.bytes += r.blob.size; }
+                catch (e) { run.failed.push({ item, reason: "zip: " + (e && e.message) }); run.failCount++; }
+              } else if (r.reason !== "aborted") {
+                run.failed.push({ item, reason: r.reason }); run.failCount++;
+              }
+              _msBulkNotify(run);
+              if (!_msPanelEl || !_msPanelEl.isConnected) _msBulkCancel(run);
+            }
+          };
+          await Promise.all(Array.from({ length: MS_BULK_CONCURRENCY }, worker));
+        }
+        _msBulkFlushPart(run);
+      } catch (e) {
+        run.error = (e && e.message) || String(e);
+        try { _msBulkFlushPart(run); } catch (_) {}
+      } finally {
+        run.phase = run.error ? "error" : run.aborted ? "cancelled" : "done";
+        run.finishedAt = Date.now();
+        _msBulkNotify(run);
+      }
+    }
+
+    function _msBulkCancel(run) {
+      if (!run || run.aborted) return;
+      run.aborted = true;
+      for (const h of run.reqs) { try { h && h.abort && h.abort(); } catch (_) {} }
+      run.reqs.clear();
+      _msBulkNotify(run);
+    }
+
+    function _msBulkFmtSize(b) {
+      if (b < 1048576)    return Math.max(1, Math.round(b / 1024)) + " KB";
+      if (b < 1073741824) return (b / 1048576).toFixed(1) + " MB";
+      return (b / 1073741824).toFixed(2) + " GB";
+    }
+    const _msBulkIsBusy = run => !!run && (run.phase === "collecting" || run.phase === "refreshing" || run.phase === "downloading");
+
+    function _msBulkCloseCard() {
+      if (_msBulkCardEl) { _msBulkCardEl.remove(); _msBulkCardEl = null; }
+    }
+
+    function _msBulkOpenCard() {
+      if (!_msPanelEl) return;
+      if (_msBulkCardEl && _msBulkCardEl.isConnected) return;
+      const card = document.createElement("div");
+      card.style.cssText = "position:absolute;left:12px;right:12px;bottom:12px;z-index:20;background:#2b2d31;border:1px solid rgba(255,255,255,0.14);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,0.55);padding:12px 14px;display:flex;flex-direction:column;gap:8px;font-size:12px;color:#dbdee1;";
+      const head  = document.createElement("div");
+      head.style.cssText = "display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:13px;";
+      const title = document.createElement("span");
+      title.style.cssText = "display:inline-flex;align-items:center;gap:6px;";
+      title.append(_msIcon("download", 16), document.createTextNode(tOr("ms_bulk_title", "Bulk download")));
+      const x = document.createElement("span");
+      x.appendChild(_msIcon("close", 14));
+      x.style.cssText = "cursor:pointer;color:#949ba4;padding:0 4px;display:inline-flex;align-items:center;";
+      x.addEventListener("click", _msBulkCloseCard);
+      head.append(title, x);
+      const msg    = document.createElement("div");
+      msg.style.cssText = "line-height:1.5;word-break:break-word;";
+      const track  = document.createElement("div");
+      track.style.cssText = "height:6px;border-radius:3px;background:rgba(255,255,255,0.1);overflow:hidden;display:none;";
+      const fill   = document.createElement("div");
+      fill.style.cssText = "height:100%;width:0%;background:#5865f2;transition:width .2s;";
+      track.appendChild(fill);
+      const detail = document.createElement("div");
+      detail.style.cssText = "color:#949ba4;font-size:11px;word-break:break-word;";
+      const btns   = document.createElement("div");
+      btns.style.cssText = "display:flex;gap:8px;justify-content:flex-end;";
+      card.append(head, msg, track, detail, btns);
+      card._ref = { x, msg, track, fill, detail, btns };
+      _msPanelEl.appendChild(card);
+      _msBulkCardEl = card;
+    }
+
+    function _msBulkRender(run) {
+      if (!_msPanelEl || !_msPanelEl.isConnected) { _msBulkCancel(run); _msBulkCardEl = null; return; }
+      if (!_msBulkCardEl || !_msBulkCardEl.isConnected || run !== _msBulkRun) return;
+      const { x, msg, track, fill, detail, btns } = _msBulkCardEl._ref;
+      x.style.display = _msBulkIsBusy(run) ? "none" : "inline-flex";
+      btns.textContent = "";
+      const mkBtn = (label, onClick, primary) => {
+        const b = document.createElement("button");
+        b.textContent = label;
+        b.style.cssText = primary
+          ? "background:rgba(88,101,242,0.35);border:1px solid rgba(88,101,242,0.6);color:#fff;padding:4px 12px;border-radius:6px;font-size:12px;cursor:pointer;"
+          : "background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#dbdee1;padding:4px 12px;border-radius:6px;font-size:12px;cursor:pointer;";
+        b.addEventListener("click", onClick);
+        btns.appendChild(b);
+      };
+      const num = n => Number(n).toLocaleString();
+      let text = "", det = "", pct = null;
+      switch (run.phase) {
+        case "collecting":
+          text = tOr("ms_bulk_collecting", "Collecting items… {n} found", { n: num(run.found) });
+          mkBtn(tOr("ms_bulk_cancel", "Cancel"), () => { _msBulkCancel(run); _msBulkCloseCard(); });
+          break;
+        case "confirm":
+          if (run.found === 0) {
+            text = tOr("ms_bulk_none", "No media matches the current filters.");
+            mkBtn(tOr("ms_bulk_close", "Close"), _msBulkCloseCard);
+          } else {
+            text = run.fromSelection
+              ? tOr("ms_bulk_confirm_sel", "Download the {n} selected items as ZIP files (about 500 MB each)? Expired links are refreshed automatically.", { n: num(run.found) })
+              : tOr("ms_bulk_confirm", "{n} items match the current filters. Download them as ZIP files (about 500 MB each)? Expired links are refreshed automatically.", { n: num(run.found) });
+            mkBtn(tOr("ms_bulk_cancel", "Cancel"), _msBulkCloseCard);
+            mkBtn(tOr("ms_bulk_start", "Start"), () => { _msBulkExecute(run); }, true);
+          }
+          break;
+        case "refreshing":
+          text = tOr("ms_bulk_refreshing", "Refreshing expired links… {done}/{total}", { done: num(run.refreshDone), total: num(run.refreshTotal) });
+          pct  = run.refreshTotal ? run.refreshDone / run.refreshTotal : 0;
+          mkBtn(tOr("ms_bulk_cancel", "Cancel"), () => _msBulkCancel(run));
+          break;
+        case "downloading":
+          text = tOr("ms_bulk_downloading", "Downloading… {done}/{total}", { done: num(run.doneCount + run.failCount), total: num(run.items.length) });
+          pct  = run.items.length ? (run.doneCount + run.failCount) / run.items.length : 0;
+          mkBtn(tOr("ms_bulk_cancel", "Cancel"), () => _msBulkCancel(run));
+          break;
+        case "done":
+        case "cancelled":
+          text = run.phase === "done"
+            ? tOr("ms_bulk_done", "✓ Done — {n} files in {parts} ZIP file(s)", { n: num(run.doneCount), parts: run.parts })
+            : tOr("ms_bulk_cancelled", "Cancelled — {n} files saved in {parts} ZIP file(s)", { n: num(run.doneCount), parts: run.parts });
+          if (run.failCount) {
+            const by = {};
+            for (const f of run.failed) by[f.reason] = (by[f.reason] || 0) + 1;
+            const reasons = Object.entries(by).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([r, n]) => r + " ×" + n).join(", ");
+            det = tOr("ms_bulk_failed", "{n} failed — {reasons}", { n: num(run.failCount), reasons });
+            if (run.phase === "done") mkBtn(tOr("ms_bulk_retry", "Retry failed ({n})", { n: num(run.failCount) }), () => _msBulkRetryFailed(run));
+          }
+          mkBtn(tOr("ms_bulk_close", "Close"), _msBulkCloseCard, true);
+          break;
+        default:
+          text = "⚠ " + (run.error || "error");
+          mkBtn(tOr("ms_bulk_close", "Close"), _msBulkCloseCard, true);
+      }
+      if (_msBulkIsBusy(run) && run.phase === "downloading") {
+        det = tOr("ms_bulk_detail", "{size} · {parts} ZIP saved · {failed} failed", { size: _msBulkFmtSize(run.bytes), parts: run.parts, failed: num(run.failCount) });
+      }
+      msg.textContent    = text;
+      detail.textContent = det;
+      detail.style.display = det ? "" : "none";
+      track.style.display  = pct === null ? "none" : "";
+      fill.style.width     = pct === null ? "0%" : Math.round(Math.min(1, pct) * 100) + "%";
+    }
+
+    async function _msBulkStart() {
+      if (_msBulkIsBusy(_msBulkRun)) { _msBulkOpenCard(); _msBulkRender(_msBulkRun); return; }
+      if (!_msGridScope) return;
+      if (_msActiveTab !== "media") {
+        dmtShowToast?.(tOr("ms_bulk_media_only", "Bulk download works on the Media tab — switch tabs and try again."), { duration: 2500 });
+        return;
+      }
+      const run = _msBulkCreate(_msGridScope);
+      run.onUpdate = _msBulkRender;
+      _msBulkRun = run;
+      _msBulkCloseCard();
+      _msBulkOpenCard();
+      _msBulkRender(run);
+      try {
+        const items = await _msBulkCollect(run);
+        if (items === null) { run.phase = "cancelled"; _msBulkCloseCard(); }
+      } catch (e) {
+        run.error = (e && e.message) || String(e);
+        run.phase = "error";
+        _msBulkRender(run);
+      }
+    }
+
+    function _msBulkRetryFailed(run) {
+      const items = run.failed.map(f => f.item);
+      if (!items.length) return;
+      const r2 = _msBulkCreate(run.scope, items);
+      r2.onUpdate = _msBulkRender;
+      _msBulkRun = r2;
+      _msBulkExecute(r2);
+    }
+
+    function _msSelKey(item) {
+      return String(item.msg_id) + "|" + String(item.url || "").split("?")[0];
+    }
+    const _msSelHas   = item => _msSelMap.has(_msSelKey(item));
+    const _msSelCount = () => _msSelMap.size;
+
+    function _msSelSyncScope() {
+      if (_msSelMap.size && _msSelScope !== _msGridScope) { _msSelClear(); return true; }
+      return false;
+    }
+    function _msSelEnsureScope() {
+      if (!_msSelMap.size) _msSelScope = _msGridScope; else _msSelSyncScope();
+    }
+
+    function _msSelToggle(item, shiftKey) {
+      _msSelEnsureScope();
+      const key = _msSelKey(item);
+      if (shiftKey && _msSelAnchor && _msSelAnchor !== key) {
+        const list = _msGridItems;
+        const a = list.findIndex(it => _msSelKey(it) === _msSelAnchor);
+        const b = list.findIndex(it => _msSelKey(it) === key);
+        if (a >= 0 && b >= 0) {
+          const lo = Math.min(a, b), hi = Math.max(a, b);
+          for (let i = lo; i <= hi; i++) _msSelMap.set(_msSelKey(list[i]), list[i]);
+          _msSelAnchor = key;
+          return;
+        }
+      }
+      if (_msSelMap.has(key)) _msSelMap.delete(key); else _msSelMap.set(key, item);
+      _msSelAnchor = key;
+    }
+
+    function _msSelectAllLoaded() {
+      _msSelEnsureScope();
+      for (const it of _msGridItems) _msSelMap.set(_msSelKey(it), it);
+    }
+
+    async function _msSelectAllMatching(onProgress) {
+      const tmp = _msBulkCreate(_msGridScope);
+      tmp.onUpdate = onProgress || null;
+      const items = await _msBulkCollect(tmp);
+      if (!items || _msGridScope !== tmp.scope) return false;
+      _msSelEnsureScope();
+      for (const it of items) _msSelMap.set(_msSelKey(it), it);
+      return true;
+    }
+
+    function _msSelClear() { _msSelMap.clear(); _msSelAnchor = null; _msSelScope = null; }
+
+    function _msSelDownload() {
+      _msSelSyncScope();
+      if (!_msSelMap.size || !_msGridScope) return;
+      if (_msBulkIsBusy(_msBulkRun)) { _msBulkOpenCard(); _msBulkRender(_msBulkRun); return; }
+      const items = [..._msSelMap.values()].sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)));
+      const run = _msBulkCreate(_msGridScope, items);
+      run.fromSelection = true;
+      run.onUpdate = _msBulkRender;
+      _msBulkRun = run;
+      _msBulkCloseCard();
+      _msBulkOpenCard();
+      _msBulkRender(run);
+    }
+
+    function _msSelApplyCell(cell, item) {
+      const on = _msSelHas(item);
+      cell.classList.toggle("ms-selected", on);
+      if (on && !cell._msSelOv) {
+        const ov = document.createElement("div");
+        ov.className = "ms-sel-overlay";
+        const ck = document.createElement("span");
+        ck.className = "ms-sel-check";
+        ck.appendChild(_msIcon("check", 16));
+        ov.appendChild(ck);
+        cell.appendChild(ov);
+        cell._msSelOv = ov;
+      } else if (!on && cell._msSelOv) {
+        cell._msSelOv.remove();
+        cell._msSelOv = null;
+      }
+    }
+    function _msSelRefreshCells() {
+      for (const [i, el] of _msGridRendered) { const it = _msGridItems[i]; if (it) _msSelApplyCell(el, it); }
+    }
+
+    function _msSelSetMode(on) {
+      _msSelMode = !!on;
+      if (_msSelBtnEl) {
+        _msSelBtnEl.style.background  = _msSelMode ? "#5865f2" : "rgba(255,255,255,0.1)";
+        _msSelBtnEl.style.borderColor = _msSelMode ? "#8a93f8" : "rgba(255,255,255,0.3)";
+      }
+      _msSelRenderBar();
+    }
+
+    function _msSelPlaceFrame() {
+      const sc = _msGridContEl && _msGridContEl.parentElement;
+      if (!_msSelFrameEl || !sc) return;
+      const st = _msSelFrameEl.style;
+      st.left = sc.offsetLeft + "px"; st.top = sc.offsetTop + "px";
+      st.width = sc.offsetWidth + "px"; st.height = sc.offsetHeight + "px";
+    }
+    function _msSelEnsureFrame() {
+      const sc = _msGridContEl && _msGridContEl.parentElement;
+      if (!sc || !_msPanelEl) return;
+      if (!_msSelFrameEl || !_msSelFrameEl.isConnected) {
+        const f = document.createElement("div");
+        f.style.cssText = "position:absolute;pointer-events:none;z-index:12;box-sizing:border-box;border:2px solid rgba(88,101,242,0.9);border-radius:6px;box-shadow:inset 0 0 22px rgba(88,101,242,0.35);";
+        _msPanelEl.appendChild(f);
+        _msSelFrameEl = f;
+      }
+      _msSelPlaceFrame();
+      if (!_msSelFrameRO && typeof ResizeObserver !== "undefined") {
+        _msSelFrameRO = new ResizeObserver(_msSelPlaceFrame);
+        _msSelFrameRO.observe(sc);
+        _msSelFrameRO.observe(_msPanelEl);
+      }
+    }
+    function _msSelRemoveFrame() {
+      if (_msSelFrameRO) { _msSelFrameRO.disconnect(); _msSelFrameRO = null; }
+      if (_msSelFrameEl) { _msSelFrameEl.remove(); _msSelFrameEl = null; }
+    }
+
+    function _msSelRenderBar() {
+      const sc = _msGridContEl && _msGridContEl.parentElement;
+      const visible = _msSelMode && _msActiveTab === "media" && _msPanelEl && _msPanelEl.isConnected;
+      if (!visible) {
+        if (_msSelBarEl) { _msSelBarEl.remove(); _msSelBarEl = null; }
+        if (sc) { sc.style.paddingBottom = ""; sc.classList.remove("ms-selecting"); }
+        _msSelRemoveFrame();
+        return;
+      }
+      if (sc) sc.classList.add("ms-selecting");
+      _msSelEnsureFrame();
+      if (!_msSelBarEl || !_msSelBarEl.isConnected) {
+        const nb = document.createElement("div");
+        nb.style.cssText = "position:absolute;left:12px;right:12px;bottom:12px;z-index:15;background:#2b2d31;border:1px solid rgba(88,101,242,0.6);border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,0.55);padding:8px 12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;color:#dbdee1;";
+        _msPanelEl.appendChild(nb);
+        _msSelBarEl = nb;
+      }
+      const bar = _msSelBarEl;
+      bar.textContent = "";
+      const n = _msSelCount();
+      const info = document.createElement("span");
+      info.style.cssText = "flex:1;min-width:120px;font-weight:600;";
+      info.textContent = n
+        ? tOr("ms_sel_count", "{n} selected", { n: n.toLocaleString() })
+        : tOr("ms_sel_hint", "Click media to select · Shift+click for a range");
+      bar.appendChild(info);
+      const mk = (label, onClick, primary, disabled) => {
+        const b = document.createElement("button");
+        b.textContent = label;
+        b.disabled = !!disabled;
+        b.style.cssText = (primary
+          ? "background:rgba(88,101,242,0.55);border:1px solid #5865f2;color:#fff;font-weight:600;"
+          : "background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:#dbdee1;")
+          + "padding:4px 10px;border-radius:6px;font-size:12px;cursor:" + (disabled ? "default" : "pointer") + ";opacity:" + (disabled ? "0.45" : "1") + ";";
+        b.addEventListener("click", onClick);
+        bar.appendChild(b);
+        return b;
+      };
+      mk(tOr("ms_sel_all_loaded", "All loaded"), () => { _msSelectAllLoaded(); _msSelRefreshCells(); _msSelRenderBar(); });
+      const allMatch = mk(tOr("ms_sel_all_match", "All matching filters"), async () => {
+        if (bar._busy) return;
+        bar._busy = true;
+        allMatch.disabled = true;
+        allMatch.style.opacity = "0.45";
+        const ok = await _msSelectAllMatching(r => {
+          if (info.isConnected) info.textContent = tOr("ms_bulk_collecting", "Collecting items… {n} found", { n: Number(r.found).toLocaleString() });
+        }).catch(() => false);
+        bar._busy = false;
+        if (ok) _msSelRefreshCells();
+        _msSelRenderBar();
+      });
+      mk(tOr("ms_sel_clear", "Clear"), () => { _msSelClear(); _msSelRefreshCells(); _msSelRenderBar(); }, false, n === 0);
+      mk(tOr("ms_sel_download", "Download ({n})", { n: n.toLocaleString() }), _msSelDownload, true, n === 0);
+      if (sc) sc.style.paddingBottom = "56px";
     }
 
     function _msJumpToMsg(guildId, channelId, msgId) {
@@ -33221,19 +34353,19 @@ if (type === "warn" && scanLimit !== null) {
       const hdr = document.createElement("div");
       hdr.style.cssText = "display:flex;align-items:center;padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.08);gap:8px;flex-shrink:0;";
       const prevBtn = document.createElement("button");
-      prevBtn.textContent = "‹";
+      prevBtn.appendChild(_msIcon("chevLeft", 20));
       prevBtn.title = "Previous (←)";
-      prevBtn.style.cssText = "background:rgba(255,255,255,0.1);border:none;color:#fff;padding:2px 12px;border-radius:6px;cursor:pointer;font-size:22px;line-height:1;flex-shrink:0;";
+      prevBtn.style.cssText = "background:rgba(255,255,255,0.1);border:none;color:#fff;padding:6px 12px;border-radius:6px;cursor:pointer;line-height:1;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;";
       const fnEl = document.createElement("div");
       fnEl.style.cssText = "flex:1;text-align:center;color:#dbdee1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;";
       const nextBtn = document.createElement("button");
-      nextBtn.textContent = "›";
+      nextBtn.appendChild(_msIcon("chevRight", 20));
       nextBtn.title = "Next (→)";
       nextBtn.style.cssText = prevBtn.style.cssText;
       const lbCloseBtn = document.createElement("button");
-      lbCloseBtn.textContent = "✕";
+      lbCloseBtn.appendChild(_msIcon("close", 16));
       lbCloseBtn.title = "Close (ESC)";
-      lbCloseBtn.style.cssText = "background:rgba(0,0,0,0.3);border:none;color:#aaa;font-size:16px;cursor:pointer;padding:4px 10px;border-radius:6px;line-height:1;flex-shrink:0;transition:color 0.15s,background 0.15s;";
+      lbCloseBtn.style.cssText = "background:rgba(0,0,0,0.3);border:none;color:#aaa;cursor:pointer;padding:6px 10px;border-radius:6px;line-height:1;flex-shrink:0;transition:color 0.15s,background 0.15s;display:inline-flex;align-items:center;";
       lbCloseBtn.addEventListener("mouseenter", () => { lbCloseBtn.style.color = "#fff"; lbCloseBtn.style.background = "rgba(237,66,69,0.4)"; });
       lbCloseBtn.addEventListener("mouseleave", () => { lbCloseBtn.style.color = "#aaa"; lbCloseBtn.style.background = "rgba(0,0,0,0.3)"; });
       hdr.appendChild(prevBtn); hdr.appendChild(fnEl); hdr.appendChild(nextBtn); hdr.appendChild(lbCloseBtn);
@@ -33247,13 +34379,13 @@ if (type === "warn" && scanLimit !== null) {
       metaEl.style.cssText = "font-size:12px;color:#949ba4;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;";
       const actEl = document.createElement("div");
       actEl.style.cssText = "display:flex;gap:8px;flex-shrink:0;";
-      const btnStyle = "background:rgba(88,101,242,0.2);border:1px solid rgba(88,101,242,0.4);color:#dbdee1;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;text-decoration:none;display:flex;align-items:center;";
+      const btnStyle = "background:rgba(88,101,242,0.2);border:1px solid rgba(88,101,242,0.4);color:#dbdee1;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;text-decoration:none;display:flex;align-items:center;gap:6px;";
       const jumpBtn = document.createElement("a");
       jumpBtn.style.cssText = btnStyle;
-      jumpBtn.textContent = "↗ " + (tOr("ms_btn_jump", "Jump to message"));
+      _msSetBtnContent(jumpBtn, "external", tOr("ms_btn_jump", "Jump to message"), 14);
       const dlBtn = document.createElement("a");
       dlBtn.style.cssText = btnStyle;
-      dlBtn.textContent   = "⬇ " + (tOr("ms_btn_download", "Download"));
+      _msSetBtnContent(dlBtn, "download", tOr("ms_btn_download", "Download"), 14);
       actEl.appendChild(jumpBtn); actEl.appendChild(dlBtn);
       ftr.appendChild(metaEl); ftr.appendChild(actEl);
 
@@ -33298,8 +34430,8 @@ if (type === "warn" && scanLimit !== null) {
         };
         if (item._msLbPending && !item._msLbBlob) {
           const wait = document.createElement("div");
-          wait.style.cssText = "font-size:36px;opacity:0.6;color:#72767d;";
-          wait.textContent = "⏳";
+          wait.style.cssText = "opacity:0.6;color:#72767d;";
+          wait.appendChild(_msIcon("clock", 36));
           mediaArea.appendChild(wait);
         } else if (_lbShowDead) {
           const ph = _msBuildDeadPlaceholder("full", item, () => jumpBtn.click());
@@ -33416,6 +34548,7 @@ if (type === "warn" && scanLimit !== null) {
       _msGridItems  = [];
       _msGridRendered.clear();
       _msActiveTab  = "media";
+      _msSelMode = false; _msSelClear(); _msSelBtnEl = null; _msSelBarEl = null; _msSelRemoveFrame();
       _msFavItems   = [];
       _msLoadFavs();
 
@@ -33454,8 +34587,8 @@ if (type === "warn" && scanLimit !== null) {
       toolbar.style.cssText = "display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:8px 48px 8px 12px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;background:#313338;cursor:grab;min-width:0;";
 
       const titleEl = document.createElement("span");
-      titleEl.textContent = "🖼 Mosaic";
-      titleEl.style.cssText = "font-size:14px;font-weight:700;color:#dbdee1;flex-shrink:0;pointer-events:none;height:24px;display:inline-flex;align-items:center;";
+      titleEl.style.cssText = "font-size:14px;font-weight:700;color:#dbdee1;flex-shrink:0;pointer-events:none;height:24px;display:inline-flex;align-items:center;gap:6px;";
+      _msSetBtnContent(titleEl, "image", "Mosaic", 16);
       toolbar.appendChild(titleEl);
 
       const _msGetSrvName = () => {
@@ -33590,9 +34723,9 @@ if (type === "warn" && scanLimit !== null) {
       toolbar.appendChild(_msTypeSelEl);
 
       _msAdvToggleBtnEl = document.createElement("button");
-      _msAdvToggleBtnEl.textContent = "⚙️";
+      _msAdvToggleBtnEl.appendChild(_msIcon("sliders", 16));
       _msAdvToggleBtnEl.title = tOr("ms_adv_filter_toggle", "More filters");
-      _msAdvToggleBtnEl.style.cssText = "position:relative;background:none;border:none;cursor:pointer;font-size:14px;padding:3px 6px;border-radius:4px;flex-shrink:0;opacity:0.7;transition:opacity 0.15s;height:24px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;";
+      _msAdvToggleBtnEl.style.cssText = "position:relative;color:#dbdee1;background:none;border:none;cursor:pointer;font-size:14px;padding:3px 6px;border-radius:4px;flex-shrink:0;opacity:0.7;transition:opacity 0.15s;height:24px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;";
       _msAdvToggleBtnEl.addEventListener("mouseenter", () => { _msAdvToggleBtnEl.style.opacity = "1"; });
       _msAdvToggleBtnEl.addEventListener("mouseleave", () => { _msAdvToggleBtnEl.style.opacity = _msAdvFilterRowEl.style.display !== "none" ? "1" : "0.7"; });
       _msAdvToggleBtnEl.addEventListener("click", () => {
@@ -33627,7 +34760,9 @@ if (type === "warn" && scanLimit !== null) {
 
       const MS_LONG_RANGE_KEYS = ["3w", "1m"];
       const rangeHintEl = document.createElement("span");
-      rangeHintEl.textContent = "⚠ " + tOr("ms_range_hint_badge", "May need multiple scans");
+      const _hintIcon = _msIcon("warning", 12);
+      _hintIcon.style.display = "inline-block"; _hintIcon.style.verticalAlign = "-2px"; _hintIcon.style.marginRight = "3px";
+      rangeHintEl.append(_hintIcon, document.createTextNode(tOr("ms_range_hint_badge", "May need multiple scans")));
       rangeHintEl.style.cssText = "font-size:11px;cursor:help;flex-shrink:0;display:none;white-space:nowrap;background:rgba(250,166,26,0.15);color:#faa61a;border:1px solid rgba(250,166,26,0.4);border-radius:4px;padding:2px 7px;font-weight:500;";
       rangeHintEl.title = tOr("ms_range_hint_long",
         "Large servers may need multiple scans to fully cover this range (auto-stops every {cap} items as a safety cap — just click Scan again to continue)",
@@ -33649,7 +34784,7 @@ if (type === "warn" && scanLimit !== null) {
 
       const dockBtnEl = document.createElement("button");
       dockBtnEl.title = "Dock to edge";
-      dockBtnEl.textContent = "⇤";
+      dockBtnEl.appendChild(_msIcon("dock", 16));
       dockBtnEl.style.cssText = "background:none;border:none;cursor:pointer;font-size:14px;padding:3px 5px;border-radius:4px;flex-shrink:0;opacity:0.55;transition:opacity 0.15s;color:#dbdee1;height:24px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;";
       dockBtnEl.addEventListener("mouseenter", () => { dockBtnEl.style.opacity = "1"; });
       dockBtnEl.addEventListener("mouseleave", () => { dockBtnEl.style.opacity = _msDocked ? "1" : "0.55"; });
@@ -33677,9 +34812,9 @@ if (type === "warn" && scanLimit !== null) {
       toolbar.appendChild(cellSizeBtnEl);
 
       const statsBtnEl = document.createElement("button");
-      statsBtnEl.textContent = "📊";
+      statsBtnEl.appendChild(_msIcon("stats", 16));
       statsBtnEl.title = tOr("ms_stats_title", "Cache statistics");
-      statsBtnEl.style.cssText = "background:none;border:none;cursor:pointer;font-size:16px;padding:4px 6px;border-radius:4px;flex-shrink:0;opacity:0.7;transition:opacity 0.15s;height:24px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;";
+      statsBtnEl.style.cssText = "color:#dbdee1;background:none;border:none;cursor:pointer;font-size:16px;padding:4px 6px;border-radius:4px;flex-shrink:0;opacity:0.7;transition:opacity 0.15s;height:24px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;";
       statsBtnEl.addEventListener("mouseenter", () => { statsBtnEl.style.opacity = "1"; });
       statsBtnEl.addEventListener("mouseleave", () => { statsBtnEl.style.opacity = "0.7"; });
       let statsVisible = false;
@@ -33690,26 +34825,49 @@ if (type === "warn" && scanLimit !== null) {
       });
       toolbar.appendChild(statsBtnEl);
 
+      const _msIconBtnCss = "cursor:pointer;font-size:14px;line-height:1;font-weight:700;padding:0 8px;border-radius:6px;flex-shrink:0;height:24px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;color:#fff;transition:background 0.15s,border-color 0.15s;";
+      const bulkBtnEl = document.createElement("button");
+      bulkBtnEl.appendChild(_msIcon("download", 16));
+      bulkBtnEl.title = tOr("ms_bulk_btn_title", "Download all media matching the current filters (ZIP)");
+      bulkBtnEl.style.cssText = _msIconBtnCss + "background:rgba(88,101,242,0.45);border:1px solid #5865f2;position:relative;";
+      bulkBtnEl.addEventListener("mouseenter", () => { bulkBtnEl.style.background = "rgba(88,101,242,0.8)"; });
+      bulkBtnEl.addEventListener("mouseleave", () => { bulkBtnEl.style.background = "rgba(88,101,242,0.45)"; });
+      const bulkNewDot = renderNewBadgeDot("ms_bulk_download");
+      if (bulkNewDot) bulkBtnEl.appendChild(bulkNewDot);
+      bulkBtnEl.addEventListener("click", () => {
+        if (bulkNewDot?.isConnected) { markFeatureSeen("ms_bulk_download"); bulkNewDot.remove(); }
+        _msBulkStart().catch(() => {});
+      });
+      toolbar.appendChild(bulkBtnEl);
+
+      _msSelBtnEl = document.createElement("button");
+      _msSelBtnEl.appendChild(_msIcon("select", 16));
+      _msSelBtnEl.title = tOr("ms_sel_btn_title", "Select media to download (Ctrl+click also works)");
+      _msSelBtnEl.style.cssText = _msIconBtnCss + "background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.3);";
+      _msSelBtnEl.addEventListener("click", () => { _msSelSetMode(!_msSelMode); });
+      toolbar.appendChild(_msSelBtnEl);
+
       _msScanBtnEl = document.createElement("button");
-      _msScanBtnEl.style.cssText = "background:rgba(88,101,242,0.25);border:1px solid rgba(88,101,242,0.4);color:#dbdee1;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;flex-shrink:0;";
+      _msScanBtnEl.style.cssText = "background:rgba(88,101,242,0.25);border:1px solid rgba(88,101,242,0.4);color:#dbdee1;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;flex-shrink:0;display:inline-flex;align-items:center;gap:5px;";
       _msUpdateScanBtn();
-      _msScanBtnEl.addEventListener("click", () => {
+      _msScanBtnEl.title = tOr("ms_btn_scan_tip", "Click: scan for new media · Shift+Click: rescan the whole selected range");
+      _msScanBtnEl.addEventListener("click", (ev) => {
         const sc = _msScopeSelEl.value;
         const st = sc.startsWith("gc:") ? "guild-channel" : sc.startsWith("g:") ? "guild" : "channel";
         if      (_msScanState.phase === "scanning") { _msScanState.phase = "paused"; _msUpdateScanBtn(); _msUpdateStatusBar(); }
         else if (_msScanState.phase === "paused")   { _msScanState.phase = "scanning"; _msUpdateScanBtn(); }
-        else { _msFullScan(sc, st).catch(err => { _msScanState.phase = "error"; _msScanState.error = err.message; _msUpdateStatusBar(); _msUpdateScanBtn(); }); }
+        else { _msFullScan(sc, st, { force: ev.shiftKey }).catch(err => { _msScanState.phase = "error"; _msScanState.error = err.message; _msUpdateStatusBar(); _msUpdateScanBtn(); }); }
       });
       toolbar.appendChild(_msScanBtnEl);
 
       _msStopBtnEl = document.createElement("button");
-      _msStopBtnEl.textContent = "⏹ " + tOr("ms_btn_stop", "Stop");
-      _msStopBtnEl.style.cssText = "background:rgba(237,66,69,0.2);border:1px solid rgba(237,66,69,0.35);color:#dbdee1;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;flex-shrink:0;display:none;";
+      _msStopBtnEl.style.cssText = "background:rgba(237,66,69,0.2);border:1px solid rgba(237,66,69,0.35);color:#dbdee1;padding:4px 10px;border-radius:6px;font-size:12px;cursor:pointer;flex-shrink:0;display:none;align-items:center;gap:5px;";
+      _msSetBtnContent(_msStopBtnEl, "stop", tOr("ms_btn_stop", "Stop"), 14);
       _msStopBtnEl.addEventListener("click", () => { _msStop(); });
       toolbar.appendChild(_msStopBtnEl);
 
       const closeBtn = document.createElement("button");
-      closeBtn.textContent = "✕";
+      closeBtn.appendChild(_msIcon("close", 14));
       closeBtn.style.cssText = "position:absolute;top:8px;right:12px;z-index:2;background:rgba(0,0,0,0.25);border:none;color:#72767d;font-size:14px;cursor:pointer;padding:3px 7px;border-radius:4px;line-height:1;height:24px;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;";
       closeBtn.addEventListener("mouseenter", () => { closeBtn.style.color = "#dbdee1"; closeBtn.style.background = "rgba(237,66,69,0.3)"; });
       closeBtn.addEventListener("mouseleave", () => { closeBtn.style.color = "#72767d"; closeBtn.style.background = "rgba(0,0,0,0.25)"; });
@@ -33743,12 +34901,12 @@ if (type === "warn" && scanLimit !== null) {
 
       const tabBar = document.createElement("div");
       tabBar.style.cssText = "display:flex;gap:4px;padding:6px 12px;border-bottom:1px solid rgba(255,255,255,0.06);flex-shrink:0;background:#2b2d31;";
-      const _msTabBtnCss = "border:none;background:transparent;color:#949ba4;font-size:12px;font-weight:600;padding:5px 10px;border-radius:6px;cursor:pointer;transition:background .12s,color .12s;";
+      const _msTabBtnCss = "border:none;background:transparent;color:#949ba4;font-size:12px;font-weight:600;padding:5px 10px;border-radius:6px;cursor:pointer;transition:background .12s,color .12s;display:inline-flex;align-items:center;gap:6px;";
       const mediaTabBtn = document.createElement("button");
       const favsTabBtn  = document.createElement("button");
       mediaTabBtn.style.cssText = _msTabBtnCss;
       favsTabBtn.style.cssText  = _msTabBtnCss;
-      mediaTabBtn.textContent = "🖼 " + tOr("ms_tab_media", "Media");
+      _msSetBtnContent(mediaTabBtn, "image", tOr("ms_tab_media", "Media"), 14);
 
       const _msUpdateTabBtnStyle = () => {
         mediaTabBtn.style.background = _msActiveTab === "media" ? "rgba(88,101,242,0.18)" : "transparent";
@@ -33757,7 +34915,7 @@ if (type === "warn" && scanLimit !== null) {
         favsTabBtn.style.color       = _msActiveTab === "favs"  ? "#fff" : "#949ba4";
       };
       _msUpdateFavsTabLabel = () => {
-        favsTabBtn.textContent = "💗 " + tOr("ms_tab_favs", "Bookmarks") + (_msFavIds.size ? " (" + _msFavIds.size + ")" : "");
+        _msSetBtnContent(favsTabBtn, "heart", tOr("ms_tab_favs", "Bookmarks") + (_msFavIds.size ? " (" + _msFavIds.size + ")" : ""), 14);
       };
       _msUpdateFavsTabLabel();
       _msUpdateTabBtnStyle();
@@ -33773,6 +34931,7 @@ if (type === "warn" && scanLimit !== null) {
       favsTabBtn.addEventListener("click", () => {
         if (_msActiveTab === "favs") return;
         _msActiveTab = "favs";
+        _msSelClear(); _msSelSetMode(false);
         _msUpdateTabBtnStyle();
         _msRenderFavsGrid().catch(() => {});
       });
@@ -34030,8 +35189,8 @@ if (type === "warn" && scanLimit !== null) {
       statsOverlay.style.cssText = "display:none;flex-direction:column;gap:10px;padding:14px 16px;flex:1;overflow-y:auto;background:#2b2d31;";
 
       const statsTitle = document.createElement("div");
-      statsTitle.style.cssText = "font-size:13px;font-weight:700;color:#dbdee1;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:8px;";
-      statsTitle.textContent = "📊 " + (tOr("ms_stats_title", "Cache Statistics"));
+      statsTitle.style.cssText = "font-size:13px;font-weight:700;color:#dbdee1;border-bottom:1px solid rgba(255,255,255,0.08);padding-bottom:8px;display:flex;align-items:center;gap:6px;";
+      _msSetBtnContent(statsTitle, "stats", tOr("ms_stats_title", "Cache Statistics"), 16);
       statsOverlay.appendChild(statsTitle);
 
       const statsBody = document.createElement("div");
@@ -34039,8 +35198,8 @@ if (type === "warn" && scanLimit !== null) {
       statsOverlay.appendChild(statsBody);
 
       const clearCacheBtn = document.createElement("button");
-      clearCacheBtn.textContent = "🗑 " + (tOr("ms_stats_clear", "Clear cached media for this scope"));
-      clearCacheBtn.style.cssText = "margin-top:8px;background:rgba(237,66,69,0.15);border:1px solid rgba(237,66,69,0.3);color:#f38ba8;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;align-self:flex-start;";
+      clearCacheBtn.style.cssText = "margin-top:8px;background:rgba(237,66,69,0.15);border:1px solid rgba(237,66,69,0.3);color:#f38ba8;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;align-self:flex-start;display:inline-flex;align-items:center;gap:6px;";
+      _msSetBtnContent(clearCacheBtn, "trash", tOr("ms_stats_clear", "Clear cached media for this scope"), 14);
       clearCacheBtn.addEventListener("click", async () => {
         if (!_msGridScope) return;
         try {
@@ -34114,6 +35273,10 @@ if (type === "warn" && scanLimit !== null) {
           ".ms-channel{font-size:9px;color:rgba(88,101,242,0.85);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}",
           ".ms-cell{transition:outline 0.12s;}",
           ".ms-cell:hover{outline:2px solid rgba(88,101,242,0.65);outline-offset:-2px;z-index:1;}",
+          ".ms-cell.ms-selected{outline:3px solid #5865f2;outline-offset:-3px;z-index:2;}",
+          ".ms-sel-overlay{position:absolute;inset:0;background:rgba(88,101,242,0.28);display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:3;}",
+          ".ms-sel-check{width:26px;height:26px;border-radius:50%;background:#5865f2;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,0.5);}",
+          "#ms-grid-scroll.ms-selecting .ms-cell:not(.ms-selected):hover::after{content:'';position:absolute;top:50%;left:50%;width:24px;height:24px;margin:-14px 0 0 -14px;box-sizing:border-box;border:2px solid #fff;border-radius:50%;background:rgba(0,0,0,0.35);pointer-events:none;z-index:3;}",
           ".ms-cell-fav-btn{position:absolute;top:4px;left:4px;z-index:4;width:22px;height:22px;",
           "border-radius:50%;border:none;cursor:pointer;background:rgba(0,0,0,0.45);",
           "display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;",
@@ -34142,15 +35305,13 @@ if (type === "warn" && scanLimit !== null) {
       panel.appendChild(gridScroll);
 
       gridScroll.addEventListener("scroll", () => {
-        clearTimeout(_msScrollTimer);
-        _msScrollTimer = setTimeout(() => {
+        if (_msScrollRaf) return;
+        _msScrollRaf = requestAnimationFrame(() => {
+          _msScrollRaf = null;
           _msRenderGrid();
-          const { scrollTop, scrollHeight, clientHeight } = gridScroll;
-          if (_msActiveTab === "media" && scrollTop + clientHeight >= scrollHeight - MS_CELL_H * 6) {
-            _msLoadMoreItems().catch(() => {});
-          }
-        }, 50);
-      });
+          _msCheckLoadMore();
+        });
+      }, { passive: true });
 
       const _msRecalcCols = () => {
         if (!_msGridContEl || !gridScroll) return;
@@ -34208,7 +35369,7 @@ if (type === "warn" && scanLimit !== null) {
         panel.style.transform = `translateX(${offX}px)`;
         panel.classList.add("ms-docked");
 
-        dockBtnEl.textContent = "⇥";
+        _msSetBtnContent(dockBtnEl, "undock", "", 16);
         dockBtnEl.title = "Undock";
         dockBtnEl.style.opacity = "1";
 
@@ -34277,7 +35438,7 @@ if (type === "warn" && scanLimit !== null) {
         if (_msDockResizeHandler) { window.removeEventListener("resize", _msDockResizeHandler); _msDockResizeHandler = null; }
         _msDockSide = null;
         _msDockSnapshot = null;
-        dockBtnEl.textContent = "⇤";
+        _msSetBtnContent(dockBtnEl, "dock", "", 16);
         dockBtnEl.title = "Dock to edge";
         dockBtnEl.style.opacity = "0.55";
       }
@@ -34330,7 +35491,20 @@ if (type === "warn" && scanLimit !== null) {
       requestAnimationFrame(_msRecalcCols);
     }
 
-    const MS_BTN_SEL = 'div[class*="buttons__"], div[class*="buttonsInner_"]';
+    const MS_EMOJI_BTN_SEL =
+      '[class*="emojiButton"], [class*="emoji_button"],' +
+      'button[aria-label*="moji"], button[aria-label*="表情"],' +
+      'button[aria-label*="スタンプ"], button[aria-label*="스티커"]';
+    function _msFindToolbarContainers() {
+      const seen = new Set();
+      document.querySelectorAll(MS_EMOJI_BTN_SEL).forEach(emojiBtn => {
+        let node = emojiBtn.parentElement;
+        for (let depth = 0; node && depth < 4; depth++, node = node.parentElement) {
+          if (node.children && node.children.length >= 2) { seen.add(node); break; }
+        }
+      });
+      return Array.from(seen);
+    }
     let _msInjectDebounce = null;
 
     function _msInjectOneContainer(container) {
@@ -34384,7 +35558,7 @@ if (type === "warn" && scanLimit !== null) {
     }
 
     function _msInjectAll() {
-      document.querySelectorAll(MS_BTN_SEL).forEach(_msInjectOneContainer);
+      _msFindToolbarContainers().forEach(_msInjectOneContainer);
     }
 
     _msMutObs = new MutationObserver(() => {
@@ -34396,7 +35570,7 @@ if (type === "warn" && scanLimit !== null) {
 
     let _msRetryCount = 0;
     const _msScanInit = () => {
-      const found = document.querySelectorAll(MS_BTN_SEL);
+      const found = _msFindToolbarContainers();
       if (found.length > 0) {
         found.forEach(_msInjectOneContainer);
       } else if (_msRetryCount < 5) {
@@ -34412,7 +35586,14 @@ if (type === "warn" && scanLimit !== null) {
       document.removeEventListener("keydown", panelEsc, false);
       _msPanelEl?.remove();
       _msStop();
-      clearTimeout(_msScrollTimer);
+      if (_msScrollRaf) { cancelAnimationFrame(_msScrollRaf); _msScrollRaf = null; }
+      clearTimeout(_msScanRefreshTimer);
+      _msScanRefreshTimer = null;
+      clearTimeout(_msNoticeTimer);
+      _msNoticeTimer = null;
+      _msBulkCancel(_msBulkRun);
+      _msBulkCardEl = null;
+      _msSelMode = false; _msSelClear(); _msSelBtnEl = null; _msSelBarEl = null; _msSelRemoveFrame();
     };
     CleanupRegistry.add(_moduleJCleanup);
     ModuleCleanupRegistry.add("mod_mosaic", _moduleJCleanup);
