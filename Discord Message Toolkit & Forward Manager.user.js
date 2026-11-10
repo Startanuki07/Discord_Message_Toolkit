@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.7.0
+// @version      2.9.7.6
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -63,7 +63,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.7.0";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.7.6";
 
   const GMStore = {
     
@@ -9381,18 +9381,22 @@
 
     function injectListStars(modal) {
       const listItems = modal.querySelectorAll('div[role="listitem"]');
+      const tagTargets = [];
+      const pending = [];
+
       listItems.forEach((row) => {
         const rowType = getRowType(row);
         if (rowType === "user") {
           const nameStrong = row.querySelector("strong");
           if (nameStrong && !nameStrong.classList.contains("my-user-tagged")) {
-            nameStrong.classList.add("my-user-tagged");
-            nameStrong.setAttribute("data-user-tagged", "true");
+            tagTargets.push(nameStrong);
           }
         }
         if (row.querySelector(".my-list-action-btn")) return;
         const nameEl = row.querySelector("strong");
         if (!nameEl) return;
+        const iconWrapper = row.querySelector('div[class*="iconWrapper"]');
+        if (!iconWrapper) return;
 
         const channelName = nameEl.innerText;
         let serverName = "";
@@ -9415,41 +9419,64 @@
             if (parts.length > 1) serverName = parts[parts.length - 1].trim();
           }
         }
+        pending.push({ row, rowType, iconWrapper, channelName, serverName });
+      });
 
-        const iconWrapper = row.querySelector('div[class*="iconWrapper"]');
-        if (iconWrapper) {
-          const actionBtn = document.createElement("button");
-          actionBtn.className = "my-list-action-btn";
-          if (rowType === "user") {
-            actionBtn.classList.add("my-list-user-btn");
-            actionBtn.title = t("fm_tooltip_user_add");
-          } else {
-            actionBtn.classList.add("my-list-star-btn");
-            actionBtn.title = t("fm_tooltip_star_add");
-          }
-
-          updateRowIcon(actionBtn, channelName, serverName, rowType);
-
-          actionBtn.onclick = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const currentServer = serverName;
-            const isNSFW = isNSFWChannel(row);
-            upsertData(
-              channelName,
-              currentServer,
-              { toggleStar: true, isNSFW: isNSFW },
-              rowType,
-            );
-            updateRowIcon(actionBtn, channelName, currentServer, rowType);
-          };
-          iconWrapper.after(actionBtn);
+      tagTargets.forEach((nameStrong) => {
+        nameStrong.classList.add("my-user-tagged");
+        nameStrong.setAttribute("data-user-tagged", "true");
+      });
+      if (pending.length === 0) return;
+      const starLookup = _fmBuildStarLookup();
+      pending.forEach(({ row, rowType, iconWrapper, channelName, serverName }) => {
+        const actionBtn = document.createElement("button");
+        actionBtn.className = "my-list-action-btn";
+        if (rowType === "user") {
+          actionBtn.classList.add("my-list-user-btn");
+          actionBtn.title = t("fm_tooltip_user_add");
+        } else {
+          actionBtn.classList.add("my-list-star-btn");
+          actionBtn.title = t("fm_tooltip_star_add");
         }
+
+        updateRowIcon(actionBtn, channelName, serverName, rowType, starLookup);
+
+        actionBtn.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const currentServer = serverName;
+          const isNSFW = isNSFWChannel(row);
+          upsertData(
+            channelName,
+            currentServer,
+            { toggleStar: true, isNSFW: isNSFW },
+            rowType,
+          );
+          updateRowIcon(actionBtn, channelName, currentServer, rowType);
+        };
+        iconWrapper.after(actionBtn);
       });
     }
 
-    function updateRowIcon(btn, channel, server, type) {
-      const isAdded = isStarred(channel, server);
+    function _fmBuildStarLookup() {
+      const byChannel = new Map();
+      for (const i of loadData()) {
+        let bySrv = byChannel.get(i.channel);
+        if (!bySrv) { bySrv = new Map(); byChannel.set(i.channel, bySrv); }
+        if (!bySrv.has(i.server)) bySrv.set(i.server, i.isStarred);
+      }
+      return byChannel;
+    }
+
+    const _fmIconSig = new WeakMap();
+
+    function updateRowIcon(btn, channel, server, type, lookup = null) {
+      const isAdded = lookup
+        ? (lookup.get(channel)?.get(server) ?? false)
+        : isStarred(channel, server);
+      const sig = (type === "user" ? "u" : "c") + (isAdded ? "1" : "0");
+      if (_fmIconSig.get(btn) === sig && btn.firstElementChild) return;
+      _fmIconSig.set(btn, sig);
       if (type === "user") {
         if (isAdded) {
           btn.classList.add("is-active");
@@ -9473,6 +9500,8 @@
       const modal = document.querySelector('div[role="dialog"]');
       if (!modal) return;
       const btns = modal.querySelectorAll(".my-list-action-btn");
+      if (btns.length === 0) return;
+      const jobs = [];
       btns.forEach((btn) => {
         const row = btn.closest('div[role="listitem"]');
         const nameEl = row.querySelector("strong");
@@ -9481,8 +9510,13 @@
         if (nameEl) {
           const sName = subLabel ? subLabel.innerText : "";
           const cName = nameEl.innerText;
-          updateRowIcon(btn, cName, sName, rowType);
+          jobs.push({ btn, cName, sName, rowType });
         }
+      });
+      if (jobs.length === 0) return;
+      const starLookup = _fmBuildStarLookup();
+      jobs.forEach(({ btn, cName, sName, rowType }) => {
+        updateRowIcon(btn, cName, sName, rowType, starLookup);
       });
     }
 
@@ -14331,11 +14365,13 @@
       const _ioMarginRaw = parseInt(localStorage.getItem("copyIOMargin"), 10);
       const _ioMargin = [100, 300, 500].includes(_ioMarginRaw) ? _ioMarginRaw : 300;
       const io = new IntersectionObserver(
-        (entries) => {
+        (entries, obs) => {
           for (const { target, isIntersecting } of entries) {
-            if (isIntersecting && !target.dataset.copyAttached) {
+            if (!target.dataset.copyAttached) {
+              if (!isIntersecting) continue;
               attachToMessage(target);
             }
+            if (target.dataset.copyAttached) obs.unobserve(target);
           }
         },
         {
@@ -14687,9 +14723,9 @@
                 100% { box-shadow: 0 0 0 2px transparent; }
             }
 
-            .my-col-del-btn { position: absolute; top: 0; right: 0; width: 20px; height: 20px; background: rgba(0,0,0,0.6); color: var(--dmt-danger); display: flex; align-items: center; justify-content: center; border-bottom-left-radius: 6px; z-index: 999; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.1s; pointer-events: auto; }
+            .my-col-del-btn { position: absolute; top: 0; right: 0; width: 20px; height: 20px; background: rgba(0,0,0,0.6); color: var(--dmt-danger); display: flex; align-items: center; justify-content: center; border-bottom-left-radius: 6px; z-index: 999; opacity: 0; transition: opacity 0.1s; pointer-events: auto; }
             .my-col-del-btn > * { pointer-events: none; }
-            .my-col-img-wrapper:hover .my-col-del-btn, .my-col-del-btn:hover { opacity: 1; }
+            .my-col-img-wrapper:hover .my-col-del-btn, .my-col-del-btn:hover { opacity: 1; backdrop-filter: blur(2px); }
             .my-col-del-btn:hover { background: var(--dmt-danger); color: #fff; }
 
             .my-save-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--dmt-bg-overlay); border: 1px solid var(--dmt-bg-deep); box-shadow: 0 0 0 100vw rgba(0,0,0,0.7); border-radius: 8px; z-index: 2147483649; width: 250px; overflow: hidden; animation: myPop 0.2s ease-out; }
@@ -15223,15 +15259,17 @@
         .replace("media.discordapp.net", "fixcdn.hyonsu.com");
     }
 
-    async function attachGifFallback(imgEl, originalUrl, stableUrl) {
+    async function attachGifFallback(imgEl, originalUrl, stableUrl, { skipCache = false } = {}) {
       if (!originalUrl || !originalUrl.startsWith("http")) return;
       const cacheTarget =
         stableUrl && stableUrl.startsWith("http") ? stableUrl : originalUrl;
 
       let cachedDataUrl = null;
-      try {
-        cachedDataUrl = await readGifCache(cacheTarget);
-      } catch (_) {}
+      if (!skipCache) {
+        try {
+          cachedDataUrl = await readGifCache(cacheTarget);
+        } catch (_) {}
+      }
 
       if (cachedDataUrl) {
         imgEl.src = cachedDataUrl;
@@ -15356,7 +15394,28 @@
       element.dispatchEvent(new Event("change", { bubbles: true }));
     }
 
-    function createMediaElement(content, isCompact = false) {
+    let _mediaVidIOInst = null;
+    function _getMediaVidIO() {
+      if (_mediaVidIOInst) return _mediaVidIOInst;
+      _mediaVidIOInst = new IntersectionObserver((entries) => {
+        for (const entry of entries) {
+          const v = entry.target;
+          if (entry.isIntersecting) {
+            if (!v.src && v.dataset.src) {
+              v.src = v.dataset.src;
+              v.play().catch(() => {});
+            }
+          } else if (v.src) {
+            v.pause();
+            v.removeAttribute("src");
+            v.load();
+          }
+        }
+      }, { threshold: 0.1 });
+      return _mediaVidIOInst;
+    }
+
+    function createMediaElement(content, isCompact = false, opts = null) {
       if (!content) return null;
 
       let el;
@@ -15386,21 +15445,9 @@
           el.loop = true;
           el.autoplay = true;
           el.dataset.src = displayUrl;
-          const vidObs = new IntersectionObserver((entries) => {
-            const entry = entries[0];
-            if (entry.isIntersecting) {
-              if (!el.src && el.dataset.src) {
-                el.src = el.dataset.src;
-                el.play().catch(() => {});
-              }
-            } else if (el.src) {
-              el.pause();
-              el.removeAttribute("src");
-              el.load();
-            }
-          }, { threshold: 0.1 });
-          vidObs.observe(el);
-          el._vidObs = vidObs;
+          const vidIO = _getMediaVidIO();
+          vidIO.observe(el);
+          el._vidObs = { disconnect: () => vidIO.unobserve(el) };
         } else {
           el = document.createElement("img");
           el.loading = "lazy";
@@ -15412,7 +15459,7 @@
               ? content.stableUrl || null
               : null;
           if (_cacheTarget && _cacheTarget.startsWith("http")) {
-            attachGifFallback(el, _cacheTarget, _stableUrl);
+            attachGifFallback(el, _cacheTarget, _stableUrl, { skipCache: !!opts?.skipCache });
           } else {
             el.onerror = function () {
               if (this.src !== actualContent && actualContent !== displayUrl) {
@@ -16639,7 +16686,7 @@
             }
           });
 
-          const media = createMediaElement(url, true);
+          const media = createMediaElement(url, true, { skipCache: type === TYPES.EMOJI });
           if (media) wrap.appendChild(media);
 
           if (
@@ -16661,7 +16708,6 @@
           del.style.height = "20px";
           del.style.borderRadius = "0 0 0 6px";
           del.style.background = "rgba(0, 0, 0, 0.6)";
-          del.style.backdropFilter = "blur(2px)";
           del.innerHTML =
             '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:none; display:block;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>';
 
@@ -17852,6 +17898,7 @@
     const _moduleCFinalCleanup = () => {
       _chatEntitySaverObs?.disconnect();
       _chatInputButtonObs?.disconnect();
+      if (_mediaVidIOInst) { _mediaVidIOInst.disconnect(); _mediaVidIOInst = null; }
     };
     CleanupRegistry.add(_moduleCFinalCleanup);
     ModuleCleanupRegistry.add("mod_emoji", _moduleCFinalCleanup);
@@ -18956,8 +19003,7 @@
       return all;
     }
 
-    findWormhole(wormholeId) {
-      const data = this.getData();
+    findWormhole(wormholeId, data = this.getData()) {
       let found = data.wormholes.find((w) => w.id === wormholeId);
       if (found) return { wormhole: found, group: null };
 
@@ -19261,7 +19307,7 @@
 
       const vipList = [];
       data.vipWormholes.forEach((vipId) => {
-        const result = this.findWormhole(vipId);
+        const result = this.findWormhole(vipId, data);
         if (result) {
           const groupName = result.group
             ? result.group.name
@@ -19302,6 +19348,10 @@
 
       this._bindTooltips(container);
 
+      if (container._whRow2Unbind) {
+        container._whRow2Unbind();
+        container._whRow2Unbind = null;
+      }
       if (this.getDockPosition() === "navbar") {
         this._bindNavbarRow2(container, row2);
       }
@@ -19329,11 +19379,16 @@
         row2.style.transform = "translateY(-2px)";
       };
 
-      container.addEventListener("mouseenter", show);
-      container.addEventListener("mouseleave", (e) => {
+      const onContainerLeave = (e) => {
         if (e.relatedTarget && row2.contains(e.relatedTarget)) return;
         hide();
-      });
+      };
+      container.addEventListener("mouseenter", show);
+      container.addEventListener("mouseleave", onContainerLeave);
+      container._whRow2Unbind = () => {
+        container.removeEventListener("mouseenter", show);
+        container.removeEventListener("mouseleave", onContainerLeave);
+      };
       row2.addEventListener("mouseleave", (e) => {
         if (e.relatedTarget && container.contains(e.relatedTarget)) return;
         hide();
@@ -24278,13 +24333,15 @@ unsafeWindow.fetch = function(...args) {
     };
     const BL_TEMP_STYLE_ID = 99;
     const BL_ALL_CLS = [...Object.values(BL_STYLES).map(s => s.cls), "dmt-bl-bot-relay"];
+    const BL_ANY_APPLIED_SEL = BL_ALL_CLS.map(c => "." + c).join(",") + ",.dmt-bl-open,.dmt-bl-s2-merged";
 
     const BOT_TAG_SEL     = '[class*="botTag"]';
     const REPLY_SEL       = '[class*="repliedMessage_"]';
     const GROUP_START_SEL = '[class*="groupStart_"]';
 
-    function _applyBotRelay(container, nameMap) {
-      if (!GMStore.get("bl_bot_relay", true)) return false;
+    function _applyBotRelay(container, nameMap, relayOn = GMStore.get("bl_bot_relay", true)) {
+      if (!relayOn) return false;
+      if (nameMap.size === 0) return false;
       if (BL_ALL_CLS.some(c => c !== "dmt-bl-bot-relay" && container.classList.contains(c))) return false;
       if (!container.querySelector(BOT_TAG_SEL)) return false;
       const replyEl = container.querySelector(REPLY_SEL);
@@ -24297,8 +24354,8 @@ unsafeWindow.fetch = function(...args) {
       return true;
     }
 
-    function _applyBotRelayFollowUps(container, nameMap) {
-      if (!GMStore.get("bl_bot_relay", true)) return;
+    function _applyBotRelayFollowUps(container, nameMap, relayOn = GMStore.get("bl_bot_relay", true)) {
+      if (!relayOn) return;
       if (!container.classList.contains("dmt-bl-bot-relay")) return;
       const li = container.closest("li");
       if (!li) return;
@@ -24320,6 +24377,8 @@ unsafeWindow.fetch = function(...args) {
     }
 
     let _blListCache = null;
+    let _blListVer = 0;
+    let _blMapsCache = null;
     function blLoad() {
       if (_blListCache !== null) return _blListCache;
       _blListCache = GMStore.get(BL_STORE_KEY, [], true) || [];
@@ -24327,7 +24386,19 @@ unsafeWindow.fetch = function(...args) {
     }
     function blSave(arr) {
       _blListCache = arr;
+      _blListVer++;
       GMStore.set(BL_STORE_KEY, arr, true);
+    }
+    function _blGetMaps() {
+      const list = blLoad();
+      if (_blMapsCache && _blMapsCache.src === list && _blMapsCache.ver === _blListVer) return _blMapsCache;
+      _blMapsCache = {
+        src: list,
+        ver: _blListVer,
+        nameMap: new Map(list.map(u => [u.name, u.style ?? 2])),
+        idMap: new Map(list.filter(u => u.id).map(u => [u.id, u.style ?? 2])),
+      };
+      return _blMapsCache;
     }
     function blAdd(name, style = 2, expiresAt = null, id = null) {
       const list = blLoad();
@@ -24537,11 +24608,21 @@ unsafeWindow.fetch = function(...args) {
       });
     }
 
+    function _blClearApplied(container) {
+      const hasAnyBlClass = BL_ALL_CLS.some(c => container.classList.contains(c))
+        || container.classList.contains("dmt-bl-open");
+      if (!hasAnyBlClass) return false;
+      BL_ALL_CLS.forEach(c => container.classList.remove(c));
+      container.classList.remove("dmt-bl-open");
+      delete container.dataset.dmtAuthor;
+      return true;
+    }
+
     function blApplyAll() {
-      const list = blLoad();
-      const nameMap = new Map(list.map(u => [u.name, u.style ?? 2]));
-      const idMap = new Map(list.filter(u => u.id).map(u => [u.id, u.style ?? 2]));
-      document.querySelectorAll(MSG_SEL).forEach(container => {
+      const { nameMap, idMap } = _blGetMaps();
+      const relayOn = GMStore.get("bl_bot_relay", true);
+      const skipLoop = nameMap.size === 0 && !document.querySelector(BL_ANY_APPLIED_SEL);
+      if (!skipLoop) document.querySelectorAll(MSG_SEL).forEach(container => {
         const name = _resolveAuthor(container);
         if (!name) return;
         const id = idMap.size > 0 ? _resolveAuthorId(container) : null;
@@ -24549,15 +24630,9 @@ unsafeWindow.fetch = function(...args) {
         if (matched !== undefined) {
           _applyStyle(container, matched, name);
         } else {
-          const hasAnyBlClass = BL_ALL_CLS.some(c => container.classList.contains(c))
-            || container.classList.contains("dmt-bl-open");
-          if (hasAnyBlClass) {
-            BL_ALL_CLS.forEach(c => container.classList.remove(c));
-            container.classList.remove("dmt-bl-open");
-            delete container.dataset.dmtAuthor;
-          }
-          if (_applyBotRelay(container, nameMap)) {
-            _applyBotRelayFollowUps(container, nameMap);
+          _blClearApplied(container);
+          if (_applyBotRelay(container, nameMap, relayOn)) {
+            _applyBotRelayFollowUps(container, nameMap, relayOn);
           }
         }
       });
@@ -24567,9 +24642,12 @@ unsafeWindow.fetch = function(...args) {
     }
 
     function blApplyNode(container) {
-      const list = blLoad();
-      const nameMap = new Map(list.map(u => [u.name, u.style ?? 2]));
-      const idMap = new Map(list.filter(u => u.id).map(u => [u.id, u.style ?? 2]));
+      const { nameMap, idMap } = _blGetMaps();
+      if (nameMap.size === 0) {
+        if (_blClearApplied(container)) _scheduleBlConverge();
+        return;
+      }
+      const relayOn = GMStore.get("bl_bot_relay", true);
       const name = _resolveAuthor(container);
       if (!name) return;
       const id = idMap.size > 0 ? _resolveAuthorId(container) : null;
@@ -24577,19 +24655,22 @@ unsafeWindow.fetch = function(...args) {
       if (matched !== undefined) {
         _applyStyle(container, matched, name);
       } else {
-        const hasAnyBlClass = BL_ALL_CLS.some(c => container.classList.contains(c))
-          || container.classList.contains("dmt-bl-open");
-        if (hasAnyBlClass) {
-          BL_ALL_CLS.forEach(c => container.classList.remove(c));
-          container.classList.remove("dmt-bl-open");
-          delete container.dataset.dmtAuthor;
-        }
-        if (_applyBotRelay(container, nameMap)) {
-          _applyBotRelayFollowUps(container, nameMap);
+        _blClearApplied(container);
+        if (_applyBotRelay(container, nameMap, relayOn)) {
+          _applyBotRelayFollowUps(container, nameMap, relayOn);
         }
       }
-      _mergeCollapseGroups();
-      _syncDimListener();
+      _scheduleBlConverge();
+    }
+
+    let _blConvergeRaf = 0;
+    function _scheduleBlConverge() {
+      if (_blConvergeRaf) return;
+      _blConvergeRaf = requestAnimationFrame(() => {
+        _blConvergeRaf = 0;
+        _mergeCollapseGroups();
+        _syncDimListener();
+      });
     }
 
     const _blPendingNodes = new WeakSet();
@@ -24623,17 +24704,23 @@ unsafeWindow.fetch = function(...args) {
         _blScanTimers.add(setTimeout(() => { blApplyAll(); _blScanTimers.delete(_blScanTimers.values().next().value); }, 2500));
         return;
       }
+      const hasList = _blGetMaps().nameMap.size > 0;
+      const noticeOn = !!(GMStore.get("bl_hide_discord_blocked", false) || GMStore.get("bl_hide_discord_ignored", false));
+      if (!hasList && !noticeOn) return;
       let hasNewNotice = false;
       for (const mut of mutations) {
         for (const node of mut.addedNodes) {
           if (!(node instanceof Element)) continue;
-          if (node.matches(MSG_SEL)) {
-            _scheduleBlApplyNode(node);
-          } else {
-            node.querySelectorAll?.(MSG_SEL).forEach(_scheduleBlApplyNode);
+          if (hasList) {
+            if (node.matches(MSG_SEL)) {
+              _scheduleBlApplyNode(node);
+            } else {
+              node.querySelectorAll?.(MSG_SEL).forEach(_scheduleBlApplyNode);
+            }
           }
-          if (node.querySelector?.("[class*=\"blockedSystemMessage\"]") ||
-              node.matches?.("[class*=\"blockedSystemMessage\"]")) {
+          if (noticeOn && !hasNewNotice &&
+              (node.querySelector?.("[class*=\"blockedSystemMessage\"]") ||
+               node.matches?.("[class*=\"blockedSystemMessage\"]"))) {
             hasNewNotice = true;
           }
         }
@@ -24647,6 +24734,11 @@ unsafeWindow.fetch = function(...args) {
       document.querySelectorAll(MSG_SEL + ".dmt-bl-s2").forEach(c => {
         const ol = c.closest("ol");
         if (ol) lists.add(ol);
+      });
+      document.querySelectorAll(".dmt-bl-s2-merged").forEach(c => {
+        const ol = c.closest("ol");
+        if (ol) lists.add(ol);
+        else c.classList.remove("dmt-bl-s2-merged");
       });
 
       lists.forEach(ol => {
@@ -24770,6 +24862,10 @@ unsafeWindow.fetch = function(...args) {
       const list = document.createElement("div");
       list.className = "bl-list";
 
+      function closeAllDropdowns() {
+        document.querySelectorAll(".bl-style-dropdown").forEach(d => d.remove());
+      }
+
       function renderList() {
         list.innerHTML = "";
         const entries = blLoad();
@@ -24779,10 +24875,6 @@ unsafeWindow.fetch = function(...args) {
           empty.textContent = t("mu_empty");
           list.appendChild(empty);
           return;
-        }
-
-        function closeAllDropdowns() {
-          document.querySelectorAll(".bl-style-dropdown").forEach(d => d.remove());
         }
 
         entries.forEach(({ name, addedAt, style = 2, expiresAt }) => {
@@ -25648,13 +25740,18 @@ unsafeWindow.fetch = function(...args) {
     }
 
     let _blCtxContainer = null;
+    let _blCtxAt = 0;
+    const BL_CTX_FRESH_MS = 60000;
 
     function _onContextMenu(e) {
       _blCtxContainer = e.target.closest(MSG_SEL) || null;
+      _blCtxAt = Date.now();
     }
 
     const _blMenuObserver = new MutationObserver((mutations) => {
       if (document.hidden) return;
+      if (!_blCtxContainer) return;
+      if (Date.now() - _blCtxAt > BL_CTX_FRESH_MS) { _blCtxContainer = null; return; }
       for (const mut of mutations) {
         for (const node of mut.addedNodes) {
           if (!(node instanceof Element)) continue;
@@ -25872,6 +25969,7 @@ unsafeWindow.fetch = function(...args) {
     const _moduleHFullCleanup = () => {
       _blObserver.disconnect();
       _blMenuObserver.disconnect();
+      if (_blConvergeRaf) { cancelAnimationFrame(_blConvergeRaf); _blConvergeRaf = 0; }
       document.removeEventListener("contextmenu", _onContextMenu, true);
       document.removeEventListener("keydown",     _onBlKeydown,   true);
       document.removeEventListener("mousemove",   _onDimMousemove);
@@ -26010,6 +26108,12 @@ unsafeWindow.fetch = function(...args) {
       }
     }
 
+    function _cmpTsDesc(a, b) {
+      const x = a.timestamp, y = b.timestamp;
+      if (x.length === y.length) return x < y ? 1 : (x > y ? -1 : 0);
+      return y.localeCompare(x);
+    }
+
     async function _idbGetByScope(scope) {
       try {
         const db = await _idbOpen();
@@ -26018,7 +26122,7 @@ unsafeWindow.fetch = function(...args) {
           const idx = tx.objectStore("messages").index("scope");
           const req = idx.getAll(IDBKeyRange.only(scope));
           req.onsuccess = () => {
-            const sorted = req.result.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+            const sorted = req.result.sort(_cmpTsDesc);
             resolve(sorted);
           };
           req.onerror = e => reject(e.target.error);
@@ -26069,7 +26173,7 @@ unsafeWindow.fetch = function(...args) {
               if ((cursor.value.content || "").toLowerCase().includes(kw)) results.push(cursor.value);
               cursor.continue();
             } else {
-              results.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+              results.sort(_cmpTsDesc);
               resolve(results);
             }
           };
@@ -26174,7 +26278,7 @@ unsafeWindow.fetch = function(...args) {
           req.onsuccess = e => {
             const cursor = e.target.result;
             if (cursor) { results.push(cursor.value); cursor.continue(); }
-            else { results.sort((a, b) => b.timestamp.localeCompare(a.timestamp)); resolve(results); }
+            else { results.sort(_cmpTsDesc); resolve(results); }
           };
           req.onerror = e => reject(e.target.error);
         });
@@ -26922,7 +27026,7 @@ unsafeWindow.fetch = function(...args) {
       const jumpBtn2 = document.createElement("button");
       jumpBtn2.className = "mp-action-btn";
       jumpBtn2.title = mp("jump_to");
-      jumpBtn2.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>';
+      _mpSetSvg(jumpBtn2, '<svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>');
       jumpBtn2.onclick = e => {
         e.stopPropagation();
         const g = _getCtx()?.guildId || "@me";
@@ -26934,7 +27038,7 @@ unsafeWindow.fetch = function(...args) {
       const delBtn2 = document.createElement("button");
       delBtn2.className = "mp-action-btn danger";
       delBtn2.title = mp("delete_single");
-      delBtn2.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
+      _mpSetSvg(delBtn2, '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>');
       delBtn2.onclick = async e => {
         e.stopPropagation();
         if (!e.shiftKey) {
@@ -26957,7 +27061,7 @@ unsafeWindow.fetch = function(...args) {
       const favBtn2 = document.createElement("button");
       favBtn2.className = "mp-action-btn mp-fav-btn" + (_favIds.has(msg.id) ? " mp-fav-active" : "");
       favBtn2.title = _favIds.has(msg.id) ? mp("fav_remove") : mp("fav_add");
-      favBtn2.innerHTML = _favIds.has(msg.id) ? _SVG_HEART_FULL : _SVG_HEART_EMPTY;
+      _mpSetSvg(favBtn2, _favIds.has(msg.id) ? _SVG_HEART_FULL : _SVG_HEART_EMPTY);
       favBtn2.onclick = e => { e.stopPropagation(); _mpToggleFav(msg.id, favBtn2); };
 
       actsEl.append(jumpBtn2, favBtn2, delBtn2);
@@ -28416,6 +28520,45 @@ unsafeWindow.fetch = function(...args) {
       }
     }
 
+    let _mpFillToken = 0;
+    const MP_FILL_SYNC_ROWS  = 60;
+    const MP_FILL_CHUNK_ROWS = 60;
+
+    function _mpMakeFiller(tasks) {
+      let ti = 0, ii = 0;
+      return function step(budget) {
+        while (ti < tasks.length && budget > 0) {
+          const task = tasks[ti];
+          const end = Math.min(task.items.length, ii + budget);
+          if (end > ii) {
+            const frag = document.createDocumentFragment();
+            try { for (let k = ii; k < end; k++) frag.appendChild(task.build(task.items[k], k)); }
+            finally { task.parent.appendChild(frag); }
+            budget -= (end - ii);
+            ii = end;
+          }
+          if (ii >= task.items.length) { ti++; ii = 0; }
+        }
+        return ti >= tasks.length;
+      };
+    }
+
+    function _mpRunFillRest(step, anchorEl, token, onDone) {
+      const tick = () => {
+        if (token !== _mpFillToken || !anchorEl || !anchorEl.isConnected) return;
+        let finished;
+        try {
+          finished = step(MP_FILL_CHUNK_ROWS);
+        } catch (err) {
+          DEBUG && console.warn("[MyPosts] chunked fill aborted:", err);
+          finished = true;
+        }
+        if (finished) onDone?.();
+        else requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }
+
     function _renderMessages(msgList, selCount, createBtn, cancelBtn, searchInput) {
       const q = (searchInput?.value || "").toLowerCase();
 
@@ -28426,6 +28569,7 @@ unsafeWindow.fetch = function(...args) {
             if (meta?.isFullySynced) {
               _idbSearch(scope, q).then(results => {
                 const filtered = results.filter(m => _passesTypeFilter(m) && _passesChanFilter(m));
+                const fillToken = ++_mpFillToken;
                 msgList.innerHTML = "";
                 if (filtered.length === 0) {
                   msgList.appendChild(Object.assign(document.createElement("div"), {
@@ -28434,6 +28578,7 @@ unsafeWindow.fetch = function(...args) {
                   return;
                 }
                 const outerFrag = document.createDocumentFragment();
+                const fillTasks = [];
                 let rowIdx = 0;
                 _groupByDate(filtered).forEach((msgs, dateKey) => {
                   const gh = document.createElement("div");
@@ -28442,14 +28587,17 @@ unsafeWindow.fetch = function(...args) {
                   gh.append(Object.assign(document.createElement("span"), { textContent: _fmtDateKey(dateKey) }));
                   const rowsWrap = document.createElement("div");
                   rowsWrap.className = "mp-rows-wrap"; rowsWrap.dataset.dateKey = dateKey;
-                  const rowFrag = document.createDocumentFragment();
-                  msgs.forEach(msg => rowFrag.appendChild(
-                    _buildMsgRow(msg, rowIdx++, filtered, selCount, createBtn, cancelBtn, () => {})
-                  ));
-                  rowsWrap.appendChild(rowFrag);
+                  const baseIdx = rowIdx; rowIdx += msgs.length;
+                  fillTasks.push({
+                    parent: rowsWrap, items: msgs,
+                    build: (msg, k) => _buildMsgRow(msg, baseIdx + k, filtered, selCount, createBtn, cancelBtn, () => {}),
+                  });
                   outerFrag.append(gh, rowsWrap);
                 });
+                const fillStep = _mpMakeFiller(fillTasks);
+                const fillDone = fillStep(MP_FILL_SYNC_ROWS);
                 msgList.appendChild(outerFrag);
+                if (!fillDone) _mpRunFillRest(fillStep, msgList.firstElementChild, fillToken);
               }).catch(() => _renderMessagesFallback(msgList, selCount, createBtn, cancelBtn, q));
             } else {
               _renderMessagesFallback(msgList, selCount, createBtn, cancelBtn, q);
@@ -28466,23 +28614,30 @@ unsafeWindow.fetch = function(...args) {
       const filtered = _browseData.filter(m =>
         _passesTypeFilter(m) && _passesChanFilter(m) && (!q || (m.content || "").toLowerCase().includes(q))
       );
+      const fillToken = ++_mpFillToken;
       msgList.innerHTML = "";
 
       if (_browseView === "grid") {
         msgList.classList.add("grid-view");
         const mediaItems = filtered.filter(m => _getThumbUrl(m) || _getVideoUrl(m));
+        const gridDone = () => {
+          if (_browseTotal !== null && _browseOffset < _browseTotal)
+            _setupBrowseSentinel();
+        };
         if (mediaItems.length === 0) {
           msgList.classList.remove("grid-view");
           msgList.appendChild(Object.assign(document.createElement("div"), {
             className: "mp-empty", textContent: mp("no_media"),
           }));
+          gridDone();
         } else {
-          mediaItems.forEach((msg, idx) => {
-            msgList.appendChild(_buildGridItem(msg, idx, mediaItems, selCount, createBtn, cancelBtn));
-          });
+          const gridStep = _mpMakeFiller([{
+            parent: msgList, items: mediaItems,
+            build: (msg, idx) => _buildGridItem(msg, idx, mediaItems, selCount, createBtn, cancelBtn),
+          }]);
+          if (gridStep(MP_FILL_SYNC_ROWS)) gridDone();
+          else _mpRunFillRest(gridStep, msgList.firstElementChild, fillToken, gridDone);
         }
-        if (_browseTotal !== null && _browseOffset < _browseTotal)
-          _setupBrowseSentinel();
         return;
       }
 
@@ -28513,6 +28668,7 @@ unsafeWindow.fetch = function(...args) {
       const collapsed = new Set(GMStore.get(SK_COLLAPSED, [], true));
       const groups = _groupByDate(filtered);
       const outerFrag = document.createDocumentFragment();
+      const fillTasks = [];
       let rowIdx = 0;
 
       groups.forEach((msgs, dateKey) => {
@@ -28565,21 +28721,27 @@ unsafeWindow.fetch = function(...args) {
 
         gh.append(chev, label, selAllBtn);
 
-        const rowFrag = document.createDocumentFragment();
-        msgs.forEach(msg => {
-          const globalIdx = rowIdx++;
-          rowFrag.appendChild(_buildMsgRow(msg, globalIdx, filtered, selCount, createBtn, cancelBtn, refreshSelAll));
+        const baseIdx = rowIdx; rowIdx += msgs.length;
+        fillTasks.push({
+          parent: rowsWrap, items: msgs,
+          build: (msg, k) => _buildMsgRow(msg, baseIdx + k, filtered, selCount, createBtn, cancelBtn, refreshSelAll),
         });
-        rowsWrap.appendChild(rowFrag);
 
         outerFrag.appendChild(gh);
         outerFrag.appendChild(rowsWrap);
       });
 
+      const fillStep = _mpMakeFiller(fillTasks);
+      const fillDone = fillStep(MP_FILL_SYNC_ROWS);
+
       msgList.appendChild(outerFrag);
 
-      if (_browseTotal !== null && _browseOffset < _browseTotal)
-        _setupBrowseSentinel();
+      const listDone = () => {
+        if (_browseTotal !== null && _browseOffset < _browseTotal)
+          _setupBrowseSentinel();
+      };
+      if (fillDone) listDone();
+      else _mpRunFillRest(fillStep, msgList.firstElementChild, fillToken, listDone);
     }
 
     function _renderMsgContent(el, content) {
@@ -28696,6 +28858,19 @@ unsafeWindow.fetch = function(...args) {
     const _SVG_HEART_EMPTY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
     const _SVG_HEART_FULL  = '<svg viewBox="0 0 24 24" fill="#f23f70" stroke="#f23f70" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>';
 
+    const _mpSvgTplCache = new Map();
+    function _mpSetSvg(btn, html) {
+      let tpl = _mpSvgTplCache.get(html);
+      if (!tpl) {
+        const holder = document.createElement("span");
+        holder.innerHTML = html;
+        tpl = holder.firstElementChild;
+        if (!tpl) { btn.innerHTML = html; return; }
+        _mpSvgTplCache.set(html, tpl);
+      }
+      btn.replaceChildren(tpl.cloneNode(true));
+    }
+
     function _mpCopyToClipboard(text) {
       try {
         typeof GM_setClipboard === "function" ? GM_setClipboard(text) : navigator.clipboard.writeText(text);
@@ -28807,6 +28982,7 @@ unsafeWindow.fetch = function(...args) {
       if (thumb) {
         const img = document.createElement("img");
         img.className = "mp-msg-thumb"; img.src = thumb; img.alt = "";
+        img.loading = "lazy"; img.decoding = "async";
         if (_isExpired(thumb)) { img.style.opacity = "0.5"; img.title = mp("img_expired"); }
         img.onclick = e => { e.stopPropagation(); _lightbox(thumb, msg); };
         row.appendChild(img);
@@ -28881,7 +29057,7 @@ unsafeWindow.fetch = function(...args) {
       const jumpBtn = document.createElement("button");
       jumpBtn.className = "mp-action-btn";
       jumpBtn.title = mp("jump_to");
-      jumpBtn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>';
+      _mpSetSvg(jumpBtn, '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>');
       jumpBtn.onclick = e => { e.stopPropagation(); _mpJumpToMessage(msg.channel_id, msg.id); };
 
       let copyContentBtn = null;
@@ -28889,7 +29065,7 @@ unsafeWindow.fetch = function(...args) {
         copyContentBtn = document.createElement("button");
         copyContentBtn.className = "mp-action-btn";
         copyContentBtn.title = mp("copy_content");
-        copyContentBtn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>';
+        _mpSetSvg(copyContentBtn, '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>');
         copyContentBtn.onclick = e => { e.stopPropagation(); _mpCopyToClipboard(msg.content); };
       }
 
@@ -28899,14 +29075,14 @@ unsafeWindow.fetch = function(...args) {
         copyMediaBtn = document.createElement("button");
         copyMediaBtn.className = "mp-action-btn";
         copyMediaBtn.title = mp("copy_media");
-        copyMediaBtn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.9 13.98l2.1 2.52 3.1-3.99L18.1 17H5.9l3-3.02z"/></svg>';
+        _mpSetSvg(copyMediaBtn, '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.9 13.98l2.1 2.52 3.1-3.99L18.1 17H5.9l3-3.02z"/></svg>');
         copyMediaBtn.onclick = e => { e.stopPropagation(); _mpCopyToClipboard(mediaUrl); };
       }
 
       const delBtn = document.createElement("button");
       delBtn.className = "mp-action-btn danger";
       delBtn.title = mp("delete_single");
-      delBtn.innerHTML = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
+      _mpSetSvg(delBtn, '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>');
       delBtn.onclick = async e => {
         e.stopPropagation();
         if (!e.shiftKey) {
@@ -28933,7 +29109,7 @@ unsafeWindow.fetch = function(...args) {
       const favBtn = document.createElement("button");
       favBtn.className = "mp-action-btn mp-fav-btn" + (_favIds.has(msg.id) ? " mp-fav-active" : "");
       favBtn.title = _favIds.has(msg.id) ? mp("fav_remove") : mp("fav_add");
-      favBtn.innerHTML = _favIds.has(msg.id) ? _SVG_HEART_FULL : _SVG_HEART_EMPTY;
+      _mpSetSvg(favBtn, _favIds.has(msg.id) ? _SVG_HEART_FULL : _SVG_HEART_EMPTY);
       favBtn.onclick = e => { e.stopPropagation(); _mpToggleFav(msg.id, favBtn); };
 
       acts.append(jumpBtn, ...(copyContentBtn ? [copyContentBtn] : []), ...(copyMediaBtn ? [copyMediaBtn] : []), favBtn, delBtn);
@@ -29503,7 +29679,7 @@ unsafeWindow.fetch = function(...args) {
       const jumpCorner = document.createElement("button");
       jumpCorner.className = "mp-jump-corner";
       jumpCorner.title = mp("jump_to");
-      jumpCorner.innerHTML = '<svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>';
+      _mpSetSvg(jumpCorner, '<svg viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>');
       jumpCorner.onclick = e => { e.stopPropagation(); _mpJumpToMessage(msg.channel_id, msg.id); };
       item.appendChild(jumpCorner);
 
@@ -29520,7 +29696,7 @@ unsafeWindow.fetch = function(...args) {
 
       const db = document.createElement("button");
       db.className = "mp-action-btn danger"; db.title = mp("delete_single");
-      db.innerHTML = '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
+      _mpSetSvg(db, '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>');
       db.onclick = async e => {
         e.stopPropagation();
         if (!e.shiftKey) {
@@ -32481,6 +32657,8 @@ if (type === "warn" && scanLimit !== null) {
           const req   = idx.openCursor(range, "prev");
           const items = [];
           let skipped = !cursorPos;
+          const contentQ  = contentFilter ? contentFilter.toLowerCase() : "";
+          const mentionQ  = mentionsUserQuery ? mentionsUserQuery.toLowerCase() : "";
           req.onsuccess = e => {
             const cur = e.target.result;
             if (!cur || items.length >= pageSize) { resolve(items); return; }
@@ -32497,9 +32675,9 @@ if (type === "warn" && scanLimit !== null) {
             const chanOk   = !chanFilter || chanFilter === "all" || v.channel_id === chanFilter;
             const authorOk = !authorTypeFilter || authorTypeFilter === "all" || v.author_type === authorTypeFilter;
             const pinnedOk = !pinnedOnly || v.pinned === true;
-            const contentOk = !contentFilter || (v.content || "").toLowerCase().includes(contentFilter.toLowerCase());
+            const contentOk = !contentQ || (v.content || "").toLowerCase().includes(contentQ);
             const mentionsOk = !mentionsFilter || mentionsFilter === "all" || (mentionsFilter === "specific"
-              ? (!mentionsUserQuery || (Array.isArray(v.mentions) && v.mentions.some(m => (m.name || "").toLowerCase().includes(mentionsUserQuery.toLowerCase()))))
+              ? (!mentionQ || (Array.isArray(v.mentions) && v.mentions.some(m => (m.name || "").toLowerCase().includes(mentionQ))))
               : (Array.isArray(v.mentions) && (mentionsFilter === "has" ? v.mentions.length > 0 : v.mentions.length === 0)));
             if (typeOk && chanOk && authorOk && pinnedOk && contentOk && mentionsOk) items.push(v);
             cur.continue();
