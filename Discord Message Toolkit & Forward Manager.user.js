@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.7.6
+// @version      2.9.7.7
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -35885,9 +35885,10 @@ if (type === "warn" && scanLimit !== null) {
     const _fiLightboxBtns = new Map();
     const _fiDownloadAllBtns = new Map();
     const _fiCloseAllBtns = new Map();
+    const _fiSatelliteCatchers = new Map();
 
     const _fiSatelliteHideTimers = new Map();
-    const _FI_SATELLITE_HIDE_DELAY = 150;
+    const _FI_SATELLITE_HIDE_DELAY = 220;
 
     const _FI_SATELLITE_TRANSITION = "opacity 0.18s ease, transform 0.18s cubic-bezier(0.34,1.56,0.64,1)";
 
@@ -35907,10 +35908,12 @@ if (type === "warn" && scanLimit !== null) {
       const lbBtn = _fiLightboxBtns.get(stackId);
       const dlAllBtn = _fiDownloadAllBtns.get(stackId);
       const closeBtn = _fiCloseAllBtns.get(stackId);
+      const catcher = _fiSatelliteCatchers.get(stackId);
       if (handle) _fiSetSatelliteVisible(handle, true);
       if (lbBtn) _fiSetSatelliteVisible(lbBtn, true);
       if (dlAllBtn) _fiSetSatelliteVisible(dlAllBtn, true);
       if (closeBtn) _fiSetSatelliteVisible(closeBtn, true);
+      if (catcher) _fiSetSatelliteVisible(catcher, true);
     }
 
     function _fiScheduleHideSatelliteGroup(stackId) {
@@ -35922,10 +35925,12 @@ if (type === "warn" && scanLimit !== null) {
         const lbBtn = _fiLightboxBtns.get(stackId);
         const dlAllBtn = _fiDownloadAllBtns.get(stackId);
         const closeBtn = _fiCloseAllBtns.get(stackId);
+        const catcher = _fiSatelliteCatchers.get(stackId);
         if (handle) _fiSetSatelliteVisible(handle, false);
         if (lbBtn) _fiSetSatelliteVisible(lbBtn, false);
         if (dlAllBtn) _fiSetSatelliteVisible(dlAllBtn, false);
         if (closeBtn) _fiSetSatelliteVisible(closeBtn, false);
+        if (catcher) _fiSetSatelliteVisible(catcher, false);
       }, _FI_SATELLITE_HIDE_DELAY);
       _fiSatelliteHideTimers.set(stackId, timerId);
     }
@@ -36049,7 +36054,7 @@ if (type === "warn" && scanLimit !== null) {
       if (img) img.style.cssText = _FI_IMG_STYLE_NATURAL;
     }
 
-    const _FI_HANDLE_SIZE = 22;
+    const _FI_HANDLE_SIZE = 24;
     const _FI_HANDLE_OFFSET = _FI_HANDLE_SIZE / 2;
 
     function _fiEnsureStackHandle(stackId, anchorRect) {
@@ -36117,7 +36122,7 @@ if (type === "warn" && scanLimit !== null) {
       }
     }
 
-    const _FI_LB_BTN_SIZE = 18;
+    const _FI_LB_BTN_SIZE = 20;
     const _FI_LB_BTN_DIST = 42;
 
     function _fiSatelliteAngle(index, total) {
@@ -36128,6 +36133,20 @@ if (type === "warn" && scanLimit !== null) {
     function _fiSatelliteOffset(angleDeg, dist) {
       const rad = (angleDeg * Math.PI) / 180;
       return { dx: -Math.sin(rad) * dist, dy: -Math.cos(rad) * dist };
+    }
+
+    function _fiSatelliteBounds() {
+      const hr = _FI_HANDLE_SIZE / 2;
+      let minX = -hr, maxX = hr, minY = -hr, maxY = hr;
+      const br = _FI_LB_BTN_SIZE / 2;
+      for (let i = 0; i < 3; i++) {
+        const { dx, dy } = _fiSatelliteOffset(_fiSatelliteAngle(i, 3), _FI_LB_BTN_DIST);
+        minX = Math.min(minX, dx - br);
+        maxX = Math.max(maxX, dx + br);
+        minY = Math.min(minY, dy - br);
+        maxY = Math.max(maxY, dy + br);
+      }
+      return { minX, maxX, minY, maxY };
     }
 
     function _fiEnsureLightboxBtn(stackId, anchorRect) {
@@ -36315,6 +36334,44 @@ if (type === "warn" && scanLimit !== null) {
       }
     }
 
+    function _fiEnsureSatelliteCatcher(stackId, anchorRect) {
+      let catcher = _fiSatelliteCatchers.get(stackId);
+      if (!catcher) {
+        catcher = document.createElement("div");
+        catcher.className = "dmt-fi-satellite-catcher";
+        catcher.style.cssText = [
+          "position:fixed",
+          "background:transparent",
+          "border:none",
+          "opacity:0",
+          "pointer-events:none",
+          "cursor:default",
+        ].join(";");
+        catcher.addEventListener("mouseenter", () => _fiShowSatelliteGroup(stackId), { signal: _fiDragAC.signal });
+        catcher.addEventListener("mouseleave", () => _fiScheduleHideSatelliteGroup(stackId), { signal: _fiDragAC.signal });
+        _fiSatelliteCatchers.set(stackId, catcher);
+      }
+      if (anchorRect) {
+        const handleCenterX = anchorRect.left - _FI_HANDLE_OFFSET + _FI_HANDLE_SIZE / 2;
+        const handleCenterY = anchorRect.top + anchorRect.height - _FI_HANDLE_OFFSET + _FI_HANDLE_SIZE / 2;
+        const b = _fiSatelliteBounds();
+        catcher.style.left = Math.round(handleCenterX + b.minX) + "px";
+        catcher.style.top = Math.round(handleCenterY + b.minY) + "px";
+        catcher.style.width = Math.round(b.maxX - b.minX) + "px";
+        catcher.style.height = Math.round(b.maxY - b.minY) + "px";
+      }
+      dmtGetPersistentLayer().appendChild(catcher);
+      return catcher;
+    }
+
+    function _fiRemoveSatelliteCatcher(stackId) {
+      const catcher = _fiSatelliteCatchers.get(stackId);
+      if (catcher) {
+        catcher.remove();
+        _fiSatelliteCatchers.delete(stackId);
+      }
+    }
+
     function _fiInlineWidth(el) {
       const w = parseFloat(el.style.width);
       return Number.isFinite(w) && w > 0 ? w : _FI_BASE_W;
@@ -36357,6 +36414,7 @@ if (type === "warn" && scanLimit !== null) {
       orderedIds.forEach((id) => _fiSyncAnim(id));
       if (grouped) {
         const freshAnchorRect = _fiAnchorRect(_fiInstances.get(orderedIds[0]));
+        _fiEnsureSatelliteCatcher(stackId, freshAnchorRect);
         _fiEnsureStackHandle(stackId, freshAnchorRect);
         _fiEnsureLightboxBtn(stackId, freshAnchorRect);
         _fiEnsureDownloadAllBtn(stackId, freshAnchorRect);
@@ -36366,6 +36424,7 @@ if (type === "warn" && scanLimit !== null) {
         _fiRemoveLightboxBtn(stackId);
         _fiRemoveDownloadAllBtn(stackId);
         _fiRemoveCloseAllBtn(stackId);
+        _fiRemoveSatelliteCatcher(stackId);
       }
     }
 
@@ -36640,6 +36699,7 @@ if (type === "warn" && scanLimit !== null) {
       _fiRemoveLightboxBtn(stackId);
       _fiRemoveDownloadAllBtn(stackId);
       _fiRemoveCloseAllBtn(stackId);
+      _fiRemoveSatelliteCatcher(stackId);
       _fiPersistAll();
     }
 
@@ -36810,6 +36870,7 @@ if (type === "warn" && scanLimit !== null) {
         if (members[0] !== id) return;
         if (!_fiStackHandles.has(curInst.stackId)) return;
         const freshRect = _fiAnchorRect(curInst);
+        _fiEnsureSatelliteCatcher(curInst.stackId, freshRect);
         _fiEnsureStackHandle(curInst.stackId, freshRect);
         _fiEnsureLightboxBtn(curInst.stackId, freshRect);
         _fiEnsureDownloadAllBtn(curInst.stackId, freshRect);
@@ -36896,16 +36957,33 @@ if (type === "warn" && scanLimit !== null) {
       newTabBtn.style.display = "none";
       newTabBtn.style.zIndex = "2";
       win.appendChild(newTabBtn);
+      const lightboxBtn = _fiMakeCtrlBtn(
+        '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>',
+        t("fi_lightbox_btn_tip"),
+        () => {
+          const curInst = _fiInstances.get(id);
+          _fiOpenLightbox(curInst ? curInst.stackId : null);
+        },
+      );
+      lightboxBtn.style.position = "absolute";
+      lightboxBtn.style.top = "56px";
+      lightboxBtn.style.right = "4px";
+      lightboxBtn.style.display = "none";
+      lightboxBtn.style.zIndex = "2";
+      win.appendChild(lightboxBtn);
       controls.addEventListener("mousedown", (e) => e.stopPropagation(), { signal: ac.signal });
       controls.addEventListener("dblclick", (e) => e.stopPropagation(), { signal: ac.signal });
       newTabBtn.addEventListener("mousedown", (e) => e.stopPropagation(), { signal: ac.signal });
       newTabBtn.addEventListener("dblclick", (e) => e.stopPropagation(), { signal: ac.signal });
+      lightboxBtn.addEventListener("mousedown", (e) => e.stopPropagation(), { signal: ac.signal });
+      lightboxBtn.addEventListener("dblclick", (e) => e.stopPropagation(), { signal: ac.signal });
       win.addEventListener(
         "mouseenter",
         () => {
           if (_fiCtrlFits()) {
             controls.style.display = "flex";
             newTabBtn.style.display = "flex";
+            lightboxBtn.style.display = "flex";
           }
           const curInst = _fiInstances.get(id);
           if (curInst && curInst.stackId != null) _fiShowSatelliteGroup(curInst.stackId);
@@ -36917,6 +36995,7 @@ if (type === "warn" && scanLimit !== null) {
         () => {
           controls.style.display = "none";
           newTabBtn.style.display = "none";
+          lightboxBtn.style.display = "none";
           const curInst = _fiInstances.get(id);
           if (curInst && curInst.stackId != null) _fiScheduleHideSatelliteGroup(curInst.stackId);
         },
@@ -37090,6 +37169,14 @@ if (type === "warn" && scanLimit !== null) {
             closeBtn.style.left = Math.round(handleCenterX + dx - _FI_LB_BTN_SIZE / 2) + "px";
             closeBtn.style.top = Math.round(handleCenterY + dy - _FI_LB_BTN_SIZE / 2) + "px";
           }
+          const catcher = _fiSatelliteCatchers.get(_fiGroupDraggingStackId);
+          if (catcher && handle) {
+            const b = _fiSatelliteBounds();
+            catcher.style.left = Math.round(handleCenterX + b.minX) + "px";
+            catcher.style.top = Math.round(handleCenterY + b.minY) + "px";
+            catcher.style.width = Math.round(b.maxX - b.minX) + "px";
+            catcher.style.height = Math.round(b.maxY - b.minY) + "px";
+          }
           return;
         }
         if (_fiDraggingId == null) return;
@@ -37194,6 +37281,7 @@ if (type === "warn" && scanLimit !== null) {
           const members = _fiStackMembers(inst.stackId);
           if (members.length > 1) {
             const anchorRect = _fiAnchorRect(_fiInstances.get(members[0]));
+            _fiEnsureSatelliteCatcher(inst.stackId, anchorRect);
             _fiEnsureStackHandle(inst.stackId, anchorRect);
             _fiEnsureLightboxBtn(inst.stackId, anchorRect);
             _fiEnsureDownloadAllBtn(inst.stackId, anchorRect);
@@ -37306,6 +37394,24 @@ if (type === "warn" && scanLimit !== null) {
       passive: true,
       signal: _fiHoverAC.signal,
     });
+    document.addEventListener(
+      "click",
+      (e) => {
+        if (_fiHoverBtn.style.display === "none") return;
+        if (e.target === _fiHoverBtn || _fiHoverBtn.contains(e.target)) return;
+        _fiHoverHide();
+      },
+      { capture: true, signal: _fiHoverAC.signal },
+    );
+    window.addEventListener("ms:locationchange", () => _fiHoverHide(), {
+      passive: true,
+      signal: _fiHoverAC.signal,
+    });
+    const _fiHoverWatchdog = setInterval(() => {
+      if (_fiHoverBtn.style.display !== "none" && _fiHoverTarget && !_fiHoverTarget.isConnected) {
+        _fiHoverHide();
+      }
+    }, 400);
 
     function _fiCollectForLightbox(originStackId) {
       const originItems = [];
@@ -37733,6 +37839,8 @@ if (type === "warn" && scanLimit !== null) {
       _fiDownloadAllBtns.clear();
       _fiCloseAllBtns.forEach((btn) => btn.remove());
       _fiCloseAllBtns.clear();
+      _fiSatelliteCatchers.forEach((catcher) => catcher.remove());
+      _fiSatelliteCatchers.clear();
       _fiSatelliteHideTimers.forEach((timerId) => clearTimeout(timerId));
       _fiSatelliteHideTimers.clear();
     }
@@ -37807,6 +37915,7 @@ if (type === "warn" && scanLimit !== null) {
       _fiCloseAll();
       _fiHoverAC.abort();
       _fiHoverBtn.remove();
+      clearInterval(_fiHoverWatchdog);
       _fiDragAC.abort();
       document.getElementById("dmt-fi-lb-style")?.remove();
       _floatImageInstance = null;
