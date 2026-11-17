@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.7.7
+// @version      2.9.7.9
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -63,7 +63,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.7.6";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.7.9";
 
   const GMStore = {
     
@@ -1294,6 +1294,7 @@
       fi_lightbox_btn_tip: "Browse all floating images in a lightbox",
       fi_downloadall_btn_tip: "Download all images in this stack",
       fi_downloadall_toast: "⬇️ Downloading {n} images",
+      fi_max_windows_toast: "⚠️ Max {n} floating windows reached — close a few first",
       fi_closeall_btn_tip: "Close and remove this entire stack",
       fi_hover_btn_tip: "Float this image",
       fi_lb_exit: "Exit lightbox",
@@ -2037,6 +2038,7 @@
       fi_lightbox_btn_tip: "以燈箱瀏覽所有浮動圖片",
       fi_downloadall_btn_tip: "下載這一疊所有圖片",
       fi_downloadall_toast: "⬇️ 正在下載 {n} 張圖片",
+      fi_max_windows_toast: "⚠️ 已達 {n} 個浮動視窗上限，請先關閉幾個",
       fi_closeall_btn_tip: "關閉並移除整疊圖片",
       fi_hover_btn_tip: "浮動此圖片",
       fi_lb_exit: "離開燈箱",
@@ -2742,6 +2744,7 @@
       fi_lightbox_btn_tip: "以灯箱浏览所有浮动图片",
       fi_downloadall_btn_tip: "下载这一叠所有图片",
       fi_downloadall_toast: "⬇️ 正在下载 {n} 张图片",
+      fi_max_windows_toast: "⚠️ 已达 {n} 个浮动窗口上限，请先关闭几个",
       fi_closeall_btn_tip: "关闭并移除整叠图片",
       fi_hover_btn_tip: "浮动此图片",
       fi_lb_exit: "退出灯箱",
@@ -3439,6 +3442,7 @@
       fi_lightbox_btn_tip: "すべてのフロート画像をライトボックスで閲覧",
       fi_downloadall_btn_tip: "このスタックの画像をすべてダウンロード",
       fi_downloadall_toast: "⬇️ {n} 枚の画像をダウンロード中",
+      fi_max_windows_toast: "⚠️ フロートウィンドウが上限の{n}個に達しました。いくつか閉じてください",
       fi_closeall_btn_tip: "このスタックを閉じてすべて削除",
       fi_hover_btn_tip: "この画像をフロート表示",
       fi_lb_exit: "ライトボックスを終了",
@@ -4136,6 +4140,7 @@
       fi_lightbox_btn_tip: "떠 있는 모든 이미지를 라이트박스로 보기",
       fi_downloadall_btn_tip: "이 스택의 모든 이미지 다운로드",
       fi_downloadall_toast: "⬇️ 이미지 {n}장 다운로드 중",
+      fi_max_windows_toast: "⚠️ 떠 있는 창이 최대 {n}개에 도달했습니다. 몇 개를 닫아주세요",
       fi_closeall_btn_tip: "이 스택을 닫고 모두 제거",
       fi_hover_btn_tip: "이 이미지 띄우기",
       fi_lb_exit: "라이트박스 종료",
@@ -4824,6 +4829,7 @@
       fi_lightbox_btn_tip: "Ver todas las imágenes flotantes en un visor",
       fi_downloadall_btn_tip: "Descargar todas las imágenes de esta pila",
       fi_downloadall_toast: "⬇️ Descargando {n} imágenes",
+      fi_max_windows_toast: "⚠️ Se alcanzó el límite de {n} ventanas flotantes, cierra algunas primero",
       fi_closeall_btn_tip: "Cerrar y eliminar toda esta pila",
       fi_hover_btn_tip: "Flotar esta imagen",
       fi_lb_exit: "Salir del visor",
@@ -5521,6 +5527,7 @@
       fi_lightbox_btn_tip: "Ver todas as imagens flutuantes em um visualizador",
       fi_downloadall_btn_tip: "Baixar todas as imagens desta pilha",
       fi_downloadall_toast: "⬇️ Baixando {n} imagens",
+      fi_max_windows_toast: "⚠️ Limite de {n} janelas flutuantes atingido, feche algumas primeiro",
       fi_closeall_btn_tip: "Fechar e remover toda esta pilha",
       fi_hover_btn_tip: "Flutuar esta imagem",
       fi_lb_exit: "Sair do visualizador",
@@ -6218,6 +6225,7 @@
       fi_lightbox_btn_tip: "Parcourir toutes les images flottantes dans une visionneuse",
       fi_downloadall_btn_tip: "Télécharger toutes les images de cette pile",
       fi_downloadall_toast: "⬇️ Téléchargement de {n} images",
+      fi_max_windows_toast: "⚠️ Limite de {n} fenêtres flottantes atteinte, fermez-en quelques-unes",
       fi_closeall_btn_tip: "Fermer et supprimer toute cette pile",
       fi_hover_btn_tip: "Détacher cette image",
       fi_lb_exit: "Quitter la visionneuse",
@@ -6917,6 +6925,7 @@
       fi_lightbox_btn_tip: "Просмотреть все плавающие изображения в лайтбоксе",
       fi_downloadall_btn_tip: "Скачать все изображения из этой стопки",
       fi_downloadall_toast: "⬇️ Скачивание {n} изображений",
+      fi_max_windows_toast: "⚠️ Достигнут предел в {n} плавающих окон, закройте несколько",
       fi_closeall_btn_tip: "Закрыть и удалить всю стопку",
       fi_hover_btn_tip: "Вынести изображение",
       fi_lb_exit: "Выйти из лайтбокса",
@@ -7612,6 +7621,7 @@
       fi_lightbox_btn_tip: "Alle schwebenden Bilder in einer Lightbox durchsuchen",
       fi_downloadall_btn_tip: "Alle Bilder dieses Stapels herunterladen",
       fi_downloadall_toast: "⬇️ {n} Bilder werden heruntergeladen",
+      fi_max_windows_toast: "⚠️ Limit von {n} schwebenden Fenstern erreicht, bitte einige schließen",
       fi_closeall_btn_tip: "Diesen Stapel schließen und vollständig entfernen",
       fi_hover_btn_tip: "Bild schweben lassen",
       fi_lb_exit: "Lightbox verlassen",
@@ -35886,6 +35896,7 @@ if (type === "warn" && scanLimit !== null) {
     const _fiDownloadAllBtns = new Map();
     const _fiCloseAllBtns = new Map();
     const _fiSatelliteCatchers = new Map();
+    const _FI_MAX_WINDOWS = 60;
 
     const _fiSatelliteHideTimers = new Map();
     const _FI_SATELLITE_HIDE_DELAY = 220;
@@ -35896,6 +35907,23 @@ if (type === "warn" && scanLimit !== null) {
       el.style.opacity = visible ? "1" : "0";
       el.style.transform = visible ? "scale(1)" : "scale(0.6)";
       el.style.pointerEvents = visible ? "auto" : "none";
+      if (!visible && document.activeElement === el) el.blur();
+    }
+
+    function _fiMakeFocusable(el, signal = _fiDragAC.signal) {
+      el.tabIndex = 0;
+      el.setAttribute("role", "button");
+      if (el.title) el.setAttribute("aria-label", el.title);
+      el.addEventListener(
+        "keydown",
+        (e) => {
+          if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+            e.preventDefault();
+            el.click();
+          }
+        },
+        { signal },
+      );
     }
 
     function _fiShowSatelliteGroup(stackId) {
@@ -36176,6 +36204,8 @@ if (type === "warn" && scanLimit !== null) {
           '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg>';
         btn.addEventListener("mouseenter", () => _fiShowSatelliteGroup(stackId), { signal: _fiDragAC.signal });
         btn.addEventListener("mouseleave", () => _fiScheduleHideSatelliteGroup(stackId), { signal: _fiDragAC.signal });
+        btn.addEventListener("focus", () => _fiShowSatelliteGroup(stackId), { signal: _fiDragAC.signal });
+        btn.addEventListener("blur", () => _fiScheduleHideSatelliteGroup(stackId), { signal: _fiDragAC.signal });
         btn.addEventListener(
           "click",
           (e) => {
@@ -36185,6 +36215,7 @@ if (type === "warn" && scanLimit !== null) {
           },
           { signal: _fiDragAC.signal },
         );
+        _fiMakeFocusable(btn);
         _fiLightboxBtns.set(stackId, btn);
       }
       if (anchorRect) {
@@ -36234,6 +36265,8 @@ if (type === "warn" && scanLimit !== null) {
           '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>';
         btn.addEventListener("mouseenter", () => _fiShowSatelliteGroup(stackId), { signal: _fiDragAC.signal });
         btn.addEventListener("mouseleave", () => _fiScheduleHideSatelliteGroup(stackId), { signal: _fiDragAC.signal });
+        btn.addEventListener("focus", () => _fiShowSatelliteGroup(stackId), { signal: _fiDragAC.signal });
+        btn.addEventListener("blur", () => _fiScheduleHideSatelliteGroup(stackId), { signal: _fiDragAC.signal });
         btn.addEventListener(
           "click",
           (e) => {
@@ -36249,6 +36282,7 @@ if (type === "warn" && scanLimit !== null) {
           },
           { signal: _fiDragAC.signal },
         );
+        _fiMakeFocusable(btn);
         _fiDownloadAllBtns.set(stackId, btn);
       }
       if (anchorRect) {
@@ -36298,6 +36332,8 @@ if (type === "warn" && scanLimit !== null) {
           '<svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="rgba(255,255,255,0.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>';
         btn.addEventListener("mouseenter", () => _fiShowSatelliteGroup(stackId), { signal: _fiDragAC.signal });
         btn.addEventListener("mouseleave", () => _fiScheduleHideSatelliteGroup(stackId), { signal: _fiDragAC.signal });
+        btn.addEventListener("focus", () => _fiShowSatelliteGroup(stackId), { signal: _fiDragAC.signal });
+        btn.addEventListener("blur", () => _fiScheduleHideSatelliteGroup(stackId), { signal: _fiDragAC.signal });
         btn.addEventListener(
           "click",
           (e) => {
@@ -36307,6 +36343,7 @@ if (type === "warn" && scanLimit !== null) {
           },
           { signal: _fiDragAC.signal },
         );
+        _fiMakeFocusable(btn);
         _fiCloseAllBtns.set(stackId, btn);
       }
       if (anchorRect) {
@@ -36910,6 +36947,8 @@ if (type === "warn" && scanLimit !== null) {
         b.innerHTML = svg;
         b.addEventListener("mouseenter", () => (b.style.opacity = "1"), { signal: ac.signal });
         b.addEventListener("mouseleave", () => (b.style.opacity = "0.65"), { signal: ac.signal });
+        b.addEventListener("focus", () => (b.style.opacity = "1"), { signal: ac.signal });
+        b.addEventListener("blur", () => (b.style.opacity = "0.65"), { signal: ac.signal });
         b.addEventListener(
           "click",
           (e) => {
@@ -36919,6 +36958,7 @@ if (type === "warn" && scanLimit !== null) {
           },
           { signal: ac.signal },
         );
+        _fiMakeFocusable(b, ac.signal);
         return b;
       };
       controls.appendChild(
@@ -36977,30 +37017,34 @@ if (type === "warn" && scanLimit !== null) {
       newTabBtn.addEventListener("dblclick", (e) => e.stopPropagation(), { signal: ac.signal });
       lightboxBtn.addEventListener("mousedown", (e) => e.stopPropagation(), { signal: ac.signal });
       lightboxBtn.addEventListener("dblclick", (e) => e.stopPropagation(), { signal: ac.signal });
+      const _fiShowWinControls = () => {
+        if (_fiCtrlFits()) {
+          controls.style.display = "flex";
+          newTabBtn.style.display = "flex";
+          lightboxBtn.style.display = "flex";
+        }
+        const curInst = _fiInstances.get(id);
+        if (curInst && curInst.stackId != null) _fiShowSatelliteGroup(curInst.stackId);
+      };
+      const _fiHideWinControls = () => {
+        controls.style.display = "none";
+        newTabBtn.style.display = "none";
+        lightboxBtn.style.display = "none";
+        const curInst = _fiInstances.get(id);
+        if (curInst && curInst.stackId != null) _fiScheduleHideSatelliteGroup(curInst.stackId);
+      };
+      win.addEventListener("mouseenter", _fiShowWinControls, { signal: ac.signal });
+      win.addEventListener("mouseleave", _fiHideWinControls, { signal: ac.signal });
+      win.addEventListener("focusin", _fiShowWinControls, { signal: ac.signal });
       win.addEventListener(
-        "mouseenter",
-        () => {
-          if (_fiCtrlFits()) {
-            controls.style.display = "flex";
-            newTabBtn.style.display = "flex";
-            lightboxBtn.style.display = "flex";
-          }
-          const curInst = _fiInstances.get(id);
-          if (curInst && curInst.stackId != null) _fiShowSatelliteGroup(curInst.stackId);
+        "focusout",
+        (e) => {
+          if (e.relatedTarget && win.contains(e.relatedTarget)) return;
+          _fiHideWinControls();
         },
         { signal: ac.signal },
       );
-      win.addEventListener(
-        "mouseleave",
-        () => {
-          controls.style.display = "none";
-          newTabBtn.style.display = "none";
-          lightboxBtn.style.display = "none";
-          const curInst = _fiInstances.get(id);
-          if (curInst && curInst.stackId != null) _fiScheduleHideSatelliteGroup(curInst.stackId);
-        },
-        { signal: ac.signal },
-      );
+      win.tabIndex = 0;
 
       dmtGetPersistentLayer().appendChild(win);
 
@@ -37261,6 +37305,62 @@ if (type === "warn" && scanLimit !== null) {
       { signal: _fiDragAC.signal },
     );
 
+    function _fiClampAllOnResize() {
+      let changed = false;
+      const seenStacks = new Set();
+      _fiInstances.forEach((inst) => {
+        if (inst.stackId != null) {
+          if (seenStacks.has(inst.stackId)) return;
+          seenStacks.add(inst.stackId);
+          const rect = _fiStackAnchorRect(inst.stackId);
+          if (!rect) return;
+          const [nx, ny] = _fiClampPos(rect.left, rect.top, rect.width, rect.height);
+          if (nx === rect.left && ny === rect.top) return;
+          changed = true;
+          _fiStackMembers(inst.stackId).forEach((mid) => {
+            const m = _fiInstances.get(mid);
+            if (m) {
+              m.el.style.left = nx + "px";
+              m.el.style.top = ny + "px";
+            }
+          });
+          const freshAnchorRect = _fiStackAnchorRect(inst.stackId);
+          _fiEnsureSatelliteCatcher(inst.stackId, freshAnchorRect);
+          _fiEnsureStackHandle(inst.stackId, freshAnchorRect);
+          _fiEnsureLightboxBtn(inst.stackId, freshAnchorRect);
+          _fiEnsureDownloadAllBtn(inst.stackId, freshAnchorRect);
+          _fiEnsureCloseAllBtn(inst.stackId, freshAnchorRect);
+        } else {
+          const rect = _fiAnchorRect(inst);
+          const [nx, ny] = _fiClampPos(rect.left, rect.top, rect.width, rect.height);
+          if (nx === rect.left && ny === rect.top) return;
+          changed = true;
+          inst.el.style.left = nx + "px";
+          inst.el.style.top = ny + "px";
+        }
+      });
+      if (changed) _fiPersistAll();
+    }
+    let _fiResizeDebounceT = null;
+    window.addEventListener(
+      "resize",
+      () => {
+        clearTimeout(_fiResizeDebounceT);
+        _fiResizeDebounceT = setTimeout(_fiClampAllOnResize, 200);
+      },
+      { passive: true, signal: _fiDragAC.signal },
+    );
+
+    function _fiCreateNew(url, x, y) {
+      if (_fiInstances.size >= _FI_MAX_WINDOWS) {
+        dmtShowToast(t("fi_max_windows_toast", { n: _FI_MAX_WINDOWS }));
+        return false;
+      }
+      _fiCreate(url, x, y);
+      _fiPersistAll();
+      return true;
+    }
+
     function _fiRestoreAll() {
       const list = GMStore.get(SK_FI_WINDOWS, [], true);
       if (!Array.isArray(list)) return;
@@ -37269,9 +37369,19 @@ if (type === "warn" && scanLimit !== null) {
         if (sa !== sb) return sa < sb ? -1 : 1;
         return (a.stackIndex || 0) - (b.stackIndex || 0);
       });
+      let _fiRestoredMaxSeq = 0;
+      sorted.forEach((item) => {
+        const m = item && typeof item.stackId === "string" && item.stackId.match(/^fistack_(\d+)$/);
+        if (m) _fiRestoredMaxSeq = Math.max(_fiRestoredMaxSeq, parseInt(m[1], 10));
+      });
+      if (_fiRestoredMaxSeq > _fiStackSeq) _fiStackSeq = _fiRestoredMaxSeq;
       sorted.forEach((item) => {
         if (!item || !item.url) return;
-        _fiCreate(item.url, 0, 0, item.id, item.left, item.top, item.stackId, item.stackIndex);
+        try {
+          _fiCreate(item.url, 0, 0, item.id, item.left, item.top, item.stackId, item.stackIndex);
+        } catch (err) {
+          DEBUG && console.error("[DMT][FloatImage] 還原單一視窗失敗，已跳過：", item, err);
+        }
       });
       _fiInstances.forEach((_inst, id) => _fiSyncAnim(id));
       const seenStackIds = new Set();
@@ -37350,8 +37460,7 @@ if (type === "warn" && scanLimit !== null) {
         e.stopPropagation();
         if (_fiHoverTarget) {
           const r = _fiHoverTarget.getBoundingClientRect();
-          _fiCreate(_fiHoverTarget.src, r.right - 20, r.bottom - 20);
-          _fiPersistAll();
+          _fiCreateNew(_fiHoverTarget.src, r.right - 20, r.bottom - 20);
         }
         _fiHoverHide();
       },
@@ -37547,6 +37656,8 @@ if (type === "warn" && scanLimit !== null) {
         b.innerHTML = svg;
         b.addEventListener("mouseenter", () => { b.style.opacity = "1"; b.style.background = "rgba(255,255,255,0.22)"; }, { signal: dragAC.signal });
         b.addEventListener("mouseleave", () => { b.style.opacity = "0.75"; b.style.background = "rgba(0,0,0,0.55)"; }, { signal: dragAC.signal });
+        b.addEventListener("focus", () => { b.style.opacity = "1"; b.style.background = "rgba(255,255,255,0.22)"; }, { signal: dragAC.signal });
+        b.addEventListener("blur", () => { b.style.opacity = "0.75"; b.style.background = "rgba(0,0,0,0.55)"; }, { signal: dragAC.signal });
         b.addEventListener(
           "click",
           (e) => {
@@ -37558,6 +37669,7 @@ if (type === "warn" && scanLimit !== null) {
         );
         b.addEventListener("mousedown", (e) => e.stopPropagation(), { signal: dragAC.signal });
         b.addEventListener("dblclick", (e) => e.stopPropagation(), { signal: dragAC.signal });
+        _fiMakeFocusable(b, dragAC.signal);
         return b;
       }
 
@@ -37611,14 +37723,18 @@ if (type === "warn" && scanLimit !== null) {
         cardNewTabBtn.style.transition = "opacity 0.15s";
         card.appendChild(cardNewTabBtn);
 
-        card.addEventListener("mouseenter", () => {
+        const _fiShowCardBtns = () => {
           cardBtnRow.style.opacity = "1"; cardBtnRow.style.pointerEvents = "auto";
           cardNewTabBtn.style.opacity = "1"; cardNewTabBtn.style.pointerEvents = "auto";
-        });
-        card.addEventListener("mouseleave", () => {
+        };
+        const _fiHideCardBtns = () => {
           cardBtnRow.style.opacity = "0"; cardBtnRow.style.pointerEvents = "none";
           cardNewTabBtn.style.opacity = "0"; cardNewTabBtn.style.pointerEvents = "none";
-        });
+        };
+        card.addEventListener("mouseenter", _fiShowCardBtns);
+        card.addEventListener("mouseleave", _fiHideCardBtns);
+        card.addEventListener("focusin", _fiShowCardBtns);
+        card.addEventListener("focusout", _fiHideCardBtns);
 
         card.addEventListener("click", (e) => {
           e.stopPropagation();
@@ -37742,8 +37858,25 @@ if (type === "warn" && scanLimit !== null) {
       }, { signal: dragAC.signal });
 
       const _LB_SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " ", "PageUp", "PageDown", "Home", "End"]);
+      const _fiLbFocusTrap = (e) => {
+        const focusables = Array.from(modal.querySelectorAll('button, [tabindex="0"]')).filter(
+          (el) => el.getClientRects().length > 0 && !el.disabled,
+        );
+        if (!focusables.length) return;
+        const curIdx = focusables.indexOf(document.activeElement);
+        let nextIdx;
+        if (e.shiftKey) {
+          nextIdx = curIdx <= 0 ? focusables.length - 1 : curIdx - 1;
+        } else {
+          nextIdx = curIdx === -1 || curIdx === focusables.length - 1 ? 0 : curIdx + 1;
+        }
+        e.preventDefault();
+        focusables[nextIdx].focus();
+      };
       keyHandler = (e) => {
-        if (_LB_SCROLL_KEYS.has(e.key)) e.preventDefault();
+        const _onBtn = e.target instanceof Element && e.target.closest('button, [role="button"]');
+        if (_LB_SCROLL_KEYS.has(e.key) && !(e.key === " " && _onBtn)) e.preventDefault();
+        if (e.key === "Tab") { _fiLbFocusTrap(e); return; }
         if (e.key === "Escape") { closeLightbox(); return; }
         if (e.key === "ArrowRight" || e.key === "ArrowDown") {
           focused = focused < items_.length - 1 ? focused + 1 : 0;
@@ -37813,6 +37946,7 @@ if (type === "warn" && scanLimit !== null) {
       if (prevBtn) modal.appendChild(prevBtn);
       if (nextBtn) modal.appendChild(nextBtn);
       document.body.appendChild(modal);
+      exitBtn.focus({ preventScroll: true });
 
       _fiActiveLightboxClose = closeLightbox;
 
@@ -37847,8 +37981,7 @@ if (type === "warn" && scanLimit !== null) {
 
     _floatImageInstance = {
       create: (url, x, y) => {
-        _fiCreate(url, x, y);
-        _fiPersistAll();
+        _fiCreateNew(url, x, y);
       },
       toggleHover: () => {
         _fiHoverEnabled = !_fiHoverEnabled;
@@ -37916,6 +38049,7 @@ if (type === "warn" && scanLimit !== null) {
       _fiHoverAC.abort();
       _fiHoverBtn.remove();
       clearInterval(_fiHoverWatchdog);
+      clearTimeout(_fiResizeDebounceT);
       _fiDragAC.abort();
       document.getElementById("dmt-fi-lb-style")?.remove();
       _floatImageInstance = null;
