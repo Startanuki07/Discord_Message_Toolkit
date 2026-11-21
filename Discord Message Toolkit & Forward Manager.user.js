@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.7.9
+// @version      2.9.7.11
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -63,7 +63,7 @@
   }
 
   const SCRIPT_NAME = GM_info?.script?.name || "Discord Integrated Utilities";
-  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.7.9";
+  const SCRIPT_VERSION = GM_info?.script?.version || "2.9.7.10";
 
   const GMStore = {
     
@@ -146,6 +146,53 @@
   function dmtGetPersistentLayer() {
     dmtGetPortal();
     return document.getElementById("dmt-portal-persistent");
+  }
+
+  let _dmtDlgSeq = 0;
+  function dmtTrapFocus(modal, { initialFocus = null, label = "", labelledBy = null, signal = null } = {}) {
+    modal.setAttribute("role", "dialog");
+    modal.setAttribute("aria-modal", "true");
+    if (label) modal.setAttribute("aria-label", label);
+    if (labelledBy) {
+      if (!labelledBy.id) labelledBy.id = "dmt-dlg-lbl-" + (++_dmtDlgSeq);
+      modal.setAttribute("aria-labelledby", labelledBy.id);
+    }
+    const ac = new AbortController();
+    const release = () => ac.abort();
+    if (signal) {
+      if (signal.aborted) release();
+      else signal.addEventListener("abort", release, { once: true });
+    }
+    const FOCUSABLE = 'button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const usable = (el) =>
+      !el.disabled && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== "hidden";
+    document.addEventListener(
+      "keydown",
+      (e) => {
+        if (e.key !== "Tab") return;
+        if (!modal.isConnected) { release(); return; }
+        e.preventDefault();
+        const list = Array.from(modal.querySelectorAll(FOCUSABLE)).filter(usable);
+        if (!list.length) { modal.focus({ preventScroll: true }); return; }
+        const step = e.shiftKey ? -1 : 1;
+        const cur = list.indexOf(document.activeElement);
+        const start = cur === -1 ? (e.shiftKey ? list.length - 1 : 0) : cur + step;
+        for (let n = 0; n < list.length; n++) {
+          const el = list[(((start + n * step) % list.length) + list.length) % list.length];
+          el.focus({ preventScroll: true });
+          if (document.activeElement === el) break;
+        }
+      },
+      { capture: true, signal: ac.signal },
+    );
+    if (initialFocus && typeof initialFocus.focus === "function") {
+      initialFocus.focus({ preventScroll: true });
+    } else {
+      modal.tabIndex = -1;
+      modal.style.outline = "none";
+      modal.focus({ preventScroll: true });
+    }
+    return release;
   }
 
   function renderNewBadge(featureKey) {
@@ -29875,6 +29922,7 @@ unsafeWindow.fetch = function(...args) {
       lb.append(closeEl, prev, mediaWrap, infoEl, next);
       dmtGetPortal().appendChild(lb);
       lb.style.pointerEvents = "auto";
+      const _releaseTrap = dmtTrapFocus(lb, { initialFocus: closeEl, labelledBy: infoEl });
 
       function _calcOrigin(el) {
         if (!el) return null;
@@ -29940,6 +29988,7 @@ unsafeWindow.fetch = function(...args) {
       }
 
       function _lbClose() {
+        _releaseTrap();
         lb.style.background = "rgba(0,0,0,0)";
         document.removeEventListener("keydown", onKey);
         setTimeout(() => lb.remove(), 220);
@@ -34534,6 +34583,7 @@ if (type === "warn" && scanLimit !== null) {
     function _msLightbox(items, startIdx) {
       let cur = Math.max(0, Math.min(startIdx, items.length - 1));
       let closed = false;
+      let releaseTrap = null;
 
       const ov = document.createElement("div");
       ov.style.cssText = "position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;background:rgba(0,0,0,0.93);pointer-events:auto;cursor:default;";
@@ -34678,6 +34728,7 @@ if (type === "warn" && scanLimit !== null) {
 
       const close = () => {
         closed = true;
+        if (releaseTrap) releaseTrap();
         items.forEach(it => _msLbRelease(it));
         ov.remove(); document.removeEventListener("keydown", onKey, true);
       };
@@ -34698,6 +34749,7 @@ if (type === "warn" && scanLimit !== null) {
       document.addEventListener("keydown", onKey, true);
       render(startIdx);
       dmtGetPortal().appendChild(ov);
+      releaseTrap = dmtTrapFocus(ov, { initialFocus: lbCloseBtn, labelledBy: fnEl });
     }
 
     function _msOpenPanel() {
@@ -36903,6 +36955,21 @@ if (type === "warn" && scanLimit !== null) {
         }
         const curInst = _fiInstances.get(id);
         if (!curInst || curInst.stackId == null) return;
+        if (curInst.restoreReflowPending) {
+          const rMembers = _fiStackMembers(curInst.stackId);
+          const rAnchor = rMembers.length > 1 ? _fiInstances.get(rMembers[0]) : null;
+          const rAnchorImg = rAnchor && rAnchor.el.querySelector("img");
+          if (!rAnchor) {
+            curInst.restoreReflowPending = false;
+          } else if (rAnchorImg && rAnchorImg.complete && rAnchorImg.naturalWidth) {
+            rMembers.forEach((mid) => {
+              const mi = _fiInstances.get(mid);
+              if (mi) mi.restoreReflowPending = false;
+            });
+            _fiReflowStack(curInst.stackId, rMembers, null, null);
+            return;
+          }
+        }
         const members = _fiStackMembers(curInst.stackId);
         if (members[0] !== id) return;
         if (!_fiStackHandles.has(curInst.stackId)) return;
@@ -37162,6 +37229,7 @@ if (type === "warn" && scanLimit !== null) {
         inst.stackId = stackId;
         inst.stackIndex = restoreStackIndex || 0;
         _fiApplyStackTransform(win, inst.stackIndex);
+        inst.restoreReflowPending = true;
         _fiSyncAnim(id);
       } else if (joinMembers) {
         _fiReflowStack(stackId, joinMembers.concat([id]), finalLeft, finalTop);
@@ -37858,25 +37926,9 @@ if (type === "warn" && scanLimit !== null) {
       }, { signal: dragAC.signal });
 
       const _LB_SCROLL_KEYS = new Set(["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " ", "PageUp", "PageDown", "Home", "End"]);
-      const _fiLbFocusTrap = (e) => {
-        const focusables = Array.from(modal.querySelectorAll('button, [tabindex="0"]')).filter(
-          (el) => el.getClientRects().length > 0 && !el.disabled,
-        );
-        if (!focusables.length) return;
-        const curIdx = focusables.indexOf(document.activeElement);
-        let nextIdx;
-        if (e.shiftKey) {
-          nextIdx = curIdx <= 0 ? focusables.length - 1 : curIdx - 1;
-        } else {
-          nextIdx = curIdx === -1 || curIdx === focusables.length - 1 ? 0 : curIdx + 1;
-        }
-        e.preventDefault();
-        focusables[nextIdx].focus();
-      };
       keyHandler = (e) => {
         const _onBtn = e.target instanceof Element && e.target.closest('button, [role="button"]');
         if (_LB_SCROLL_KEYS.has(e.key) && !(e.key === " " && _onBtn)) e.preventDefault();
-        if (e.key === "Tab") { _fiLbFocusTrap(e); return; }
         if (e.key === "Escape") { closeLightbox(); return; }
         if (e.key === "ArrowRight" || e.key === "ArrowDown") {
           focused = focused < items_.length - 1 ? focused + 1 : 0;
@@ -37946,7 +37998,7 @@ if (type === "warn" && scanLimit !== null) {
       if (prevBtn) modal.appendChild(prevBtn);
       if (nextBtn) modal.appendChild(nextBtn);
       document.body.appendChild(modal);
-      exitBtn.focus({ preventScroll: true });
+      dmtTrapFocus(modal, { initialFocus: exitBtn, label: t("fi_lightbox_btn_tip"), signal: dragAC.signal });
 
       _fiActiveLightboxClose = closeLightbox;
 
