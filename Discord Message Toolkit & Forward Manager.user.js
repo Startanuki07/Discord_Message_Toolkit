@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.7.11
+// @version      2.9.7.13
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -19516,26 +19516,230 @@
       });
     }
 
+    get _whRow1FallbackMax() {
+      return 11;
+    }
+
     _scheduleBalanceRows(container) {
       requestAnimationFrame(() => {
-        this._balanceRows(container);
+        this._balanceRows(container, true);
+      });
+      this._bindBalanceTriggers();
+    }
+
+    _scheduleBalanceAll(force) {
+      if (force) this._balanceForcePending = true;
+      if (this._balanceAllPending) return;
+      this._balanceAllPending = true;
+      requestAnimationFrame(() => {
+        this._balanceAllPending = false;
+        const f = !!this._balanceForcePending;
+        this._balanceForcePending = false;
+        document
+          .querySelectorAll(".my-wormhole-container")
+          .forEach((c) => this._balanceRows(c, f));
       });
     }
 
-    _balanceRows(container) {
-      const ROW1_MAX = 11;
+    _bindBalanceTriggers() {
+      if (!this._balanceBound) {
+        this._balanceBound = true;
+        this._balanceObserved = new Set();
+        this._balanceTitleEl = null;
+        window.addEventListener("resize", () => this._scheduleBalanceAll(false));
+        if (typeof ResizeObserver === "function") {
+          this._balanceRO = new ResizeObserver(() => this._scheduleBalanceAll(false));
+        }
+        if (typeof MutationObserver === "function") {
+          this._balanceTitleMO = new MutationObserver(() => this._scheduleBalanceAll(false));
+        }
+      }
+      this._refreshBalanceObservers();
+    }
+
+    _refreshBalanceObservers() {
+      const wanted = new Set();
+      ["wh-input-dock", "wh-titlebar-dock"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) wanted.add(el);
+      });
+      let titleEl = null;
+      if (document.getElementById("wh-navbar-dock")) {
+        const parts = this._whFindNavbarParts();
+        if (parts) {
+          wanted.add(parts.bar);
+          wanted.add(parts.trailing);
+          if (parts.title) {
+            wanted.add(parts.title);
+            titleEl = parts.title;
+          }
+        }
+      }
+      if (this._balanceRO) {
+        this._balanceObserved.forEach((el) => {
+          if (!wanted.has(el)) {
+            this._balanceRO.unobserve(el);
+            this._balanceObserved.delete(el);
+          }
+        });
+        wanted.forEach((el) => {
+          if (!this._balanceObserved.has(el)) {
+            this._balanceRO.observe(el);
+            this._balanceObserved.add(el);
+          }
+        });
+      }
+      if (this._balanceTitleMO && titleEl !== this._balanceTitleEl) {
+        this._balanceTitleMO.disconnect();
+        this._balanceTitleEl = titleEl;
+        if (titleEl) {
+          this._balanceTitleMO.observe(titleEl, {
+            childList: true,
+            characterData: true,
+            subtree: true,
+          });
+        }
+      }
+    }
+
+    _whFindNavbarParts() {
+      const trailing = document.querySelector('div[class*="trailing_"]');
+      const bar = trailing && trailing.parentElement;
+      if (!trailing || !bar) return null;
+      const title =
+        Array.from(bar.children).find(
+          (el) => el !== trailing && /(^|\s)title_/.test(String(el.className)),
+        ) || null;
+      return { trailing, bar, title };
+    }
+
+    _whMeasureContentRight(rootEl) {
+      let right = -Infinity;
+      const visit = (el) => {
+        if (el.children.length > 0) {
+          for (const c of el.children) visit(c);
+          return;
+        }
+        let r;
+        if (el.textContent && el.textContent.trim()) {
+          const range = document.createRange();
+          range.selectNodeContents(el);
+          r = range.getBoundingClientRect();
+        } else {
+          r = el.getBoundingClientRect();
+        }
+        if (r && r.width > 0 && r.height > 0 && r.right > right) right = r.right;
+      };
+      visit(rootEl);
+      return right;
+    }
+
+    _whMeasureNavbarSpace() {
+      const parts = this._whFindNavbarParts();
+      if (!parts || !parts.title) return null;
+      const rightEdge = parts.trailing.getBoundingClientRect().left - 6;
+      const contentRight = this._whMeasureContentRight(parts.title);
+      if (!Number.isFinite(contentRight) || contentRight >= rightEdge) return null;
+      return rightEdge - (contentRight + 12);
+    }
+
+    _whGetBalanceLimit(container) {
+      let limit = null;
+      let reason = "";
+      try {
+        const host = container.parentElement;
+        const id = host ? host.id : "";
+        if (id === "wh-input-dock" || id === "wh-titlebar-dock") {
+          const hs = getComputedStyle(host);
+          limit =
+            host.clientWidth -
+            (parseFloat(hs.paddingLeft) || 0) -
+            (parseFloat(hs.paddingRight) || 0);
+        } else if (id === "wh-navbar-dock") {
+          limit = this._whMeasureNavbarSpace();
+          if (limit == null) reason = "navbar: title bar not measurable";
+        } else {
+          reason = "legacy position (" + (id || "unknown host") + ")";
+        }
+        if (limit != null) {
+          const cs = getComputedStyle(container);
+          limit -= [
+            "marginLeft", "marginRight", "paddingLeft", "paddingRight",
+            "borderLeftWidth", "borderRightWidth",
+          ].reduce((sum, k) => sum + (parseFloat(cs[k]) || 0), 0);
+          if (!(limit >= 48)) {
+            reason = "available width too small (" + Math.round(limit) + "px)";
+            limit = null;
+          }
+        }
+      } catch (e) {
+        limit = null;
+        reason = "measure error: " + (e && e.message);
+      }
+      if (limit == null && reason && reason.indexOf("legacy position") !== 0) {
+        this._balanceWarned = this._balanceWarned || new Set();
+        if (!this._balanceWarned.has(reason)) {
+          this._balanceWarned.add(reason);
+          console.debug("[Wormhole] width measure unavailable, using fixed cap:", reason);
+        }
+      }
+      return { limit, reason };
+    }
+
+    _balanceRows(container, force = true) {
       if (!container || !document.body.contains(container)) return;
 
       const row1 = container.querySelector(".wh-row-1");
       const row2 = container.querySelector(".wh-row-2");
       if (!row1 || !row2) return;
 
-      while (row2.firstChild) {
-        row1.appendChild(row2.firstChild);
+      const info = this._whGetBalanceLimit(container);
+      const key =
+        (info.limit == null ? "fb" : Math.round(info.limit)) +
+        "|" + (row1.children.length + row2.children.length) +
+        "|" + container.className;
+      if (!force && container._whBalanceKey === key) return;
+
+      container.classList.add("wh-measuring");
+      try {
+        while (row2.firstChild) {
+          row1.appendChild(row2.firstChild);
+        }
+
+        const chips = Array.from(row1.children);
+        let keep = chips.length;
+        if (info.limit == null) {
+          keep = Math.min(keep, this._whRow1FallbackMax);
+        } else {
+          const gap = parseFloat(getComputedStyle(row1).columnGap) || 0;
+          const maxW = info.limit - 4;
+          let used = 0;
+          keep = 0;
+          for (let i = 0; i < chips.length; i++) {
+            const cs = getComputedStyle(chips[i]);
+            const w =
+              chips[i].offsetWidth +
+              (parseFloat(cs.marginLeft) || 0) +
+              (parseFloat(cs.marginRight) || 0);
+            const next = used + (i > 0 ? gap : 0) + w;
+            if (i > 0 && next > maxW) break;
+            used = next;
+            keep = i + 1;
+          }
+        }
+        chips.slice(keep).forEach((chip) => row2.appendChild(chip));
+        container._whBalanceKey = key;
+      } finally {
+        container.classList.remove("wh-measuring");
       }
 
-      const chips = Array.from(row1.children);
-      chips.slice(ROW1_MAX).forEach((chip) => row2.appendChild(chip));
+      if (
+        container.parentElement &&
+        container.parentElement.id === "wh-navbar-dock" &&
+        typeof this._navbarDockReposition === "function"
+      ) {
+        this._navbarDockReposition();
+      }
     }
     createVIPChip(wormhole) {
       const chip = document.createElement("div");
@@ -22597,6 +22801,8 @@ unsafeWindow.fetch = function(...args) {
       } else {
         container.classList.remove("focus-show-labels");
       }
+
+      if (!containerEl) this._scheduleBalanceAll(true);
     }
 
     showToast(msg, emoji = "✅") {
@@ -23128,6 +23334,8 @@ unsafeWindow.fetch = function(...args) {
             #wh-input-dock .my-wormhole-container.focus-mode .my-wormhole-vip-chip { width: var(--wh-focus-vip, 22px); height: var(--wh-focus-vip, 22px); max-width: var(--wh-focus-vip, 22px); }
             .my-wormhole-container { display: flex; flex-direction: row; align-items: center; flex-shrink: 0; margin-left: 8px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 8px; transition: all 0.3s ease; position: relative; }
             .wh-row-1 { display: flex; align-items: center; gap: 0; flex-wrap: nowrap; flex-shrink: 0; }
+            .my-wormhole-container.wh-measuring,
+            .my-wormhole-container.wh-measuring * { transition: none !important; }
             .wh-row-2 {
                 position: absolute;
                 top: 100%;
@@ -23203,6 +23411,7 @@ unsafeWindow.fetch = function(...args) {
             .wh-row-2 .my-wormhole-vip-chip .vip-text {
                 display: none !important;
             }
+
 
             .my-wormhole-container.focus-mode { position: relative; padding-top: 0; align-items: center; }
             .my-wormhole-container.focus-mode .my-wormhole-vip-chip,
@@ -35735,6 +35944,7 @@ if (type === "warn" && scanLimit !== null) {
       '[class*="emojiButton"], [class*="emoji_button"],' +
       'button[aria-label*="moji"], button[aria-label*="表情"],' +
       'button[aria-label*="スタンプ"], button[aria-label*="스티커"]';
+    const MS_DISABLED_TOOLBAR_SEL = '[class*="channelTextAreaDisabled"] [class*="buttons_"]';
     function _msFindToolbarContainers() {
       const seen = new Set();
       document.querySelectorAll(MS_EMOJI_BTN_SEL).forEach(emojiBtn => {
@@ -35743,12 +35953,16 @@ if (type === "warn" && scanLimit !== null) {
           if (node.children && node.children.length >= 2) { seen.add(node); break; }
         }
       });
+      document.querySelectorAll(MS_DISABLED_TOOLBAR_SEL).forEach(node => seen.add(node));
       return Array.from(seen);
     }
     let _msInjectDebounce = null;
 
     function _msInjectOneContainer(container) {
-      if (!container.closest('[class*="channelTextArea"], [class*="channelTextarea"]')) return;
+      const textArea = container.closest('[class*="channelTextArea"], [class*="channelTextarea"]');
+      if (!textArea) return;
+
+      const isDisabledToolbar = !!container.closest('[class*="channelTextAreaDisabled"]');
 
       const hasInputBtns =
         container.querySelector('[class*="emojiButton"], [class*="emoji_button"]') ||
@@ -35757,14 +35971,14 @@ if (type === "warn" && scanLimit !== null) {
           'button[aria-label*="ticker"], button[aria-label*="表情"],' +
           'button[aria-label*="スタンプ"], button[aria-label*="스티커"]'
         );
-      if (!hasInputBtns) return;
+      if (!hasInputBtns && !isDisabledToolbar) return;
 
-      const existing = container.querySelector(".dmt-mosaic-btn-wrap");
-      if (existing) return;
+      if (textArea.querySelector(".dmt-mosaic-btn-wrap")) return;
 
       const wrap = document.createElement("div");
       wrap.className = "dmt-mosaic-btn-wrap";
-      wrap.style.cssText = "display:inline-flex;align-items:center;";
+      wrap.style.cssText = "display:inline-flex;align-items:center;" +
+        (isDisabledToolbar ? "pointer-events:auto;margin-right:4px;" : "");
 
       const btn = document.createElement("button");
       btn.type  = "button";
