@@ -10,7 +10,7 @@
 // @name:ru      Discord Message Toolkit
 // @namespace    https://greasyfork.org/en/users/1575945-star-tanuki07
 // @homepageURL  https://github.com/Startanuki07
-// @version      2.9.7.13
+// @version      2.9.7.17
 // @license      MIT
 // @author       Star_tanuki07
 // @description      Per-message toolbar for copying text and converting social links to embed-friendly formats (Twitter, Instagram, Pixiv, and more). Browse, search, and batch-delete your own messages with daily quota controls. Visually dim messages from specific users without blocking; save emojis, stickers, and GIFs into named collections. Also includes a forwarding panel, Wormhole sidebar shortcuts, Channel Scout search, and duplicate URL detection.
@@ -1535,6 +1535,10 @@
       wm_send_sending_n:    "Sending {n}/{total}…",
       wm_send_cool_warn:    "Cool-down: {s}s between messages",
       wm_send_chat_btn:     "Send message",
+      wm_refresh_icon_btn:  "Refresh icon",
+      wm_refresh_icon_ok:   "Icon refreshed",
+      wm_refresh_icon_same: "Icon is already up to date",
+      wm_refresh_icon_fail: "Couldn't find the latest icon. Make sure this server appears in your server list, or enable API Mode in Wormhole settings (\"Send Method & API Mode\").",
       wm_send_mode_api: "⚡ API Mode",
       wm_send_mode_nav: "🔀 Navigate Mode",
       wm_send_mode_desc_api: "Send directly, no channel switch",
@@ -2281,6 +2285,10 @@
       wm_send_sending_n:    "傳送中 {n}/{total}…",
       wm_send_cool_warn:    "冷卻中：{s} 秒後傳送下一則",
       wm_send_chat_btn:     "傳送訊息",
+      wm_refresh_icon_btn:  "重新整理頭像",
+      wm_refresh_icon_ok:   "頭像已更新",
+      wm_refresh_icon_same: "頭像已是最新",
+      wm_refresh_icon_fail: "找不到最新的頭像。請確認該伺服器顯示在你的伺服器列表中，或到蟲洞設定的「傳訊方式與 API 模式」啟用 API 模式。",
       wm_send_mode_api: "⚡ API 模式",
       wm_send_mode_nav: "🔀 跳頁模式",
       wm_send_mode_desc_api: "直接傳送，不切換頻道",
@@ -2986,6 +2994,10 @@
       wm_send_sending_n:    "发送中 {n}/{total}…",
       wm_send_cool_warn:    "冷却中：{s} 秒后发送下一条",
       wm_send_chat_btn:     "发送消息",
+      wm_refresh_icon_btn:  "刷新头像",
+      wm_refresh_icon_ok:   "头像已更新",
+      wm_refresh_icon_same: "头像已是最新",
+      wm_refresh_icon_fail: "找不到最新的头像。请确认该服务器显示在你的服务器列表中，或到虫洞设置的“发送方式与 API 模式”中启用 API 模式。",
       wm_send_mode_api: "⚡ API 模式",
       wm_send_mode_nav: "🔀 跳页模式",
       wm_send_mode_desc_api: "直接发送，不切换频道",
@@ -3689,6 +3701,10 @@
       wm_send_sending_n:    "送信中 {n}/{total}…",
       wm_send_cool_warn:    "クールダウン：{s}秒後に次を送信",
       wm_send_chat_btn:     "メッセージを送信",
+      wm_refresh_icon_btn:  "アイコンを更新",
+      wm_refresh_icon_ok:   "アイコンを更新しました",
+      wm_refresh_icon_same: "アイコンは最新です",
+      wm_refresh_icon_fail: "最新のアイコンが見つかりませんでした。このサーバーがサーバー一覧に表示されているか確認するか、ワームホール設定の「送信方式・API モード」で API モードを有効にしてください。",
       wm_send_mode_api: "⚡ API モード",
       wm_send_mode_nav: "🔀 ページ移動モード",
       wm_send_mode_desc_api: "直接送信、チャンネル切替なし",
@@ -4385,6 +4401,10 @@
       wm_send_sending_n:    "전송 중 {n}/{total}…",
       wm_send_cool_warn:    "쿨다운: {s}초 후 다음 메시지 전송",
       wm_send_chat_btn:     "메시지 보내기",
+      wm_refresh_icon_btn:  "아이콘 새로고침",
+      wm_refresh_icon_ok:   "아이콘을 새로고침했습니다",
+      wm_refresh_icon_same: "아이콘이 이미 최신입니다",
+      wm_refresh_icon_fail: "최신 아이콘을 찾을 수 없습니다. 이 서버가 서버 목록에 표시되는지 확인하거나 웜홀 설정의 \"전송 방식 및 API 모드\"에서 API 모드를 켜 주세요.",
       wm_send_mode_api: "⚡ API 모드",
       wm_send_mode_nav: "🔀 페이지 이동 모드",
       wm_send_mode_desc_api: "직접 전송, 채널 전환 없음",
@@ -5247,6 +5267,10 @@
       mod_tip_myposts:    "Navega, filtra y programa la eliminación de tus propios mensajes. Requiere token de API (obtenido automáticamente).",
 
       wm_send_chat_btn:  "Enviar mensaje",
+      wm_refresh_icon_btn:  "Actualizar icono",
+      wm_refresh_icon_ok:   "Icono actualizado",
+      wm_refresh_icon_same: "El icono ya está actualizado",
+      wm_refresh_icon_fail: "No se encontró el icono más reciente. Comprueba que este servidor aparece en tu lista de servidores o activa el Modo API en los ajustes del agujero de gusano («Método de envío y Modo API»).",
       wm_send_cool_warn: "Enfriamiento: {s}s entre mensajes",
       wm_send_field_add: "+ Añadir campo",
       wm_send_field_del: "Eliminar campo",
@@ -5943,6 +5967,10 @@
       mod_tip_myposts:    "Navegue, filtre e agende a exclusão de suas próprias mensagens. Requer token de API (obtido automaticamente).",
 
       wm_send_chat_btn:  "Enviar mensagem",
+      wm_refresh_icon_btn:  "Atualizar ícone",
+      wm_refresh_icon_ok:   "Ícone atualizado",
+      wm_refresh_icon_same: "O ícone já está atualizado",
+      wm_refresh_icon_fail: "Não foi possível encontrar o ícone mais recente. Verifique se este servidor aparece na sua lista de servidores ou ative o Modo API nas configurações do buraco de minhoca («Método de envio e Modo API»).",
       wm_send_cool_warn: "Cooldown: {s}s entre mensagens",
       wm_send_field_add: "+ Adicionar campo",
       wm_send_field_del: "Remover campo",
@@ -6477,6 +6505,10 @@
       wm_send_editor_missing: "❌ Éditeur introuvable",
       wm_send_uploading: "📎 Envoi de {n} image(s)...",
       wm_send_chat_btn:  "Envoyer un message",
+      wm_refresh_icon_btn:  "Actualiser l'icône",
+      wm_refresh_icon_ok:   "Icône actualisée",
+      wm_refresh_icon_same: "L'icône est déjà à jour",
+      wm_refresh_icon_fail: "Impossible de trouver l'icône la plus récente. Vérifiez que ce serveur apparaît dans votre liste de serveurs ou activez le Mode API dans les paramètres du trou de ver (« Méthode d'envoi et Mode API »).",
       wm_send_cool_warn: "Délai : {s}s entre les messages",
       wm_send_field_add: "+ Ajouter un champ",
       wm_send_field_del: "Supprimer le champ",
@@ -7174,6 +7206,10 @@
       wm_send_editor_missing: "❌ Редактор не найден",
       wm_send_uploading: "📎 Загрузка {n} изображени(й)...",
       wm_send_chat_btn:  "Отправить сообщение",
+      wm_refresh_icon_btn:  "Обновить значок",
+      wm_refresh_icon_ok:   "Значок обновлён",
+      wm_refresh_icon_same: "Значок уже актуален",
+      wm_refresh_icon_fail: "Не удалось найти актуальный значок. Убедитесь, что этот сервер есть в вашем списке серверов, или включите режим API в настройках червоточины («Метод отправки и режим API»).",
       wm_send_cool_warn: "Задержка: {s}с между сообщениями",
       wm_send_field_add: "+ Добавить поле",
       wm_send_field_del: "Удалить поле",
@@ -7867,6 +7903,10 @@
       wm_send_editor_missing: "❌ Editor nicht gefunden",
       wm_send_uploading: "📎 {n} Bild(er) werden hochgeladen...",
       wm_send_chat_btn:  "Nachricht senden",
+      wm_refresh_icon_btn:  "Symbol aktualisieren",
+      wm_refresh_icon_ok:   "Symbol aktualisiert",
+      wm_refresh_icon_same: "Symbol ist bereits aktuell",
+      wm_refresh_icon_fail: "Das aktuelle Symbol wurde nicht gefunden. Prüfe, ob dieser Server in deiner Serverliste angezeigt wird, oder aktiviere den API-Modus in den Wurmloch-Einstellungen („Sendemethode & API-Modus“).",
       wm_send_cool_warn: "Wartezeit: {s}s zwischen Nachrichten",
       wm_send_field_add: "+ Feld hinzufügen",
       wm_send_field_del: "Feld entfernen",
@@ -19403,6 +19443,8 @@
 
       this._scheduleBalanceRows(container);
 
+      this._bindRefreshIconTriggers();
+
       this._bindTooltips(container);
 
       if (container._whRow2Unbind) {
@@ -20493,6 +20535,25 @@
       wrapper.className = "my-wormhole-container";
       dock.appendChild(wrapper);
       this.renderWormholes(wrapper);
+    }
+
+    _ensureTitlebarDockPlacement(dock) {
+      const cached = this._whTitleSection;
+      if (
+        cached &&
+        cached.isConnected &&
+        cached.parentNode === dock.parentNode &&
+        (cached.compareDocumentPosition(dock) & 4)
+      ) {
+        return;
+      }
+
+      const titleSection = document.querySelector('section[class*="title_"]');
+      if (!titleSection || !titleSection.parentNode) return;
+      this._whTitleSection = titleSection;
+      const sameParent = dock.parentNode === titleSection.parentNode;
+      if (sameParent && (titleSection.compareDocumentPosition(dock) & 4)) return;
+      titleSection.parentNode.insertBefore(dock, titleSection.nextSibling);
     }
 
     _injectInputDock() {
@@ -22307,6 +22368,234 @@ unsafeWindow.fetch = function(...args) {
       });
     }
 
+    _bindRefreshIconTriggers() {
+      if (this._whRefreshBound) return;
+      this._whRefreshBound = true;
+      const CHIP_SEL = ".my-wormhole-chip, .my-wormhole-vip-chip";
+      document.addEventListener(
+        "mouseover",
+        (e) => {
+          const t = e.target;
+          if (!t || typeof t.closest !== "function") return;
+          const btn = this._whRefreshBtn;
+          if (btn && (t === btn || btn.contains(t))) return;
+          const chip = t.closest(CHIP_SEL);
+          if (chip) this._showRefreshBtnFor(chip);
+          else this._hideRefreshBtn();
+        },
+        true,
+      );
+      document.addEventListener(
+        "mouseout",
+        (e) => {
+          if (!e.relatedTarget) this._hideRefreshBtn();
+        },
+        true,
+      );
+      document.addEventListener("dragstart", () => this._hideRefreshBtn(), true);
+      window.addEventListener("resize", () => this._hideRefreshBtn());
+    }
+
+    _ensureRefreshBtn() {
+      if (this._whRefreshBtn && this._whRefreshBtn.isConnected) return this._whRefreshBtn;
+      const btn = document.createElement("button");
+      btn.className = "wh-refresh-btn";
+      btn.type = "button";
+      btn.title = tOr("wm_refresh_icon_btn", "Refresh icon");
+      const NS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(NS, "svg");
+      svg.setAttribute("viewBox", "0 0 24 24");
+      svg.setAttribute("width", "10");
+      svg.setAttribute("height", "10");
+      svg.setAttribute("fill", "none");
+      svg.setAttribute("stroke", "currentColor");
+      svg.setAttribute("stroke-width", "3");
+      svg.setAttribute("stroke-linecap", "round");
+      svg.setAttribute("stroke-linejoin", "round");
+      ["M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8", "M21 3v5h-5"].forEach((d) => {
+        const p = document.createElementNS(NS, "path");
+        p.setAttribute("d", d);
+        svg.appendChild(p);
+      });
+      btn.appendChild(svg);
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (this._whRefreshTargetId) this.refreshWormholeIcon(this._whRefreshTargetId);
+      });
+      document.body.appendChild(btn);
+      this._whRefreshBtn = btn;
+      return btn;
+    }
+
+    _showRefreshBtnFor(chip) {
+      const id = chip.dataset ? chip.dataset.wormholeId : "";
+      const url = chip.dataset ? chip.dataset.wormholeUrl : "";
+      if (!id || !/\/channels\/\d+\//.test(url || "")) {
+        this._hideRefreshBtn();
+        return;
+      }
+      const r = chip.getBoundingClientRect();
+      if (!(r.width > 0 && r.height > 0)) {
+        this._hideRefreshBtn();
+        return;
+      }
+      const btn = this._ensureRefreshBtn();
+      btn.style.left = Math.round(r.right - 12) + "px";
+      btn.style.top = Math.round(r.bottom - 12) + "px";
+      this._whRefreshTargetId = id;
+      btn.classList.add("visible");
+    }
+
+    _hideRefreshBtn() {
+      if (this._whRefreshBusy) return;
+      if (this._whRefreshBtn) this._whRefreshBtn.classList.remove("visible");
+    }
+
+    _whScanGuildIconHashes(guildId) {
+      const re = new RegExp("/icons/" + guildId + "/([A-Za-z0-9_]+)\\.(?:webp|png|jpe?g|gif)");
+      const OWN =
+        '[id^="wh-"], [class*="my-wormhole"], [class^="wh-"], [class*=" wh-"], [id^="dmt-"], [class*="dmt-"]';
+      const hashes = [];
+      const add = (raw) => {
+        const m = re.exec(raw || "");
+        if (m && hashes.indexOf(m[1]) === -1) hashes.push(m[1]);
+      };
+      document.querySelectorAll('img[src*="/icons/' + guildId + '/"]').forEach((el) => {
+        if (!el.closest(OWN)) add(el.getAttribute("src"));
+      });
+      document.querySelectorAll('[style*="/icons/' + guildId + '/"]').forEach((el) => {
+        if (!el.closest(OWN)) add(el.getAttribute("style"));
+      });
+      return hashes;
+    }
+
+    _whProbeImage(url, timeoutMs = 8000) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        let done = false;
+        let timer = null;
+        const fin = (ok) => {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          img.onload = img.onerror = null;
+          resolve(ok);
+        };
+        timer = setTimeout(() => fin(false), timeoutMs);
+        img.onload = () => fin(true);
+        img.onerror = () => fin(false);
+        img.src = url;
+      });
+    }
+
+    async _whProbeIconUrl(guildId, hash) {
+      const candidates = [
+        `https://cdn.discordapp.com/icons/${guildId}/${hash}.webp?size=128&quality=lossless`,
+        `https://cdn.discordapp.com/icons/${guildId}/${hash}.png?size=128`,
+      ];
+      for (const u of candidates) {
+        if (await this._whProbeImage(u)) return u;
+      }
+      return null;
+    }
+
+    async _whResolveGuildIcon(guildId) {
+      for (const hash of this._whScanGuildIconHashes(guildId)) {
+        const url = await this._whProbeIconUrl(guildId, hash);
+        if (url) return { status: "ok", url };
+      }
+      if (!(this.getApiMode() && this._cachedToken)) {
+        return { status: "unavailable", reason: "not found on page; API Mode off or token missing" };
+      }
+      try {
+        const res = await new Promise((resolve, reject) => {
+          GM_xmlhttpRequest({
+            method: "GET",
+            url: `https://discord.com/api/v10/guilds/${guildId}`,
+            headers: { Authorization: this._cachedToken, "Content-Type": "application/json" },
+            timeout: 15000,
+            onload: resolve,
+            onerror: reject,
+            ontimeout: reject,
+          });
+        });
+        if (res.status !== 200) return { status: "unavailable", reason: "API status " + res.status };
+        let body;
+        try {
+          body = JSON.parse(res.responseText);
+        } catch (_) {
+          return { status: "unavailable", reason: "API response is not JSON" };
+        }
+        const hash = body && body.icon;
+        if (!hash) return { status: "none" };
+        if (!/^[A-Za-z0-9_]+$/.test(hash)) return { status: "unavailable", reason: "unexpected icon hash" };
+        const url = await this._whProbeIconUrl(guildId, hash);
+        return url ? { status: "ok", url } : { status: "unavailable", reason: "icon from API did not load" };
+      } catch (e) {
+        return { status: "unavailable", reason: "API request failed" };
+      }
+    }
+
+    async refreshWormholeIcon(wormholeId) {
+      if (this._whRefreshBusy) return;
+      const findTarget = (data) => {
+        const hit =
+          this.findWormhole(Number(wormholeId), data) ||
+          this.findWormhole(String(wormholeId), data);
+        return hit ? hit.wormhole : null;
+      };
+      const before = findTarget(this.getData());
+      if (!before) {
+        console.debug("[Wormhole] icon refresh: wormhole not found for id", wormholeId);
+        return;
+      }
+      const m = /\/channels\/(\d+)\//.exec(before.url || "");
+      if (!m) {
+        console.debug("[Wormhole] icon refresh: not a server channel URL", before.url);
+        return;
+      }
+      const guildId = m[1];
+
+      this._whRefreshBusy = true;
+      if (this._whRefreshBtn) this._whRefreshBtn.classList.add("busy");
+      let result;
+      try {
+        result = await this._whResolveGuildIcon(guildId);
+      } catch (e) {
+        result = { status: "unavailable", reason: "unexpected error" };
+      } finally {
+        this._whRefreshBusy = false;
+        if (this._whRefreshBtn) this._whRefreshBtn.classList.remove("busy");
+        this._hideRefreshBtn();
+      }
+
+      if (result.status === "unavailable") {
+        console.debug("[Wormhole] icon refresh unavailable:", result.reason);
+        dmtShowToast(
+          tOr(
+            "wm_refresh_icon_fail",
+            "Couldn't find the latest icon. Make sure this server appears in your server list, or enable API Mode in Wormhole settings (\"Send Method & API Mode\").",
+          ),
+          { duration: 4000 },
+        );
+        return;
+      }
+      const newIcon = result.status === "ok" ? result.url : null;
+
+      const data = this.getData();
+      const target = findTarget(data);
+      if (!target) return;
+      if ((target.icon || null) === newIcon) {
+        dmtShowToast(tOr("wm_refresh_icon_same", "Icon is already up to date"), { duration: 2200 });
+        return;
+      }
+      target.icon = newIcon;
+      this.saveData(data);
+      this.refreshDisplay();
+      dmtShowToast(tOr("wm_refresh_icon_ok", "Icon refreshed"), { duration: 2200 });
+    }
+
     async editWormhole(wormhole) {
       const newName = await dmtPrompt(
         this.t("wm_edit_title", { n: wormhole.name }),
@@ -23221,6 +23510,9 @@ unsafeWindow.fetch = function(...args) {
       this._strayCheckNeeded = false;
       let debounceTimer = null;
       this.observer = new MutationObserver(() => {
+        const titlebarDockNow = document.getElementById("wh-titlebar-dock");
+        if (titlebarDockNow) this._ensureTitlebarDockPlacement(titlebarDockNow);
+
         if (document.hidden) return;
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
@@ -23628,6 +23920,23 @@ unsafeWindow.fetch = function(...args) {
             .wh-chat-btn.visible { opacity: 1; transform: none; pointer-events: auto; }
             .focus-mode .wh-chat-btn { display: none !important; }
             .wh-chat-icon { font-size: 16px; line-height: 1; }
+
+            .wh-refresh-btn {
+                position: fixed;
+                display: flex; align-items: center; justify-content: center;
+                width: 16px; height: 16px; padding: 0;
+                border: none; border-radius: 50%;
+                background: rgba(24,25,28,.55); color: #fff;
+                cursor: pointer;
+                opacity: 0; pointer-events: none;
+                transition: opacity .15s, background .15s;
+                z-index: 2147483640;
+            }
+            .wh-refresh-btn.visible { opacity: .5; pointer-events: auto; }
+            .wh-refresh-btn.visible:hover { opacity: 1; background: rgba(88,101,242,.9); }
+            .wh-refresh-btn.busy { opacity: 1; pointer-events: none; }
+            .wh-refresh-btn.busy svg { animation: wh-refresh-spin .8s linear infinite; }
+            @keyframes wh-refresh-spin { to { transform: rotate(360deg); } }
         `;
       document.head.appendChild(style);
     }
